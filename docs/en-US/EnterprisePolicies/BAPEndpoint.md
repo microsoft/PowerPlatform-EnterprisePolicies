@@ -28,5 +28,5 @@ Represents the different BAP endpoints that can be used to connect to Power Plat
 ## Examples
 ### Example 1
 ```powershell
-$endpoint = [BAPEndpoint]::Prod
+$endpoint = [BAPEndpoint]::prod
 ```

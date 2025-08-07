@@ -13,7 +13,7 @@ title: Test-NetworkConnectivity
 
 ## SYNOPSIS
 
-{{ Fill in the Synopsis }}
+Tests the connectivity to a given service in a specified environment.
 
 ## SYNTAX
 
@@ -21,7 +21,7 @@ title: Test-NetworkConnectivity
 
 ```
 Test-NetworkConnectivity [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
- [[-TenantId] <string>] [[-Region] <string>] [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
+ [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,13 +31,24 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-{{ Fill in the Description }}
+Tests the connectivity to a given service in a specified environment.
+The connectivity test will attempt to establish a TCP connection to the specified destination on the specified port.
+This function is executed in the context of your delegated subnet in the region that you have specified.
+If the region is not specified, it defaults to the region of the environment.
 
 ## EXAMPLES
 
-### Example 1
+### EXAMPLE 1
 
-{{ Add example description here }}
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
+
+### EXAMPLE 2
+
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
+
+### EXAMPLE 3
+
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
 
 ## PARAMETERS
 
@@ -68,12 +79,12 @@ The BAP endpoint to connect to. Default is 'prod'.
 
 ```yaml
 Type: BAPEndpoint
-DefaultValue: ''
+DefaultValue: prod
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 5
+  Position: 4
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -110,33 +121,12 @@ The port that should be used to attempt the connection. Defaults to 443
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 443
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
   Position: 2
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -Region
-
-The region to resolve DNS for. Defaults to the region the environment is in.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 4
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -178,13 +168,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### System.String
+
+A string representing the result of the connectivity test.
 
 {{ Fill in the Description }}
 
 ## NOTES
-
-{{ Fill in the Notes }}
 
 ## RELATED LINKS
 

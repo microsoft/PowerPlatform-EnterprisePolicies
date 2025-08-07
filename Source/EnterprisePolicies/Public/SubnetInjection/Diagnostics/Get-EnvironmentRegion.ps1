@@ -16,15 +16,13 @@ Retrieves the region that the specified environment is deployed in. Note, the re
 
 .OUTPUTS
 System.String
-
 A string representing the region of the environment.
 
 .EXAMPLE
-Get-EnvironmentRegion -EnvironmentId "env-12345"
+Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
 .EXAMPLE
-Get-EnvironmentRegion -EnvironmentId "env-12345" -TenantId "tenant-12345" -Endpoint [BAPEndpoint]::Prod
-
+Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
 #>
 function Get-EnvironmentRegion{
     param(

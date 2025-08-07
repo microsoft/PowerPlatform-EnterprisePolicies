@@ -16,24 +16,21 @@ title: EnterprisePolicies Module
 
 Microsoft PowerPlatform Enterprise policies module
 
-## SubnetInjection Diagnostics Scripts
-
-### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
-
-{{ Fill in the Synopsis }}
-
-### [Test-DnsResolution](Test-DnsResolution.md)
-
-{{ Fill in the Synopsis }}
-
-### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
-
-{{ Fill in the Synopsis }}
+## EnterprisePolicies
 
 ### [Get-EnvironmentRegion](Get-EnvironmentRegion.md)
 
-{{ Fill in the Synopsis }}
+Retrieves the region that the specified environment is deployed in.
 
-## Enums
+### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
 
-### [BAPEndpoint](BAPEndpoint.md)
+Retrieves the current usage of the specified environment.
+
+### [Test-DnsResolution](Test-DnsResolution.md)
+
+Tests the DNS resolution for a given hostname in a specified environment.
+
+### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
+
+Tests the connectivity to a given service in a specified environment.
+

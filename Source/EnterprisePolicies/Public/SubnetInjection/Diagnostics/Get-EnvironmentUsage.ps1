@@ -8,7 +8,22 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 #>
 
 <#
+.SYNOPSIS
+Retrieves the current usage of the specified environment.
 
+.DESCRIPTION
+Retrieves the current usage of the specified environment.
+Note, this is only the usage that this environment has. It does not include usage from other environments and it does not include any ips that might be reserved by azure.
+
+.OUTPUTS
+NetworkUsage
+A class representing the network usage of the environment. [NetworkUsage](NetworkUsage.md)
+
+.EXAMPLE
+Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
+
+.EXAMPLE
+Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
 #>
 function Get-EnvironmentUsage{
     param(

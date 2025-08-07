@@ -13,7 +13,7 @@ title: Test-DnsResolution
 
 ## SYNOPSIS
 
-{{ Fill in the Synopsis }}
+Tests the DNS resolution for a given hostname in a specified environment.
 
 ## SYNTAX
 
@@ -21,7 +21,7 @@ title: Test-DnsResolution
 
 ```
 Test-DnsResolution [-EnvironmentId] <string> [-HostName] <string> [[-TenantId] <string>]
- [[-Region] <string>] [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
+ [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,13 +31,19 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-{{ Fill in the Description }}
+Tests the DNS resolution for a given hostname in a specified environment.
+This function is executed in the context of your delegated subnet in the region that you have specified.
+If the region is not specified, it defaults to the region of the environment.
 
 ## EXAMPLES
 
-### Example 1
+### EXAMPLE 1
 
-{{ Add example description here }}
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"
+
+### EXAMPLE 2
+
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
 
 ## PARAMETERS
 
@@ -47,12 +53,12 @@ The BAP endpoint to connect to. Default is 'prod'.
 
 ```yaml
 Type: BAPEndpoint
-DefaultValue: ''
+DefaultValue: prod
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -85,7 +91,7 @@ HelpMessage: ''
 
 ### -HostName
 
-The hostname that DNS should attempt to resolve.
+The hostname that DNS should attempt to resolve. IP addresses are not supported.
 
 ```yaml
 Type: System.String
@@ -96,27 +102,6 @@ ParameterSets:
 - Name: (All)
   Position: 1
   IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -Region
-
-The region to resolve DNS for. Defaults to the region the environment is in.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 3
-  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -157,13 +142,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### System.String
+
+A string representing the result of the DNS resolution. Whether it is successful or not
 
 {{ Fill in the Description }}
 
 ## NOTES
-
-{{ Fill in the Notes }}
 
 ## RELATED LINKS
 

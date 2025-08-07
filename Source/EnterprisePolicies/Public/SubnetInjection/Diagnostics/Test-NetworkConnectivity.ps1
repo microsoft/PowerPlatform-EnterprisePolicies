@@ -7,6 +7,30 @@ THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAI
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
 
+<#
+.SYNOPSIS
+Tests the connectivity to a given service in a specified environment.
+
+.DESCRIPTION
+Tests the connectivity to a given service in a specified environment.
+The connectivity test will attempt to establish a TCP connection to the specified destination on the specified port.
+This function is executed in the context of your delegated subnet in the region that you have specified.
+If the region is not specified, it defaults to the region of the environment.
+
+.OUTPUTS
+System.String
+
+A string representing the result of the connectivity test.
+
+.EXAMPLE
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
+
+.EXAMPLE
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
+
+.EXAMPLE
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+#>
 function Test-NetworkConnectivity{
     param(
         [Parameter(Mandatory, HelpMessage="The Id of the environment to get usage for.")]

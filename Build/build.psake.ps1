@@ -205,11 +205,11 @@ Task GenerateMarkdown -depends Build, PreBuildHelp -requiredVariables DocsRootDi
         if (Get-ChildItem -LiteralPath $DocsRootDir -Filter *.md -Recurse) {
             $mdfiles = Measure-PlatyPSMarkdown -Path $DocsRootDir\$DefaultLocale\*.md
                 $mdfiles | Where-Object Filetype -match 'CommandHelp' |
-                    Update-MarkdownCommandHelp -Path {$_.FilePath}
+                    Update-CommandHelp -Path {$_.FilePath}
         }
 
         # ErrorAction set to SilentlyContinue so this command will not overwrite an existing MD file.
-        New-MarkdownCommandHelp -ModuleInfo $moduleInfo -Locale $DefaultLocale -OutputFolder $DocsRootDir\$DefaultLocale -WithModulePage -ErrorAction SilentlyContinue > $null
+        New-MarkdownCommandHelp -ModuleInfo $moduleInfo -Locale $DefaultLocale -OutputFolder $DocsRootDir\$DefaultLocale -WithModulePage -ErrorAction SilentlyContinue -Force > $null
     }
     finally {
         Remove-Module $ModuleName
