@@ -217,6 +217,7 @@ Task GenerateMarkdown -depends Build, PreBuildHelp -requiredVariables DocsRootDi
 }
 
 Task BuildHelp -depends BuildHelpImpl, PostBuildHelp {
+
 }
 
 Task BuildHelpImpl -depends GenerateMarkdown -requiredVariables DocsRootDir, OutDir {
@@ -230,8 +231,11 @@ Task BuildHelpImpl -depends GenerateMarkdown -requiredVariables DocsRootDir, Out
             Measure-PlatyPSMarkdown |
             Where-Object Filetype -match 'CommandHelp' |
             Import-MarkdownCommandHelp -Path {$_.FilePath} |
-            Export-MamlCommandHelp -OutputFolder .\maml -Force -Verbose:$VerbosePreference
+            Export-MamlCommandHelp -OutputFolder $OutDir\$locale -Force -Verbose:$VerbosePreference
     }
+
+    Move-Item -Path $OutDir\$locale\$ModuleName\* -Destination $OutDir\$locale -Force -Verbose:$VerbosePreference
+    Remove-Item -Path $OutDir\$locale\$ModuleName -Recurse -Force -Verbose:$VerbosePreference
 }
 
 Task Install -depends InstallImpl, PostInstall {

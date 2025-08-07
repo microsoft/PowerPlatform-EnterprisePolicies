@@ -13,7 +13,7 @@ title: Get-EnvironmentUsage
 
 ## SYNOPSIS
 
-Gets the network usage for a specified environment.
+{{ Fill in the Synopsis }}
 
 ## SYNTAX
 
@@ -31,9 +31,13 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This function retrieves the network usage for a specified environment, including details such as data transfer and connectivity issues.
+{{ Fill in the Description }}
 
 ## EXAMPLES
+
+### Example 1
+
+{{ Add example description here }}
 
 ## PARAMETERS
 
@@ -43,7 +47,7 @@ The BAP endpoint to connect to. Default is 'prod'.
 
 ```yaml
 Type: BAPEndpoint
-DefaultValue: prod
+DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
@@ -132,7 +136,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
+### System.Object
+
+{{ Fill in the Description }}
+
 ## NOTES
+
+{{ Fill in the Notes }}
 
 ## RELATED LINKS
 

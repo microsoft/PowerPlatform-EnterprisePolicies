@@ -7,9 +7,9 @@ param (
 
 $ModuleManifestName = 'EnterprisePolicies.psd1'
 $Global:ModuleName = 'EnterprisePolicies'
-$Global:ModuleManifestPath = "$PSScriptRoot\..\CommonV2\"
+$Global:ModuleManifestPath = "$PSScriptRoot\..\EnterprisePolicies\"
 $Global:ModuleManifestFilePath = "$Global:ModuleManifestPath\$ModuleManifestName"
-$Global:ModuleScriptsPaths = @("$PSScriptRoot\..\SubnetInjection\")
+$Global:ModuleScriptsPaths = @("$PSScriptRoot\..\EnterprisePolicies\Public")
 $Global:InPesterExecution = $true
 
 $packagesDir = Resolve-Path -Path "$HOME\.nuget\packages"
@@ -50,7 +50,7 @@ Import-Module $PSScriptRoot\FakeAzModule\FakeAZ.psd1 -Force -Global
 
 if($Module)
 {
-    (Get-ChildItem $MyInvocation.PSCommandPath | Select-Object -Expand Name) -replace '.Tests.ps1', '.psm1' | ForEach-Object {
-        Import-Module -Name "$Global:ModuleManifestPath\$_" -Force
+    (Get-ChildItem $MyInvocation.PSCommandPath | Select-Object -Expand Name) -replace '.Tests.ps1', '.ps1' | ForEach-Object {
+        . "$Global:ModuleManifestPath\Private\$_"
     }
 }

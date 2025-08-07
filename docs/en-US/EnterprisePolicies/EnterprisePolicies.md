@@ -20,7 +20,7 @@ Microsoft PowerPlatform Enterprise policies module
 
 ### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
 
-Gets the network usage for a specified environment.
+{{ Fill in the Synopsis }}
 
 ### [Test-DnsResolution](Test-DnsResolution.md)
 

@@ -28,7 +28,7 @@ function Read-InstallMissingPrerequisite {
 }
 
 if($Global:InPesterExecution){
-    Write-Host "Skipped prereqs for Pester execution" -ForegroundColor Yellow
+    Write-Verbose "Skipped prereqs for Pester execution"
     return
 }
 

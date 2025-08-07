@@ -8,12 +8,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 #>
 
 <#
-.SYNOPSIS
-    Gets the network usage for a specified environment.
-.DESCRIPTION
-    This function retrieves the network usage for a specified environment, including details such as data transfer and connectivity issues.
-.PARAMETER EnvironmentId
-    The Id of the environment to get usage for.
+
 #>
 function Get-EnvironmentUsage{
     param(

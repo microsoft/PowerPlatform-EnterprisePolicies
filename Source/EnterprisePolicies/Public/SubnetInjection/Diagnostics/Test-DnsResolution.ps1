@@ -27,8 +27,6 @@ function Test-DnsResolution {
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
     )
     
-    Import-Module "$PSScriptRoot\..\..\CommonV2\EnterprisePolicies" -Force
-    
     $ErrorActionPreference = "Stop"
     
     if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId)) {

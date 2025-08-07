@@ -10,9 +10,9 @@ Properties {
     $DocsRootDir = "$PSScriptRoot\..\docs"
     $SrcRootDir  = "$PSScriptRoot\..\Source\EnterprisePolicies"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $TestRootDir = "$PSScriptRoot\..\Tests"
+    $TestRootDir = "$PSScriptRoot\..\Source\Tests"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $ScriptsRootDir = "$PSScriptRoot\..\Source\Public\SubnetInjection"
+    $ScriptsRootDir = "$PSScriptRoot\..\Source\EnterprisePolicies\Public\SubnetInjection"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 
     # The name of your module should match the basename of the PSD1 file.
@@ -21,7 +21,7 @@ Properties {
                       Select-Object -First 1 | Foreach-Object BaseName
 
     # The $OutDir must match the ModuleName in order to support publishing the module.
-    $ReleaseDir = "$PSScriptRoot\..\Release\Scripts"
+    $ReleaseDir = "$PSScriptRoot\..\Release"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $OutDir     = "$ReleaseDir\$ModuleName"
 
@@ -90,7 +90,7 @@ Properties {
     # acts as a direct input to the Pester -CodeCoverage parameter, so will support constructions
     # like the ones found here: https://github.com/pester/Pester/wiki/Code-Coverage.
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $CodeCoverageFiles = "$ScriptsRootDir\*.ps1", "$SrcRootDir\*.psm1"
+    $CodeCoverageFiles = "$ScriptsRootDir\**\*.ps1", "$SrcRootDir\**\*.ps1"
 
     # Specifies an output file path to send to Invoke-Pester's CodeCoverage.OutputPath configuration.
     # This is typically used to write out test results so that they can be sent to a CI

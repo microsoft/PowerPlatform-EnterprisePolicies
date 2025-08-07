@@ -80,7 +80,10 @@ function Get-AccessToken {
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [BAPEndpoint]$Endpoint
+        [BAPEndpoint]$Endpoint,
+
+        [Parameter(Mandatory=$false)]
+        [string]$TenantId = $null
     )
 
     $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
@@ -91,7 +94,7 @@ function Get-AccessToken {
         if($tokenError.Exception.AuthenticationErrorCode -eq "failed_to_acquire_token_silently_from_broker")
         {
             Write-Host "Failed to acquire token silently. Please log in interactively." -ForegroundColor Red
-            Connect-AzAccount -AuthScope $resourceUrl
+            Connect-Azure -AuthScope $resourceUrl
             $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString
         }
 

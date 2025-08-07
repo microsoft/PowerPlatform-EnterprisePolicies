@@ -7,24 +7,17 @@ THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAI
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
 
-function Test-NetworkConnectivity{
+<#
+
+#>
+function Get-EnvironmentRegion{
     param(
-        [Parameter(Mandatory, HelpMessage="The Id of the environment to get usage for.")]
+        [Parameter(Mandatory, HelpMessage="The Id of the environment to get the region for.")]
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
 
-        [Parameter(Mandatory, HelpMessage="The destination that should be used to attempt the connection. This can be a hostname or an IP address.")]
-        [ValidateNotNullOrEmpty()]
-        [string]$Destination,
-
-        [Parameter(Mandatory=$false, HelpMessage="The port that should be used to attempt the connection. Defaults to 443")]
-        [string]$Port = 443,
-
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
-
-        [Parameter(Mandatory=$false, HelpMessage="The region to resolve DNS for. Defaults to the region the environment is in.")]
-        [string]$Region = $null,
 
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
@@ -38,23 +31,19 @@ function Test-NetworkConnectivity{
 
     $client = New-HttpClient
 
-    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/testConnection?api-version=2024-10-01"
+    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/networkUsage?api-version=2024-10-01"
 
-    if($Region)
-    {
-        $uri += "&region=$Region"
-    }
-
-    $Body = @{
-        Destination = $Destination
-        Port = $Port
-    }
-
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint) -Content ($Body | ConvertTo-Json)
+    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
 
     $result = Get-AsyncResult -Task $client.SendAsync($request)
 
     Test-Result -Result $result
 
-    Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+    $usage = Get-AsyncResult -Task $result.Content.ReadAsStringAsync() | ConvertFrom-Json
+
+    if($usage -and $usage.azureRegion) {
+        return "Your environment is located in region: [$($usage.azureRegion)]"
+    } else {
+        throw "Failed to retrieve the environment region."
+    }
 }

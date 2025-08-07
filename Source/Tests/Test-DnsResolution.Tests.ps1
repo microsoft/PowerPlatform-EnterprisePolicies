@@ -2,15 +2,15 @@ BeforeDiscovery{
     . $PSScriptRoot\Shared.ps1
 }
 
-Describe 'Get-EnvironmentUsage Tests' {
+Describe 'Test-DnsResolution Tests' {
     BeforeAll {
         Mock Write-Host {}
         Mock Connect-Azure { return $true } -ModuleName "EnterprisePolicies"
         Mock Get-AccessToken { return "mocked_token" } -ModuleName "EnterprisePolicies"
     }
 
-    Context 'Testing Get-EnvironmentUsage' {
-        It 'Returns usage data for a valid environment' {
+    Context 'Testing Test-DnsResolution' {
+        It 'Returns string with the DNS resolution result' {
             $stringResult = "0 IPs in use"
             $endpoint = [BAPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
