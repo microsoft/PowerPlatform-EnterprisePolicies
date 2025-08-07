@@ -16,7 +16,7 @@ title: EnterprisePolicies Module
 
 Microsoft PowerPlatform Enterprise policies module
 
-## EnterprisePolicies
+## SubnetInjection Diagnostics Scripts
 
 ### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
 
@@ -30,3 +30,10 @@ Microsoft PowerPlatform Enterprise policies module
 
 {{ Fill in the Synopsis }}
 
+### [Get-EnvironmentRegion](Get-EnvironmentRegion.md)
+
+{{ Fill in the Synopsis }}
+
+## Enums
+
+### [BAPEndpoint](BAPEndpoint.md)

@@ -147,7 +147,18 @@ function Test-Result {
 
     if ($result.StatusCode -ne [System.Net.HttpStatusCode]::OK)
     {
-        throw "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1)"
+        $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+        if ($contentString)
+        {
+            $errorMessage = $contentString.Trim('.')
+            Write-Host "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))" -ForegroundColor Red
+            throw "API Call returned $($result.StatusCode): $($errorMessage)."
+        }
+        else
+        {
+            Write-Host "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))" -ForegroundColor Red
+            throw "API Call returned $($result.StatusCode): $($result.ReasonPhrase)."
+        }
     }
 }
 

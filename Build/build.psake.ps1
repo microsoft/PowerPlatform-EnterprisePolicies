@@ -229,7 +229,7 @@ Task BuildHelpImpl -depends GenerateMarkdown -requiredVariables DocsRootDir, Out
     foreach ($locale in (Get-ChildItem -Path $DocsRootDir -Directory).Name) {
         Get-ChildItem $DocsRootDir\$locale -Recurse -Filter *.md |
             Measure-PlatyPSMarkdown |
-            Where-Object Filetype -match 'CommandHelp' |
+            Where-Object Filetype -notmatch 'ModuleFile' |
             Import-MarkdownCommandHelp -Path {$_.FilePath} |
             Export-MamlCommandHelp -OutputFolder $OutDir\$locale -Force -Verbose:$VerbosePreference
     }

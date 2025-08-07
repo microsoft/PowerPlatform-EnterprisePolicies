@@ -8,6 +8,22 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 #>
 
 <#
+.SYNOPSIS
+Retrieves the region that the specified environment is deployed in.
+
+.DESCRIPTION
+Retrieves the region that the specified environment is deployed in. Note, the region is the Power Platform region, but it is aligned with an Azure region.
+
+.OUTPUTS
+System.String
+
+A string representing the region of the environment.
+
+.EXAMPLE
+Get-EnvironmentRegion -EnvironmentId "env-12345"
+
+.EXAMPLE
+Get-EnvironmentRegion -EnvironmentId "env-12345" -TenantId "tenant-12345" -Endpoint [BAPEndpoint]::Prod
 
 #>
 function Get-EnvironmentRegion{

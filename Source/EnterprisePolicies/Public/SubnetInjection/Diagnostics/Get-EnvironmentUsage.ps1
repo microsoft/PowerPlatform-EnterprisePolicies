@@ -19,9 +19,6 @@ function Get-EnvironmentUsage{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The region for which usage is requested. Defaults to the region the environment is in.")]
-        [string]$Region = $null,
-
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
     )
@@ -41,7 +38,7 @@ function Get-EnvironmentUsage{
         $uri += "&region=$Region"
     }
 
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
+    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
 
     $result = Get-AsyncResult -Task $client.SendAsync($request)
 

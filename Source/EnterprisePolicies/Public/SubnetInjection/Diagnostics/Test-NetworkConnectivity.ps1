@@ -23,9 +23,6 @@ function Test-NetworkConnectivity{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The region to resolve DNS for. Defaults to the region the environment is in.")]
-        [string]$Region = $null,
-
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
     )
@@ -39,11 +36,6 @@ function Test-NetworkConnectivity{
     $client = New-HttpClient
 
     $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/testConnection?api-version=2024-10-01"
-
-    if($Region)
-    {
-        $uri += "&region=$Region"
-    }
 
     $Body = @{
         Destination = $Destination

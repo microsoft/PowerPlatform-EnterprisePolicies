@@ -94,7 +94,7 @@ function Get-AccessToken {
         if($tokenError.Exception.AuthenticationErrorCode -eq "failed_to_acquire_token_silently_from_broker")
         {
             Write-Host "Failed to acquire token silently. Please log in interactively." -ForegroundColor Red
-            Connect-Azure -AuthScope $resourceUrl
+            Connect-Azure -AuthScope $resourceUrl -Endpoint $Endpoint -TenantId $TenantId
             $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString
         }
 
