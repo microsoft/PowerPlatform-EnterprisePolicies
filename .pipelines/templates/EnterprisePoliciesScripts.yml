@@ -1,0 +1,39 @@
+steps:
+- task: DotNetCoreCLI@2
+  displayName: 🔄 Dotnet restore
+  env:
+    ob_restore_phase: true # Steps decorated with this env variable will be run with network. All these steps are hoisted to the beginning of the build
+  inputs:
+    command: 'custom'
+    custom: 'restore'
+    projects: '$(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\build\build.proj'
+    selectOrConfig: 'config'
+    nugetConfigPath: $(Build.SourcesDirectory)\nuget.config
+
+- task: PowerShell@2
+  displayName: 🧪 Test Scripts (Windows)
+  inputs:
+    filePath: $(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\build.ps1
+    arguments: '-Tasks @("Test")'
+
+- task: PowerShell@2
+  displayName: 🧪 Test Scripts (Core)
+  inputs:
+    pwsh: true
+    filePath: $(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\build.ps1
+    arguments: '-Tasks @("Test")'
+
+- task: PublishTestResults@2
+  displayName: 📰 Publish Test Results
+  inputs:
+    testResultsFormat: 'NUnit'
+    testResultsFiles: '$(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\TestResult.xml'
+  condition: always()
+
+- task: PublishCodeCoverageResults@2
+  displayName: 📰 Publish Code Coverage
+  inputs:
+    summaryFileLocation: '$(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\coverage.xml'
+    pathToSources: '$(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts'
+    failIfCoverageEmpty: true
+  condition: always()

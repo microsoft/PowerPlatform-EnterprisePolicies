@@ -1,0 +1,104 @@
+<#
+SAMPLE CODE NOTICE
+
+THIS SAMPLE CODE IS MADE AVAILABLE AS IS. MICROSOFT MAKES NO WARRANTIES, WHETHER EXPRESS OR IMPLIED,
+OF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OR CONDITIONS OF MERCHANTABILITY.
+THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.
+NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
+#>
+
+function Connect-Azure {
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [BAPEndpoint]$Endpoint,
+        [Parameter(Mandatory=$false)]
+        [string]$TenantId = $null,
+        [Parameter(Mandatory=$false)]
+        [string]$AuthScope = $null
+    )
+
+    $environment = switch ($Endpoint) {
+        ([BAPEndpoint]::china) { "AzureChinaCloud" }
+        ([BAPEndpoint]::dod) { "AzureUSGovernment" }
+        ([BAPEndpoint]::usgovhigh) { "AzureUSGovernment" }
+        Default { "AzureCloud" }
+    }
+
+    $context = Get-AzContext -ListAvailable
+
+    if ($null -ne $context -and [string]::IsNullOrWhiteSpace($AuthScope)) {
+        if([string]::IsNullOrWhiteSpace($TenantId)) {
+            $matchedContext = $context | Where-Object { $_.Environment.Name -eq $environment } | Select-Object -First 1
+            if($matchedContext) {
+                Set-AzContext -Context $matchedContext
+                Write-Host "Already connected to Azure environment: $environment with account $($matchedContext.Account.Id) with tenants [$($matchedContext.Account.Tenants -join ",")]" -ForegroundColor Yellow
+                return $true
+            }
+        }
+        else {
+            # Prioritize the home tenant if it exists
+            $homeTenantContext = $context | Where-Object { $_.Environment.Name -eq $environment -and $_.Tenant.TenantCategory -eq "Home" -and $_.Tenant.Id -eq $TenantId } | Select-Object -First 1
+            if($homeTenantContext) {
+                Set-AzContext -Context $homeTenantContext
+                Write-Host "Already connected to Azure environment: $environment with account $($homeTenantContext.Account.Id) with home tenant Id $TenantId" -ForegroundColor Yellow
+                return $true
+            }
+
+            if ($matchedContext.Account.Tenants -contains $TenantId) {
+                Set-AzContext -TenantId $TenantId
+                Write-Host "Already connected to Azure environment: $environment with account $($context.Account.Id) with tenant Id $TenantId" -ForegroundColor Yellow
+                return $true
+            }
+        }
+    }
+
+    Write-Host "Logging In..." -ForegroundColor Green
+    $connectParameters = @{
+        Environment = $environment        
+    }
+    if(-not([string]::IsNullOrWhiteSpace($TenantId))) {
+        $connectParameters['Tenant'] = $TenantId
+    }
+    if(-not([string]::IsNullOrWhiteSpace($AuthScope))) {
+        $connectParameters['AuthScope'] = $AuthScope
+    }
+
+    $connect = Connect-AzAccount @connectParameters
+
+    if ($null -eq $connect)
+    {
+        Write-Host "Error connecting to Azure Account" -ForegroundColor Red
+        return $false
+    }
+
+    Write-Host "Logged In..." -ForegroundColor Green
+    return $true
+}
+
+function Get-AccessToken {
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [BAPEndpoint]$Endpoint
+    )
+
+    $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
+
+    $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString -ErrorAction SilentlyContinue
+    if ($null -eq $token) {
+        $tokenError = $global:Error[0]
+        if($tokenError.Exception.AuthenticationErrorCode -eq "failed_to_acquire_token_silently_from_broker")
+        {
+            Write-Host "Failed to acquire token silently. Please log in interactively." -ForegroundColor Red
+            Connect-AzAccount -AuthScope $resourceUrl
+            $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString
+        }
+
+        if($null -eq $token) {
+            throw "Failed to acquire access token. Please check your Azure login and try again."
+        }
+    }
+    $ssPtr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($token.Token)
+    return [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ssPtr)
+}

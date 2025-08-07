@@ -1,14 +1,47 @@
 # Project
 
-> This repo has been populated by an initial template to help get you started. Please
-> make sure to update the content to build a great experience for community-building.
+This repository contains the source code for the Power Platform Enterprise Policies project, which provides a set of scripts to help setup and manage enterprise policies for Power Platform environments. In addition, it includes scripts for helping troubleshoot issues with the VNET functionality provided by Power Platform.
 
-As the maintainer of this project, please make a few updates:
+## Using the Enterprise Policies Scripts
 
-- Improving this README.MD file to provide a great experience
-- Updating SUPPORT.MD with content about this project's support experience
-- Understanding the security reporting process in SECURITY.MD
-- Remove this section from the README
+The Enterprise Policies scripts are designed to help manage and enforce policies across Power Platform environments. They can be run in both Windows PowerShell and PowerShell Core environments.
+
+Clone the repository and navigate to the `Source` directory.
+
+If you have never interacted with the scripts before, run the following command to setup your subscription as well as your machine:
+
+```powershell
+.\SetupSubscriptionForPowerPlatform.ps1
+.\InstallPowerAppsCmdlets.ps1
+```
+
+This will install the necessary Power Platform cmdlets and set up your environment for running the scripts.
+
+You can then run the scripts as needed. For example, to run the `CreateSubnetInjectionEnterprisePolicy.ps1` script, you would use:
+
+```powershell
+.\SubnetInjection\CreateSubnetInjectionEnterprisePolicy.ps1
+```
+
+## Using the Diagnostic Scripts
+
+The diagnostic scripts are designed to help troubleshoot issues with the VNET functionality provided by Power Platform. They can be run in both Windows PowerShell and PowerShell Core environments.
+
+Clone the repository and navigate to the `Source` directory.
+
+Run the following command the first time you open the PowerShell session:
+
+```powershell
+Import-Module .\EnterprisePolicies
+```
+
+This will import the module, validate prerequisites and make the scripts available for use.
+
+You can then run the diagnostic scripts as needed. For example, to run the `Get-EnvironmentUsage` cmdlets, you would use:
+
+```powershell
+Get-EnvironmentUsage -EnvironmentId "your-environment-id"
+```
 
 ## Contributing
 
