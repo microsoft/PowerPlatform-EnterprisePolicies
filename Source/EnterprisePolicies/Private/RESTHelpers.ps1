@@ -150,3 +150,22 @@ function Test-Result {
         throw "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1)"
     }
 }
+
+function ConvertFrom-JsonToClass {
+    param (
+        [string]$Json,
+        [Type]$ClassType
+    )
+
+    $data = $Json | ConvertFrom-Json
+    $instance = [Activator]::CreateInstance($ClassType)
+
+    foreach ($property in $ClassType.GetProperties()) {
+        $name = $property.Name
+        if ($data.PSObject.Properties[$name]) {
+            $instance.$name = $data.$name
+        }
+    }
+
+    return $instance
+}

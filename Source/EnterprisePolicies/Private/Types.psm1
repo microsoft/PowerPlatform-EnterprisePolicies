@@ -12,6 +12,16 @@ class VnetInformation{
     [string] $SubnetName
 }
 
+class NetworkUsage{
+    [string] $AzureRegion
+    [string] $EnvironmentId
+    [string] $VnetId
+    [string] $SubnetName
+    [string] $SubnetIpRange
+    [string] $ContainerReservedIpCount
+    [string[]] $DnsServers
+}
+
 enum PolicyType{
     Encryption
     NetworkInjection
@@ -39,6 +49,7 @@ $ExportableTypes = @(
     [PolicyType]
     [BAPEndpoint]
     [LinkOperation]
+    [NetworkUsage]
 )
 
 # Get the internal TypeAccelerators class to use its static methods.

@@ -47,5 +47,11 @@ function Get-EnvironmentUsage{
 
     Test-Result -Result $result
 
-    Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-}
+    $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+
+    if($contentString) {
+        [NetworkUsage] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([NetworkUsage])
+        return $networkUsage
+    } else {
+        throw "Failed to retrieve the environment region."
+    }}

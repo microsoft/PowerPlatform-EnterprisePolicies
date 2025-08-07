@@ -39,10 +39,12 @@ function Get-EnvironmentRegion{
 
     Test-Result -Result $result
 
-    $usage = Get-AsyncResult -Task $result.Content.ReadAsStringAsync() | ConvertFrom-Json
+    $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
-    if($usage -and $usage.azureRegion) {
-        return "Your environment is located in region: [$($usage.azureRegion)]"
+    if($contentString) {
+        [NetworkUsage] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([NetworkUsage])
+        Write-Host "Your environment is located in region: [$($networkUsage.AzureRegion)]"
+        return $networkUsage.AzureRegion
     } else {
         throw "Failed to retrieve the environment region."
     }
