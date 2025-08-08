@@ -26,7 +26,7 @@ Description: The Azure region where the environment is deployed.
 ### EnvironmentId
 
 Type: `System.String`
-The unique identifier of the Power Platform environment.
+Description: The unique identifier of the Power Platform environment.
 
 ### VnetId
 
