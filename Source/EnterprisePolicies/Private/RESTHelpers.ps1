@@ -42,7 +42,7 @@ function New-JsonRequestMessage
     {
         $request.Content = New-Object -TypeName System.Net.Http.StringContent -ArgumentList @($Content, [System.Text.Encoding]::UTF8, "application/json")
     }
-    $request.Headers.Authorization = "Bearer $(ConvertFrom-SecureString $AccessToken)"
+    $request.Headers.Authorization = "Bearer $(ConvertFrom-SecureStringInternal $AccessToken)"
 
     return $request
 }

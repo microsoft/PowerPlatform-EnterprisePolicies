@@ -116,3 +116,24 @@ function Get-AccessToken {
     }
     return $token.Token
 }
+
+function ConvertFrom-SecureStringInternal {
+    param (
+        [Parameter(Mandatory)]
+        [System.Security.SecureString]$SecureString
+    )
+
+    try{
+        $ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureString)
+        $plainText = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+        return $plainText
+    }
+    catch {
+        throw "Failed to convert SecureString to plain text: $_"
+    }
+    finally {
+        if ($ptr) {
+            [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+        }
+    }   
+}
