@@ -17,7 +17,7 @@ function Connect-Azure {
         [Parameter(Mandatory=$false)]
         [string]$AuthScope = $null,
         [Parameter(Mandatory=$false)]
-        [switch]$ForceLogin
+        [switch]$Force
     )
 
     $environment = switch ($Endpoint) {
@@ -30,7 +30,7 @@ function Connect-Azure {
     $context = Get-AzContext -ListAvailable
     $foundContext = $false
 
-    if(-not($ForceLogin) -and [string]::IsNullOrWhiteSpace($AuthScope) -and $null -ne $context) {
+    if(-not($Force) -and [string]::IsNullOrWhiteSpace($AuthScope) -and $null -ne $context) {
         if([string]::IsNullOrWhiteSpace($TenantId)) {
             $matchedContext = $context | Where-Object { $_.Environment.Name -eq $environment } | Select-Object -First 1
             if($matchedContext) {
