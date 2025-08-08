@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "PowerShell Launch Script",
+            "script": "${file}",
+            "args": [],
+            "cwd": "${fileDirname}"
+        },
+        {
+            "type": "PowerShell",
+            "request":"launch",
+            "name": "Load Modules",
+            "script": "${workspaceRoot}\\Source\\Tests\\Shared.ps1",
+            "cwd": "${workspaceRoot}\\Source\\Tests",
+        },
+        {
+            "type": "PowerShell",
+            "request": "launch",
+            "name": "PowerShell Pester Tests",
+            "script": "Invoke-Pester",
+            "args": [],
+            "cwd": "${workspaceRoot}",
+        }
+    ]
+}
