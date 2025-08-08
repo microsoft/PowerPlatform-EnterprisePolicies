@@ -66,7 +66,7 @@ function Test-NetworkConnectivity{
         Port = $Port
     }
 
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint) -Content ($Body | ConvertTo-Json)
+    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -Content ($Body | ConvertTo-Json)
 
     $result = Get-AsyncResult -Task $client.SendAsync($request)
 

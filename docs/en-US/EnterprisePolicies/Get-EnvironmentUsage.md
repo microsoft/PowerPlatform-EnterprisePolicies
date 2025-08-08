@@ -4,7 +4,7 @@ external help file: EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: EnterprisePolicies
-ms.date: 08/07/2025
+ms.date: 08/08/2025
 PlatyPS schema version: 2024-05-01
 title: Get-EnvironmentUsage
 ---

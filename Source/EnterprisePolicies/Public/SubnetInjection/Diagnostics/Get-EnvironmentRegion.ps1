@@ -47,7 +47,7 @@ function Get-EnvironmentRegion{
 
     $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/networkUsage?api-version=2024-10-01"
 
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
+    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
 
     $result = Get-AsyncResult -Task $client.SendAsync($request)
 

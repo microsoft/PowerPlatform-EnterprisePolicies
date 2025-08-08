@@ -27,13 +27,13 @@ function New-JsonRequestMessage
 {
     param(
         [Parameter(Mandatory=$true)]
-        [string]$Uri,
+        [string] $Uri,
         [Parameter(Mandatory=$true)]
-        [string]$AccessToken,
+        [System.Security.SecureString] $AccessToken,
         [Parameter(Mandatory=$false)]
-        [string]$Content,
+        [string] $Content,
         [Parameter(Mandatory=$false)]
-        [System.Net.Http.HttpMethod]$HttpMethod = [System.Net.Http.HttpMethod]::Post
+        [System.Net.Http.HttpMethod] $HttpMethod = [System.Net.Http.HttpMethod]::Post
     )
 
     Write-Host "Creating request for URI: $Uri" -ForegroundColor Cyan
@@ -42,7 +42,7 @@ function New-JsonRequestMessage
     {
         $request.Content = New-Object -TypeName System.Net.Http.StringContent -ArgumentList @($Content, [System.Text.Encoding]::UTF8, "application/json")
     }
-    $request.Headers.Authorization = "Bearer $AccessToken"
+    $request.Headers.Authorization = "Bearer $(ConvertFrom-SecureStringInternal $AccessToken)"
 
     return $request
 }
