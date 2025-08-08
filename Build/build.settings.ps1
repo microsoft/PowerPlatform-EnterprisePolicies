@@ -169,7 +169,27 @@ Task PreBuildHelp {
 }
 
 # Executes after the BuildHelpImpl phase of the BuildHelp task.
-Task PostBuildHelp {
+Task PostBuildHelp -requiredVariables DocsRootDir, ModuleName, DefaultLocale{
+    
+    $markdownToAppend = @"
+## Types
+
+### Classes
+
+#### [NetworkUsage](NetworkUsage.md)
+
+The `NetworkUsage` class represents metadata about the network configuration of a Power Platform environment.
+
+### Enums
+
+#### [BAPEndpoint](BAPEndpoint.md)
+
+Represents the different BAP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+"@
+
+    $targetFile = "$DocsRootDir\$DefaultLocale\$ModuleName\$ModuleName.md"
+    Add-Content -Path $targetFile -Value $markdownToAppend
+
 }
 
 ###############################################################################

@@ -15,7 +15,9 @@ function Connect-Azure {
         [Parameter(Mandatory=$false)]
         [string]$TenantId = $null,
         [Parameter(Mandatory=$false)]
-        [string]$AuthScope = $null
+        [string]$AuthScope = $null,
+        [Parameter(Mandatory=$false)]
+        [switch]$ForceLogin
     )
 
     $environment = switch ($Endpoint) {
@@ -26,14 +28,15 @@ function Connect-Azure {
     }
 
     $context = Get-AzContext -ListAvailable
+    $foundContext = $false
 
-    if ($null -ne $context -and [string]::IsNullOrWhiteSpace($AuthScope)) {
+    if(-not($ForceLogin) -and [string]::IsNullOrWhiteSpace($AuthScope) -and $null -ne $context) {
         if([string]::IsNullOrWhiteSpace($TenantId)) {
             $matchedContext = $context | Where-Object { $_.Environment.Name -eq $environment } | Select-Object -First 1
             if($matchedContext) {
                 Set-AzContext -Context $matchedContext
                 Write-Host "Already connected to Azure environment: $environment with account $($matchedContext.Account.Id) with tenants [$($matchedContext.Account.Tenants -join ",")]" -ForegroundColor Yellow
-                return $true
+                $foundContext = $true
             }
         }
         else {
@@ -42,15 +45,19 @@ function Connect-Azure {
             if($homeTenantContext) {
                 Set-AzContext -Context $homeTenantContext
                 Write-Host "Already connected to Azure environment: $environment with account $($homeTenantContext.Account.Id) with home tenant Id $TenantId" -ForegroundColor Yellow
-                return $true
+                $foundContext = $true
             }
 
             if ($matchedContext.Account.Tenants -contains $TenantId) {
                 Set-AzContext -TenantId $TenantId
                 Write-Host "Already connected to Azure environment: $environment with account $($context.Account.Id) with tenant Id $TenantId" -ForegroundColor Yellow
-                return $true
+                $foundContext = $true
             }
         }
+    }
+
+    if ($foundContext) {
+        return $true
     }
 
     Write-Host "Logging In..." -ForegroundColor Green
@@ -97,11 +104,15 @@ function Get-AccessToken {
             Connect-Azure -AuthScope $resourceUrl -Endpoint $Endpoint -TenantId $TenantId
             $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString
         }
+        else
+        {
+            Write-Host "Failed to acquire access token: $($tokenError.Exception.AuthenticationErrorCode)" -ForegroundColor Red
+            Connect-Azure -AuthScope $resourceUrl -Endpoint $Endpoint -TenantId $TenantId -Force
+        }
 
         if($null -eq $token) {
             throw "Failed to acquire access token. Please check your Azure login and try again."
         }
     }
-    $ssPtr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($token.Token)
-    return [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ssPtr)
+    return $token.Token
 }

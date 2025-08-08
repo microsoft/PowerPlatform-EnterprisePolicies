@@ -23,7 +23,7 @@ You can then run the scripts as needed. For example, to run the `CreateSubnetInj
 .\SubnetInjection\CreateSubnetInjectionEnterprisePolicy.ps1
 ```
 
-## Using the Diagnostic Scripts
+## Using the SubnetInjection Diagnostic Scripts
 
 The diagnostic scripts are designed to help troubleshoot issues with the VNET functionality provided by Power Platform. They can be run in both Windows PowerShell and PowerShell Core environments.
 
@@ -42,6 +42,29 @@ You can then run the diagnostic scripts as needed. For example, to run the `Get-
 ```powershell
 Get-EnvironmentUsage -EnvironmentId "your-environment-id"
 ```
+
+For a full list of available cmdlets and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/EnterprisePolicies) folder.
+
+## Development
+
+To get started with development, clone the repository and open it in VSCode. The scripts are written in PowerShell and follow standard PowerShell conventions.
+
+Please place any common functions in the `Private` folder, and any module-level functions that are going to be exposed in the `Public` folder. 
+
+In order to run tests, please ensure you do the following from the repository root:
+
+```powershell
+# You might need the --interactive flag
+dotnet restore
+```
+
+> [!NOTE]
+> If you are not a Microsoft employee, you will need to modify the Nuget.config file to point to the public NuGet repository.
+
+Then, you can enable running the tests by going to the Run and Debug view in VSCode and selecting and running the `Load Modules` script. This will load the necessary modules and allow you to run the tests.
+
+> [!NOTE]
+> You should clear out any Pester installations, as the tests are written using the latest version of Pester.
 
 ## Contributing
 
