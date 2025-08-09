@@ -87,7 +87,7 @@ function LinkPolicyToEnv
     {
         return
     }
-    Write-Host "Environment reterieved `n" -ForegroundColor Green
+    Write-Host "Environment retrieved `n" -ForegroundColor Green
 
     #Validate Enterprise Policy
     $policySystemId = GetEnterprisePolicySystemId $policyArmId
@@ -95,7 +95,7 @@ function LinkPolicyToEnv
     {
         return
     }
-    Write-Host "Enterprise Policy reterieved `n" -ForegroundColor Green
+    Write-Host "Enterprise Policy retrieved `n" -ForegroundColor Green
 
 
     $linkResult = LinkEnterprisePolicy $env $policyType $policySystemId
@@ -177,7 +177,7 @@ function UnLinkPolicyFromEnv
     {
         return
     }
-    Write-Host "Environment reterieved `n" -ForegroundColor Green
+    Write-Host "Environment retrieved `n" -ForegroundColor Green
 
     $epPropertyName = switch ( $policyType )
     {
@@ -205,7 +205,7 @@ function UnLinkPolicyFromEnv
     {
         return
     }
-    Write-Host "Enterprise Policy reterieved `n" -ForegroundColor Green
+    Write-Host "Enterprise Policy retrieved `n" -ForegroundColor Green
 
 
     $unLinkResult = UnLinkEnterprisePolicy $env $policyType $policySystemId
@@ -288,7 +288,7 @@ function SwapPolicyForEnv
     {
         return
     }
-    Write-Host "Environment reterieved `n" -ForegroundColor Green
+    Write-Host "Environment retrieved `n" -ForegroundColor Green
 
     $epPropertyName = switch ( $policyType )
     {
@@ -309,7 +309,7 @@ function SwapPolicyForEnv
     {
         return
     }
-    Write-Host "Enterprise Policy reterieved `n" -ForegroundColor Green
+    Write-Host "Enterprise Policy retrieved `n" -ForegroundColor Green
 
 
     $swapResult = LinkEnterprisePolicy $env $policyType $policySystemId
@@ -389,7 +389,7 @@ function GetEnterprisePolicyForEnvironment
     {
         return
     }
-    Write-Host "Environment reterieved `n" -ForegroundColor Green
+    Write-Host "Environment retrieved `n" -ForegroundColor Green
 
     $epPropertyName = switch ( $policyType )
     {
@@ -456,7 +456,7 @@ function LinkPolicyToPlatformAppsData
     {
         return
     }
-    Write-Host "Enterprise Policy reterieved `n" -ForegroundColor Green
+    Write-Host "Enterprise Policy retrieved `n" -ForegroundColor Green
 
 
     $linkResult = LinkEnterprisePolicyToPlatformAppsData $policyType $policySystemId
@@ -540,7 +540,7 @@ function UnLinkPolicyFromPlatformAppsData
     {
         return
     }
-    Write-Host "Enterprise Policy reterieved `n" -ForegroundColor Green
+    Write-Host "Enterprise Policy retrieved `n" -ForegroundColor Green
 
 
     $unLinkResult = UnLinkEnterprisePolicyForPlatformAppsData $policyType $policySystemId

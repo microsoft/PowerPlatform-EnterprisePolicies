@@ -25,7 +25,7 @@ function GetAndValidateKeyVaultProperties($keyVaultName)
        Write-Host "Purge protection not enabled for keyVault $keyVaultName. Please enable it as per the instruction at https://learn.microsoft.com/en-us/azure/key-vault/general/soft-delete-overview#permitted-purge" -ForegroundColor Red
        return $null
     }
-    Write-Host "KeyVault $keyVaultName reterieved with soft delete and purge protection enabled" -ForegroundColor Green `n
+    Write-Host "KeyVault $keyVaultName retrieved with soft delete and purge protection enabled" -ForegroundColor Green `n
 
     return $keyVault
 }
@@ -46,7 +46,7 @@ function GetAndValidateEnterprisePolicyForKeyVault($enterprisePolicyArmId, $keyV
     if ($cmkPolicy.Kind -ne "Encryption")
     {
        
-        Write-Host "Enterprise Policy reterieved for $enterprisePolicyArmId  is not of Kind Encryption. Enterprise Policy = $cmkPolicyString" -ForegroundColor Red
+        Write-Host "Enterprise Policy retrieved for $enterprisePolicyArmId  is not of Kind Encryption. Enterprise Policy = $cmkPolicyString" -ForegroundColor Red
         return $null
     }
 
@@ -54,7 +54,7 @@ function GetAndValidateEnterprisePolicyForKeyVault($enterprisePolicyArmId, $keyV
     if ($cmkPolicy.Identity -eq $null -or $cmkPolicy.Identity.Type -ne "SystemAssigned")
     {
        
-        Write-Host "Enterprise Policy reterieved for $enterprisePolicyArmId is not having SystemAssigned identity. Enterprise Policy = $cmkPolicyString" -ForegroundColor Red
+        Write-Host "Enterprise Policy retrieved for $enterprisePolicyArmId is not having SystemAssigned identity. Enterprise Policy = $cmkPolicyString" -ForegroundColor Red
         return $null
     }
 
@@ -63,7 +63,7 @@ function GetAndValidateEnterprisePolicyForKeyVault($enterprisePolicyArmId, $keyV
     if ($epKeyVaultConfig.Id -ne $keyVault.ResourceId)
     {
        
-        Write-Host "Enterprise Policy reterieved for $enterprisePolicyArmId is not having same key vault config as $keyVaultName. Enterprise Policy = $cmkPolicyString" -ForegroundColor Red
+        Write-Host "Enterprise Policy retrieved for $enterprisePolicyArmId is not having same key vault config as $keyVaultName. Enterprise Policy = $cmkPolicyString" -ForegroundColor Red
         return $null
     }
    
@@ -88,7 +88,7 @@ function GetAndValidateEnterprisePolicyForKeyVault($enterprisePolicyArmId, $keyV
             Write-Host "WrapKey access not present for Enterprise Policy $enterprisePolicyArmId in keyVault $keyVaultName" -ForegroundColor Red
             return $null
         }
-        Write-Host "Enterprise policy $enterprisePolicyArmId reterieved and is valid for $keyvaultName with Get, UnwrapKey and WrapKey access" -ForegroundColor Green `n
+        Write-Host "Enterprise policy $enterprisePolicyArmId retrieved and is valid for $keyvaultName with Get, UnwrapKey and WrapKey access" -ForegroundColor Green `n
     }
     else
     {
@@ -99,7 +99,7 @@ function GetAndValidateEnterprisePolicyForKeyVault($enterprisePolicyArmId, $keyV
             Write-Host "Enterprise policy $enterprisePolicyArmId identity is not assigned 'Key Vault Crypto Service Encryption User' role" -ForegroundColor Red
             return $null
         }
-        Write-Host "Enterprise policy $enterprisePolicyArmId reterieved and is valid for $keyvaultName with 'Key Vault Crypto Service Encryption User' role" -ForegroundColor Green `n
+        Write-Host "Enterprise policy $enterprisePolicyArmId retrieved and is valid for $keyvaultName with 'Key Vault Crypto Service Encryption User' role" -ForegroundColor Green `n
 
     }
 
@@ -126,7 +126,7 @@ function GetAndValidateEnterprisePolicyKey($epKeyVaultConfig, $keyVaultName)
     $keyString = $key | ConvertTo-Json
     if ($key -eq $null -or $key.Id -eq $null)
     {
-        Write-Host "Key $keyName not reterieved from $keyVaultName  $keyString" -ForegroundColor Red
+        Write-Host "Key $keyName not retrieved from $keyVaultName  $keyString" -ForegroundColor Red
         return $null
     }
     #validate if key is enabled
