@@ -64,7 +64,7 @@ function CreateCMKEnterprisePolicy
 	
     $body = GenerateEnterprisePolicyBody -policyType "cmk" -policyLocation $enterprisePolicyLocation -policyName $enterprisePolicyName -keyVaultId $keyVaultId -keyName $keyName -keyVersion $keyVersion
 
-    $result = PutEnterprisePolicy $resourceGroup $body
+    $result = PutEnterprisePolicy $subscriptionId $resourceGroup $body
     if ($result -eq $false)
     {
        return

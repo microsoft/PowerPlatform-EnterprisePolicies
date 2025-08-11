@@ -38,19 +38,19 @@ function SetupVnetForSubnetDelegation
     $virtualNetwork = Get-AzVirtualNetwork -Name $virtualNetworkName
     if ($null -eq  $virtualNetwork.Name)
     {
-         Write-Host "Virtual network not reterieved" -ForegroundColor Red
+         Write-Host "Virtual network not retrieved" -ForegroundColor Red
          return
     }
-    Write-Host "Virtual network reterieved" -ForegroundColor Green
+    Write-Host "Virtual network retrieved" -ForegroundColor Green
 
     Write-Host "Getting virtual network subnet $subnetName" -ForegroundColor Green
     $subnet = Get-AzVirtualNetworkSubnetConfig -Name $subnetName -VirtualNetwork $virtualNetwork
     if ($null -eq  $subnet.Name)
     {
-         Write-Host "Virtual network subnet not reterieved" -ForegroundColor Red
+         Write-Host "Virtual network subnet not retrieved" -ForegroundColor Red
          return
     }
-    Write-Host "Virtual network subnet reterieved" -ForegroundColor Green
+    Write-Host "Virtual network subnet retrieved" -ForegroundColor Green
 
     Write-Host "Adding delegation for Microsoft.PowerPlatform/enterprisePolicies to subnet $subnet.Name in vnet $virtualNetworkName" -ForegroundColor Green
     $subnet = Add-AzDelegation -Name "Microsoft.PowerPlatform/enterprisePolicies" -ServiceName "Microsoft.PowerPlatform/enterprisePolicies" -Subnet $subnet
