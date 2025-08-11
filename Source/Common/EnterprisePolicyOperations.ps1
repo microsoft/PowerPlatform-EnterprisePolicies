@@ -36,11 +36,12 @@ function GetEnterprisePolicySystemId($policyArmId) {
 
 }
 
-function PutEnterprisePolicy($resourceGroup, $body)
+function PutEnterprisePolicy($subscriptionId, $resourceGroup, $body)
  {
 
     $tmp = New-TemporaryFile
     $body | ConvertTo-Json -Depth 7 | Out-File $tmp.FullName
+    Set-AzContext -Subscription $subscriptionId
     $policy = New-AzResourceGroupDeployment -DeploymentName "EPDeployment" -ResourceGroupName $resourceGroup -TemplateFile $tmp.FullName
 
     Remove-Item $tmp.FullName
