@@ -15,6 +15,13 @@ Properties {
     $ScriptsRootDir = "$PSScriptRoot\..\Source\EnterprisePolicies\Public\SubnetInjection"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 
+    $BuildVersion = "1.0.0"
+    if($env:GitVersion_MajorMinorPatch)
+    {
+        $BuildVersion = $env:GitVersion_MajorMinorPatch
+
+    }
+
     # The name of your module should match the basename of the PSD1 file.
     $ModuleName = Get-Item $SrcRootDir/*.psd1 |
                       Where-Object { $null -ne (Test-ModuleManifest -Path $_ -ErrorAction SilentlyContinue) } |
@@ -154,10 +161,13 @@ Properties {
 
 # Executes before the BuildImpl phase of the Build task.
 Task PreBuild {
+
 }
 
 # Executes after the Sign phase of the Build task.
 Task PostBuild {
+    $moduleFile = Get-Item "$ReleaseDir\$ModuleName\*.psd1"
+    (Get-Content $moduleFile).Replace("ModuleVersion = '1.0.0'", "ModuleVersion = '$BuildVersion'") | Set-Content $moduleFile
 }
 
 ###############################################################################

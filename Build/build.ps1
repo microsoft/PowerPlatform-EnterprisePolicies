@@ -26,7 +26,10 @@ foreach($loadModule in $loadModules) {
     Import-Module $psd1.FullName
 }
 
-Install-PSResource -Name Microsoft.PowerShell.PlatyPS -TrustRepository -Quiet
+if(-not($env:TF_BUILD))
+{
+    Install-PSResource -Name Microsoft.PowerShell.PlatyPS -Version "1.0.1" -TrustRepository -Quiet
+}
 Import-Module -Name Microsoft.PowerShell.PlatyPS
 
 # Builds the module by invoking psake on the build.psake.ps1 script.

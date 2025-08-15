@@ -1,14 +1,101 @@
+parameters:
+# Official tasks include determining a 'proper' version with GitVersion and enabling code signing
+- name: official
+  type: boolean
+
 steps:
+- checkout: self
+      
+- ${{ if parameters.Official }}:
+
+  - task: PowerShell@2
+    displayName: dotnet tool install GitVersion.Tool
+    inputs:
+      targetType: inline
+      script: dotnet tool install GitVersion.Tool --global --version 5.11.1
+
+  - task: PowerShell@2
+    displayName: dotnet gitversion
+    inputs:
+      targetType: inline
+      script: dotnet gitversion -output buildserver
+
 - task: DotNetCoreCLI@2
   displayName: 🔄 Dotnet restore
-  env:
-    ob_restore_phase: true # Steps decorated with this env variable will be run with network. All these steps are hoisted to the beginning of the build
   inputs:
     command: 'custom'
     custom: 'restore'
-    projects: '$(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\build\build.proj'
+    projects: '$(Build.SourcesDirectory)\build\build.proj'
     selectOrConfig: 'config'
     nugetConfigPath: $(Build.SourcesDirectory)\nuget.config
+
+- task: PowerShell@2
+  displayName: Import Powershell Modules
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    MODULES_JSON: '[{"Name": "Microsoft.PowerShell.PlatyPS", "Version": "1.0.1"}]'
+  inputs:
+    targetType: 'inline'
+    script: |
+      [string]$modulesjson = "$($env:MODULES_JSON)"
+      [string]$PackageSource = "$(PackageSource)"
+      [string]$PackageSourceName = "BICPSGalleryUpstream"
+
+      Write-Host "##[Debug]modulesjson: $modulesjson."
+      Write-Host "##[Debug]env:MODULES_JSON: $($env:MODULES_JSON)"
+
+      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+      $feedUri = $PackageSource
+      Write-Host "##[debug]Original FeedUri: $feedUri"
+
+      $patToken = $env:SYSTEM_ACCESSTOKEN | ConvertTo-SecureString -AsPlainText -Force
+      $credentialsObject = New-Object System.Management.Automation.PSCredential("ONEBRANCH_TOKEN", $patToken)
+
+      # Install modules in common location so that they are accessible
+      $customPath = "C:\Windows\system32\WindowsPowerShell\v1.0\Modules"
+      Write-Host "##[debug] Install Powershell modules in location:" $customPath
+      $env:PSModulePath += ";$customPath"
+      Write-Host "##[debug] PowerShell Modules Path: $env:PSModulePath"
+
+      $psGallery = Get-PSRepository -Name "PSGallery" -ErrorAction SilentlyContinue
+      if ($null -ne $psGallery) {
+        Write-Output "##[debug] Removing default PS Gallery" # To satisfy network isolation
+        Unregister-PSRepository -Name $psGallery.Name -ErrorAction SilentlyContinue -Verbose
+      }
+
+      Write-Output "##[debug] Register PSRepository for $($feeduri)"
+      Register-PSRepository -Name $PackageSourceName `
+        -SourceLocation $feedUri `
+        -PublishLocation $feedUri `
+        -InstallationPolicy Trusted `
+        -Credential $credentialsObject `
+        -ErrorAction SilentlyContinue `
+        -Verbose
+      Write-Host "PS Repository registered successfully."
+
+      if (-not [string]::IsNullOrEmpty($modulesjson)) {
+        $modules = $modulesjson | ConvertFrom-Json
+        Write-Host "##[Debug]modules: $modules."
+      }
+      else {
+        Write-Host "##[error]Error: No modules specified in the input JSON." -ForegroundColor Red
+        exit 1
+      }
+      foreach ($module in $modules) {
+        # Try to install the module
+        try {
+          $moduleName = $module.Name
+          $moduleVersion = $module.Version
+          Write-Host "Installing module $moduleName, version $moduleVersion ..." -ForegroundColor Yellow
+          Save-Module -Name $moduleName -RequiredVersion $moduleVersion -Path $customPath -Repository $PackageSourceName -Credential $credentialsObject -Verbose -Force
+          Install-Module -Name $moduleName -RequiredVersion $moduleVersion -Repository $PackageSourceName -Credential $credentialsObject -Verbose -Force -AllowClobber
+          Import-Module $moduleName -RequiredVersion $moduleVersion -Verbose -Force
+          Write-Host "Module $moduleName installed successfully." -ForegroundColor Green
+        }
+        catch {
+          Write-Host "Failed to install module $module due to exception $_" -ForegroundColor Red
+        }
+      }
 
 - task: PowerShell@2
   displayName: 🧪 Test Scripts (Windows)
@@ -37,3 +124,43 @@ steps:
     pathToSources: '$(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts'
     failIfCoverageEmpty: true
   condition: always()
+
+- task: PowerShell@2
+  displayName: 🏗️ Build Scripts
+  inputs:
+    pwsh: true
+    filePath: $(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\build.ps1
+    arguments: '-Tasks @("Build")'
+
+- ${{ if parameters.Official }}:
+
+  - template: templates/CodeSigning.yml@self
+    parameters:
+      codesigning_path: '$(Build.ArtifactStagingDirectory)\Release'
+      codesigning_pattern: | 
+        '*.ps1'
+        '*.psm1'
+
+  - task: ArchiveFiles@2
+    displayName: 📦 Archive Files
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\Release'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies_v$(GitVersion.SemVer).zip'
+      replaceExistingArchive: true
+
+  - task: GithubRelease@1 
+    displayName: 'Create GitHub Release'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    inputs:
+      gitHubConnection: 'github.com_faix'
+      action: 'create'
+      repositoryName: microsoft/PowerPlatform-EnterprisePolicies
+      target: '$(Build.SourceVersion)'
+      tagSource: userSpecifiedTag
+      tag: v$(GitVersion.SemVer)
+      changeLogCompareToRelease: 'lastFullRelease'
+      changeLogType: 'commitBased'
+      assets: |
+          $(Build.ArtifactStagingDirectory)/EnterprisePolicies_v$(GitVersion.SemVer).zip
