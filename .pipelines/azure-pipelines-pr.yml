@@ -1,0 +1,54 @@
+name: Azure Pipelines PR Build
+
+trigger: none
+
+pr:
+  branches:
+    include:
+    - main
+
+resources:
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Unofficial.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: 1ES-windows-latest-dynamicscrm
+      os: windows
+    sdl:
+      tsa:
+        enabled: false
+      binskim:
+        enabled: false # Not applicable for this repo
+      codeql:
+        enabled: true
+        compiled:
+          enabled: false #No compiled languages in this repo
+        runSourceLanguagesInSourceAnalysis: true
+      credscan:
+        enabled: true
+        suppressionsFile: $(Build.SourcesDirectory)/.config/CredScanSuppressions.json
+      policheck:
+        enabled: true
+        exclusionFile: $(Build.SourcesDirectory)/.config/PolicyCheckExclusions.json
+      psscriptanalyzer:
+        enabled: true
+      sourceAnalysisPool:
+        name: 1ES-windows-latest-dynamicscrm
+        os: windows
+
+    stages:
+    - stage: Build
+      jobs:
+      - job: Build_And_Release
+        displayName: "Build and Release"
+        steps:
+          - template: .pipelines/templates/BuildCommon.yml@self
+            parameters:
+              Official: false
+

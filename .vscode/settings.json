@@ -1,3 +1,4 @@
 {
-    "terminal.integrated.defaultProfile.windows": "PowerShell"
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "azure-pipelines.1ESPipelineTemplatesSchemaFile": true
 }

@@ -1,0 +1,171 @@
+parameters:
+- name: codesigning_path
+  type: string
+  default: $(build.artifactstagingdirectory)
+- name: strongname_codesigning_pattern
+  type: string
+  default: '*.dll'
+- name: enable_strongname_codesigning
+  type: boolean
+  default: false
+- name: codesigning_pattern
+  type: string
+  default: '*.dll'
+- name: enable_oss_codesigning
+  type: boolean
+  default: false
+- name: oss_codesigning_pattern
+  type: string
+  default: ''
+
+steps:
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
+    displayName: 'CodeSigning: Strong Name'
+    enabled: ${{ parameters.enable_strongname_codesigning }}
+    inputs:
+      ConnectedServiceName: 'DVEsrpConnectionPME'
+      UseMSIAuthentication: true
+      AppRegistrationClientId: 'fc323dd6-944c-45fd-bdf2-0f84b4e9edf5'
+      AppRegistrationTenantId: '975f013f-7f24-47e8-a7d3-abc4752bf346'
+      EsrpClientId: 'b9168bee-488b-4d02-ae87-c7b2d65a6df9'
+      AuthAKVName: KvEsrp
+      AuthSignCertName: DVEsrpPKI
+      FolderPath: ${{ parameters.codesigning_path }}
+      Pattern: ${{ parameters.strongname_codesigning_pattern }}
+      UseMinimatch: true
+      signConfigType: inlineSignParams
+      inlineOperation: >-
+        [
+          {
+            "keyCode": "CP-233863-SN",
+            "operationSetCode": "StrongNameSign",
+            "parameters": [],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          },
+          {
+            "keyCode": "CP-233863-SN",
+            "operationSetCode": "StrongNameVerify",
+            "parameters": [],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
+      VerboseLogin: true
+
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
+    displayName: 'CodeSigning: Authenticode (inline)'
+    inputs:
+      ConnectedServiceName: 'DVEsrpConnectionPME'
+      UseMSIAuthentication: true
+      AppRegistrationClientId: 'fc323dd6-944c-45fd-bdf2-0f84b4e9edf5'
+      AppRegistrationTenantId: '975f013f-7f24-47e8-a7d3-abc4752bf346'
+      EsrpClientId: 'b9168bee-488b-4d02-ae87-c7b2d65a6df9'
+      AuthAKVName: KvEsrp
+      AuthSignCertName: DVEsrpPKI
+      FolderPath: ${{ parameters.codesigning_path }}
+      Pattern: ${{ parameters.codesigning_pattern }}
+      UseMinimatch: true
+      signConfigType: inlineSignParams
+      inlineOperation: >-
+        [
+          {
+            "keyCode": "CP-230012",
+            "operationSetCode": "SigntoolSign",
+            "parameters": [
+              {
+                "parameterName": "OpusName",
+                "parameterValue": "Microsoft"
+              },
+              {
+                "parameterName": "OpusInfo",
+                "parameterValue": "http://www.microsoft.com"
+              },
+              {
+                "parameterName": "FileDigest",
+                "parameterValue": "/fd \"SHA256\""
+              },
+              {
+                "parameterName": "PageHash",
+                "parameterValue": "/NPH"
+              },
+              {
+                "parameterName": "TimeStamp",
+                "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+              }
+            ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          },
+          {
+            "keyCode": "CP-230012",
+            "operationSetCode": "SigntoolVerify",
+            "parameters": [],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ]
+
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
+    displayName: 'CodeSigning: Authenticode (inline) 3rd Party/OSS'
+    enabled: ${{ parameters.enable_oss_codesigning }}
+    inputs:
+      ConnectedServiceName: 'DVEsrpConnectionPME'
+      UseMSIAuthentication: true
+      AppRegistrationClientId: 'fc323dd6-944c-45fd-bdf2-0f84b4e9edf5'
+      AppRegistrationTenantId: '975f013f-7f24-47e8-a7d3-abc4752bf346'
+      EsrpClientId: 'b9168bee-488b-4d02-ae87-c7b2d65a6df9'
+      AuthAKVName: KvEsrp
+      AuthSignCertName: DVEsrpPKI
+      FolderPath: ${{ parameters.codesigning_path }}
+      Pattern: ${{ parameters.oss_codesigning_pattern }}
+      UseMinimatch: true
+      signConfigType: inlineSignParams
+      inlineOperation: >-
+        [
+          {
+            "keyCode": "CP-231522",
+            "operationSetCode": "SigntoolSign",
+            "parameters": [
+              {
+                "parameterName": "OpusName",
+                "parameterValue": "Microsoft"
+              },
+              {
+                "parameterName": "OpusInfo",
+                "parameterValue": "http://www.microsoft.com"
+              },
+              {
+                "parameterName": "FileDigest",
+                "parameterValue": "/fd \"SHA256\""
+              },
+              {
+                "parameterName": "Append",
+                "parameterValue": "/as"
+              },
+              {
+                "parameterName": "PageHash",
+                "parameterValue": "/NPH"
+              },
+              {
+                "parameterName": "TimeStamp",
+                "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+              }
+            ],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          },
+          {
+            "keyCode": "CP-231522",
+            "operationSetCode": "SigntoolVerify",
+            "parameters": [],
+            "toolName": "sign",
+            "toolVersion": "1.0"
+          }
+        ] 
+
+  - task: PowerShell@2
+    displayName: 'PowerShell Script: Remove codesign logs'
+    inputs:
+      targetType: inline
+      script: "$Excluded = @(\"CodeSignSummary-*.md\")\nGet-ChildItem -Recurse -Include $Excluded -Path $(build.artifactstagingdirectory) | \nForeach-Object {\n     Remove-Item $_.FullName\n     Write-Host \"Had to remove: $_\"\n}\n\n\n"

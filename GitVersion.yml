@@ -1,0 +1,38 @@
+assembly-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-scheme: MajorMinorPatch
+mode: Mainline
+major-version-bump-message: '\+semver:\s?(breaking|major)'
+minor-version-bump-message: '\+semver:\s?(feature|minor)'
+patch-version-bump-message: '\+semver:\s?(fix|patch)'
+commit-message-incrementing: Enabled
+tag-prefix: '[vV]'
+legacy-semver-padding: 4
+build-metadata-padding: 4
+commits-since-version-source-padding: 4
+branches:
+  main:
+    regex: ^main$
+    tag: ''
+    increment: Patch
+    prevent-increment-of-merged-branch-version: true
+    track-merge-target: false
+    is-mainline: true
+  pull-request:
+    regex: ^(pull|pull\-requests|pr)[/-]
+    mode: ContinuousDeployment
+    tag: pr
+    increment: Patch
+    prevent-increment-of-merged-branch-version: false
+    tag-number-pattern: '[/-](?<number>\d+)[-/]'
+    track-merge-target: false
+  other:
+   regex: ^(?!pull$|pull-requests?$|pr$|main$).+$
+   mode: ContinuousDeployment
+   source-branches: ['main']
+   tag: ci
+   increment: Patch
+   prevent-increment-of-merged-branch-version: false
+   tag-number-pattern: '[/-](?<number>\d+)[-/]'
+   track-merge-target: false
+ignore:
+  sha: []

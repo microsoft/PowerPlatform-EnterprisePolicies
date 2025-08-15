@@ -1,0 +1,12 @@
+{
+    "codebaseName": "PowerPlatform-EnteprisePolicies",
+    "ppe": false,
+    "serviceTreeId": "ff34b0cc-6c95-4afd-a097-aef2ed6b080f",
+    "notificationAliases": [
+      "plexinfra@microsoft.com"
+    ],
+    "instanceUrl": "https://dynamicscrm.visualstudio.com/defaultcollection",
+    "projectName": "ALM",
+    "areaPath": "ALM\\Policy.Fundamentals",
+    "allTools": true
+}
