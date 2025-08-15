@@ -168,11 +168,6 @@ Task PreBuild {
 Task PostBuild {
     $moduleFile = Get-Item "$ReleaseDir\$ModuleName\*.psd1"
     (Get-Content $moduleFile).Replace("ModuleVersion = '1.0.0'", "ModuleVersion = '$BuildVersion'") | Set-Content $moduleFile
-
-    if($env:TF_BUILD)
-    {
-        Compress-Archive -Path $OutDir -DestinationPath "$env:Build.ArtifactStagingDirectory\$ModuleName_v$(BuildVersion).zip" -Force
-    }
 }
 
 ###############################################################################

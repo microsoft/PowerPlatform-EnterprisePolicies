@@ -136,10 +136,19 @@ steps:
 
   - template: templates/CodeSigning.yml@self
     parameters:
-      codesigning_path: '$(Build.ArtifactStagingDirectory)'
+      codesigning_path: '$(Build.ArtifactStagingDirectory)\Release'
       codesigning_pattern: | 
         '*.ps1'
         '*.psm1'
+
+  - task: ArchiveFiles@2
+    displayName: 📦 Archive Files
+    inputs:
+      rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\Release'
+      includeRootFolder: false
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies_v$(GitVersion.SemVer).zip'
+      replaceExistingArchive: true
 
   - task: GithubRelease@1 
     displayName: 'Create GitHub Release'

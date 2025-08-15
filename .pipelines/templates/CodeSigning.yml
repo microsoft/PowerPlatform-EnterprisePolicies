@@ -168,4 +168,4 @@ steps:
     displayName: 'PowerShell Script: Remove codesign logs'
     inputs:
       targetType: inline
-      script: "$Excluded = @(\"CodeSignSummary-*.md\")\nGet-ChildItem -Recurse -Include $Excluded -Path $(build.artifactstagingdirectory) | \nForeach-Object {\n     Remove-Item $_.FullName\n     Write-Host \"Had to remove: $_\"\n}\n\n\n"
+      script: "$Excluded = @(\"CodeSignSummary-*.md\")\nGet-ChildItem -Recurse -Include $Excluded -Path ${{ parameters.codesigning_path }} | \nForeach-Object {\n     Remove-Item $_.FullName\n     Write-Host \"Had to remove: $_\"\n}\n\n\n"
