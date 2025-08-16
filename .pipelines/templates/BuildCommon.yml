@@ -9,18 +9,19 @@ steps:
 - ${{ if parameters.Official }}:
 
   - task: PowerShell@2
-    displayName: dotnet tool install GitVersion.Tool
+    displayName: ⬇️ dotnet tool install GitVersion.Tool
     inputs:
       targetType: inline
       script: dotnet tool install GitVersion.Tool --global --version 5.11.1
 
   - task: PowerShell@2
-    displayName: dotnet gitversion
+    displayName: 🧮 dotnet gitversion
     inputs:
       targetType: inline
       script: dotnet gitversion -output buildserver
 
 - task: NuGetAuthenticate@1
+  displayName: 🔐 Nuget Auth
 
 - task: DotNetCoreCLI@2
   displayName: 🔄 Dotnet restore
@@ -33,7 +34,7 @@ steps:
     nugetConfigPath: $(Build.SourcesDirectory)\nuget.config
 
 - task: PowerShell@2
-  displayName: Get the PackageSource from NugetConfig
+  displayName: 🔎 Get the PackageSource from NugetConfig
   inputs:
     pwsh: true
     targetType: 'inline'
@@ -69,7 +70,7 @@ steps:
       }
 
 - task: PowerShell@2
-  displayName: Import Powershell Modules
+  displayName: ⏬ Install Powershell Modules
   env:
     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
     MODULES_JSON: '[{"Name": "Microsoft.PowerShell.PlatyPS", "Version": "1.0.1"}]'
@@ -139,36 +140,36 @@ steps:
 - task: PowerShell@2
   displayName: 🧪 Test Scripts (Windows)
   inputs:
-    filePath: $(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\build.ps1
+    filePath: $(Build.SourcesDirectory)\Build\build.ps1
     arguments: '-Tasks @("Test")'
 
 - task: PowerShell@2
   displayName: 🧪 Test Scripts (Core)
   inputs:
     pwsh: true
-    filePath: $(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\build.ps1
+    filePath: $(Build.SourcesDirectory)\Build\build.ps1
     arguments: '-Tasks @("Test")'
 
 - task: PublishTestResults@2
   displayName: 📰 Publish Test Results
   inputs:
     testResultsFormat: 'NUnit'
-    testResultsFiles: '$(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\TestResult.xml'
+    testResultsFiles: '$(Build.SourcesDirectory)\Build\TestResult.xml'
   condition: always()
 
 - task: PublishCodeCoverageResults@2
   displayName: 📰 Publish Code Coverage
   inputs:
-    summaryFileLocation: '$(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\coverage.xml'
-    pathToSources: '$(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts'
+    summaryFileLocation: '$(Build.SourcesDirectory)\Build\coverage.xml'
+    pathToSources: '$(Build.SourcesDirectory)Source\EnterprisePolicies'
     failIfCoverageEmpty: true
   condition: always()
 
 - task: PowerShell@2
-  displayName: 🏗️ Build Scripts
+  displayName: 🔨 Build Scripts
   inputs:
     pwsh: true
-    filePath: $(Build.SourcesDirectory)\tools\PowerShell\EnterprisePoliciesScripts\Build\build.ps1
+    filePath: $(Build.SourcesDirectory)\Build\build.ps1
     arguments: '-Tasks @("Build")'
 
 - ${{ if parameters.Official }}:
@@ -190,7 +191,7 @@ steps:
       replaceExistingArchive: true
 
   - task: GithubRelease@1 
-    displayName: 'Create GitHub Release'
+    displayName: '🚢 Create GitHub Release'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
     inputs:
       gitHubConnection: 'github.com_faix'

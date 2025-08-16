@@ -20,7 +20,7 @@ parameters:
 
 steps:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
-    displayName: 'CodeSigning: Strong Name'
+    displayName: '📝 CodeSigning: Strong Name'
     enabled: ${{ parameters.enable_strongname_codesigning }}
     inputs:
       ConnectedServiceName: 'DVEsrpConnectionPME'
@@ -54,7 +54,7 @@ steps:
       VerboseLogin: true
 
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
-    displayName: 'CodeSigning: Authenticode (inline)'
+    displayName: '📝 CodeSigning: Authenticode (inline)'
     inputs:
       ConnectedServiceName: 'DVEsrpConnectionPME'
       UseMSIAuthentication: true
@@ -107,7 +107,7 @@ steps:
         ]
 
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
-    displayName: 'CodeSigning: Authenticode (inline) 3rd Party/OSS'
+    displayName: '📝 CodeSigning: Authenticode (inline) 3rd Party/OSS'
     enabled: ${{ parameters.enable_oss_codesigning }}
     inputs:
       ConnectedServiceName: 'DVEsrpConnectionPME'
@@ -165,7 +165,7 @@ steps:
         ] 
 
   - task: PowerShell@2
-    displayName: 'PowerShell Script: Remove codesign logs'
+    displayName: '❌ PowerShell Script: Remove codesign logs'
     inputs:
       targetType: inline
       script: "$Excluded = @(\"CodeSignSummary-*.md\")\nGet-ChildItem -Recurse -Include $Excluded -Path ${{ parameters.codesigning_path }} | \nForeach-Object {\n     Remove-Item $_.FullName\n     Write-Host \"Had to remove: $_\"\n}\n\n\n"
