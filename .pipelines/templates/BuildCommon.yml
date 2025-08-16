@@ -50,7 +50,9 @@ steps:
   displayName: 📰 Publish Test Results
   inputs:
     testResultsFormat: 'NUnit'
-    testResultsFiles: '$(Build.SourcesDirectory)\Build\TestResult.xml'
+    testResultsFiles: |
+      '$(Build.SourcesDirectory)\Build\TestResult.xml'
+      '$(Build.SourcesDirectory)\Build\TestResultCore.xml'
   condition: always()
 
 - task: PublishCodeCoverageResults@2

@@ -258,7 +258,7 @@ Task InstallImpl -depends BuildHelp, PreInstall -requiredVariables OutDir {
     "Module installed into $InstallPath"
 }
 
-Task Test -depends Build -requiredVariables TestRootDir, ModuleName, CodeCoverageEnabled, CodeCoverageOutputFormat, CodeCoverageOutputPath, CodeCoverageFiles, TestOutputEnabled, TestOutputFormat, TestOutputFile {
+Task Test -depends Build -requiredVariables TestRootDir, ModuleName, CodeCoverageEnabled, CodeCoverageOutputFormat, CodeCoverageOutputPath, CodeCoverageFiles, TestOutputEnabled, TestOutputFormat, TestOutputFile, SrcRootDir {
 
     $pesterAvailable = Get-Module Pester -ListAvailable
     $pesterLoaded = Get-Module Pester
@@ -304,6 +304,13 @@ Task Test -depends Build -requiredVariables TestRootDir, ModuleName, CodeCoverag
                 Write-Host $testResult.CodeCoverage.NumberOfCommandsAnalyzed
                 $testCoverage = [int]($testResult.CodeCoverage.NumberOfCommandsExecuted / $testResult.CodeCoverage.NumberOfCommandsAnalyzed * 100)
                 "Pester code coverage on specified files: ${testCoverage}%"
+            }
+
+            if(Test-Path $CodeCoverageOutputPath)
+            {
+                "Updating code coverage file so it includes full paths and not relative paths."
+                $ResolvedPath = Resolve-Path $SrcRootDir -replace '\', '/'
+                (Get-Content $CodeCoverageOutputPath) -replace 'sourcefilename="([^"]+)"', "sourcefilename=""$ResolvedPath\`$1""" | Set-Content $CodeCoverageOutputPath
             }
         }
     }
