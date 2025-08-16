@@ -22,9 +22,10 @@ steps:
 
 - task: DotNetCoreCLI@2
   displayName: 🔄 Dotnet restore
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
   inputs:
-    command: 'custom'
-    custom: 'restore'
+    command: 'restore'
     projects: '$(Build.SourcesDirectory)\build\build.proj'
     selectOrConfig: 'config'
     nugetConfigPath: $(Build.SourcesDirectory)\nuget.config
