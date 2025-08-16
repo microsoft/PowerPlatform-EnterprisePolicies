@@ -20,6 +20,8 @@ steps:
       targetType: inline
       script: dotnet gitversion -output buildserver
 
+- task: NuGetAuthenticate@1
+
 - task: DotNetCoreCLI@2
   displayName: 🔄 Dotnet restore
   env:
