@@ -309,7 +309,7 @@ Task Test -depends Build -requiredVariables TestRootDir, ModuleName, CodeCoverag
             if(Test-Path $CodeCoverageOutputPath)
             {
                 "Updating code coverage file so it includes full paths and not relative paths."
-                $ResolvedPath = Resolve-Path $SrcRootDir -replace '\', '/'
+                $ResolvedPath = (Resolve-Path $SrcRootDir) -replace '\\', '/'
                 (Get-Content $CodeCoverageOutputPath) -replace 'sourcefilename="([^"]+)"', "sourcefilename=""$ResolvedPath\`$1""" | Set-Content $CodeCoverageOutputPath
             }
         }
