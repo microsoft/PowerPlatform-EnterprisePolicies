@@ -19,7 +19,7 @@ foreach($loadModule in $loadModules) {
     }
 
     if(!$psd1) {
-        throw "Unable to find module $loadModule psd1 file under: $modulePkg.FullName"
+        throw "Unable to find module $loadModule psd1 file under: $($modulePkg.FullName)"
     }
 
     Write-Host "Loading module: $($psd1.FullName)"
@@ -28,7 +28,7 @@ foreach($loadModule in $loadModules) {
 
 if(-not($env:TF_BUILD))
 {
-    Install-PSResource -Name Microsoft.PowerShell.PlatyPS -Version "1.0.1" -TrustRepository -Quiet
+    Install-Module -Name Microsoft.PowerShell.PlatyPS -Version "1.0.1"
 }
 Import-Module -Name Microsoft.PowerShell.PlatyPS
 
