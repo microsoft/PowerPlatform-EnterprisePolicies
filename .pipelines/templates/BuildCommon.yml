@@ -31,6 +31,42 @@ steps:
     nugetConfigPath: $(Build.SourcesDirectory)\nuget.config
 
 - task: PowerShell@2
+  displayName: Get the PackageSource from NugetConfig
+  inputs:
+    pwsh: true
+    targetType: 'inline'
+    script: |
+      Write-Host "Reading content from $nugetConfigPath"
+      $nugetConfigPath = "$(Build.SourcesDirectory)/nuget.config"
+      Write-Host "NugetConfigPath: $nugetConfigPath"
+      if (-not (Test-Path $nugetConfigPath)) {
+        throw "Unable to find $($nugetConfigPath)"
+      }
+      # Load the XML content from the NugetConfig file
+      [xml]$nugetConfigContent = Get-Content -Path $nugetConfigPath
+
+      # Get the packageSources node
+      $packageSources = $nugetConfigContent.configuration.packageSources
+      if ($packageSources) {
+        foreach ($addNode in $packageSources.add) {
+          if ($addNode.value -like '*/nuget/*') {
+            # Get the first node in packageSources
+            $packageSource = $addNode.value
+            Write-Host "Original value: $packageSource"
+            # Replace v3/index.json with v2
+            if ($packageSource -like '*v3/index.json') {
+              $packageSource = $packageSource -replace 'v3/index.json', 'v2'
+              Write-Host "Updated PackageSource value: $packageSource"
+            }
+            Write-Host "Setting PackageSource variable with the value : $packageSource"
+            Write-Host "##vso[task.setvariable variable=PackageSource]$packageSource"
+            Write-Host "Created PackageSource variable with the value : $(PackageSource)"
+            break
+          }
+        }
+      }
+
+- task: PowerShell@2
   displayName: Import Powershell Modules
   env:
     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
