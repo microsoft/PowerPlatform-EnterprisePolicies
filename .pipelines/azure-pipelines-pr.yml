@@ -28,7 +28,7 @@ extends:
       tsa:
         enabled: false
       binskim:
-        enabled: false # Not applicable for this repo
+        enabled: true
       codeql:
         enabled: true
         compiled:
