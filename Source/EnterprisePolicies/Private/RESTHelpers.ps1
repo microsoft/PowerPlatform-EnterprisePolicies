@@ -36,7 +36,7 @@ function New-JsonRequestMessage
         [System.Net.Http.HttpMethod] $HttpMethod = [System.Net.Http.HttpMethod]::Post
     )
 
-    Write-Host "Creating request for URI: $Uri" -ForegroundColor Cyan
+    Write-Verbose "Creating request for URI: $Uri"
     $request = New-Object -TypeName System.Net.Http.HttpRequestMessage -ArgumentList @($HttpMethod, $Uri)
     if ($Content)
     {
@@ -151,13 +151,13 @@ function Test-Result {
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Host "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))" -ForegroundColor Red
-            throw "API Call returned $($result.StatusCode): $($errorMessage)."
+            Write-Verbose "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
         else
         {
-            Write-Host "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))" -ForegroundColor Red
-            throw "API Call returned $($result.StatusCode): $($result.ReasonPhrase)."
+            Write-Verbose "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
     }
 }

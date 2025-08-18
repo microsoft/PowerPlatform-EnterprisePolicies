@@ -4,7 +4,7 @@ param
 )
 
 $packagesDir = Resolve-Path -Path "$HOME\.nuget\packages"
-$loadModules = @('psake', 'Pester')
+$loadModules = @('psake', 'Pester', 'Microsoft.PowerShell.PlatyPS')
 foreach($loadModule in $loadModules) {
     $modulePath = Join-Path -Path $packagesDir -ChildPath "$loadModule"
     $modulePkg = Get-ChildItem -Path $modulePath | Sort-Object -Property Name -Descending | Select-Object -First 1
@@ -19,18 +19,12 @@ foreach($loadModule in $loadModules) {
     }
 
     if(!$psd1) {
-        throw "Unable to find module $loadModule psd1 file under: $modulePkg.FullName"
+        throw "Unable to find module $loadModule psd1 file under: $($modulePkg.FullName)"
     }
 
     Write-Host "Loading module: $($psd1.FullName)"
     Import-Module $psd1.FullName
 }
-
-if(-not($env:TF_BUILD))
-{
-    Install-PSResource -Name Microsoft.PowerShell.PlatyPS -Version "1.0.1" -TrustRepository -Quiet
-}
-Import-Module -Name Microsoft.PowerShell.PlatyPS
 
 # Builds the module by invoking psake on the build.psake.ps1 script.
 Invoke-PSake $PSScriptRoot\build.psake.ps1 -taskList $Tasks

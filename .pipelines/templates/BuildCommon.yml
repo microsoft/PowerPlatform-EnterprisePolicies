@@ -1,0 +1,117 @@
+parameters:
+# Official tasks include determining a 'proper' version with GitVersion and enabling code signing
+- name: official
+  type: boolean
+
+steps:
+- checkout: self
+      
+- ${{ if parameters.Official }}:
+
+  - task: PowerShell@2
+    displayName: ⬇️ dotnet tool install GitVersion.Tool
+    inputs:
+      targetType: inline
+      script: dotnet tool install GitVersion.Tool --global --version 5.11.1
+
+  - task: PowerShell@2
+    displayName: 🧮 dotnet gitversion
+    inputs:
+      targetType: inline
+      script: dotnet gitversion -output buildserver
+
+- task: NuGetAuthenticate@1
+  displayName: 🔐 Nuget Auth
+
+- task: DotNetCoreCLI@2
+  displayName: 🔄 Dotnet restore
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+  inputs:
+    command: 'restore'
+    projects: '$(Build.SourcesDirectory)\build\build.proj'
+    selectOrConfig: 'config'
+    nugetConfigPath: $(Build.SourcesDirectory)\nuget.config
+
+- task: PowerShell@2
+  displayName: 🧪 Test Scripts (Windows)
+  inputs:
+    filePath: $(Build.SourcesDirectory)\Build\build.ps1
+    arguments: '-Tasks @("Test")'
+
+- task: PowerShell@2
+  displayName: 🧪 Test Scripts (Core)
+  inputs:
+    pwsh: true
+    filePath: $(Build.SourcesDirectory)\Build\build.ps1
+    arguments: '-Tasks @("Test")'
+  condition: succeededOrFailed()
+
+- task: PublishTestResults@2
+  displayName: 📰 Publish Test Results
+  inputs:
+    testResultsFormat: 'NUnit'
+    testResultsFiles: $(Build.SourcesDirectory)\Build\TestResult.xml
+    testRunTitle: 'Windows PowerShell Tests'
+  condition: always()
+
+- task: PublishTestResults@2
+  displayName: 📰 Publish Test Results
+  inputs:
+    testResultsFormat: 'NUnit'
+    testResultsFiles: $(Build.SourcesDirectory)\Build\TestResultCore.xml
+    testRunTitle: 'PowerShell Core Tests'
+  condition: always()
+
+- task: PublishCodeCoverageResults@2
+  displayName: 📰 Publish Code Coverage
+  inputs:
+    summaryFileLocation: '$(Build.SourcesDirectory)\Build\coverage.xml'
+    pathToSources: '$(Build.SourcesDirectory)Source\EnterprisePolicies'
+    failIfCoverageEmpty: true
+  condition: always()
+
+- task: PowerShell@2
+  displayName: 🔨 Build Scripts
+  inputs:
+    pwsh: true
+    filePath: $(Build.SourcesDirectory)\Build\build.ps1
+    arguments: '-Tasks @("Build")'
+
+- ${{ if parameters.Official }}:
+
+  - template: templates/CodeSigning.yml@self
+    parameters:
+      codesigning_path: '$(Build.SourcesDirectory)\Release'
+      codesigning_pattern: | 
+        '*.ps1'
+        '*.psm1'
+
+- task: ArchiveFiles@2
+  displayName: 📦 Archive Files
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)\Release'
+    includeRootFolder: false
+    archiveType: 'zip'
+    ${{ if parameters.Official }}:
+      archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies_v$(GitVersion.SemVer).zip'
+    ${{ else }}:
+      archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies.zip'
+    replaceExistingArchive: true
+
+- ${{ if parameters.Official }}:
+
+  - task: GithubRelease@1 
+    displayName: '🚢 Create GitHub Release'
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    inputs:
+      gitHubConnection: 'github.com_faix'
+      action: 'create'
+      repositoryName: microsoft/PowerPlatform-EnterprisePolicies
+      target: '$(Build.SourceVersion)'
+      tagSource: userSpecifiedTag
+      tag: v$(GitVersion.SemVer)
+      changeLogCompareToRelease: 'lastFullRelease'
+      changeLogType: 'commitBased'
+      assets: |
+          $(Build.ArtifactStagingDirectory)/EnterprisePolicies_v$(GitVersion.SemVer).zip

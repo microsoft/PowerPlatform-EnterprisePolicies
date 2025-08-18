@@ -57,7 +57,7 @@ function Get-EnvironmentRegion{
 
     if($contentString) {
         [NetworkUsage] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([NetworkUsage])
-        Write-Host "Your environment is located in region: [$($networkUsage.AzureRegion)]"
+        Write-Verbose "Your environment is located in region: [$($networkUsage.AzureRegion)]"
         return $networkUsage.AzureRegion
     } else {
         throw "Failed to retrieve the environment region."

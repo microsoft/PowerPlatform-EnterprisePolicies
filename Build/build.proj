@@ -6,5 +6,6 @@
   <ItemGroup>
     <PackageReference Include="Pester" />
     <PackageReference Include="psake" />
+    <PackageReference Include="Microsoft.PowerShell.PlatyPS" />
   </ItemGroup>
 </Project>

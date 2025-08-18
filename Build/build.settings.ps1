@@ -10,6 +10,8 @@ Properties {
     $DocsRootDir = "$PSScriptRoot\..\docs"
     $SrcRootDir  = "$PSScriptRoot\..\Source\EnterprisePolicies"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $RepoRootDir = "$PSScriptRoot\.."
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $TestRootDir = "$PSScriptRoot\..\Source\Tests"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $ScriptsRootDir = "$PSScriptRoot\..\Source\EnterprisePolicies\Public\SubnetInjection"
@@ -146,8 +148,15 @@ Properties {
     # Specifies an output file path to send to Invoke-Pester's -OutputFile parameter.
     # This is typically used to write out test results so that they can be sent to a CI
     # system like AppVeyor.
-    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $TestOutputFile = "$PSScriptRoot\TestResult.xml"
+    if($PSVersionTable.PSEdition -eq "Core") {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+        $TestOutputFile = "$PSScriptRoot\TestResultCore.xml"
+    }
+    else {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+        $TestOutputFile = "$PSScriptRoot\TestResult.xml"
+    }
+
 
     # Specifies the test output format to use when the TestOutputFile property is given
     # a path.  This parameter is passed through to Invoke-Pester's -OutputFormat parameter.

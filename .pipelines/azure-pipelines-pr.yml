@@ -13,18 +13,22 @@ resources:
     type: git
     name: 1ESPipelineTemplates/1ESPipelineTemplates
     ref: refs/tags/release
+  - repository: self
+    type: githubenterprise
+    name: microsoft/PowerPlatform-EnterprisePolicies
 
 extends:
   template: v1/1ES.Unofficial.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
     pool:
-      name: 1ES-windows-latest-dynamicscrm
+      name: Azure-Pipelines-1ESPT-ExDShared
+      image: windows-2022
       os: windows
     sdl:
       tsa:
         enabled: false
       binskim:
-        enabled: false # Not applicable for this repo
+        enabled: true
       codeql:
         enabled: true
         compiled:
@@ -37,9 +41,11 @@ extends:
         enabled: true
         exclusionFile: $(Build.SourcesDirectory)/.config/PolicyCheckExclusions.json
       psscriptanalyzer:
+        break: true
         enabled: true
       sourceAnalysisPool:
-        name: 1ES-windows-latest-dynamicscrm
+        name: Azure-Pipelines-1ESPT-ExDShared
+        image: windows-2022
         os: windows
 
     stages:
@@ -47,6 +53,12 @@ extends:
       jobs:
       - job: Build_And_Release
         displayName: "Build and Release"
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            targetPath: "$(Build.ArtifactStagingDirectory)"
+            artifactName: "EnterprisePolicies"
+            publishLocation: "Container"
         steps:
           - template: .pipelines/templates/BuildCommon.yml@self
             parameters:

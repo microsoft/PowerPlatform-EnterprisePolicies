@@ -4,14 +4,16 @@ BeforeDiscovery{
 
 Describe 'Test-DnsResolution Tests' {
     BeforeAll {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+        $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
+        Mock Get-AccessToken { return $secureString } -ModuleName "EnterprisePolicies"
         Mock Write-Host {}
         Mock Connect-Azure { return $true } -ModuleName "EnterprisePolicies"
-        Mock Get-AccessToken { return "mocked_token" } -ModuleName "EnterprisePolicies"
     }
 
     Context 'Testing Test-DnsResolution' {
         It 'Returns string with the DNS resolution result' {
-            $stringResult = "0 IPs in use"
+            $stringResult = "Some string"
             $endpoint = [BAPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $mockClient = [HttpClientMock]::new()
@@ -21,7 +23,7 @@ Describe 'Test-DnsResolution Tests' {
             Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -Verifiable -ModuleName "EnterprisePolicies"
             Mock Get-AsyncResult { return $stringResult } -ParameterFilter { $task -eq $stringResult } -Verifiable -ModuleName "EnterprisePolicies"
             
-            $result = Get-EnvironmentUsage -Endpoint $endpoint -EnvironmentId $environmentId
+            $result = Test-DnsResolution -EnvironmentId $environmentId -HostName "bing.com" -Endpoint $endpoint
 
             $result | Should -Be $stringResult
         }
