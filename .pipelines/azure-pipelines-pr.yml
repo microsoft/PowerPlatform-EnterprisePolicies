@@ -41,6 +41,7 @@ extends:
         enabled: true
         exclusionFile: $(Build.SourcesDirectory)/.config/PolicyCheckExclusions.json
       psscriptanalyzer:
+        break: true
         enabled: true
       sourceAnalysisPool:
         name: Azure-Pipelines-1ESPT-ExDShared
