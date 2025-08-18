@@ -151,13 +151,13 @@ function Test-Result {
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Output "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))" -ForegroundColor Red
-            throw "API Call returned $($result.StatusCode): $($errorMessage)."
+            Write-Verbose "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
         else
         {
-            Write-Output "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))" -ForegroundColor Red
-            throw "API Call returned $($result.StatusCode): $($result.ReasonPhrase)."
+            Write-Verbose "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
     }
 }

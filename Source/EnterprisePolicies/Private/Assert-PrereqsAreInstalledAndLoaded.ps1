@@ -18,7 +18,7 @@ function Read-InstallMissingPrerequisite {
     if ($response -eq 'Y' -or $response -eq 'y') {
         try {
             Install-Module -Name $Module.Name -MinimumVersion $Module.MinimumVersion -AllowClobber -Force
-            Write-Output "$($Module.Name) module installed successfully." -ForegroundColor Green
+            Write-Host "$($Module.Name) module installed successfully." -ForegroundColor Green
         } catch {
             throw "Failed to install $($Module.Name) module. Please install it manually."
         }
