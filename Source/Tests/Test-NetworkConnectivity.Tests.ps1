@@ -4,9 +4,11 @@ BeforeDiscovery{
 
 Describe 'Test-NetworkConnectivity Tests' {
     BeforeAll {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
+        $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
+        Mock Get-AccessToken { return $secureString } -ModuleName "EnterprisePolicies"
         Mock Write-Host {}
         Mock Connect-Azure { return $true } -ModuleName "EnterprisePolicies"
-        Mock Get-AccessToken { return (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force) } -ModuleName "EnterprisePolicies"
     }
 
     Context 'Testing Test-NetworkConnectivity' {

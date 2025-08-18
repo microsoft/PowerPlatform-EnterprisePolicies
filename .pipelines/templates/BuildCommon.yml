@@ -50,9 +50,16 @@ steps:
   displayName: 📰 Publish Test Results
   inputs:
     testResultsFormat: 'NUnit'
-    testResultsFiles: |
-      $(Build.SourcesDirectory)\Build\TestResult.xml
-      $(Build.SourcesDirectory)\Build\TestResultCore.xml
+    testResultsFiles: $(Build.SourcesDirectory)\Build\TestResult.xml
+    testRunTitle: 'Windows PowerShell Tests'
+  condition: always()
+
+- task: PublishTestResults@2
+  displayName: 📰 Publish Test Results
+  inputs:
+    testResultsFormat: 'NUnit'
+    testResultsFiles: $(Build.SourcesDirectory)\Build\TestResultCore.xml
+    testRunTitle: 'PowerShell Core Tests'
   condition: always()
 
 - task: PublishCodeCoverageResults@2
@@ -74,7 +81,7 @@ steps:
 
   - template: templates/CodeSigning.yml@self
     parameters:
-      codesigning_path: '$(Build.ArtifactStagingDirectory)\Release'
+      codesigning_path: '$(Build.SourcesDirectory)\Release'
       codesigning_pattern: | 
         '*.ps1'
         '*.psm1'
@@ -82,14 +89,14 @@ steps:
 - task: ArchiveFiles@2
   displayName: 📦 Archive Files
   inputs:
-    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\Release'
+    rootFolderOrFile: '$(Build.SourcesDirectory)\Release'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies_v$(GitVersion.SemVer).zip'
     replaceExistingArchive: true
 
 - ${{ if parameters.Official }}:
-  
+
   - task: GithubRelease@1 
     displayName: '🚢 Create GitHub Release'
     condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
