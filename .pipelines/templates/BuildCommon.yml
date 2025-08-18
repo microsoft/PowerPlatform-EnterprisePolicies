@@ -47,7 +47,6 @@ steps:
     arguments: '-Tasks @("Test")'
   condition: succeededOrFailed()
 
-
 - task: PublishTestResults@2
   displayName: 📰 Publish Test Results
   inputs:
