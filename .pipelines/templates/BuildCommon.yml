@@ -93,7 +93,10 @@ steps:
     rootFolderOrFile: '$(Build.SourcesDirectory)\Release'
     includeRootFolder: false
     archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies_v$(GitVersion.SemVer).zip'
+    ${{ if parameters.Official }}:
+      archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies_v$(GitVersion.SemVer).zip'
+    ${{ else }}:
+      archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies.zip'
     replaceExistingArchive: true
 
 - ${{ if parameters.Official }}:
