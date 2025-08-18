@@ -50,6 +50,12 @@ extends:
       jobs:
       - job: Build_And_Release
         displayName: "Build and Release"
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            targetPath: "$(Build.ArtifactStagingDirectory)"
+            artifactName: "EnterprisePolicies"
+            publishLocation: "Container"
         steps:
           - template: .pipelines/templates/BuildCommon.yml@self
             parameters:
