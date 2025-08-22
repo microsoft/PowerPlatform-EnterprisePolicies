@@ -80,7 +80,7 @@ steps:
 
 - ${{ if parameters.Official }}:
 
-  - template: templates/CodeSigning.yml@self
+  - template: CodeSigning.yml@self
     parameters:
       codesigning_path: '$(Build.SourcesDirectory)\Release'
       codesigning_pattern: | 
