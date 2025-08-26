@@ -181,6 +181,7 @@ This script adds the subnet delegation for `Microsoft.PowerPlatform/enterprisePo
 Script name : [SetupVnetForSubnetDelegation.ps1](./Source/SubnetInjection/SetupVnetForSubnetDelegation.ps1)</br>
 Input parameters :
 - virtualNetworkSubscriptionId : The subscriptionId of the virtual network
+- resourceGroupName : The resource group of the virtual network
 - virtualNetworkName : The name of the virtual network
 - subnetName : The name of the virtual network's subnet
 
