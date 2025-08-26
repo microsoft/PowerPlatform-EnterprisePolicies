@@ -51,8 +51,8 @@ extends:
     stages:
     - stage: Build
       jobs:
-      - job: Build_And_Release
-        displayName: "Build and Release"
+      - job: Build
+        displayName: "Build"
         templateContext:
           outputs:
           - output: pipelineArtifact
