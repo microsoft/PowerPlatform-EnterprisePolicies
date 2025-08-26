@@ -13,17 +13,21 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 function SetupVnetForSubnetDelegation
 {
     param(
-         [Parameter(
-            Mandatory=$true,
+        [Parameter(
+            Mandatory,
             HelpMessage="The Policy subscription"
         )]
         [string]$virtualNetworkSubscriptionId,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$resourceGroupName,
+
+        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String]$virtualNetworkName,
 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [String]$subnetName
     )
@@ -35,7 +39,7 @@ function SetupVnetForSubnetDelegation
     $setSubscription = Set-AzContext -Subscription $virtualNetworkSubscriptionId
     
     Write-Host "Getting virtual network $virtualNetworkName" -ForegroundColor Green
-    $virtualNetwork = Get-AzVirtualNetwork -Name $virtualNetworkName
+    $virtualNetwork = Get-AzVirtualNetwork -Name $virtualNetworkName -ResourceGroupName $resourceGroupName
     if ($null -eq  $virtualNetwork.Name)
     {
          Write-Host "Virtual network not retrieved" -ForegroundColor Red

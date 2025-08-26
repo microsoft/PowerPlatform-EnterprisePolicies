@@ -5,7 +5,10 @@ parameters:
 
 steps:
 - checkout: self
-      
+
+- task: NuGetAuthenticate@1
+  displayName: 🔐 Nuget Auth
+
 - ${{ if parameters.Official }}:
 
   - task: PowerShell@2
@@ -19,9 +22,6 @@ steps:
     inputs:
       targetType: inline
       script: dotnet gitversion -output buildserver
-
-- task: NuGetAuthenticate@1
-  displayName: 🔐 Nuget Auth
 
 - task: DotNetCoreCLI@2
   displayName: 🔄 Dotnet restore
@@ -103,7 +103,7 @@ steps:
 
   - task: GithubRelease@1 
     displayName: '🚢 Create GitHub Release'
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), succeeded())
     inputs:
       gitHubConnection: 'github.com_faix'
       action: 'create'
