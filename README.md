@@ -329,15 +329,15 @@ Sample Output :</br>
 
 The diagnostic scripts are designed to help troubleshoot issues with the VNET functionality provided by Power Platform. They can be run in both Windows PowerShell and PowerShell Core environments.
 
-Clone the repository and navigate to the `Source` directory.
+Go to the [Releases](https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases/latest) page and download the latest release zip file. Extract the contents to a local directory.
 
-Run the following command the first time you open the PowerShell session:
+Navigate to the extracted directory and run the following command the first time you open the PowerShell session:
 
 ```powershell
 Import-Module .\EnterprisePolicies
 ```
 
-This will import the module, validate prerequisites and make the scripts available for use.
+This will import the module, validate prerequisites and make the scripts available for use. If you are missing any prerequisites, the script will inform you and ask for permission to install them.
 
 You can then run the diagnostic scripts as needed. For example, to run the `Get-EnvironmentUsage` cmdlets, you would use:
 
