@@ -46,10 +46,11 @@ extends:
         os: windows
 
     stages:
-    - stage: Build
+    - stage: BuildAndRelease
+      displayName: "Build and Release"
       jobs:
-      - job: Build_And_Release
-        displayName: "Build and Release"
+      - job: Build
+        displayName: "Build"
         templateContext:
           outputs:
           - output: pipelineArtifact
@@ -60,4 +61,30 @@ extends:
           - template: .pipelines/templates/BuildCommon.yml@self
             parameters:
               Official: true
+
+      - job: Release
+        displayName: "Release"
+        dependsOn: Build
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+        templateContext:
+          type: releaseJob
+          isProduction: true
+          inputs:
+          - input: pipelineArtifact  # Required, type of the input artifact
+            artifactName: "EnterprisePolicies"  # Required, name of the pipeline artifact
+            targetPath: $(Pipeline.Workspace)/drop
+        steps:
+          - task: GithubRelease@1 
+            displayName: '🚢 Create GitHub Release'
+            inputs:
+              gitHubConnection: 'github.com_faix'
+              action: 'create'
+              repositoryName: microsoft/PowerPlatform-EnterprisePolicies
+              target: '$(Build.SourceVersion)'
+              tagSource: userSpecifiedTag
+              tag: v$(Build.BuildNumber)
+              changeLogCompareToRelease: 'lastFullRelease'
+              changeLogType: 'commitBased'
+              assets: |
+                  $(Pipeline.Workspace)/drop/EnterprisePolicies_v$(Build.BuildNumber).zip
 
