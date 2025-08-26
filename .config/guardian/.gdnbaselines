@@ -1,0 +1,79 @@
+{
+  "properties": {
+    "helpUri": "https://eng.ms/docs/microsoft-security/security/azure-security/cloudai-security-fundamentals-engineering/security-integration/guardian-wiki/microsoft-guardian/general/baselines"
+  },
+  "version": "1.0.0",
+  "baselines": {
+    "default": {
+      "name": "default",
+      "createdDate": "2025-08-26 18:29:24Z",
+      "lastUpdatedDate": "2025-08-26 18:29:24Z"
+    }
+  },
+  "results": {
+    "49e93e28a3365aab96e9d007ed32307d1eab01aa6e612567d79de6b81e176dae": {
+      "signature": "49e93e28a3365aab96e9d007ed32307d1eab01aa6e612567d79de6b81e176dae",
+      "alternativeSignatures": [
+        "68bd38115037b890782e0e11951586933e48e4747a6d93ee7385d8b69951007e"
+      ],
+      "target": "Source/Tests/Get-EnvironmentRegion.Tests.ps1",
+      "line": 8,
+      "memberOf": [
+        "default"
+      ],
+      "tool": "psscriptanalyzer",
+      "ruleId": "PSAvoidUsingConvertToSecureStringWithPlainText",
+      "createdDate": "2025-08-26 18:29:24Z",
+      "expirationDate": "2026-02-12 18:35:03Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-08-26 18:35:03Z"
+    },
+    "dd3c047cc98006c29ee7da6c7307295a95e0c85a10c042301e4b468aa7c97dbb": {
+      "signature": "dd3c047cc98006c29ee7da6c7307295a95e0c85a10c042301e4b468aa7c97dbb",
+      "alternativeSignatures": [
+        "ca6f51f03a00e0c7ec0c6691c7ea5f453047eb1b5e9234af61d0e2a47fffb6d7"
+      ],
+      "target": "Source/Tests/Get-EnvironmentUsage.Tests.ps1",
+      "line": 8,
+      "memberOf": [
+        "default"
+      ],
+      "tool": "psscriptanalyzer",
+      "ruleId": "PSAvoidUsingConvertToSecureStringWithPlainText",
+      "createdDate": "2025-08-26 18:29:24Z",
+      "expirationDate": "2026-02-12 18:35:03Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-08-26 18:35:03Z"
+    },
+    "a47d369bb8be0fe054e165ce976dcb4a63fb2f15cc9e298e5548ee1b16cfdb59": {
+      "signature": "a47d369bb8be0fe054e165ce976dcb4a63fb2f15cc9e298e5548ee1b16cfdb59",
+      "alternativeSignatures": [
+        "212f83d7cb3e21e9c6ee7893b7d601fc77367a6bd9db6ff8a17c130d0c81716a"
+      ],
+      "target": "Source/Tests/Test-DnsResolution.Tests.ps1",
+      "line": 8,
+      "memberOf": [
+        "default"
+      ],
+      "tool": "psscriptanalyzer",
+      "ruleId": "PSAvoidUsingConvertToSecureStringWithPlainText",
+      "createdDate": "2025-08-26 18:29:24Z",
+      "expirationDate": "2026-02-12 18:35:03Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-08-26 18:35:03Z"
+    },
+    "8bd5551e85792da1895418fbc65a5508110e66127555a512f68bdc74aa3d90bd": {
+      "signature": "8bd5551e85792da1895418fbc65a5508110e66127555a512f68bdc74aa3d90bd",
+      "alternativeSignatures": [
+        "8a9e0ceab3a88d0b0ae9d0b802d77f3671d371572aaeb05f5914ec98f30cc335"
+      ],
+      "target": "Source/Tests/Test-NetworkConnectivity.Tests.ps1",
+      "line": 8,
+      "memberOf": [
+        "default"
+      ],
+      "tool": "psscriptanalyzer",
+      "ruleId": "PSAvoidUsingConvertToSecureStringWithPlainText",
+      "createdDate": "2025-08-26 18:29:24Z",
+      "expirationDate": "2026-02-12 18:35:03Z",
+      "justification": "This error is baselined with an expiration date of 180 days from 2025-08-26 18:35:03Z"
+    }
+  }
+}
