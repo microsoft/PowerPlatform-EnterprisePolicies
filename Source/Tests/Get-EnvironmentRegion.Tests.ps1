@@ -1,10 +1,12 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification="Unit test code")]
+param()
+
 BeforeDiscovery{
     . $PSScriptRoot\Shared.ps1
 }
 
 Describe 'Get-EnvironmentRegion Tests' {
     BeforeAll {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
         $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
         Mock Get-AccessToken { return $secureString } -ModuleName "EnterprisePolicies"
         Mock Write-Host {}

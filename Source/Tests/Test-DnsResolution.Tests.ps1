@@ -1,3 +1,6 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification="Unit test code")]
+param()
+
 BeforeDiscovery{
     . $PSScriptRoot\Shared.ps1
 }
