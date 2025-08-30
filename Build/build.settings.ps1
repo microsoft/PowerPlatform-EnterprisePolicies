@@ -179,7 +179,6 @@ Task PostBuild {
     (Get-Content $moduleFile).Replace("ModuleVersion = '1.0.0'", "ModuleVersion = '$BuildVersion'") | Set-Content $moduleFile
     (Get-Content $moduleFile).Replace("ReleaseNotes = ''", "ReleaseNotes = 'https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases/tag/$BuildVersion'") | Set-Content $moduleFile
 
-
     Copy-Item $RepoRootDir\LICENSE $ReleaseDir\$ModuleName\LICENSE.md
 }
 
