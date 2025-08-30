@@ -4,19 +4,19 @@ Help Version: 1.0.0.0
 HelpInfoUri: 
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
-Module Name: EnterprisePolicies
-ms.date: 08/08/2025
+Module Name: Microsoft.PowerPlatform.EnterprisePolicies
+ms.date: 08/29/2025
 PlatyPS schema version: 2024-05-01
-title: EnterprisePolicies Module
+title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
 
-# EnterprisePolicies Module
+# Microsoft.PowerPlatform.EnterprisePolicies Module
 
 ## Description
 
 Microsoft PowerPlatform Enterprise policies module
 
-## EnterprisePolicies
+## Microsoft.PowerPlatform.EnterprisePolicies
 
 ### [Get-EnvironmentRegion](Get-EnvironmentRegion.md)
 

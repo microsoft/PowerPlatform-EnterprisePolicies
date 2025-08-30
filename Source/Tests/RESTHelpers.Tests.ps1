@@ -3,7 +3,7 @@ BeforeDiscovery{
 }
 
 Describe 'RESTHelpers Tests' {
-    InModuleScope 'EnterprisePolicies'{
+    InModuleScope 'Microsoft.PowerPlatform.EnterprisePolicies'{
         BeforeAll{
             Mock Write-Host {}
         }

@@ -1,10 +1,10 @@
 #
-# Module manifest for module 'EnterprisePolicies'
+# Module manifest for module 'Microsoft.PowerPlatform.EnterprisePolicies'
 #
 
 @{
     # Script module or binary module file associated with this manifest.
-    RootModule = 'EnterprisePolicies.psm1'
+    RootModule = 'Microsoft.PowerPlatform.EnterprisePolicies.psm1'
 
     # Version number of this module. Gets replaced during build.
     ModuleVersion = '1.0.0'
@@ -90,19 +90,19 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            # Tags = @()
+            Tags = @('PowerPlatform', 'Enterprise', 'Policies', 'VNet', 'Subnet', 'Injection', 'Diagnostics')
 
             # A URL to the license for this module.
-            # LicenseUri = ''
+            LicenseUri = 'https://github.com/microsoft/PowerPlatform-EnterprisePolicies/blob/main/LICENSE'
 
             # A URL to the main website for this project.
-            # ProjectUri = ''
+            ProjectUri = 'https://github.com/microsoft/PowerPlatform-EnterprisePolicies'
 
             # A URL to an icon representing this module.
             # IconUri = ''
 
             # ReleaseNotes of this module
-            # ReleaseNotes = ''
+            ReleaseNotes = ''
 
         } # End of PSData hashtable
 

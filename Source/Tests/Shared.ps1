@@ -5,11 +5,11 @@ param (
     [switch] $Module
 )
 
-$ModuleManifestName = 'EnterprisePolicies.psd1'
-$Global:ModuleName = 'EnterprisePolicies'
-$Global:ModuleManifestPath = "$PSScriptRoot\..\EnterprisePolicies\"
+$ModuleManifestName = 'Microsoft.PowerPlatform.EnterprisePolicies.psd1'
+$Global:ModuleName = 'Microsoft.PowerPlatform.EnterprisePolicies'
+$Global:ModuleManifestPath = "$PSScriptRoot\..\Microsoft.PowerPlatform.EnterprisePolicies\"
 $Global:ModuleManifestFilePath = "$Global:ModuleManifestPath\$ModuleManifestName"
-$Global:ModuleScriptsPaths = @("$PSScriptRoot\..\EnterprisePolicies\Public")
+$Global:ModuleScriptsPaths = @("$PSScriptRoot\..\Microsoft.PowerPlatform.EnterprisePolicies\Public")
 $Global:InPesterExecution = $true
 
 $packagesDir = Resolve-Path -Path "$HOME\.nuget\packages"

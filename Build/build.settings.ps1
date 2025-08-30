@@ -8,13 +8,13 @@ Properties {
     # The root directories for the module's docs, src and test.
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $DocsRootDir = "$PSScriptRoot\..\docs"
-    $SrcRootDir  = "$PSScriptRoot\..\Source\EnterprisePolicies"
+    $SrcRootDir  = "$PSScriptRoot\..\Source\Microsoft.PowerPlatform.EnterprisePolicies"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $RepoRootDir = "$PSScriptRoot\.."
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $TestRootDir = "$PSScriptRoot\..\Source\Tests"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
-    $ScriptsRootDir = "$PSScriptRoot\..\Source\EnterprisePolicies\Public\SubnetInjection"
+    $ScriptsRootDir = "$PSScriptRoot\..\Source\Microsoft.PowerPlatform.EnterprisePolicies\Public\SubnetInjection"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 
     $BuildVersion = "1.0.0"
@@ -177,6 +177,9 @@ Task PreBuild {
 Task PostBuild {
     $moduleFile = Get-Item "$ReleaseDir\$ModuleName\*.psd1"
     (Get-Content $moduleFile).Replace("ModuleVersion = '1.0.0'", "ModuleVersion = '$BuildVersion'") | Set-Content $moduleFile
+    (Get-Content $moduleFile).Replace("ReleaseNotes = ''", "ReleaseNotes = 'https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases/tag/$BuildVersion'") | Set-Content $moduleFile
+
+    Copy-Item $RepoRootDir\LICENSE $ReleaseDir\$ModuleName\LICENSE.md
 }
 
 ###############################################################################

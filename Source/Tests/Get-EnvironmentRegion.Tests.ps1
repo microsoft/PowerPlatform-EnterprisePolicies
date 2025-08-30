@@ -8,9 +8,9 @@ BeforeDiscovery{
 Describe 'Get-EnvironmentRegion Tests' {
     BeforeAll {
         $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
-        Mock Get-AccessToken { return $secureString } -ModuleName "EnterprisePolicies"
+        Mock Get-AccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Write-Host {}
-        Mock Connect-Azure { return $true } -ModuleName "EnterprisePolicies"
+        Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
     Context 'Testing Get-EnvironmentRegion' {
@@ -24,10 +24,10 @@ Describe 'Get-EnvironmentRegion Tests' {
             $mockClient = [HttpClientMock]::new()
             $mockResult = [HttpClientResultMock]::new($resultJsonString)
             
-            Mock New-HttpClient { return $mockClient } -Verifiable -ModuleName "EnterprisePolicies"
-            Mock New-JsonRequestMessage { return "message" } -Verifiable -ModuleName "EnterprisePolicies"
-            Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -Verifiable -ModuleName "EnterprisePolicies"
-            Mock Get-AsyncResult { return $resultJsonString } -ParameterFilter { $task -eq $resultJsonString } -Verifiable -ModuleName "EnterprisePolicies"
+            Mock New-HttpClient { return $mockClient } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock New-JsonRequestMessage { return "message" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult { return $resultJsonString } -ParameterFilter { $task -eq $resultJsonString } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             
             $result = Get-EnvironmentRegion -Endpoint $endpoint -EnvironmentId $environmentId
 

@@ -1,27 +1,27 @@
 ---
 document type: cmdlet
-external help file: EnterprisePolicies-Help.xml
+external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
-Module Name: EnterprisePolicies
-ms.date: 08/08/2025
+Module Name: Microsoft.PowerPlatform.EnterprisePolicies
+ms.date: 08/29/2025
 PlatyPS schema version: 2024-05-01
-title: Test-DnsResolution
+title: Test-NetworkConnectivity
 ---
 
-# Test-DnsResolution
+# Test-NetworkConnectivity
 
 ## SYNOPSIS
 
-Tests the DNS resolution for a given hostname in a specified environment.
+Tests the connectivity to a given service in a specified environment.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Test-DnsResolution [-EnvironmentId] <string> [-HostName] <string> [[-TenantId] <string>]
- [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
+Test-NetworkConnectivity [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
+ [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,7 +31,8 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Tests the DNS resolution for a given hostname in a specified environment.
+Tests the connectivity to a given service in a specified environment.
+The connectivity test will attempt to establish a TCP connection to the specified destination on the specified port.
 This function is executed in the context of your delegated subnet in the region that you have specified.
 If the region is not specified, it defaults to the region of the environment.
 
@@ -39,13 +40,38 @@ If the region is not specified, it defaults to the region of the environment.
 
 ### EXAMPLE 1
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
 ### EXAMPLE 2
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
+
+### EXAMPLE 3
+
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
 
 ## PARAMETERS
+
+### -Destination
+
+The destination that should be used to attempt the connection. This can be a hostname or an IP address.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 1
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
 
 ### -Endpoint
 
@@ -58,7 +84,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: 4
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -89,19 +115,19 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -HostName
+### -Port
 
-The hostname that DNS should attempt to resolve. IP addresses are not supported.
+The port that should be used to attempt the connection. Defaults to 443
 
 ```yaml
 Type: System.String
-DefaultValue: ''
+DefaultValue: 443
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
-  IsRequired: true
+  Position: 2
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -121,7 +147,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -144,7 +170,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.String
 
-A string representing the result of the DNS resolution. Whether it is successful or not
+A string representing the result of the connectivity test.
 
 {{ Fill in the Description }}
 

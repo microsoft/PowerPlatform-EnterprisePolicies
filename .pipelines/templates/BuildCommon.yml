@@ -67,7 +67,7 @@ steps:
   displayName: 📰 Publish Code Coverage
   inputs:
     summaryFileLocation: '$(Build.SourcesDirectory)\Build\coverage.xml'
-    pathToSources: '$(Build.SourcesDirectory)Source\EnterprisePolicies'
+    pathToSources: '$(Build.SourcesDirectory)Source\Microsoft.PowerPlatform.EnterprisePolicies'
     failIfCoverageEmpty: true
   condition: always()
 
@@ -89,11 +89,11 @@ steps:
 - task: ArchiveFiles@2
   displayName: 📦 Archive Files
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)\Release'
+    rootFolderOrFile: '$(Build.SourcesDirectory)\Release\Microsoft.PowerPlatform.EnterprisePolicies'
     includeRootFolder: false
     archiveType: 'zip'
     ${{ if parameters.Official }}:
-      archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies_v$(GitVersion.SemVer).zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/Microsoft.PowerPlatform.EnterprisePolicies_$(GitVersion.SemVer).zip'
     ${{ else }}:
-      archiveFile: '$(Build.ArtifactStagingDirectory)/EnterprisePolicies.zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/Microsoft.PowerPlatform.EnterprisePolicies.zip'
     replaceExistingArchive: true

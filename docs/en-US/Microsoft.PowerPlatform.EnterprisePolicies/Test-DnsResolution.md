@@ -1,27 +1,27 @@
 ---
 document type: cmdlet
-external help file: EnterprisePolicies-Help.xml
+external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
-Module Name: EnterprisePolicies
-ms.date: 08/08/2025
+Module Name: Microsoft.PowerPlatform.EnterprisePolicies
+ms.date: 08/29/2025
 PlatyPS schema version: 2024-05-01
-title: Get-EnvironmentRegion
+title: Test-DnsResolution
 ---
 
-# Get-EnvironmentRegion
+# Test-DnsResolution
 
 ## SYNOPSIS
 
-Retrieves the region that the specified environment is deployed in.
+Tests the DNS resolution for a given hostname in a specified environment.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Get-EnvironmentRegion [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
- [<CommonParameters>]
+Test-DnsResolution [-EnvironmentId] <string> [-HostName] <string> [[-TenantId] <string>]
+ [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,18 +31,19 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Retrieves the region that the specified environment is deployed in.
-Note, the region is the Power Platform region, but it is aligned with an Azure region.
+Tests the DNS resolution for a given hostname in a specified environment.
+This function is executed in the context of your delegated subnet in the region that you have specified.
+If the region is not specified, it defaults to the region of the environment.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000"
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"
 
 ### EXAMPLE 2
 
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
 
 ## PARAMETERS
 
@@ -57,7 +58,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -69,7 +70,7 @@ HelpMessage: ''
 
 ### -EnvironmentId
 
-The Id of the environment to get the region for.
+The Id of the environment to get usage for.
 
 ```yaml
 Type: System.String
@@ -79,6 +80,27 @@ Aliases: []
 ParameterSets:
 - Name: (All)
   Position: 0
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -HostName
+
+The hostname that DNS should attempt to resolve. IP addresses are not supported.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 1
   IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -99,7 +121,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: 2
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -121,7 +143,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### System.String
-A string representing the region of the environment.
+
+A string representing the result of the DNS resolution. Whether it is successful or not
 
 {{ Fill in the Description }}
 
