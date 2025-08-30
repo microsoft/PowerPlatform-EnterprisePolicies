@@ -17,6 +17,9 @@ function Read-InstallMissingPrerequisite {
     $response = Read-Host "The $($Module.Name) module is not installed or the required minimum version [$($Module.MinimumVersion)] is not installed. Do you want to install it now? (Y/N)"
     if ($response -eq 'Y' -or $response -eq 'y') {
         try {
+            if(-not (Test-AdminRights)) {
+                throw "You must run this script as an Administrator to install the required module."
+            }
             Install-Module -Name $Module.Name -MinimumVersion $Module.MinimumVersion -AllowClobber -Force
             Write-Host "$($Module.Name) module installed successfully." -ForegroundColor Green
         } catch {
@@ -26,6 +29,14 @@ function Read-InstallMissingPrerequisite {
         throw "This module can't be run without previously installing the $($Module.Name) module."
     }
 }
+
+
+function Test-AdminRights {
+    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+    $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
+    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
 
 if($Global:InPesterExecution){
     Write-Verbose "Skipped prereqs for Pester execution"
