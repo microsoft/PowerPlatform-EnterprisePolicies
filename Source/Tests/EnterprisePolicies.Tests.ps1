@@ -60,7 +60,6 @@ Describe 'Script Tests' {
             $file = $_
             $fileName = Split-Path -Path $file -Leaf
             $disclaimer = '<#\r\nSAMPLE CODE NOTICE\r\n\r\nTHIS SAMPLE CODE IS MADE AVAILABLE AS IS. MICROSOFT MAKES NO WARRANTIES, WHETHER EXPRESS OR IMPLIED,\r\nOF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OR CONDITIONS OF MERCHANTABILITY.\r\nTHE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.\r\nNO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.\r\n#>'
-            $moduleImportPattern = 'Import-Module "\$PSScriptRoot\\\.\.\\(\\\.\.\\)?CommonV2\\EnterprisePolicies" -Force'
             $usingPattern = 'using module \.\.\\(\\\.\.\\)?CommonV2\\Types\.psm1'
         }
 

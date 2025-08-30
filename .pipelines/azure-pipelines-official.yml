@@ -5,6 +5,9 @@ trigger:
 
 pr: none
 
+variables:
+- group: 'Nuget And PSGallery Publishing Data'
+
 resources:
   repositories:
   - repository: 1ESPipelineTemplates
@@ -55,15 +58,15 @@ extends:
           outputs:
           - output: pipelineArtifact
             targetPath: "$(Build.ArtifactStagingDirectory)"
-            artifactName: "EnterprisePolicies"
+            artifactName: "Microsoft.PowerPlatform.EnterprisePolicies"
             publishLocation: "Container"
         steps:
           - template: .pipelines/templates/BuildCommon.yml@self
             parameters:
               Official: true
 
-      - job: Release
-        displayName: "Release"
+      - job: Release_Github
+        displayName: "GitHub Release"
         dependsOn: Build
         condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
         templateContext:
@@ -71,7 +74,7 @@ extends:
           isProduction: true
           inputs:
           - input: pipelineArtifact  # Required, type of the input artifact
-            artifactName: "EnterprisePolicies"  # Required, name of the pipeline artifact
+            artifactName: "Microsoft.PowerPlatform.EnterprisePolicies"  # Required, name of the pipeline artifact
             targetPath: $(Pipeline.Workspace)/drop
         steps:
           - task: GithubRelease@1 
@@ -82,9 +85,102 @@ extends:
               repositoryName: microsoft/PowerPlatform-EnterprisePolicies
               target: '$(Build.SourceVersion)'
               tagSource: userSpecifiedTag
-              tag: v$(Build.BuildNumber)
+              tag: $(Build.BuildNumber)
               changeLogCompareToRelease: 'lastFullRelease'
               changeLogType: 'commitBased'
               assets: |
-                  $(Pipeline.Workspace)/drop/EnterprisePolicies_v$(Build.BuildNumber).zip
+                  $(Pipeline.Workspace)/drop/Microsoft.PowerPlatform.EnterprisePolicies_$(Build.BuildNumber).zip
+
+      - job: Release_PSGallery
+        displayName: "PSGallery Release"
+        dependsOn: Build
+        condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+        templateContext:
+          type: releaseJob
+          isProduction: true
+          inputs:
+          - input: pipelineArtifact  # Required, type of the input artifact
+            artifactName: "Microsoft.PowerPlatform.EnterprisePolicies"  # Required, name of the pipeline artifact
+            targetPath: $(Pipeline.Workspace)/drop
+        steps:
+          - task: PowerShell@2
+            displayName: '📚 Import Powershell Modules'
+            env:
+              SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            inputs:
+              targetType: 'inline'
+              script: |
+                [string]$modulesjson = '[
+                  {"Name": "PowerShellGet", "Version": "2.2.5"},
+                  {"Name": "PackageManagement", "Version": "1.4.8.1"},
+                  {"Name": "Microsoft.PowerShell.PSResourceGet", "Version": "1.1.1"}]'
+
+                [string]$PackageSource = "https://dynamicscrm.pkgs.visualstudio.com/DefaultCollection/_packaging/CommonDataServices/nuget/v2"
+                [string]$PackageSourceName = "CommonDataServices"
+                
+                [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+                $feedUri = $PackageSource
+                Write-Host "##[debug]Original FeedUri: $feedUri"
+
+                $patToken = $env:SYSTEM_ACCESSTOKEN | ConvertTo-SecureString -AsPlainText -Force
+                $credentialsObject = New-Object System.Management.Automation.PSCredential("AUTH_TOKEN", $patToken)
+
+                # Install modules in common location so that they are accessible
+                $customPath = "C:\Windows\system32\WindowsPowerShell\v1.0\Modules"
+                Write-Host "##[debug] Install Powershell modules in location:" $customPath
+                $env:PSModulePath += ";$customPath"
+                Write-Host "##[debug] PowerShell Modules Path: $env:PSModulePath"
+
+                $psGallery = Get-PSRepository -Name "PSGallery" -ErrorAction SilentlyContinue
+                if ($null -ne $psGallery) {
+                  Write-Output "##[debug] Removing default PS Gallery" # To satisfy network isolation
+                  Unregister-PSRepository -Name $psGallery.Name -ErrorAction SilentlyContinue -Verbose
+                }
+
+                Write-Output "##[debug] Register PSRepository for $($feeduri)"
+                Register-PSRepository -Name $PackageSourceName `
+                  -SourceLocation $feedUri `
+                  -PublishLocation $feedUri `
+                  -InstallationPolicy Trusted `
+                  -Credential $credentialsObject `
+                  -ErrorAction SilentlyContinue `
+                  -Verbose
+                Write-Host "PS Repository registered successfully."
+
+                if (-not [string]::IsNullOrEmpty($modulesjson)) {
+                  $modules = $modulesjson | ConvertFrom-Json
+                  Write-Host "##[Debug]modules: $modules."
+                }
+                else {
+                  Write-Host "##[error]Error: No modules specified in the input JSON." -ForegroundColor Red
+                  exit 1
+                }
+                foreach ($module in $modules) {
+                  # Try to install the module
+                  try {
+                    $moduleName = $module.Name
+                    $moduleVersion = $module.Version
+                    Write-Host "Installing module $moduleName, version $moduleVersion ..." -ForegroundColor Yellow
+                    Save-Module -Name $moduleName -RequiredVersion $moduleVersion -Path $customPath -Repository $PackageSourceName -Credential $credentialsObject -Verbose -Force
+                    Install-Module -Name $moduleName -RequiredVersion $moduleVersion -Repository $PackageSourceName -Credential $credentialsObject -Verbose -Force -AllowClobber
+                    Import-Module $moduleName -RequiredVersion $moduleVersion -Verbose -Force
+                    Write-Host "Module $moduleName installed successfully." -ForegroundColor Green
+                  }
+                  catch {
+                    Write-Host "Failed to install module $module due to exception $_" -ForegroundColor Red
+                  }
+                }
+
+          - task: Powershell@2
+            displayName: '🛳️ Release module to PSGallery'
+            inputs:
+              targetType: "inline"
+              script: |
+                Write-Host 'Listing artifacts'
+                Get-ChildItem -Path $(Pipeline.Workspace) -Recurse -Name
+                [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+                cd '$(Pipeline.Workspace)/drop'
+                Expand-Archive -Path Microsoft.PowerPlatform.EnterprisePolicies_$(Build.BuildNumber).zip -DestinationPath .\Microsoft.PowerPlatform.EnterprisePolicies
+                Write-Host 'Publishing Microsoft.PowerPlatform.EnterprisePolicies module to PSGallery'
+                Publish-Module -Path .\Microsoft.PowerPlatform.EnterprisePolicies -Name Microsoft.PowerPlatform.EnterprisePolicies -NuGetApiKey $(PowerShellGallery-PublishKey) -Force -Verbose -Repository PSGallery -WhatIf
 

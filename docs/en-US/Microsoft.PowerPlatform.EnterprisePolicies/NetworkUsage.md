@@ -1,9 +1,9 @@
 ---
 document type: class
-external help file: EnterprisePolicies-Help.xml
+external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
-Module Name: EnterprisePolicies
+Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 08/07/2025
 PlatyPS schema version: 2024-05-01
 title: NetworkUsage

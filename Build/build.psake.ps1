@@ -227,11 +227,14 @@ Task BuildHelpImpl -depends GenerateMarkdown -requiredVariables DocsRootDir, Out
     }
 
     foreach ($locale in (Get-ChildItem -Path $DocsRootDir -Directory).Name) {
-        Get-ChildItem $DocsRootDir\$locale -Recurse -Filter *.md |
+        $resolvedDir = Resolve-Path -Path "$DocsRootDir\$locale\$ModuleName"
+        pushd $resolvedDir
+        Get-ChildItem $resolvedDir -Recurse -Filter *.md |
             Measure-PlatyPSMarkdown |
             Where-Object Filetype -notmatch 'ModuleFile' |
             Import-MarkdownCommandHelp -Path {$_.FilePath} |
             Export-MamlCommandHelp -OutputFolder $OutDir\$locale -Force -Verbose:$VerbosePreference
+        popd
     }
 
     Move-Item -Path $OutDir\$locale\$ModuleName\* -Destination $OutDir\$locale -Force -Verbose:$VerbosePreference

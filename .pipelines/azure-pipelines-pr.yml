@@ -57,7 +57,7 @@ extends:
           outputs:
           - output: pipelineArtifact
             targetPath: "$(Build.ArtifactStagingDirectory)"
-            artifactName: "EnterprisePolicies"
+            artifactName: "Microsoft.PowerPlatform.EnterprisePolicies"
             publishLocation: "Container"
         steps:
           - template: .pipelines/templates/BuildCommon.yml@self
