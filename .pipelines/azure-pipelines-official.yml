@@ -103,6 +103,9 @@ extends:
             artifactName: "Microsoft.PowerPlatform.EnterprisePolicies"  # Required, name of the pipeline artifact
             targetPath: $(Pipeline.Workspace)/drop
         steps:
+          - task: NuGetAuthenticate@1
+            displayName: 🔐 Nuget Authentication
+
           - task: PowerShell@2
             displayName: '📚 Import Powershell Modules'
             env:
