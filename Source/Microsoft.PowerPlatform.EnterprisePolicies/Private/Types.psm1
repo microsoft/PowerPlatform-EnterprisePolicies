@@ -22,6 +22,42 @@ class NetworkUsage{
     [string[]] $DnsServers
 }
 
+class NetworkUsageData{
+    [string] $TimeStamp
+    [string] $NormalizedTimestamp
+    [int] $TotalIpUsage
+    [System.Collections.Hashtable] $IPAllocations
+}
+
+class EnvironmentNetworkUsageDocument{
+    [string] $Id
+    [string] $EnvironmentId
+    [string] $TenantId
+    [string] $EnterprisePolicyId
+    [string] $VnetId
+    [string] $SubnetName
+    [int] $SubnetSize
+    [string] $AzureRegion
+    [NetworkUsageData[]] $NetworkUsageData
+    
+}
+
+class SubnetUsageDocument{
+    [string] $TenantId
+    [string] $EnterprisePolicyId
+    [string] $VnetId
+    [string] $SubnetName
+    [int] $SubnetSize
+    [string] $AzureRegion
+    [NetworkUsageData[]] $NetworkUsageDataByWorkload
+    [NetworkUsageData[]] $NetworkUsageDataByEnvironment
+    
+}
+
+class BAPEnvironmentProperties{
+    [string] $AzureRegion
+}
+
 enum PolicyType{
     Encryption
     NetworkInjection
@@ -50,6 +86,9 @@ $ExportableTypes = @(
     [BAPEndpoint]
     [LinkOperation]
     [NetworkUsage]
+    [NetworkUsageData]
+    [EnvironmentNetworkUsageDocument]
+    [SubnetUsageDocument]
 )
 
 # Get the internal TypeAccelerators class to use its static methods.

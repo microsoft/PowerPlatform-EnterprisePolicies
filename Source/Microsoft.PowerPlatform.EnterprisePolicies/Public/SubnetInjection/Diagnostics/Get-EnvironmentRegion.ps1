@@ -45,7 +45,7 @@ function Get-EnvironmentRegion{
 
     $client = New-HttpClient
 
-    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/networkUsage?api-version=2024-10-01"
+    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/getEnvironmentRegion?api-version=2024-10-01"
 
     $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
 
@@ -55,11 +55,27 @@ function Get-EnvironmentRegion{
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
-    if($contentString) {
-        [NetworkUsage] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([NetworkUsage])
-        Write-Verbose "Your environment is located in region: [$($networkUsage.AzureRegion)]"
-        return $networkUsage.AzureRegion
-    } else {
+    if (-not $contentString) {
         throw "Failed to retrieve the environment region."
     }
+
+    # If the response is a JSON-encoded string (e.g. "CentralUS"), try ConvertFrom-Json
+    try {
+        $maybeString = ConvertFrom-Json -InputObject $contentString -ErrorAction Stop
+        if ($maybeString -is [string] -and $maybeString) {
+            Write-Verbose "Your environment is located in region: [$maybeString]"
+            return $maybeString
+        }
+    } catch {
+        # not JSON, fall through to plain text handling
+    }
+
+    # Fallback: treat the body as plain text (trim quotes/whitespace)
+    $plain = $contentString.Trim().Trim('"')
+    if ($plain) {
+        Write-Verbose "Your environment is located in region: [$plain]"
+        return $plain
+    }
+
+    throw "Failed to retrieve the environment region."
 }

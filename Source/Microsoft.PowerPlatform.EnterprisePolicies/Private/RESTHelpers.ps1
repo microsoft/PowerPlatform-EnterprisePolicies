@@ -122,6 +122,23 @@ function Get-EnvironmentRoute {
     return "https://$remainingEnvId.$shortEnvId.environment.$baseUri"
 }
 
+function Get-TenantRoute {
+    param (
+        [Parameter(Mandatory)]
+        [string] $TenantId,
+        [Parameter(Mandatory)]
+        [BAPEndpoint] $Endpoint
+    )
+
+    $baseUri = Get-APIResourceUrl -Endpoint $Endpoint
+    # Separate the scheme from the base URI
+    $baseUri = $baseUri.Replace("https://", "").Trim('/')
+    $TenantId = $TenantId.Replace("-", "")
+    $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
+    $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
+    return "https://il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
+}
+
 function Get-APIResourceUrl {
     param (
         [Parameter(Mandatory)]
