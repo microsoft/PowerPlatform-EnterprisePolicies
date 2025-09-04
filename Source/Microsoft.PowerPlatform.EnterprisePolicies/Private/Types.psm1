@@ -54,10 +54,6 @@ class SubnetUsageDocument{
     
 }
 
-class BAPEnvironmentProperties{
-    [string] $AzureRegion
-}
-
 enum PolicyType{
     Encryption
     NetworkInjection
