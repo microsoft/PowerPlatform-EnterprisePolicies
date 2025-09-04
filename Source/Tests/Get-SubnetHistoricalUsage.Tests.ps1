@@ -23,7 +23,7 @@ Describe 'Get-SubnetHistoricalUsage Tests' {
             $endpoint = [BAPEndpoint]::prod
             $tenantId = "e9651b85-8b04-482f-a1e2-3e03421b4398"
             $region = "EastUs"
-            $enterprisePolicyId = "00000000-0000-0000-0000-000000000000"
+            $enterprisePolicyId = "d82eb721-3a0d-4c06-bf60-28075e0e9682"
             $mockClient = [HttpClientMock]::new()
             $mockResult = [HttpClientResultMock]::new($resultJsonString)
             Mock New-HttpClient { return $mockClient } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"

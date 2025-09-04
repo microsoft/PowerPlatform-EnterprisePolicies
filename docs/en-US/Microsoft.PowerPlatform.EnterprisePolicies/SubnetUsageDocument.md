@@ -68,8 +68,8 @@ This class does not define any methods.
 
 ```powershell
 $subnetUsage = [SubnetUsageDocument]::new()
-$subnetUsage.TenantId = ""
-$subnetUsage.EnterprisePolicyId = ""
+$subnetUsage.TenantId = "e9653248-8c04-482f-a1e3-3e23421b4356"
+$subnetUsage.EnterprisePolicyId = "d82eb721-3a0d-4c06-bf60-28075e0e9682"
 $subnetUsage.VnetId = "e9651b85-8b04-482f-a1e2-3e03421b4398"
 $subnetUsage.SubnetName = "default"
 $subnetUsage.SubnetSize = 256
