@@ -20,10 +20,10 @@ SubnetUsageDocument
 A class representing the network usage of the subnet. [SubnetUsageDocument](SubnetUsageDocument.md)
 
 .EXAMPLE
-Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000"
+Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -Region "WestUs"
 
 .EXAMPLE
-Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "WestUs" -Endpoint [BAPEndpoint]::Prod
 #>
 function Get-SubnetHistoricalUsage{
     param(
@@ -60,8 +60,7 @@ function Get-SubnetHistoricalUsage{
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if($contentString) {
-        [SubnetUsageDocument] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([SubnetUsageDocument])
-        return $networkUsage
+        return ConvertFrom-JsonToClass -Json $contentString -ClassType ([SubnetUsageDocument])
     } else {
-        throw "Failed to retrieve the subnet usage data."
+        throw "Failed to retrieve the subnet usage data from response."
     }}

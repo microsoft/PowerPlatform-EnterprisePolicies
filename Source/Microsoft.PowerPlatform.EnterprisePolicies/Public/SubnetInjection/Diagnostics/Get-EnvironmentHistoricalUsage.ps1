@@ -17,13 +17,13 @@ Note, this is only the historical usage that this environment has. It does not i
 
 .OUTPUTS
 EnvironmentNetworkUsageDocument
-A class representing the network usage of the environment. [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
+A class representing the historical network usage of the environment. [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
 
 .EXAMPLE
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "WestUs"
 
 .EXAMPLE
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "WestUs" -Endpoint [BAPEndpoint]::Prod
 #>
 function Get-EnvironmentHistoricalUsage{
     param(
@@ -60,8 +60,7 @@ function Get-EnvironmentHistoricalUsage{
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if($contentString) {
-        [EnvironmentNetworkUsageDocument] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([EnvironmentNetworkUsageDocument])
-        return $networkUsage
+        return ConvertFrom-JsonToClass -Json $contentString -ClassType ([EnvironmentNetworkUsageDocument])
     } else {
-        throw "Failed to retrieve the environment network usage data."
+        throw "Failed to retrieve the environment network usage data from response."
     }}

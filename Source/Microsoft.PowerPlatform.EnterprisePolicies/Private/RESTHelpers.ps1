@@ -134,8 +134,14 @@ function Get-TenantRoute {
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $TenantId = $TenantId.Replace("-", "")
-    $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
-    $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
+    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2) {
+        $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
+        $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
+    }
+    else {
+        $shortTenantId = $TenantId.Substring($TenantId.Length - 2, 2)
+        $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 2)
+    }
     return "https://il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
 }
 
