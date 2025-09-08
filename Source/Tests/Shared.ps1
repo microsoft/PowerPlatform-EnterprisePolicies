@@ -41,8 +41,6 @@ foreach($loadModule in $loadNugetModules) {
         Import-Module $psd1.FullName
     }
 
-    # if getting issues with finding Pester in nuget packages, uncomment above and try this:
-    # Import-Module $loadModule
 }
 
 Get-Module -All | Where-Object {$_.Name -like "$Global:ModuleName*"} | Remove-Module -Force -ErrorAction SilentlyContinue | Out-Null
