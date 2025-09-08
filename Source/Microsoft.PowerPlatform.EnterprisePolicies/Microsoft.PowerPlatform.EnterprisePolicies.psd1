@@ -90,7 +90,7 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags = @('PowerPlatform', 'Enterprise', 'Policies', 'VNet', 'Subnet', 'Injection', 'Diagnostics')
+            Tags = @('Microsoft', 'PowerPlatform', 'Enterprise', 'Policies', 'VNet', 'Subnet', 'Injection', 'Diagnostics')
 
             # A URL to the license for this module.
             LicenseUri = 'https://github.com/microsoft/PowerPlatform-EnterprisePolicies/blob/main/LICENSE'

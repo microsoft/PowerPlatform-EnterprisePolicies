@@ -185,5 +185,5 @@ extends:
                 cd '$(Pipeline.Workspace)/drop'
                 Expand-Archive -Path Microsoft.PowerPlatform.EnterprisePolicies_$(Build.BuildNumber).zip -DestinationPath .\Microsoft.PowerPlatform.EnterprisePolicies
                 Write-Host 'Publishing Microsoft.PowerPlatform.EnterprisePolicies module to PSGallery'
-                Publish-Module -Path .\Microsoft.PowerPlatform.EnterprisePolicies -Name Microsoft.PowerPlatform.EnterprisePolicies -NuGetApiKey $(PowerShellGallery-PublishKey) -Force -Verbose -Repository PSGallery -WhatIf
+                Publish-Module -Path .\Microsoft.PowerPlatform.EnterprisePolicies -NuGetApiKey $(PowerShellGallery-PublishKey) -Force -Verbose -Repository PSGallery -WhatIf
 
