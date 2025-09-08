@@ -6,22 +6,22 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 09/08/2025
 PlatyPS schema version: 2024-05-01
-title: Get-EnvironmentUsage
+title: Get-SubnetHistoricalUsage
 ---
 
-# Get-EnvironmentUsage
+# Get-SubnetHistoricalUsage
 
 ## SYNOPSIS
 
-Retrieves the current usage of the specified environment.
+Retrieves the historical network usage of the specified subnet based on enterprise policy id and region.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Get-EnvironmentUsage [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
- [<CommonParameters>]
+Get-SubnetHistoricalUsage [-EnterprisePolicyId] <string> [[-TenantId] <string>] [-Region] <string>
+ [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,19 +31,18 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Retrieves the current usage of the specified environment.
-Note, this is only the usage that this environment has.
-It does not include usage from other environments and it does not include any ips that might be reserved by azure.
+Retrieves the historical usage of the specified subnet.
+This includes usage from all environments with the specified enterprise policy id and the ips reserved by azure.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
+Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 ### EXAMPLE 2
 
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod
 
 ## PARAMETERS
 
@@ -58,7 +57,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -68,9 +67,9 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -EnvironmentId
+### -EnterprisePolicyId
 
-The Id of the environment to get usage for.
+The Id of the enterprise policy to get usage for.
 
 ```yaml
 Type: System.String
@@ -89,9 +88,30 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -Region
+
+The region that the tenant belongs to.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 2
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
 ### -TenantId
 
-The id of the tenant that the environment belongs to.
+The id of the tenant.
 
 ```yaml
 Type: System.String
@@ -121,8 +141,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### NetworkUsage
-A class representing the network usage of the environment. [NetworkUsage](NetworkUsage.md)
+### SubnetUsageDocument
+A class representing the network usage of the subnet. [SubnetUsageDocument](SubnetUsageDocument.md)
 
 {{ Fill in the Description }}
 

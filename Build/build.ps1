@@ -3,7 +3,16 @@ param
     [string[]] $Tasks = 'Build'
 )
 
-$packagesDir = Resolve-Path -Path "$HOME\.nuget\packages"
+$packagesDir = $env:NUGET_PACKAGES
+if (-not $packagesDir) {
+    # Fallback: query dotnet for the actual path
+    $packagesDir = (& dotnet nuget locals global-packages --list) -replace '^global-packages:\s*', ''
+}
+
+if (-not (Test-Path $packagesDir)) {
+    throw "NuGet global packages folder not found: $packagesDir"
+}
+
 $loadModules = @('psake', 'Pester', 'Microsoft.PowerShell.PlatyPS')
 foreach($loadModule in $loadModules) {
     $modulePath = Join-Path -Path $packagesDir -ChildPath "$loadModule"

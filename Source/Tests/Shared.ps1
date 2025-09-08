@@ -12,41 +12,44 @@ $Global:ModuleManifestFilePath = "$Global:ModuleManifestPath\$ModuleManifestName
 $Global:ModuleScriptsPaths = @("$PSScriptRoot\..\Microsoft.PowerPlatform.EnterprisePolicies\Public")
 $Global:InPesterExecution = $true
 
-$packagesDir = Resolve-Path -Path "$HOME\.nuget\packages"
+
+$packagesDir = $env:NUGET_PACKAGES
+if (-not $packagesDir) {
+    # Fallback: query dotnet for the actual path
+    $packagesDir = (& dotnet nuget locals global-packages --list) -replace '^global-packages:\s*', ''
+}
+
+if (-not (Test-Path $packagesDir)) {
+    throw "NuGet global packages folder not found: $packagesDir"
+}
+
 $loadNugetModules = @('Pester')
 foreach($loadModule in $loadNugetModules) {
     $modulePath = Join-Path -Path $packagesDir -ChildPath "$loadModule"
-    if (-not (Test-Path $modulePath)) {
-        $modulePkg = Resolve-Path "$modulePath*" | Sort-Object -Property Name -Descending | Select-Object -First 1 
-        $folderName = (Split-Path -Path $modulePkg -Leaf)
-        $version = $folderName -split $loadModule | Select-Object -Last 1
-    } else {
-        $modulePkg = (Get-ChildItem -Path $modulePath | Sort-Object -Property Name -Descending | Select-Object -First 1).FullName
-        $folderName = (Split-Path -Path $modulePkg -Leaf)
-        $version = $folderName
-    }
+    $modulePkg = Get-ChildItem -Path $modulePath | Sort-Object -Property Name -Descending | Select-Object -First 1
     if(!$modulePkg) {
         throw "Unable to load $loadModule from $packagesDir"
     }
-    
+    $folderName = (Split-Path -Path $modulePkg -Leaf)
+    $version = $folderName
+
     $loadedModules = Get-Module $loadModule
     $correctVersionModule = $loadedModules | Where-Object {$_.Version -eq $version}
     if(($loadedModules.Count -eq 0) -or ($correctVersionModule.Count -eq 0)){
         Remove-Module $loadModule -Force -ErrorAction SilentlyContinue
-        $psd1 = Get-ChildItem -Path $modulePkg -Filter '*.psd1' | Select-Object -First 1
-        $toolsDir = "$($modulePkg)\tools"
+        $psd1 = Get-ChildItem -Path $modulePkg.FullName -Filter '*.psd1' | Select-Object -First 1
+        $toolsDir = "$($modulePkg.FullName)\tools"
         if(!$psd1 -and (Test-Path -Path $toolsDir)) {
             $psd1 = Get-ChildItem -Path $toolsDir -Filter '*.psd1' | Select-Object -First 1
         }
     
         if(!$psd1) {
-            throw "Unable to find module $loadModule psd1 file under: $modulePkg"
+            throw "Unable to find module $loadModule psd1 file under: $modulePkg.FullName"
         }
     
         Write-Host "Loading module: $($psd1.FullName)"
         Import-Module $psd1.FullName
     }
-
 }
 
 Get-Module -All | Where-Object {$_.Name -like "$Global:ModuleName*"} | Remove-Module -Force -ErrorAction SilentlyContinue | Out-Null

@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 08/29/2025
+ms.date: 09/08/2025
 PlatyPS schema version: 2024-05-01
 title: Get-EnvironmentRegion
 ---
