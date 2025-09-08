@@ -16,25 +16,31 @@ $packagesDir = Resolve-Path -Path "$HOME\.nuget\packages"
 $loadNugetModules = @('Pester')
 foreach($loadModule in $loadNugetModules) {
     $modulePath = Join-Path -Path $packagesDir -ChildPath "$loadModule"
-    $modulePkg = Get-ChildItem -Path $modulePath | Sort-Object -Property Name -Descending | Select-Object -First 1
+    if (-not (Test-Path $modulePath)) {
+        $modulePkg = Resolve-Path "$modulePath*" | Sort-Object -Property Name -Descending | Select-Object -First 1 
+        $folderName = (Split-Path -Path $modulePkg -Leaf)
+        $version = $folderName -split $loadModule | Select-Object -Last 1
+    } else {
+        $modulePkg = (Get-ChildItem -Path $modulePath | Sort-Object -Property Name -Descending | Select-Object -First 1).FullName
+        $folderName = (Split-Path -Path $modulePkg -Leaf)
+        $version = $folderName
+    }
     if(!$modulePkg) {
         throw "Unable to load $loadModule from $packagesDir"
     }
-    $folderName = (Split-Path -Path $modulePkg -Leaf)
-    $version = $folderName
-
+    
     $loadedModules = Get-Module $loadModule
     $correctVersionModule = $loadedModules | Where-Object {$_.Version -eq $version}
     if(($loadedModules.Count -eq 0) -or ($correctVersionModule.Count -eq 0)){
         Remove-Module $loadModule -Force -ErrorAction SilentlyContinue
-        $psd1 = Get-ChildItem -Path $modulePkg.FullName -Filter '*.psd1' | Select-Object -First 1
-        $toolsDir = "$($modulePkg.FullName)\tools"
+        $psd1 = Get-ChildItem -Path $modulePkg -Filter '*.psd1' | Select-Object -First 1
+        $toolsDir = "$($modulePkg)\tools"
         if(!$psd1 -and (Test-Path -Path $toolsDir)) {
             $psd1 = Get-ChildItem -Path $toolsDir -Filter '*.psd1' | Select-Object -First 1
         }
     
         if(!$psd1) {
-            throw "Unable to find module $loadModule psd1 file under: $modulePkg.FullName"
+            throw "Unable to find module $loadModule psd1 file under: $modulePkg"
         }
     
         Write-Host "Loading module: $($psd1.FullName)"
