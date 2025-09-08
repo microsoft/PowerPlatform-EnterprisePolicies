@@ -5,8 +5,7 @@ param
 
 $packagesDir = $env:NUGET_PACKAGES
 if (-not $packagesDir) {
-    # Fallback: query dotnet for the actual path
-    $packagesDir = (& dotnet nuget locals global-packages --list) -replace '^global-packages:\s*', ''
+    $packagesDir = Resolve-Path -Path "$HOME\.nuget\packages"
 }
 
 if (-not (Test-Path $packagesDir)) {
