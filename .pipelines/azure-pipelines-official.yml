@@ -182,8 +182,15 @@ extends:
                 Write-Host 'Listing artifacts'
                 Get-ChildItem -Path $(Pipeline.Workspace) -Recurse -Name
                 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+                # PSGallery may get disabled prior due to netiso and CFS requirements. Re-register it here.
+                Register-PSRepository -Default
                 cd '$(Pipeline.Workspace)/drop'
                 Expand-Archive -Path Microsoft.PowerPlatform.EnterprisePolicies_$(Build.BuildNumber).zip -DestinationPath .\Microsoft.PowerPlatform.EnterprisePolicies
                 Write-Host 'Publishing Microsoft.PowerPlatform.EnterprisePolicies module to PSGallery'
                 Publish-Module -Path .\Microsoft.PowerPlatform.EnterprisePolicies -NuGetApiKey $(PowerShellGallery-PublishKey) -Force -Verbose -Repository PSGallery -WhatIf
-
+                # Disable PSGallery again
+                $psGallery = Get-PSRepository -Name "PSGallery" -ErrorAction SilentlyContinue
+                if ($null -ne $psGallery) {
+                  Write-Output "##[debug] Removing default PS Gallery" # To satisfy network isolation
+                  Unregister-PSRepository -Name $psGallery.Name -ErrorAction SilentlyContinue -Verbose
+                }
