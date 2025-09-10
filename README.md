@@ -325,33 +325,50 @@ Sample Output :</br>
 ![alt text](./ReadMeImages/RevertSubnetInjection2.png)</br>
 
 
-## Using the Subnet Injection Diagnostic Scripts
+## Using the Subnet Injection Diagnostic Module
 
-The diagnostic scripts are designed to help troubleshoot issues with the VNET functionality provided by Power Platform. They can be run in both Windows PowerShell and PowerShell Core environments.
+The diagnostic commands are designed to help troubleshoot issues with the VNET functionality provided by Power Platform. They can be run in both Windows PowerShell and PowerShell Core environments.
+
+You can get the module in two different ways. Either through the PowerShell Gallery or by downloading the module from Github Releases. Both options provide the same functionality.
+
+### Install the module from the PS Gallery
+
+In a PowerShell session, run the following command the first time you open the PowerShell session:
+
+```powershell
+Install-Module -Name Microsoft.PowerPlatform.EnterprisePolicies
+Import-Module Microsoft.PowerPlatform.EnterprisePolicies
+```
+
+This will import the module, validate prerequisites and make the functions available for use. If you are missing any prerequisites, the module will inform you and ask for permission to install them.
+
+### Download the module from Github Releases
 
 Go to the [Releases](https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases/latest) page and download the latest release zip file. Extract the contents to a local directory.
 
 Navigate to the extracted directory and run the following command the first time you open the PowerShell session:
 
 ```powershell
-Import-Module .\EnterprisePolicies
+Import-Module .\Microsoft.PowerPlatform.EnterprisePolicies
 ```
 
-This will import the module, validate prerequisites and make the scripts available for use. If you are missing any prerequisites, the script will inform you and ask for permission to install them.
+This will import the module, validate prerequisites and make the commands available for use. If you are missing any prerequisites, the module will inform you and ask for permission to install them.
 
-You can then run the diagnostic scripts as needed. For example, to run the `Get-EnvironmentUsage` cmdlets, you would use:
+### Running the diagnostic functions
+
+Once your module has been imported into your PowerShell session, you can now run the diagnostic functions as needed. For example, to run the `Get-EnvironmentUsage` function, you would use:
 
 ```powershell
 Get-EnvironmentUsage -EnvironmentId "your-environment-id"
 ```
 
-For a full list of available cmdlets and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/EnterprisePolicies) folder.
+For a full list of available functions and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/EnterprisePolicies) folder.
 
 ## Development
 
 To get started with development, clone the repository and open it in VSCode. The scripts are written in PowerShell and follow standard PowerShell conventions.
 
-Please place any common functions in the `Private` folder, and any module-level functions that are going to be exposed in the `Public` folder. 
+Please place any common functions in the `Private` folder, and any module-level functions that are going to be exposed in the `Public` folder.
 
 In order to run tests, please ensure you do the following from the repository root:
 
