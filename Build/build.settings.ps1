@@ -181,10 +181,14 @@ Task PostBuild {
     Get-ChildItem $PublicScriptsDir -Recurse -Filter *.ps1 | ForEach-Object {
         $FunctionsToExport += (Split-Path -Leaf $_.FullName).Split('.')[0]
     }
+    if($FunctionsToExport.Count -eq 0)
+    {
+        throw "No public functions found to export. Please check that there are .ps1 files under the Public folder."
+    }
     $moduleFile = Get-Item "$ReleaseDir\$ModuleName\*.psd1"
     (Get-Content $moduleFile).Replace("ModuleVersion = '1.0.0'", "ModuleVersion = '$BuildVersion'") | Set-Content $moduleFile
     (Get-Content $moduleFile).Replace("ReleaseNotes = ''", "ReleaseNotes = 'https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases/tag/$BuildVersion'") | Set-Content $moduleFile
-    (Get-Content $moduleFile).Replace("FunctionsToExport = ''", "FunctionsToExport = @('$($FunctionsToExport -join "','")')") | Set-Content $moduleFile
+    (Get-Content $moduleFile).Replace("FunctionsToExport = '*'", "FunctionsToExport = @('$($FunctionsToExport -join "','")')") | Set-Content $moduleFile
     Copy-Item $RepoRootDir\LICENSE $ReleaseDir\$ModuleName\LICENSE.md
 }
 
