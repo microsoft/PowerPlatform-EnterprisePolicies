@@ -60,11 +60,10 @@ Describe 'Script Tests' {
             $file = $_
             $fileName = Split-Path -Path $file -Leaf
             $disclaimer = '<#\r\nSAMPLE CODE NOTICE\r\n\r\nTHIS SAMPLE CODE IS MADE AVAILABLE AS IS. MICROSOFT MAKES NO WARRANTIES, WHETHER EXPRESS OR IMPLIED,\r\nOF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OR CONDITIONS OF MERCHANTABILITY.\r\nTHE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.\r\nNO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.\r\n#>'
-            $usingPattern = 'using module \.\.\\(\\\.\.\\)?CommonV2\\Types\.psm1'
+            $fileContent = Get-Content -Path $file -ErrorAction Stop
         }
 
         It 'Is a valid powershell file' {
-            $fileContent = Get-Content -Path $file -ErrorAction Stop
             $errors = $null
             $null = [System.Management.Automation.PSParser]::Tokenize($fileContent, [ref]$errors)
             $errors.Count | Should -Be 0
@@ -83,6 +82,27 @@ Describe 'Script Tests' {
             else
             {
                 "$PSScriptRoot\$testFileName" | Should -Exist
+            }
+        }
+
+        It 'Has a single function defined and matches file name'{
+            $functions = @()
+            $tokens = $null
+            $errors = $null
+            $tokens = [System.Management.Automation.PSParser]::Tokenize($fileContent, [ref]$errors)
+            for ($i = 0; $i -lt $tokens.Count; $i++) {
+                if ($tokens[$i].Type -eq 'Keyword' -and $tokens[$i].Content -eq 'function') {
+                    # The next token should be the function name
+                    if ($i + 1 -lt $tokens.Count) {
+                        $functionName = $tokens[$i + 1].Content
+                        $functions += $functionName
+                    }
+                }
+            }
+            $functions.Count | Should -Be 1
+            if($functions.Count -eq 1)
+            {
+                $functions[0] | Should -Be ($fileName -replace '\.ps1$','')
             }
         }
     }
