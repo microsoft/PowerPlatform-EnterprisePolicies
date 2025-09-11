@@ -61,7 +61,7 @@ Description: The Azure region where the environment is deployed.
 ### NetworkUsageData
 
 Type: `NetworkUsageData[]`
-Description: A list of network usage data for the environment each with its own timestamp. This will not include the System Reserved IP addresses in IPAllocations.
+Description: A list of network usage data for the environment each with its own timestamp. This will not include the System Reserved IP addresses in IpAllocations.
 
 ## METHODS
 
@@ -84,7 +84,7 @@ $environmentUsage.NetworkUsageData = @(
     Timestamp = "2025-09-03T00:09:00.2389538+00:00"
     NormalizedTimestamp = "2025-09-03T00:00:00+00:00"
     TotalIpUsage = 10
-    IPAllocations = @{ 'Diagnostics' = 5; 'Copilot Studio' = 5 }
+    IpAllocations = @{ 'Diagnostics' = 5; 'Copilot Studio' = 5 }
   }
 )
 ```

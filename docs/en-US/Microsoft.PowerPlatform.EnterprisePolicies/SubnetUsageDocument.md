@@ -51,13 +51,13 @@ Description: The Azure region where the subnet is.
 ### NetworkUsageDataByWorkload
 
 Type: `NetworkUsageData[]`
-Description: A list of network usage data for all workloads within the subnet each with its own timestamp. This will include the System Reserved IP addresses in IPAllocations.
+Description: A list of network usage data for all workloads within the subnet each with its own timestamp. This will include the System Reserved IP addresses in IpAllocations.
 
 
 ### NetworkUsageDataByEnvironment
 
 Type: `NetworkUsageData[]`
-Description: A list of network usage data for all environments within the subnet each with its own timestamp. This will include the System Reserved IP addresses in IPAllocations.
+Description: A list of network usage data for all environments within the subnet each with its own timestamp. This will include the System Reserved IP addresses in IpAllocations.
 
 
 ## METHODS
@@ -79,7 +79,7 @@ $subnetUsage.NetworkUsageDataByWorkload = @(
     Timestamp = "2025-09-03T00:09:00.2389538+00:00"
     NormalizedTimestamp = "2025-09-03T00:00:00+00:00"
     TotalIpUsage = 15
-    IPAllocations = @{ 'Diagnostics' = 5; 'Copilot Studio' = 5; 'System Reserved' = 5 }
+    IpAllocations = @{ 'Diagnostics' = 5; 'Copilot Studio' = 5; 'System Reserved' = 5 }
   }
 )
 $subnetUsage.NetworkUsageDataByEnvironment = @(
@@ -87,7 +87,7 @@ $subnetUsage.NetworkUsageDataByEnvironment = @(
     Timestamp = "2025-09-03T00:09:00.2389538+00:00"
     NormalizedTimestamp = "2025-09-03T00:00:00+00:00"
     TotalIpUsage = 15
-    IPAllocations = @{ 'ea344393-c4ec-4f0c-a489-98320b6c151c' = 6; 'ad5d6e7c-df31-e071-b781-ac7cfba5fc46' = 4; 'System Reserved' = 5 }
+    IpAllocations = @{ 'ea344393-c4ec-4f0c-a489-98320b6c151c' = 6; 'ad5d6e7c-df31-e071-b781-ac7cfba5fc46' = 4; 'System Reserved' = 5 }
   }
 )
 

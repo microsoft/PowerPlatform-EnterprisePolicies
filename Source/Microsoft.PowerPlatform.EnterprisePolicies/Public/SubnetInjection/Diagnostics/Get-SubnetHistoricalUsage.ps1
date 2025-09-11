@@ -20,10 +20,10 @@ SubnetUsageDocument
 A class representing the network usage of the subnet. [SubnetUsageDocument](SubnetUsageDocument.md)
 
 .EXAMPLE
-Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -Region "WestUs"
+Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 .EXAMPLE
-Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "WestUs" -Endpoint [BAPEndpoint]::Prod
+Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod
 #>
 function Get-SubnetHistoricalUsage{
     param(
@@ -49,7 +49,7 @@ function Get-SubnetHistoricalUsage{
 
     $client = New-HttpClient
 
-    $uri = "$(Get-TenantRoute -Endpoint $Endpoint -TenantId $TenantId)/plex/networkUsage/subnetHistoricalUsage?api-version=2024-10-01&region=$Region"
+    $uri = "$(Get-TenantRoute -Endpoint $Endpoint -TenantId $TenantId)/plex/networkUsage/subnetHistoricalUsage?api-version=2024-10-01&enterprisePolicyId=$EnterprisePolicyId&region=$Region"
 
     $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
 

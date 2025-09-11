@@ -20,10 +20,10 @@ EnvironmentNetworkUsageDocument
 A class representing the historical network usage of the environment. [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
 
 .EXAMPLE
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "WestUs"
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 .EXAMPLE
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "WestUs" -Endpoint [BAPEndpoint]::Prod
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -ShowDetails $True -Endpoint [BAPEndpoint]::Prod
 #>
 function Get-EnvironmentHistoricalUsage{
     param(
@@ -37,6 +37,9 @@ function Get-EnvironmentHistoricalUsage{
         [Parameter(Mandatory, HelpMessage="The region that the environment belongs to.")]
         [string]$Region,
 
+        [Parameter(Mandatory=$false, HelpMessage="Whether or not to show detailed usage information. Default is 'false'.")]
+        [bool]$ShowDetails = $false,
+
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
     )
@@ -49,7 +52,7 @@ function Get-EnvironmentHistoricalUsage{
 
     $client = New-HttpClient
 
-    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/networkUsage/environmentHistoricalUsage?api-version=2024-10-01&region=$Region"
+    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/networkUsage/environmentHistoricalUsage?api-version=2024-10-01&region=$Region&showDetails=$ShowDetails"
 
     $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
 
@@ -60,7 +63,10 @@ function Get-EnvironmentHistoricalUsage{
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if($contentString) {
+        # return $contentString
         return ConvertFrom-JsonToClass -Json $contentString -ClassType ([EnvironmentNetworkUsageDocument])
+        # $object = ConvertFrom-Json -InputObject $contentString
+        # return ConvertTo-ClassInstance -InputObject $object -ClassType ([EnvironmentNetworkUsageDocument])
     } else {
         throw "Failed to retrieve the environment network usage data from response."
     }}

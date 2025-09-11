@@ -23,13 +23,15 @@ class NetworkUsage{
 }
 
 class NetworkUsageData{
+    NetworkUsageData() {}
     [string] $TimeStamp
     [string] $NormalizedTimestamp
     [int] $TotalIpUsage
-    [System.Collections.Hashtable] $IPAllocations
+    [hashtable] $IpAllocations
 }
 
 class EnvironmentNetworkUsageDocument{
+    EnvironmentNetworkUsageDocument() {}
     [string] $Id
     [string] $EnvironmentId
     [string] $TenantId
@@ -39,7 +41,6 @@ class EnvironmentNetworkUsageDocument{
     [int] $SubnetSize
     [string] $AzureRegion
     [NetworkUsageData[]] $NetworkUsageData
-    
 }
 
 class SubnetUsageDocument{

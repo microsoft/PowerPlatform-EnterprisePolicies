@@ -33,7 +33,7 @@ Description: The timestamp at which this network usage data was collected normal
 Type: `int`
 Description: The total number of IP addresses being used by the network at the given timestamp.
 
-### IPAllocations
+### IpAllocations
 
 Type: `System.Collections.Hashtable`
 Description: A dictionary containing the environment or workload as the key and the number of IP addresses allocated to the environment or workload.
@@ -49,5 +49,5 @@ $networkUsageData = [NetworkUsageData]::new()
 $networkUsageData.Timestamp = "2025-09-03T00:09:00.2389538+00:00"
 $networkUsageData.NormalizedTimestamp = "2025-09-03T00:00:00.0000000+00:00"
 $networkUsageData.TotalIpUsage = 10
-$networkUsageData.IPAllocations = @{ 'Diagnostics' = 5, 'Copilot Studio' = 5 }
+$networkUsageData.IpAllocations = @{ 'Diagnostics' = 5, 'Copilot Studio' = 5 }
 ```
