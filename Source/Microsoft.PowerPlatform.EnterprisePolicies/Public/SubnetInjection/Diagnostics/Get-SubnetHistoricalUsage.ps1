@@ -20,9 +20,6 @@ SubnetUsageDocument
 A class representing the network usage of the subnet. [SubnetUsageDocument](SubnetUsageDocument.md)
 
 .EXAMPLE
-Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -Region "westus"
-
-.EXAMPLE
 Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod
 #>
 function Get-SubnetHistoricalUsage{
@@ -31,7 +28,7 @@ function Get-SubnetHistoricalUsage{
         [ValidateNotNullOrEmpty()]
         [string]$EnterprisePolicyId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The id of the tenant.")]
+        [Parameter(Mandatory, HelpMessage="The id of the tenant.")]
         [string]$TenantId,
 
         [Parameter(Mandatory, HelpMessage="The region that the tenant belongs to.")]

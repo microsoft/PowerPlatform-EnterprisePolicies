@@ -38,10 +38,6 @@ This includes usage from all environments with the specified enterprise policy i
 
 ### EXAMPLE 1
 
-Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -Region "westus"
-
-### EXAMPLE 2
-
 Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod
 
 ## PARAMETERS
