@@ -43,7 +43,7 @@ Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000
 
 ### EXAMPLE 2
 
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -ShowDetails $True -Endpoint [BAPEndpoint]::Prod
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod -ShowDetails
 
 ## PARAMETERS
 

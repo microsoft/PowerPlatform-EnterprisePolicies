@@ -23,7 +23,7 @@ A class representing the historical network usage of the environment. [Environme
 Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 .EXAMPLE
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -ShowDetails $True -Endpoint [BAPEndpoint]::Prod
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod -ShowDetails
 #>
 function Get-EnvironmentHistoricalUsage{
     param(
@@ -37,11 +37,11 @@ function Get-EnvironmentHistoricalUsage{
         [Parameter(Mandatory, HelpMessage="The region that the environment belongs to.")]
         [string]$Region,
 
-        [Parameter(Mandatory=$false, HelpMessage="Whether or not to show detailed usage information. Default is 'false'.")]
-        [bool]$ShowDetails = $false,
-
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="Switch to show detailed usage information.")]
+        [switch]$ShowDetails
     )
 
     $ErrorActionPreference = "Stop"
@@ -52,7 +52,8 @@ function Get-EnvironmentHistoricalUsage{
 
     $client = New-HttpClient
 
-    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/networkUsage/environmentHistoricalUsage?api-version=2024-10-01&region=$Region&showDetails=$ShowDetails"
+    $show = if ($ShowDetails.IsPresent) { 'true' } else { 'false' }
+    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/networkUsage/environmentHistoricalUsage?api-version=2024-10-01&region=$Region&showDetails=$show"
 
     $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
 
