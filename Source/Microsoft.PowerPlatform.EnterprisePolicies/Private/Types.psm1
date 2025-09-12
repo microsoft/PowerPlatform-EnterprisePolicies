@@ -23,7 +23,6 @@ class NetworkUsage{
 }
 
 class NetworkUsageData{
-    NetworkUsageData() {}
     [string] $TimeStamp
     [string] $NormalizedTimestamp
     [int] $TotalIpUsage
@@ -31,7 +30,6 @@ class NetworkUsageData{
 }
 
 class EnvironmentNetworkUsageDocument{
-    EnvironmentNetworkUsageDocument() {}
     [string] $Id
     [string] $EnvironmentId
     [string] $TenantId
