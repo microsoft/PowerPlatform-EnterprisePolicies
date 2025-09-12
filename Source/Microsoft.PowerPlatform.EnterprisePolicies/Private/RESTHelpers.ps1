@@ -122,6 +122,29 @@ function Get-EnvironmentRoute {
     return "https://$remainingEnvId.$shortEnvId.environment.$baseUri"
 }
 
+function Get-TenantRoute {
+    param (
+        [Parameter(Mandatory)]
+        [string] $TenantId,
+        [Parameter(Mandatory)]
+        [BAPEndpoint] $Endpoint
+    )
+
+    $baseUri = Get-APIResourceUrl -Endpoint $Endpoint
+    # Separate the scheme from the base URI
+    $baseUri = $baseUri.Replace("https://", "").Trim('/')
+    $TenantId = $TenantId.Replace("-", "")
+    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2) {
+        $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
+        $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
+    }
+    else {
+        $shortTenantId = $TenantId.Substring($TenantId.Length - 2, 2)
+        $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 2)
+    }
+    return "https://il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
+}
+
 function Get-APIResourceUrl {
     param (
         [Parameter(Mandatory)]
@@ -169,14 +192,55 @@ function ConvertFrom-JsonToClass {
     )
 
     $data = $Json | ConvertFrom-Json
-    $instance = [Activator]::CreateInstance($ClassType)
+    
+    # Handle array types directly
+    if ($ClassType.IsArray) {
+        $elementType = $ClassType.GetElementType()
+        $itemList = @()
+        foreach ($item in $data) {
+            $itemJson = $item | ConvertTo-Json -Depth 10
+            $itemList += ConvertFrom-JsonToClass -Json $itemJson -ClassType $elementType
+        }
+        return ,$itemList  
+    } else {
+        $instance = [Activator]::CreateInstance($ClassType)
+    }
 
     foreach ($property in $ClassType.GetProperties()) {
         $name = $property.Name
+        $type = Get-UnderlyingType $property.PropertyType
         if ($data.PSObject.Properties[$name]) {
-            $instance.$name = $data.$name
+            if ($type -eq [hashtable] -or $type.FullName -eq 'System.Collections.Hashtable') {
+                $instance.$name = ConvertTo-Hashtable $data.$name
+            }
+            elseif ($type.IsClass -and $type -ne [string]) {
+                $nestedJson = $data.$name | ConvertTo-Json -Depth 10
+                $instance.$name = ConvertFrom-JsonToClass -Json $nestedJson -ClassType $type
+            }
+            else {
+                $instance.$name = $data.$name
+            }
         }
     }
 
     return $instance
+}
+
+
+function Get-UnderlyingType([type]$t) {
+    if ($t.IsGenericType -and $t.GetGenericTypeDefinition().FullName -eq 'System.Nullable`1') {
+        return $t.GetGenericArguments()[0]
+    }
+    return $t
+}
+
+function ConvertTo-Hashtable($obj) {
+    if ($obj -is [hashtable]) {
+        return $obj
+    }
+    $hash = @{}
+    foreach ($property in $obj.PSObject.Properties) {
+        $hash[$property.Name] = $property.Value
+    }
+    return $hash
 }
