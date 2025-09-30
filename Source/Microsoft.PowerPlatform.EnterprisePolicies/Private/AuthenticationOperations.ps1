@@ -50,7 +50,7 @@ function Connect-Azure {
             else {
                 $tenantContext = $context | Where-Object { $_.Environment.Name -eq $environment -and $_.Account.Tenants -contains $TenantId } | Select-Object -First 1
                 if ($tenantContext) {
-                    Set-AzContext -Context $TenantId
+                    Set-AzContext -Context $tenantContext
                     Write-Host "Already connected to Azure environment: $environment with account $($tenantContext.Account.Id) with tenant Id $TenantId" -ForegroundColor Yellow
                     $foundContext = $true
                 }
