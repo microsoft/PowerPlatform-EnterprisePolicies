@@ -47,11 +47,13 @@ function Connect-Azure {
                 Write-Host "Already connected to Azure environment: $environment with account $($homeTenantContext.Account.Id) with home tenant Id $TenantId" -ForegroundColor Yellow
                 $foundContext = $true
             }
-
-            if ($matchedContext.Account.Tenants -contains $TenantId) {
-                Set-AzContext -TenantId $TenantId
-                Write-Host "Already connected to Azure environment: $environment with account $($context.Account.Id) with tenant Id $TenantId" -ForegroundColor Yellow
-                $foundContext = $true
+            else {
+                $tenantContext = $context | Where-Object { $_.Environment.Name -eq $environment -and $_.Account.Tenants -contains $TenantId } | Select-Object -First 1
+                if ($tenantContext) {
+                    Set-AzContext -Context $tenantContext
+                    Write-Host "Already connected to Azure environment: $environment with account $($tenantContext.Account.Id) with tenant Id $TenantId" -ForegroundColor Yellow
+                    $foundContext = $true
+                }
             }
         }
     }

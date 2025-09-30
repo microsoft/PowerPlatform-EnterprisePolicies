@@ -119,7 +119,7 @@ function Get-EnvironmentRoute {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 2, 2)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 2)
     }
-    return "https://$remainingEnvId.$shortEnvId.environment.$baseUri"
+    return "https://primary-$remainingEnvId.$shortEnvId.environment.$baseUri"
 }
 
 function Get-APIResourceUrl {
