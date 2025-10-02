@@ -47,6 +47,37 @@ function New-JsonRequestMessage
     return $request
 }
 
+function New-EnvironmentRouteRequest
+{
+    param(
+        [Parameter(Mandatory)]
+        [string] $EnvironmentId,
+        [Parameter(Mandatory)]
+        [string] $Path,
+        [Parameter(Mandatory)]
+        [string] $Query,
+        [Parameter(Mandatory)]
+        [BAPEndpoint] $Endpoint,
+        [Parameter(Mandatory=$true)]
+        [System.Security.SecureString] $AccessToken,
+        [Parameter(Mandatory=$false)]
+        [string] $Content,
+        [Parameter(Mandatory=$false)]
+        [System.Net.Http.HttpMethod] $HttpMethod = [System.Net.Http.HttpMethod]::Post
+    )
+
+    $hostName = Get-EnvironmentRouteHostName -Endpoint $Endpoint -EnvironmentId $EnvironmentId
+    $uriBuilder = [System.UriBuilder]::new()
+    $uriBuilder.Scheme = "https"
+    $uriBuilder.Host = "primary-$(Get-EnvironmentRouteHostName -Endpoint $Endpoint -EnvironmentId $EnvironmentId)"
+    $uriBuilder.Path = $Path
+    $uriBuilder.Query = $Query
+
+    $request = New-JsonRequestMessage -Uri $uriBuilder.Uri.ToString() -AccessToken $AccessToken -Content $Content -HttpMethod $HttpMethod
+    $request.Headers.Host = $hostName
+    return $request
+}
+
 <#
 .SYNOPSIS
     Create new HttpClient object and clear Default Request Headers
@@ -99,7 +130,7 @@ function Get-AsyncResult
     return $result
 }
 
-function Get-EnvironmentRoute {
+function Get-EnvironmentRouteHostName {
     param (
         [Parameter(Mandatory)]
         [string] $EnvironmentId,
@@ -119,7 +150,7 @@ function Get-EnvironmentRoute {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 2, 2)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 2)
     }
-    return "https://primary-$remainingEnvId.$shortEnvId.environment.$baseUri"
+    return "$remainingEnvId.$shortEnvId.environment.$baseUri"
 }
 
 function Get-APIResourceUrl {

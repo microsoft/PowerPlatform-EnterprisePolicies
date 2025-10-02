@@ -59,14 +59,14 @@ function Test-NetworkConnectivity{
 
     $client = New-HttpClient
 
-    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/testConnection?api-version=2024-10-01"
-
+    $path = "/plex/testConnection"
+    $query = "api-version=2024-10-01"
     $Body = @{
         Destination = $Destination
         Port = $Port
     }
 
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -Content ($Body | ConvertTo-Json)
+    $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Post) -Content ($Body | ConvertTo-Json) -Endpoint $Endpoint
 
     $result = Get-AsyncResult -Task $client.SendAsync($request)
 

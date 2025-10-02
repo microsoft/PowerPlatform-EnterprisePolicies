@@ -53,13 +53,14 @@ function Test-DnsResolution {
     
     $client = New-HttpClient
     
-    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/resolveDns?api-version=2024-10-01"
+    $path = "/plex/resolveDns"
+    $query = "api-version=2024-10-01"
     
     $Body = @{
         HostName = $HostName
     }
     
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -Content ($Body | ConvertTo-Json)
+    $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Post) -Content ($Body | ConvertTo-Json) -Endpoint $Endpoint
     
     $result = Get-AsyncResult -Task $client.SendAsync($request)
     
