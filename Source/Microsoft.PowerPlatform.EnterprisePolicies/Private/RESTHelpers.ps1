@@ -69,7 +69,7 @@ function New-EnvironmentRouteRequest
     $hostName = Get-EnvironmentRouteHostName -Endpoint $Endpoint -EnvironmentId $EnvironmentId
     $uriBuilder = [System.UriBuilder]::new()
     $uriBuilder.Scheme = "https"
-    $uriBuilder.Host = "primary-$(Get-EnvironmentRouteHostName -Endpoint $Endpoint -EnvironmentId $EnvironmentId)"
+    $uriBuilder.Host = "primary-$hostName"
     $uriBuilder.Path = $Path
     $uriBuilder.Query = $Query
 
