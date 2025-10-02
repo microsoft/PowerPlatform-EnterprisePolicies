@@ -51,8 +51,6 @@ function Test-DnsResolution {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
     
-    $client = New-HttpClient
-    
     $path = "/plex/resolveDns"
     $query = "api-version=2024-10-01"
     
@@ -62,9 +60,7 @@ function Test-DnsResolution {
     
     $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Post) -Content ($Body | ConvertTo-Json) -Endpoint $Endpoint
     
-    $result = Get-AsyncResult -Task $client.SendAsync($request)
-    
-    Test-Result -Result $result
+    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -Request $request
     
     Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 }

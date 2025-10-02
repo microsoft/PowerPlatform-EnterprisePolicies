@@ -80,16 +80,19 @@ function New-EnvironmentRouteRequest
 
 <#
 .SYNOPSIS
-    Create new HttpClient object and clear Default Request Headers
+    Gets a singleton HttpClient object or creates a new one and clears Default Request Headers
 #>
-function New-HttpClient
+function Get-HttpClient
 {
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls13 -bor [System.Net.SecurityProtocolType]::Tls12
+    if($null -eq $script:httpClient)
+    {
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls13 -bor [System.Net.SecurityProtocolType]::Tls12
     
-    $client = New-Object -TypeName System.Net.Http.HttpClient
-    $client.DefaultRequestHeaders.Clear()
+        $client = New-Object -TypeName System.Net.Http.HttpClient
+        $client.DefaultRequestHeaders.Clear()
+    }
 
-    return $client
+    return $script:httpClient
 }
 
 <#
@@ -170,25 +173,81 @@ function Get-APIResourceUrl {
     }
 }
 
+function Send-RequestWithRetries {
+    param (
+        [Parameter(Mandatory)]
+        [int] $MaxRetries,
+        [Parameter(Mandatory)]
+        [int] $DelaySeconds,
+        [Parameter(Mandatory)]
+        $Request
+    )
+
+    $client = Get-HttpClient
+    $attempt = 0
+    while ($attempt -lt $MaxRetries) {
+        try {
+            $result = Get-AsyncResult -Task $client.SendAsync($Request)
+            if(Test-Result -Result $result) {
+                return $result
+            }
+            $attempt++
+        }
+        catch {
+            $attempt++
+        }
+
+        if ($attempt -ge $MaxRetries) {
+            Write-Host "Request failed after $MaxRetries attempts." -ForegroundColor Red
+            Assert-Result -Result $result
+        }
+        Write-Verbose "Request failed on attempt $attempt. Retrying in $DelaySeconds seconds..."
+        Start-Sleep -Seconds $DelaySeconds
+    }
+}
+
 function Test-Result {
     param (
         [Parameter(Mandatory)]
         $Result
     )
 
-    if ($result.StatusCode -ne [System.Net.HttpStatusCode]::OK)
+    if (-not($Result.IsSuccessStatusCode))
     {
-        $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+        $contentString = Get-AsyncResult -Task $Result.Content.ReadAsStringAsync()
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            return $false
         }
         else
         {
-            Write-Verbose "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            return $false
+        }
+    }
+}
+
+function Assert-Result {
+    param (
+        [Parameter(Mandatory)]
+        $Result
+    )
+
+    if (-not($Result.IsSuccessStatusCode))
+    {
+        $contentString = Get-AsyncResult -Task $Result.Content.ReadAsStringAsync()
+        if ($contentString)
+        {
+            $errorMessage = $contentString.Trim('.')
+            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+        }
+        else
+        {
+            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
     }
 }
