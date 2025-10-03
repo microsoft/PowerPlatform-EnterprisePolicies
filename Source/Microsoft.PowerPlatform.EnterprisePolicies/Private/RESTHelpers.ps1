@@ -88,8 +88,8 @@ function Get-HttpClient
     {
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls13 -bor [System.Net.SecurityProtocolType]::Tls12
     
-        $client = New-Object -TypeName System.Net.Http.HttpClient
-        $client.DefaultRequestHeaders.Clear()
+        $script:httpClient = New-Object -TypeName System.Net.Http.HttpClient
+        $script:httpClient.DefaultRequestHeaders.Clear()
     }
 
     return $script:httpClient
@@ -180,14 +180,15 @@ function Send-RequestWithRetries {
         [Parameter(Mandatory)]
         [int] $DelaySeconds,
         [Parameter(Mandatory)]
-        $Request
+        [scriptblock] $RequestFactory
     )
 
     $client = Get-HttpClient
     $attempt = 0
     while ($attempt -lt $MaxRetries) {
         try {
-            $result = Get-AsyncResult -Task $client.SendAsync($Request)
+            $result = Get-AsyncResult -Task $client.SendAsync((& $RequestFactory))
+
             if(Test-Result -Result $result) {
                 return $result
             }
@@ -195,6 +196,10 @@ function Send-RequestWithRetries {
         }
         catch {
             $attempt++
+            Write-Verbose "Exception on attempt $attempt : $($_.Exception.Message)"
+            if($attempt -ge $MaxRetries) {
+                throw "Request failed after $MaxRetries attempts. Last error: $($_.Exception.Message)"
+            }
         }
 
         if ($attempt -ge $MaxRetries) {
@@ -227,6 +232,7 @@ function Test-Result {
             return $false
         }
     }
+    return $true
 }
 
 function Assert-Result {

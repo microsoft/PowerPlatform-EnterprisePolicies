@@ -52,9 +52,9 @@ function Get-EnvironmentUsage{
         $query += "&region=$Region"
     }
 
-    $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
-
-    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -Request $request
+    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
+        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+    }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
