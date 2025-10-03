@@ -57,6 +57,13 @@ Describe 'RESTHelpers Tests' {
         }
 
         Context 'Testing Get-HttpClient' {
+            BeforeEach {
+                #This test could be flaky if other tests create HttpClient instances, ensure that doesn't happen
+                $script:httpClient = $null
+            }
+            AfterAll {
+                $script:httpClient = $null
+            }
             It 'Returns an HttpClient with no headers' {
                 $client = Get-HttpClient
                 $client.DefaultRequestHeaders | ForEach-Object { $_ | Should -BeNullOrEmpty }
