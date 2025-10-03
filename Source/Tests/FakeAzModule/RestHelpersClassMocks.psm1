@@ -33,6 +33,7 @@ class HttpClientMock
     }
 }
 
+
 $ExportableTypes =@(
     [HttpClientResultContentMock]
     [HttpClientResultMock]

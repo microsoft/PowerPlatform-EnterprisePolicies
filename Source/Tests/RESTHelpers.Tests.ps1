@@ -55,5 +55,71 @@ Describe 'RESTHelpers Tests' {
                 $result.Headers.Host | Should -Be "3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
             }
         }
+
+        Context 'Testing Get-HttpClient' {
+            It 'Returns an HttpClient with no headers' {
+                $client = Get-HttpClient
+                $client.DefaultRequestHeaders | ForEach-Object { $_ | Should -BeNullOrEmpty }
+            }
+
+            It 'Follows a singleton pattern'{
+                Mock New-Object -ParameterFilter { $TypeName -eq 'System.Net.Http.HttpClient' } { [System.Net.Http.HttpClient]::new() } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Get-HttpClient
+                Get-HttpClient
+                Should -Invoke New-Object -Times 1
+            }
+        }
+
+        Context 'Testing Send-RequestWithRetries' {
+            It 'Returns the result of a successful request' {
+                $mockClient = [HttpClientMock]::new()
+                $mockResult = [HttpClientResultMock]::new("Some string")
+                Mock Get-HttpClient { return $mockClient } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $resultJsonString } -ParameterFilter { $task -eq $resultJsonString } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Test-Result { return $true} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 3 -DelaySeconds 1
+
+                $result | Should -Be $mockResult
+            }
+
+            It 'Asserts after the specified number of failed requests' {
+                $mockClient = [HttpClientMock]::new()
+                $mockResult = [HttpClientResultMock]::new("Some string")
+                Mock Get-HttpClient { return $mockClient } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $resultJsonString } -ParameterFilter { $task -eq $resultJsonString } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Test-Result { return $false} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Assert-Result { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 3 -DelaySeconds 0
+
+                Should -Invoke Get-AsyncResult -Times 3
+                Should -Invoke Assert-Result -Times 1
+            }
+
+            It 'Returns the request if it succeeds after retries' {
+                $mockClient = [HttpClientMock]::new()
+                $mockResult = [HttpClientResultMock]::new("Some string")
+                Mock Get-HttpClient { return $mockClient } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $resultJsonString } -ParameterFilter { $task -eq $resultJsonString } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                
+                $script:callCount = 0
+                Mock Test-Result { 
+                    $script:callCount++
+                    if ($script:callCount -lt 2) {
+                        return $false
+                    } else {
+                        return $true
+                    }
+                } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                Mock Assert-Result { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 3 -DelaySeconds 0
+
+                Should -Not -Invoke Assert-Result
+                $result | Should -Be $mockResult
+            }
+        }
     }
 }
