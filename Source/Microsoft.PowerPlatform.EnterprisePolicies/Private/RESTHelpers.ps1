@@ -47,18 +47,52 @@ function New-JsonRequestMessage
     return $request
 }
 
+function New-EnvironmentRouteRequest
+{
+    param(
+        [Parameter(Mandatory)]
+        [string] $EnvironmentId,
+        [Parameter(Mandatory)]
+        [string] $Path,
+        [Parameter(Mandatory)]
+        [string] $Query,
+        [Parameter(Mandatory)]
+        [BAPEndpoint] $Endpoint,
+        [Parameter(Mandatory=$true)]
+        [System.Security.SecureString] $AccessToken,
+        [Parameter(Mandatory=$false)]
+        [string] $Content,
+        [Parameter(Mandatory=$false)]
+        [System.Net.Http.HttpMethod] $HttpMethod = [System.Net.Http.HttpMethod]::Post
+    )
+
+    $hostName = Get-EnvironmentRouteHostName -Endpoint $Endpoint -EnvironmentId $EnvironmentId
+    $uriBuilder = [System.UriBuilder]::new()
+    $uriBuilder.Scheme = "https"
+    $uriBuilder.Host = "primary-$hostName"
+    $uriBuilder.Path = $Path
+    $uriBuilder.Query = $Query
+
+    $request = New-JsonRequestMessage -Uri $uriBuilder.Uri.ToString() -AccessToken $AccessToken -Content $Content -HttpMethod $HttpMethod
+    $request.Headers.Host = $hostName
+    return $request
+}
+
 <#
 .SYNOPSIS
-    Create new HttpClient object and clear Default Request Headers
+    Gets a singleton HttpClient object or creates a new one and clears Default Request Headers
 #>
-function New-HttpClient
+function Get-HttpClient
 {
-    [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls13 -bor [System.Net.SecurityProtocolType]::Tls12
+    if($null -eq $script:httpClient)
+    {
+        [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls13 -bor [System.Net.SecurityProtocolType]::Tls12
     
-    $client = New-Object -TypeName System.Net.Http.HttpClient
-    $client.DefaultRequestHeaders.Clear()
+        $script:httpClient = New-Object -TypeName System.Net.Http.HttpClient
+        $script:httpClient.DefaultRequestHeaders.Clear()
+    }
 
-    return $client
+    return $script:httpClient
 }
 
 <#
@@ -99,7 +133,7 @@ function Get-AsyncResult
     return $result
 }
 
-function Get-EnvironmentRoute {
+function Get-EnvironmentRouteHostName {
     param (
         [Parameter(Mandatory)]
         [string] $EnvironmentId,
@@ -119,7 +153,7 @@ function Get-EnvironmentRoute {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 2, 2)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 2)
     }
-    return "https://$remainingEnvId.$shortEnvId.environment.$baseUri"
+    return "$remainingEnvId.$shortEnvId.environment.$baseUri"
 }
 
 function Get-APIResourceUrl {
@@ -139,25 +173,87 @@ function Get-APIResourceUrl {
     }
 }
 
+function Send-RequestWithRetries {
+    param (
+        [Parameter(Mandatory)]
+        [int] $MaxRetries,
+        [Parameter(Mandatory)]
+        [int] $DelaySeconds,
+        [Parameter(Mandatory)]
+        [scriptblock] $RequestFactory
+    )
+
+    $client = Get-HttpClient
+    $attempt = 0
+    while ($attempt -lt $MaxRetries) {
+        try {
+            $result = Get-AsyncResult -Task $client.SendAsync((& $RequestFactory))
+
+            if(Test-Result -Result $result) {
+                return $result
+            }
+            $attempt++
+        }
+        catch {
+            $attempt++
+            Write-Verbose "Exception on attempt $attempt : $($_.Exception.Message)"
+            if($attempt -ge $MaxRetries) {
+                throw "Request failed after $MaxRetries attempts. Last error: $($_.Exception.Message)"
+            }
+        }
+
+        if ($attempt -ge $MaxRetries) {
+            Write-Host "Request failed after $MaxRetries attempts." -ForegroundColor Red
+            Assert-Result -Result $result
+        }
+        Write-Verbose "Request failed on attempt $attempt. Retrying in $DelaySeconds seconds..."
+        Start-Sleep -Seconds $DelaySeconds
+    }
+}
+
 function Test-Result {
     param (
         [Parameter(Mandatory)]
         $Result
     )
 
-    if ($result.StatusCode -ne [System.Net.HttpStatusCode]::OK)
+    if (-not($Result.IsSuccessStatusCode))
     {
-        $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+        $contentString = Get-AsyncResult -Task $Result.Content.ReadAsStringAsync()
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($result.StatusCode): $($errorMessage). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            return $false
         }
         else
         {
-            Write-Verbose "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($result.StatusCode): $($result.ReasonPhrase). Correlation ID: $($($result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            return $false
+        }
+    }
+    return $true
+}
+
+function Assert-Result {
+    param (
+        [Parameter(Mandatory)]
+        $Result
+    )
+
+    if (-not($Result.IsSuccessStatusCode))
+    {
+        $contentString = Get-AsyncResult -Task $Result.Content.ReadAsStringAsync()
+        if ($contentString)
+        {
+            $errorMessage = $contentString.Trim('.')
+            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+        }
+        else
+        {
+            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
     }
 }
