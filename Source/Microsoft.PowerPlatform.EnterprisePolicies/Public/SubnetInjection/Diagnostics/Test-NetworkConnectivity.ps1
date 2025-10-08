@@ -30,6 +30,9 @@ Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -
 
 .EXAMPLE
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+
+.EXAMPLE
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
 #>
 function Test-NetworkConnectivity{
     param(
@@ -48,7 +51,10 @@ function Test-NetworkConnectivity{
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the connectivity. Defaults to the region the environment is in.")]
+        [string]$Region
     )
 
     $ErrorActionPreference = "Stop"
@@ -59,6 +65,11 @@ function Test-NetworkConnectivity{
 
     $path = "/plex/testConnection"
     $query = "api-version=2024-10-01"
+    if($Region)
+    {
+        $query += "&region=$Region"
+    }
+
     $Body = @{
         Destination = $Destination
         Port = $Port
