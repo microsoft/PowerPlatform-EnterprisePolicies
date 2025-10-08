@@ -59,7 +59,7 @@ function Test-DnsResolution {
     
     $path = "/plex/resolveDns"
     $query = "api-version=2024-10-01"
-    if($Region)
+    if(-not([string]::IsNullOrWhiteSpace($Region)))
     {
         $query += "&region=$Region"
     }
