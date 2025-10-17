@@ -6,6 +6,12 @@ parameters:
 steps:
 - checkout: self
 
+- task: UseDotNet@2
+  displayName: Install .NET SDK from global.json
+  inputs:
+    packageType: 'sdk'
+    useGlobalJson: true
+
 - task: NuGetAuthenticate@1
   displayName: 🔐 Nuget Auth
 
@@ -23,12 +29,6 @@ steps:
       targetType: inline
       script: dotnet gitversion -output buildserver
 
-- task: UseDotNet@2
-  displayName: $(stepPrefix) Install .NET SDK from global.json
-  inputs:
-    packageType: 'sdk'
-    useGlobalJson: true
-  
 - task: DotNetCoreCLI@2
   displayName: 🔄 Dotnet restore
   env:
