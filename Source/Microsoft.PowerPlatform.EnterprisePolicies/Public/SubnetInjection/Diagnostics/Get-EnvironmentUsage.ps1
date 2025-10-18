@@ -24,6 +24,9 @@ Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
 .EXAMPLE
 Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+
+.EXAMPLE
+Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
 #>
 function Get-EnvironmentUsage{
     param(
@@ -35,7 +38,10 @@ function Get-EnvironmentUsage{
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure region to filter the usage by. Defaults to the region the environment is in.")]
+        [string]$Region
     )
 
     $ErrorActionPreference = "Stop"
@@ -47,7 +53,7 @@ function Get-EnvironmentUsage{
     $path = "/plex/networkUsage"
 
     $query = "api-version=2024-10-01"
-    if($Region)
+    if(-not([string]::IsNullOrWhiteSpace($Region)))
     {
         $query += "&region=$Region"
     }
