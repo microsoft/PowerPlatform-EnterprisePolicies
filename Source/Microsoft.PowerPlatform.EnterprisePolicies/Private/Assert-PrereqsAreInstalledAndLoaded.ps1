@@ -74,7 +74,7 @@ foreach ($module in $modules) {
         }
     }
     else {
-        $availableModule = Get-InstalledModule -Name $module.Name -ErrorAction SilentlyContinue | Where-Object { [version]$_.Version -eq [version]$module.RequiredVersion }
+        $availableModule = Get-InstalledModule -Name $module.Name -AllVersions -ErrorAction SilentlyContinue | Where-Object { [version]$_.Version -eq [version]$module.RequiredVersion }
         if(-Not ($availableModule)) {
             Read-InstallMissingPrerequisite -Module $module
         }
