@@ -14,7 +14,7 @@ function Read-InstallMissingPrerequisite {
         $Module
     )
 
-    $response = Read-Host "The $($Module.Name) module is not installed or the required minimum version [$($Module.MinimumVersion)] is not installed. Do you want to install it now? (Y/N)"
+    $response = Read-Host "The $($Module.Name) module is not installed or the required version [$($Module.RequiredVersion)] is not installed. Do you want to install it now? (Y/N)"
     if ($response -eq 'Y' -or $response -eq 'y') {
         if(-not(Test-AdminRights)) {
             throw "You must run this script as an Administrator to install the required module."
