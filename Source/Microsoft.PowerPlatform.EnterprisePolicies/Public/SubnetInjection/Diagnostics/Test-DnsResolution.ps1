@@ -72,5 +72,11 @@ function Test-DnsResolution {
         return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Post) -Content ($Body | ConvertTo-Json) -Endpoint $Endpoint
     }
     
-    Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+    $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+    if($contentString.startsWith('"')){
+        $contentString | ConvertFrom-Json
+    }
+    else{
+        $contentString
+    }
 }
