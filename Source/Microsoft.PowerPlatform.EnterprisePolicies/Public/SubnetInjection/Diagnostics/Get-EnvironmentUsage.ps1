@@ -69,4 +69,5 @@ function Get-EnvironmentUsage{
         return $networkUsage
     } else {
         throw "Failed to retrieve the environment region."
-    }}
+    }
+}

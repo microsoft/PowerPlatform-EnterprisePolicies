@@ -36,7 +36,7 @@ Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -
 #>
 function Test-NetworkConnectivity{
     param(
-        [Parameter(Mandatory, HelpMessage="The Id of the environment to get usage for.")]
+        [Parameter(Mandatory, HelpMessage="The Id of the environment to test connectivity for.")]
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
 
@@ -80,10 +80,12 @@ function Test-NetworkConnectivity{
     }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-    if($contentString.startsWith('"')){
+    
+    $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+    if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
         $contentString | ConvertFrom-Json
     }
-    else{
+    else {
         $contentString
     }
 }
