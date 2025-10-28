@@ -81,7 +81,6 @@ function Test-NetworkConnectivity{
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
     
-    $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
     if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
         $contentString | ConvertFrom-Json
     }

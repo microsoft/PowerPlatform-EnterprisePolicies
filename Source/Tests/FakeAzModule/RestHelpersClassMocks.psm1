@@ -1,9 +1,26 @@
+class HttpClientResultHeaderMock
+{
+    [hashtable]$Headers
+    HttpClientResultHeaderMock($ContentType)
+    {
+        $this.Headers = @{
+            "Content-Type" = $ContentType
+        }
+    }
+    [string]GetValues($Header)
+    {
+        return $this.Headers[$Header]
+    }
+}
+
 class HttpClientResultContentMock
 {
     [string]$ReadAsyncValue
-    HttpClientResultContentMock($ReadAsyncValue)
+    [HttpClientResultHeaderMock]$Headers
+    HttpClientResultContentMock($ReadAsyncValue, $ContentType)
     {
         $this.ReadAsyncValue = $ReadAsyncValue
+        $this.Headers = [HttpClientResultHeaderMock]::new($ContentType)
     }
 
     [string]ReadAsStringAsync()
@@ -15,14 +32,22 @@ class HttpClientResultContentMock
 class HttpClientResultMock
 {
     [string]$ReadContent
+    [string]$ContentType
+    
     HttpClientResultMock($ReadContent)
     {
         $this.ReadContent = $ReadContent
+        $this.ContentType = ""
+    }
+    HttpClientResultMock($ReadContent, $ContentType)
+    {
+        $this.ReadContent = $ReadContent
+        $this.ContentType = $ContentType
     }
 
     [System.Net.HttpStatusCode]$StatusCode = [System.Net.HttpStatusCode]::OK
     [string]$ReasonPhrase = "mock http error message"
-    [HttpClientResultContentMock]$Content = [HttpClientResultContentMock]::new($ReadContent)
+    [HttpClientResultContentMock]$Content = [HttpClientResultContentMock]::new($ReadContent, $ContentType)
 }
 
 class HttpClientMock
@@ -35,6 +60,7 @@ class HttpClientMock
 
 
 $ExportableTypes =@(
+    [HttpClientResultHeaderMock]
     [HttpClientResultContentMock]
     [HttpClientResultMock]
     [HttpClientMock]
