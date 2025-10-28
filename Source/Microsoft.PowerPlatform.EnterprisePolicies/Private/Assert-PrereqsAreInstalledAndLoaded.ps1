@@ -14,13 +14,13 @@ function Read-InstallMissingPrerequisite {
         $Module
     )
 
-    $response = Read-Host "The $($Module.Name) module is not installed or the required minimum version [$($Module.MinimumVersion)] is not installed. Do you want to install it now? (Y/N)"
+    $response = Read-Host "The $($Module.Name) module is not installed or the required version [$($Module.RequiredVersion)] is not installed. Do you want to install it now? (Y/N)"
     if ($response -eq 'Y' -or $response -eq 'y') {
+        if(-not(Test-AdminRights)) {
+            throw "You must run this script as an Administrator to install the required module."
+        }
         try {
-            if(-not (Test-AdminRights)) {
-                throw "You must run this script as an Administrator to install the required module."
-            }
-            Install-Module -Name $Module.Name -MinimumVersion $Module.MinimumVersion -AllowClobber -Force
+            Install-Module -Name $Module.Name -RequiredVersion $Module.RequiredVersion -AllowClobber -Force
             Write-Host "$($Module.Name) module installed successfully." -ForegroundColor Green
         } catch {
             throw "Failed to install $($Module.Name) module. Please install it manually."
@@ -48,24 +48,33 @@ if ($Global:PrereqsChecked) {
 }
 
 $modules = [PSCustomObject]@{
-    Name = "Az"
-    MinimumVersion = "12.3.0"
+    Name = "Az.Accounts"
+    RequiredVersion = "5.3.0"
+}, [PSCustomObject]@{
+    Name = "Az.Resources"
+    RequiredVersion = "8.1.1"
+}, [PSCustomObject]@{
+    Name = "Az.KeyVault"
+    RequiredVersion = "6.4.0"
+}, [PSCustomObject]@{
+    Name = "Az.Network"
+    RequiredVersion = "7.22.0"
 }, [PSCustomObject]@{
     Name = "Microsoft.PowerApps.Administration.PowerShell"
-    MinimumVersion = "2.0.212"
+    RequiredVersion = "2.0.214"
 }, [PSCustomObject]@{
     Name = "Microsoft.PowerApps.PowerShell"
-    MinimumVersion = "1.0.40"
+    RequiredVersion = "1.0.40"
 }
 foreach ($module in $modules) {
     if($PSVersionTable.PSEdition -eq "Core") {
-        $availableModule = Get-Module -Name $module.Name -ListAvailable | Where-Object { [version]$_.Version -ge [version]$module.MinimumVersion }
+        $availableModule = Get-Module -Name $module.Name -ListAvailable | Where-Object { [version]$_.Version -eq [version]$module.RequiredVersion }
         if(-Not ($availableModule)) {
             Read-InstallMissingPrerequisite -Module $module
         }
     }
     else {
-        $availableModule = Get-InstalledModule -Name $module.Name -ErrorAction SilentlyContinue | Where-Object { [version]$_.Version -ge [version]$module.MinimumVersion }
+        $availableModule = Get-InstalledModule -Name $module.Name -AllVersions -ErrorAction SilentlyContinue | Where-Object { [version]$_.Version -eq [version]$module.RequiredVersion }
         if(-Not ($availableModule)) {
             Read-InstallMissingPrerequisite -Module $module
         }
