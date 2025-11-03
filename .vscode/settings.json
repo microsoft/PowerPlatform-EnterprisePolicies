@@ -1,4 +1,5 @@
 {
     "terminal.integrated.defaultProfile.windows": "PowerShell",
-    "azure-pipelines.1ESPipelineTemplatesSchemaFile": true
+    "azure-pipelines.1ESPipelineTemplatesSchemaFile": true,
+    "powershell.pester.useLegacyCodeLens": false
 }
