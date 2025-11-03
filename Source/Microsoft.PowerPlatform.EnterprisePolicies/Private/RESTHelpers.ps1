@@ -265,14 +265,58 @@ function ConvertFrom-JsonToClass {
     )
 
     $data = $Json | ConvertFrom-Json
-    $instance = [Activator]::CreateInstance($ClassType)
+
+    # Handle array types directly
+    if ($ClassType.IsArray) {
+        $elementType = $ClassType.GetElementType()
+        $itemList = @()
+        foreach ($item in $data) {
+            $itemJson = $item | ConvertTo-Json -Depth 10
+            $itemList += ConvertFrom-JsonToClass -Json $itemJson -ClassType $elementType
+        }
+        return ,$itemList  
+    } else {
+        $instance = [Activator]::CreateInstance($ClassType)
+    }
 
     foreach ($property in $ClassType.GetProperties()) {
         $name = $property.Name
+        $type = Get-UnderlyingType $property.PropertyType
         if ($data.PSObject.Properties[$name]) {
-            $instance.$name = $data.$name
+            if ($type -eq [hashtable] -or $type.FullName -eq 'System.Collections.Hashtable') {
+                $instance.$name = ConvertTo-Hashtable $data.$name
+            }
+            elseif ($type.IsClass -and $type -ne [string]) {
+                $nestedJson = $data.$name | ConvertTo-Json -Depth 10
+                $instance.$name = ConvertFrom-JsonToClass -Json $nestedJson -ClassType $type
+            }
+            elseif ($type.IsEnum){
+                $instance.$name = [System.Enum]::Parse($type, $data.$name)
+            }
+            else {
+                $instance.$name = $data.$name
+            }
         }
     }
 
     return $instance
+}
+
+
+function Get-UnderlyingType([type]$t) {
+    if ($t.IsGenericType -and $t.GetGenericTypeDefinition().FullName -eq 'System.Nullable`1') {
+        return $t.GetGenericArguments()[0]
+    }
+    return $t
+}
+
+function ConvertTo-Hashtable($obj) {
+    if ($obj -is [hashtable]) {
+        return $obj
+    }
+    $hash = @{}
+    foreach ($property in $obj.PSObject.Properties) {
+        $hash[$property.Name] = $property.Value
+    }
+    return $hash
 }

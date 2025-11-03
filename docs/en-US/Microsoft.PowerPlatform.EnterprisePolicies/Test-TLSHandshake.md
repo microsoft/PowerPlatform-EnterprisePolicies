@@ -6,22 +6,22 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 11/03/2025
 PlatyPS schema version: 2024-05-01
-title: Test-DnsResolution
+title: Test-TLSHandshake
 ---
 
-# Test-DnsResolution
+# Test-TLSHandshake
 
 ## SYNOPSIS
 
-Tests the DNS resolution for a given hostname in a specified environment.
+Attempts to establish a TLS handshake with the provided destination and port.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Test-DnsResolution [-EnvironmentId] <string> [-HostName] <string> [[-TenantId] <string>]
- [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [<CommonParameters>]
+Test-TLSHandshake [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
+ [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,7 +31,8 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Tests the DNS resolution for a given hostname in a specified environment.
+Tests that a TLS handshake can be established against the provided destination and port.
+
 This function is executed in the context of your delegated subnet in the region that you have specified.
 If the region is not specified, it defaults to the region of the environment.
 
@@ -39,63 +40,25 @@ If the region is not specified, it defaults to the region of the environment.
 
 ### EXAMPLE 1
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
 ### EXAMPLE 2
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
 
 ### EXAMPLE 3
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+
+### EXAMPLE 4
+
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
 
 ## PARAMETERS
 
-### -Endpoint
+### -Destination
 
-The BAP endpoint to connect to. Default is 'prod'.
-
-```yaml
-Type: BAPEndpoint
-DefaultValue: prod
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 3
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -EnvironmentId
-
-The Id of the environment to get usage for.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -HostName
-
-The hostname that DNS should attempt to resolve. IP addresses are not supported.
+The destination that should be used to attempt the handshake for. This should only be a hostname.
 
 ```yaml
 Type: System.String
@@ -114,9 +77,30 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Region
+### -Endpoint
 
-The Azure region in which to test the resolution. Defaults to the region the environment is in.
+The BAP endpoint to connect to. Default is 'prod'.
+
+```yaml
+Type: BAPEndpoint
+DefaultValue: prod
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 4
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -EnvironmentId
+
+The Id of the environment to test the handshake for.
 
 ```yaml
 Type: System.String
@@ -125,7 +109,49 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: 0
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Port
+
+The port that should be used to attempt the handshake for. Defaults to 443
+
+```yaml
+Type: System.String
+DefaultValue: 443
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 2
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Region
+
+The Azure region in which to test the handshake. Defaults to the region the environment is in.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 5
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -146,7 +172,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -167,9 +193,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
-
-A string representing the result of the DNS resolution. Whether it is successful or not
+### TLSConnectivityInformation
+A class representing the result of the TLS handshake. [TLSConnectivityInformation](TLSConnectivityInformation.md)
 
 {{ Fill in the Description }}
 

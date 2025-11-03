@@ -6,6 +6,26 @@ OF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, O
 THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
+class CertificateInformation{
+    [string] $Issuer
+    [string] $Subject
+    [string] $SignatureAlgorithm
+    [bool] $IsExpired
+}
+
+class SSLInformation{
+    [string] $Protocols
+    [bool] $Success
+    [string] $SslErrors
+    [string] $TLSCipherSuites
+}
+
+class TLSConnectivityInformation{
+    [bool] $TCPConnectivity
+    [CertificateInformation] $Certificate
+    [SSLInformation] $SSLWithoutCRL
+    [SSLInformation] $SSLWithCRL
+}
 
 class VnetInformation{
     [string] $VnetId
@@ -45,6 +65,9 @@ enum LinkOperation{
 
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
+    [TLSConnectivityInformation]
+    [SSLInformation]
+    [CertificateInformation]
     [VnetInformation]
     [PolicyType]
     [BAPEndpoint]

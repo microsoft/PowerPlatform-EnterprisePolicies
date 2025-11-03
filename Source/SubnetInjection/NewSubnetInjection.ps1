@@ -28,7 +28,7 @@ function NewSubnetInjection
     )
     
     if (![bool]$endpoint) {
-        $endpoint = "prod"
+        $endpoint = "tip1"
     }
     LinkPolicyToEnv -policyType vnet -environmentId $environmentId -policyArmId $policyArmId -endpoint $endpoint 
 }

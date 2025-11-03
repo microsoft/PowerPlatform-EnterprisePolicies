@@ -6,22 +6,21 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 11/03/2025
 PlatyPS schema version: 2024-05-01
-title: Get-EnvironmentRegion
+title: Test-AccountPermissions
 ---
 
-# Get-EnvironmentRegion
+# Test-AccountPermissions
 
 ## SYNOPSIS
 
-Retrieves the region that the specified environment is deployed in.
+Validates that the account has the correct permissions to run diagnostic commands.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Get-EnvironmentRegion [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
- [<CommonParameters>]
+Test-AccountPermissions [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,18 +30,18 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Retrieves the region that the specified environment is deployed in.
-Note, the region is the Power Platform region, but it is aligned with an Azure region.
+Tests that the generated Bearer token for the logged in account has the claim that is necessary to be able to call the diagnostic APIs.
+The necessary permission is the Power Platform Administrator role which is assigned through the Entra portal.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000"
+Test-AccountPermissions
 
 ### EXAMPLE 2
 
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
 
 ## PARAMETERS
 
@@ -57,29 +56,8 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: 1
   IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -EnvironmentId
-
-The Id of the environment to get the region for.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 0
-  IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -99,7 +77,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: 0
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -120,8 +98,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
-A string representing the region of the environment.
+### System.Boolean
+Whether the account has the required permissions or not.
 
 {{ Fill in the Description }}
 
