@@ -45,9 +45,6 @@ enum LinkOperation{
 
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
-    [TLSConnectivityInformation]
-    [SSLInformation]
-    [CertificateInformation]
     [VnetInformation]
     [PolicyType]
     [BAPEndpoint]
