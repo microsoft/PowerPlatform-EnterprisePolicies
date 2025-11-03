@@ -47,22 +47,22 @@ function Test-AccountPermissions{
         throw "Token is not in an expected format."
     }
 
-
     $pad = '=' * ((4 - $parts[1].Length % 4) % 4)
     $base64 = ($parts[1] + $pad).Replace('-', '+').Replace('_', '/')
 
     $payload = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($base64)) | ConvertFrom-Json
 
     if(-not($payload.wids)){
-        throw "Token does not contain wids claim. Does user have any built-in roles assigned in Entra?"
+        Write-Host "Token does not contain wids claim. Check that the user has roles assigned in Entra." -ForegroundColor Red
+        return $false
     }
 
     if($payload.wids | Where-Object { $_ -eq "11648597-926c-4cf3-9c36-bcebb0ba8dcc"} ){
-        Write-Verbose "Token contains Power Platform Administrator role."
+        Write-Host "Token contains Power Platform Administrator role." -ForegroundColor Green
         return $true
     }
     else {
-        Write-Verbose "Token does not contain required Power Platform Administrator role."
+        Write-Host "Token does not contain required Power Platform Administrator role." -ForegroundColor Red
         return $false
     }
 }
