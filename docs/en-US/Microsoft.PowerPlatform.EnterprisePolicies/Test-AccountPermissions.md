@@ -99,7 +99,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### System.Boolean
-Whether the account has the required permissions or not.
+Whether the account has the required permissions.
 
 {{ Fill in the Description }}
 

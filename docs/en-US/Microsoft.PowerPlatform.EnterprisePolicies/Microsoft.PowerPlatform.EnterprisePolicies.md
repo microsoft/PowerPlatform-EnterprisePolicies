@@ -38,10 +38,6 @@ Tests the DNS resolution for a given hostname in a specified environment.
 
 Tests the connectivity to a given service in a specified environment.
 
-### [Test-TLSHandshake](Test-TLSHandshake.md)
-
-Attempts to establish a TLS handshake with the provided destination and port.
-
 ## Types
 
 ### Classes

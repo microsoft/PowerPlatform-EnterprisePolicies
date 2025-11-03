@@ -17,7 +17,7 @@ The necessary permission is the Power Platform Administrator role which is assig
 
 .OUTPUTS
 System.Boolean
-Whether the account has the required permissions or not.
+Whether the account has the required permissions.
 
 .EXAMPLE
 Test-AccountPermissions
