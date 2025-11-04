@@ -354,6 +354,12 @@ Import-Module .\Microsoft.PowerPlatform.EnterprisePolicies
 
 This will import the module, validate prerequisites and make the commands available for use. If you are missing any prerequisites, the module will inform you and ask for permission to install them.
 
+### Permissions required
+
+In order to run these diagnostics commands the user used to invoke the commands must have the Power Platform Administrator role.
+
+To validate that the role is correctly assigned you can use the `Test-AccountPermissions` command.
+
 ### Running the diagnostic functions
 
 Once your module has been imported into your PowerShell session, you can now run the diagnostic functions as needed. For example, to run the `Get-EnvironmentUsage` function, you would use:

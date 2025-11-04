@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 10/07/2025
+ms.date: 11/03/2025
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -25,6 +25,10 @@ Retrieves the region that the specified environment is deployed in.
 ### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
 
 Retrieves the current usage of the specified environment.
+
+### [Test-AccountPermissions](Test-AccountPermissions.md)
+
+Validates that the account has the correct permissions to run diagnostic commands.
 
 ### [Test-DnsResolution](Test-DnsResolution.md)
 
