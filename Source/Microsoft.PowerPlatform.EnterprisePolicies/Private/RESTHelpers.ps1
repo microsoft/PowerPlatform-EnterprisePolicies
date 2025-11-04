@@ -302,7 +302,6 @@ function ConvertFrom-JsonToClass {
     return $instance
 }
 
-
 function Get-UnderlyingType([type]$t) {
     if ($t.IsGenericType -and $t.GetGenericTypeDefinition().FullName -eq 'System.Nullable`1') {
         return $t.GetGenericArguments()[0]
