@@ -17,7 +17,7 @@ class SSLInformation{
     [string] $Protocols
     [bool] $Success
     [string] $SslErrors
-    [string] $TLSCipherSuites
+    [string] $CipherSuite
 }
 
 class TLSConnectivityInformation{
