@@ -45,9 +45,9 @@ This class does not define any methods.
 ## EXAMPLES
 
 ```powershell
-$connectivity = [TLSConnectivityInformation]::new()
-$connectivity.TCPConnectivity = $true
-$connectivity.Certificate = [CertificateInformation]::new()
-$connectivity.SSLWithCRL = [SSLInformation]::new()
-$connectivity.SSLWithoutCRL = [SSLInformation]::new()
+$certInfo = [CertificateInformation]::new()
+$certInfo.Issuer = "CN=Microsoft Azure RSA TLS Issuing CA 08, O=Microsoft Corporation, C=US"
+$certInfo.Subject = "CN=vault.azure.net, O=Microsoft Corporation, L=Redmond, S=WA, C=US"
+$certInfo.SignatureAlgorithm = "sha384RSA"
+$certInfo.IsExpired = $false
 ```
