@@ -27,6 +27,9 @@ Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostNa
 
 .EXAMPLE
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+
+.EXAMPLE
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
 #>
 function Test-DnsResolution {
     param(
@@ -42,7 +45,10 @@ function Test-DnsResolution {
         [string]$TenantId,
     
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the resolution. Defaults to the region the environment is in.")]
+        [string]$Region
     )
     
     $ErrorActionPreference = "Stop"
@@ -51,19 +57,26 @@ function Test-DnsResolution {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
     
-    $client = New-HttpClient
-    
-    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/resolveDns?api-version=2024-10-01"
+    $path = "/plex/resolveDns"
+    $query = "api-version=2024-10-01"
+    if(-not([string]::IsNullOrWhiteSpace($Region)))
+    {
+        $query += "&region=$Region"
+    }
     
     $Body = @{
         HostName = $HostName
     }
     
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -Content ($Body | ConvertTo-Json)
+    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
+        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Post) -Content ($Body | ConvertTo-Json) -Endpoint $Endpoint
+    }
     
-    $result = Get-AsyncResult -Task $client.SendAsync($request)
-    
-    Test-Result -Result $result
-    
-    Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+    $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+    if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
+        $contentString | ConvertFrom-Json
+    }
+    else {
+        $contentString
+    }
 }

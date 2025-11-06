@@ -16,6 +16,8 @@ Properties {
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $ScriptsRootDir = "$PSScriptRoot\..\Source\Microsoft.PowerPlatform.EnterprisePolicies\Public\SubnetInjection"
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
+    $PublicScriptsDir = "$PSScriptRoot\..\Source\Microsoft.PowerPlatform.EnterprisePolicies\Public"
+    [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
 
     $BuildVersion = "1.0.0"
     if($env:GitVersion_MajorMinorPatch)
@@ -175,10 +177,18 @@ Task PreBuild {
 
 # Executes after the Sign phase of the Build task.
 Task PostBuild {
+    $FunctionsToExport = @()
+    Get-ChildItem $PublicScriptsDir -Recurse -Filter *.ps1 | ForEach-Object {
+        $FunctionsToExport += (Split-Path -Leaf $_.FullName).Split('.')[0]
+    }
+    if($FunctionsToExport.Count -eq 0)
+    {
+        throw "No public functions found to export. Please check that there are .ps1 files under the Public folder."
+    }
     $moduleFile = Get-Item "$ReleaseDir\$ModuleName\*.psd1"
     (Get-Content $moduleFile).Replace("ModuleVersion = '1.0.0'", "ModuleVersion = '$BuildVersion'") | Set-Content $moduleFile
     (Get-Content $moduleFile).Replace("ReleaseNotes = ''", "ReleaseNotes = 'https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases/tag/$BuildVersion'") | Set-Content $moduleFile
-
+    (Get-Content $moduleFile).Replace("FunctionsToExport = '*'", "FunctionsToExport = @('$($FunctionsToExport -join "','")')") | Set-Content $moduleFile
     Copy-Item $RepoRootDir\LICENSE $ReleaseDir\$ModuleName\LICENSE.md
 }
 

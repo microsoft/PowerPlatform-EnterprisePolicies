@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 08/29/2025
+ms.date: 11/03/2025
 PlatyPS schema version: 2024-05-01
 title: Test-DnsResolution
 ---
@@ -21,7 +21,7 @@ Tests the DNS resolution for a given hostname in a specified environment.
 
 ```
 Test-DnsResolution [-EnvironmentId] <string> [-HostName] <string> [[-TenantId] <string>]
- [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
+ [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -44,6 +44,10 @@ Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostNa
 ### EXAMPLE 2
 
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+
+### EXAMPLE 3
+
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
 
 ## PARAMETERS
 
@@ -102,6 +106,27 @@ ParameterSets:
 - Name: (All)
   Position: 1
   IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Region
+
+The Azure region in which to test the resolution. Defaults to the region the environment is in.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 4
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false

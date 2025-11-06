@@ -30,10 +30,13 @@ Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -
 
 .EXAMPLE
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+
+.EXAMPLE
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
 #>
 function Test-NetworkConnectivity{
     param(
-        [Parameter(Mandatory, HelpMessage="The Id of the environment to get usage for.")]
+        [Parameter(Mandatory, HelpMessage="The Id of the environment to test connectivity for.")]
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
 
@@ -48,7 +51,10 @@ function Test-NetworkConnectivity{
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the connectivity. Defaults to the region the environment is in.")]
+        [string]$Region
     )
 
     $ErrorActionPreference = "Stop"
@@ -57,20 +63,28 @@ function Test-NetworkConnectivity{
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
-    $client = New-HttpClient
-
-    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/testConnection?api-version=2024-10-01"
+    $path = "/plex/testConnection"
+    $query = "api-version=2024-10-01"
+    if(-not([string]::IsNullOrWhiteSpace($Region)))
+    {
+        $query += "&region=$Region"
+    }
 
     $Body = @{
         Destination = $Destination
         Port = $Port
     }
 
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -Content ($Body | ConvertTo-Json)
+    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
+        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Post) -Content ($Body | ConvertTo-Json) -Endpoint $Endpoint
+    }
 
-    $result = Get-AsyncResult -Task $client.SendAsync($request)
-
-    Test-Result -Result $result
-
-    Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+    $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+    
+    if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
+        $contentString | ConvertFrom-Json
+    }
+    else {
+        $contentString
+    }
 }

@@ -64,6 +64,7 @@
     NestedModules = @('Private\Types.psm1')
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
+    # Created dynamically from list of public scripts at build time. Leaving wildcard for test purposes.
     FunctionsToExport = '*'
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
@@ -90,7 +91,7 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags = @('PowerPlatform', 'Enterprise', 'Policies', 'VNet', 'Subnet', 'Injection', 'Diagnostics')
+            Tags = @('Microsoft', 'PowerPlatform', 'Enterprise', 'Policies', 'VNet', 'Subnet', 'Injection', 'Diagnostics')
 
             # A URL to the license for this module.
             LicenseUri = 'https://github.com/microsoft/PowerPlatform-EnterprisePolicies/blob/main/LICENSE'
@@ -102,6 +103,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
+            # Created dynamically at build time. Links to the github release notes.
             ReleaseNotes = ''
 
         } # End of PSData hashtable

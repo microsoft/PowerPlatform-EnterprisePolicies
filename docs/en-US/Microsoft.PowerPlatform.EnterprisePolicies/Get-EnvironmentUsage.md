@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 09/08/2025
+ms.date: 11/03/2025
 PlatyPS schema version: 2024-05-01
 title: Get-EnvironmentUsage
 ---
@@ -21,7 +21,7 @@ Retrieves the current usage of the specified environment.
 
 ```
 Get-EnvironmentUsage [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
- [<CommonParameters>]
+ [[-Region] <string>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -44,6 +44,10 @@ Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
 ### EXAMPLE 2
 
 Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+
+### EXAMPLE 3
+
+Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
 
 ## PARAMETERS
 
@@ -81,6 +85,27 @@ ParameterSets:
 - Name: (All)
   Position: 0
   IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Region
+
+The Azure region to filter the usage by. Defaults to the region the environment is in.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 3
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false

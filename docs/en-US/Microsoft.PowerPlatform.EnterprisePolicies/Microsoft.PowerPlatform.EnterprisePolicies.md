@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 09/08/2025
+ms.date: 11/03/2025
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -30,9 +30,9 @@ Retrieves the region that the specified environment is deployed in.
 
 Retrieves the current usage of the specified environment.
 
-### [Get-SubnetHistoricalUsage](Get-SubnetHistoricalUsage.md)
+### [Test-AccountPermissions](Test-AccountPermissions.md)
 
-Retrieves the historical network usage of the specified subnet based on enterprise policy id and region.
+Validates that the account has the correct permissions to run diagnostic commands.
 
 ### [Test-DnsResolution](Test-DnsResolution.md)
 

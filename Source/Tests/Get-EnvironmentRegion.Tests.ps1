@@ -19,10 +19,9 @@ Describe 'Get-EnvironmentRegion Tests' {
             $region = "CentralUS"
             $endpoint = [BAPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
-            $mockClient = [HttpClientMock]::new()
-            $mockResult = [HttpClientResultMock]::new($region)
+            $mockResult = [HttpClientResultMock]::new($resultJsonString)
             
-            Mock New-HttpClient { return $mockClient } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Send-RequestWithRetries { return $mockResult } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-JsonRequestMessage { return "message" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AsyncResult { return $region } -ParameterFilter { $task -eq $region } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
