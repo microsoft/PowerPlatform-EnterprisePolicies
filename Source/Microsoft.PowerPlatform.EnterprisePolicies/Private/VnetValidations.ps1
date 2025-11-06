@@ -11,7 +11,7 @@ $supportedVnetLocations = New-Object "System.Collections.Generic.Dictionary[[Str
 $supportedVnetLocations.Add("centraluseuap", "eastus|westus")
 $supportedVnetLocations.Add("eastus2euap", "eastus|westus")
 $supportedVnetLocations.Add("unitedstateseuap", "eastus|westus")
-$supportedVnetLocations.Add("unitedstates", "eastus|westus")
+$supportedVnetLocations.Add("unitedstates", "eastus|westus|centralus|eastus2")
 $supportedVnetLocations.Add("southafrica", "southafricanorth|southafricawest")
 $supportedVnetLocations.Add("uk", "uksouth|ukwest")
 $supportedVnetLocations.Add("japan", "japaneast|japanwest")
