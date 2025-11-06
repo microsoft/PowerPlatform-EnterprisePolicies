@@ -44,15 +44,12 @@ function Get-SubnetHistoricalUsage{
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
-    $client = New-HttpClient
+    $path = "/plex/networkUsage/subnetHistoricalUsage"
+    $query = "api-version=2024-10-01&enterprisePolicyId=$EnterprisePolicyId&region=$Region"
 
-    $uri = "$(Get-TenantRoute -Endpoint $Endpoint -TenantId $TenantId)/plex/networkUsage/subnetHistoricalUsage?api-version=2024-10-01&enterprisePolicyId=$EnterprisePolicyId&region=$Region"
-
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
-
-    $result = Get-AsyncResult -Task $client.SendAsync($request)
-
-    Test-Result -Result $result
+    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
+        return New-HomeTenantRouteRequest -TenantId $TenantId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+    }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 

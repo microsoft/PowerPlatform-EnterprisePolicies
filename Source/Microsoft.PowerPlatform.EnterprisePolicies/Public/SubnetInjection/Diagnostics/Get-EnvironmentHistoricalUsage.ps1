@@ -50,16 +50,14 @@ function Get-EnvironmentHistoricalUsage{
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
-    $client = New-HttpClient
-
-    $show = if ($ShowDetails.IsPresent) { 'true' } else { 'false' }
-    $uri = "$(Get-EnvironmentRoute -Endpoint $Endpoint -EnvironmentId $EnvironmentId)/plex/networkUsage/environmentHistoricalUsage?api-version=2024-10-01&region=$Region&showDetails=$show"
-
-    $request = New-JsonRequestMessage -Uri $uri -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
-
-    $result = Get-AsyncResult -Task $client.SendAsync($request)
-
-    Test-Result -Result $result
+    $path = "/plex/networkUsage/environmentHistoricalUsage"
+    $query = "api-version=2024-10-01&region=$Region"
+    if($ShowDetails){
+        $query += "&showDetails=true"
+    }
+    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
+        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+    }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 

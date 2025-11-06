@@ -78,6 +78,37 @@ function New-EnvironmentRouteRequest
     return $request
 }
 
+function New-HomeTenantRouteRequest
+{
+    param(
+        [Parameter(Mandatory)]
+        [string] $TenantId,
+        [Parameter(Mandatory)]
+        [string] $Path,
+        [Parameter(Mandatory)]
+        [string] $Query,
+        [Parameter(Mandatory)]
+        [BAPEndpoint] $Endpoint,
+        [Parameter(Mandatory=$true)]
+        [System.Security.SecureString] $AccessToken,
+        [Parameter(Mandatory=$false)]
+        [string] $Content,
+        [Parameter(Mandatory=$false)]
+        [System.Net.Http.HttpMethod] $HttpMethod = [System.Net.Http.HttpMethod]::Post
+    )
+
+    $hostName = Get-TenantRouteHostName -Endpoint $Endpoint -TenantId $TenantId
+    $uriBuilder = [System.UriBuilder]::new()
+    $uriBuilder.Scheme = "https"
+    $uriBuilder.Host = $hostName
+    $uriBuilder.Path = $Path
+    $uriBuilder.Query = $Query
+
+    $request = New-JsonRequestMessage -Uri $uriBuilder.Uri.ToString() -AccessToken $AccessToken -Content $Content -HttpMethod $HttpMethod
+    $request.Headers.Host = $hostName
+    return $request
+}
+
 <#
 .SYNOPSIS
     Gets a singleton HttpClient object or creates a new one and clears Default Request Headers
@@ -156,7 +187,7 @@ function Get-EnvironmentRouteHostName {
     return "$remainingEnvId.$shortEnvId.environment.$baseUri"
 }
 
-function Get-TenantRoute {
+function Get-TenantRouteHostName {
     param (
         [Parameter(Mandatory)]
         [string] $TenantId,
@@ -176,7 +207,7 @@ function Get-TenantRoute {
         $shortTenantId = $TenantId.Substring($TenantId.Length - 2, 2)
         $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 2)
     }
-    return "https://il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
+    return "il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
 }
 
 function Get-APIResourceUrl {
