@@ -97,6 +97,8 @@ function CreateSubnetInjectionEnterprisePolicy
             return
         }
 
+        Assert-RegionPairing -primaryVnet $primaryVnet -secondaryVnet $secondaryVnet -policyLocation $enterprisePolicyLocation
+
         $body = GenerateEnterprisePolicyBody -policyType "vnet" -policyLocation $enterprisePolicyLocation -policyName $enterprisePolicyName -primaryVnetId $primaryVnetId -primarySubnetName $primarySubnetName -secondaryVnetId $secondaryVnetId -secondarySubnetName $secondarySubnetName
     }
 
