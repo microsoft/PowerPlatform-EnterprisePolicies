@@ -80,7 +80,7 @@ function Assert-RegionPairing {
 
     foreach ($pair in $vnetPairsAllowed) {
         $regions = $pair.Split("|")
-        if($regions -contains $primaryRegion -and $regions -contains $secondaryRegion) {
+        if($regions -contains $primaryRegion -and $regions -contains $secondaryRegion -and $primaryRegion -ne $secondaryRegion) {
             return
         }
     }
