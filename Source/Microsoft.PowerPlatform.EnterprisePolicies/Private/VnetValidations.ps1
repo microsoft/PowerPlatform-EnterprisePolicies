@@ -11,7 +11,7 @@ $supportedVnetLocations = New-Object "System.Collections.Generic.Dictionary[[Str
 $supportedVnetLocations.Add("centraluseuap", "eastus|westus")
 $supportedVnetLocations.Add("eastus2euap", "eastus|westus")
 $supportedVnetLocations.Add("unitedstateseuap", "eastus|westus")
-$supportedVnetLocations.Add("unitedstates", "eastus|westus")
+$supportedVnetLocations.Add("unitedstates", "eastus|westus;centralus|eastus2")
 $supportedVnetLocations.Add("southafrica", "southafricanorth|southafricawest")
 $supportedVnetLocations.Add("uk", "uksouth|ukwest")
 $supportedVnetLocations.Add("japan", "japaneast|japanwest")
@@ -43,7 +43,7 @@ function Assert-AzureRegionIsSupported
     )
 
     Assert-PowerPlatformRegionIsSupported -PowerPlatformRegion $PowerPlatformRegion
-    $vnetLocationsAllowed = $SupportedVnetLocations[$PowerPlatformRegion].Split("|")
+    $vnetLocationsAllowed = $SupportedVnetLocations[$PowerPlatformRegion].Split(";") | ForEach-Object { $_.Split("|") }
     if (-not($vnetLocationsAllowed.Contains($AzureRegion)))
     {
         throw "The location $AzureRegion is not supported for enterprise policy location $PowerPlatformRegion. The supported vnet location for the enterprise policy location are $($vnetLocationsAllowed -join ",")"
@@ -72,7 +72,7 @@ function Get-SupportedVnetRegionsForPowerPlatformRegion
     )
 
     Assert-PowerPlatformRegionIsSupported -PowerPlatformRegion $PowerPlatformRegion
-    return $SupportedVnetLocations[$PowerPlatformRegion].Split("|")
+    return $SupportedVnetLocations[$PowerPlatformRegion].Split(";") | ForEach-Object { $_.Split("|") }
 }
 
 function Get-Vnet{
