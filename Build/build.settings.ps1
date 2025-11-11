@@ -212,6 +212,15 @@ Task PostBuildHelp -requiredVariables DocsRootDir, ModuleName, DefaultLocale{
 
 The `NetworkUsage` class represents metadata about the network configuration of a Power Platform environment.
 
+#### [TLSConnectivityInformation](TLSConnectivityInformation.md)
+A class representing the result of the TLS handshake.
+
+#### [SSLInformation](SSLInformation.md)
+The `SSLInformation` class contains detailed information on the TLS handshake attempt.
+
+#### [CertificateInformation](CertificateInformation.md)
+The `CertificateInformation` class contains detailed information about the certificate presented during the TLS handshake.
+
 ### Enums
 
 #### [BAPEndpoint](BAPEndpoint.md)
