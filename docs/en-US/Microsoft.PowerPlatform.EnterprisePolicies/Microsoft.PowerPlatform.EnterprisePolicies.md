@@ -18,6 +18,10 @@ Microsoft PowerPlatform Enterprise policies module
 
 ## Microsoft.PowerPlatform.EnterprisePolicies
 
+### [Get-EnvironmentHistoricalUsage](Get-EnvironmentHistoricalUsage.md)
+
+Retrieves the historical network usage of the specified environment.
+
 ### [Get-EnvironmentRegion](Get-EnvironmentRegion.md)
 
 Retrieves the region that the specified environment is deployed in.

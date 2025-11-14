@@ -16,9 +16,7 @@ Describe 'Get-EnvironmentRegion Tests' {
     Context 'Testing Get-EnvironmentRegion' {
         It 'Returns region for a valid environment' {
             
-            $resultClass = [NetworkUsage]::new()
-            $resultClass.AzureRegion = "Central US"
-            $resultJsonString = ($resultClass | ConvertTo-Json)
+            $region = "CentralUS"
             $endpoint = [BAPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $mockResult = [HttpClientResultMock]::new($resultJsonString)
@@ -26,11 +24,11 @@ Describe 'Get-EnvironmentRegion Tests' {
             Mock Send-RequestWithRetries { return $mockResult } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-JsonRequestMessage { return "message" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AsyncResult { return $resultJsonString } -ParameterFilter { $task -eq $resultJsonString } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult { return $region } -ParameterFilter { $task -eq $region } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             
             $result = Get-EnvironmentRegion -Endpoint $endpoint -EnvironmentId $environmentId
 
-            $result | Should -Be $resultClass.AzureRegion
+            $result | Should -Be $region
         }
     }
 }
