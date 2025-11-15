@@ -43,22 +43,13 @@ function Get-EnvironmentRegion{
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
-    $path = "/plex/networkUsage"
-
+    $path = "/plex/getEnvironmentRegion"
     $query = "api-version=2024-10-01"
 
     $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
         return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
-
     }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-
-    if($contentString) {
-        [NetworkUsage] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([NetworkUsage])
-        Write-Verbose "Your environment is located in region: [$($networkUsage.AzureRegion)]"
-        return $networkUsage.AzureRegion
-    } else {
-        throw "Failed to retrieve the environment region."
-    }
+    Write-Verbose "Your environment is located in region: [$contentString]"
 }
