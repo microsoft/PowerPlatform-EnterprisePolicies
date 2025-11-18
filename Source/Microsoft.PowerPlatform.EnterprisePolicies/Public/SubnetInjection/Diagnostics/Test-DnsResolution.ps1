@@ -74,9 +74,13 @@ function Test-DnsResolution {
     
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
     if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
-        $contentString | ConvertFrom-Json
+        try{
+            return ConvertFrom-Json -InputObject $contentString
+        } catch {
+            # If JSON conversion fails, return the raw string
+            return $contentString
+        }
     }
-    else {
-        $contentString
-    }
+
+    return $contentString
 }
