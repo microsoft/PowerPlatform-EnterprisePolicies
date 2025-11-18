@@ -87,7 +87,7 @@ function Test-NetworkConnectivity{
         } catch {
             # If JSON conversion fails, return the raw string
             return $contentString
-        }    
+        }
     }
     else {
         return $contentString
