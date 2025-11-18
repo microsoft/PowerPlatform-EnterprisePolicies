@@ -12,7 +12,16 @@ $Global:ModuleManifestFilePath = "$Global:ModuleManifestPath\$ModuleManifestName
 $Global:ModuleScriptsPaths = @("$PSScriptRoot\..\Microsoft.PowerPlatform.EnterprisePolicies\Public")
 $Global:InPesterExecution = $true
 
-$packagesDir = Resolve-Path -Path "$HOME\.nuget\packages"
+
+$packagesDir = $env:NUGET_PACKAGES
+if (-not $packagesDir) {
+    $packagesDir = Resolve-Path -Path "$HOME\.nuget\packages"
+}
+
+if (-not (Test-Path $packagesDir)) {
+    throw "NuGet global packages folder not found: $packagesDir"
+}
+
 $loadNugetModules = @('Pester')
 foreach($loadModule in $loadNugetModules) {
     $modulePath = Join-Path -Path $packagesDir -ChildPath "$loadModule"
