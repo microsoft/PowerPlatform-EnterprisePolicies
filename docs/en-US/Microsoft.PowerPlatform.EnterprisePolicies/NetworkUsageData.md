@@ -49,5 +49,5 @@ $networkUsageData = [NetworkUsageData]::new()
 $networkUsageData.Timestamp = "2025-09-03T00:09:00.2389538+00:00"
 $networkUsageData.NormalizedTimestamp = "2025-09-03T00:00:00.0000000+00:00"
 $networkUsageData.TotalIpUsage = 10
-$networkUsageData.IpAllocations = @{ 'Diagnostics' = 5, 'Copilot Studio' = 5 }
+$networkUsageData.IpAllocations = @{ 'Diagnostics' = 5; 'Copilot Studio' = 5 }
 ```
