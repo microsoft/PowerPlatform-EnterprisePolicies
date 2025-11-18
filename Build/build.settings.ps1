@@ -214,6 +214,10 @@ The `NetworkUsage` class represents metadata about the network configuration of 
 
 ### Enums
 
+#### [AzureEnvironment](AzureEnvironment.md)
+
+Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
+
 #### [BAPEndpoint](BAPEndpoint.md)
 
 Represents the different BAP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.

@@ -9,22 +9,30 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 function Connect-Azure {
     param(
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ParameterSetName = 'ByEndpoint')]
         [ValidateNotNullOrEmpty()]
         [BAPEndpoint]$Endpoint,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory, ParameterSetName = 'ByEnvironment')]
+        [ValidateNotNullOrEmpty()]
+        [AzureEnvironment] $AzureEnvironment,
+        [Parameter(Mandatory=$false, ParameterSetName = 'ByEndpoint')]
+        [Parameter(Mandatory=$false, ParameterSetName = 'ByEnvironment')]
         [string]$TenantId = $null,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false, ParameterSetName = 'ByEndpoint')]
+        [Parameter(Mandatory=$false, ParameterSetName = 'ByEnvironment')]
         [string]$AuthScope = $null,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$false, ParameterSetName = 'ByEndpoint')]
+        [Parameter(Mandatory=$false, ParameterSetName = 'ByEnvironment')]
         [switch]$Force
     )
 
-    $environment = switch ($Endpoint) {
-        ([BAPEndpoint]::china) { "AzureChinaCloud" }
-        ([BAPEndpoint]::dod) { "AzureUSGovernment" }
-        ([BAPEndpoint]::usgovhigh) { "AzureUSGovernment" }
-        Default { "AzureCloud" }
+    if($PSCmdlet.ParameterSetName -eq 'ByEndpoint') {
+        $AzureEnvironment = switch ($Endpoint) {
+            ([BAPEndpoint]::china) { "AzureChinaCloud" }
+            ([BAPEndpoint]::dod) { "AzureUSGovernment" }
+            ([BAPEndpoint]::usgovhigh) { "AzureUSGovernment" }
+            Default { "AzureCloud" }
+        }
     }
 
     $context = Get-AzContext -ListAvailable
@@ -32,26 +40,26 @@ function Connect-Azure {
 
     if(-not($Force) -and [string]::IsNullOrWhiteSpace($AuthScope) -and $null -ne $context) {
         if([string]::IsNullOrWhiteSpace($TenantId)) {
-            $matchedContext = $context | Where-Object { $_.Environment.Name -eq $environment } | Select-Object -First 1
+            $matchedContext = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment } | Select-Object -First 1
             if($matchedContext) {
                 Set-AzContext -Context $matchedContext
-                Write-Host "Already connected to Azure environment: $environment with account $($matchedContext.Account.Id) with tenants [$($matchedContext.Account.Tenants -join ",")]" -ForegroundColor Yellow
+                Write-Host "Already connected to Azure environment: $AzureEnvironment with account $($matchedContext.Account.Id) with tenants [$($matchedContext.Account.Tenants -join ",")]" -ForegroundColor Yellow
                 $foundContext = $true
             }
         }
         else {
             # Prioritize the home tenant if it exists
-            $homeTenantContext = $context | Where-Object { $_.Environment.Name -eq $environment -and $_.Tenant.TenantCategory -eq "Home" -and $_.Tenant.Id -eq $TenantId } | Select-Object -First 1
+            $homeTenantContext = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Tenant.TenantCategory -eq "Home" -and $_.Tenant.Id -eq $TenantId } | Select-Object -First 1
             if($homeTenantContext) {
                 Set-AzContext -Context $homeTenantContext
-                Write-Host "Already connected to Azure environment: $environment with account $($homeTenantContext.Account.Id) with home tenant Id $TenantId" -ForegroundColor Yellow
+                Write-Host "Already connected to Azure environment: $AzureEnvironment with account $($homeTenantContext.Account.Id) with home tenant Id $TenantId" -ForegroundColor Yellow
                 $foundContext = $true
             }
             else {
-                $tenantContext = $context | Where-Object { $_.Environment.Name -eq $environment -and $_.Account.Tenants -contains $TenantId } | Select-Object -First 1
+                $tenantContext = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Account.Tenants -contains $TenantId } | Select-Object -First 1
                 if ($tenantContext) {
                     Set-AzContext -Context $tenantContext
-                    Write-Host "Already connected to Azure environment: $environment with account $($tenantContext.Account.Id) with tenant Id $TenantId" -ForegroundColor Yellow
+                    Write-Host "Already connected to Azure environment: $AzureEnvironment with account $($tenantContext.Account.Id) with tenant Id $TenantId" -ForegroundColor Yellow
                     $foundContext = $true
                 }
             }
@@ -64,7 +72,7 @@ function Connect-Azure {
 
     Write-Host "Logging In..." -ForegroundColor Green
     $connectParameters = @{
-        Environment = $environment        
+        Environment = $AzureEnvironment        
     }
     if(-not([string]::IsNullOrWhiteSpace($TenantId))) {
         $connectParameters['Tenant'] = $TenantId

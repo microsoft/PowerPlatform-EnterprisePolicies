@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 11/03/2025
+ms.date: 11/17/2025
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -25,6 +25,10 @@ Retrieves the region that the specified environment is deployed in.
 ### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
 
 Retrieves the current usage of the specified environment.
+
+### [New-VnetForSubnetDelegation](New-VnetForSubnetDelegation.md)
+
+Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprisePolicies delegation, or configures an existing VNet/subnet.
 
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
