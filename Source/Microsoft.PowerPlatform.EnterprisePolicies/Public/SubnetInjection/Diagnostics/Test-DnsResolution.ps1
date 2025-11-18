@@ -81,6 +81,7 @@ function Test-DnsResolution {
             return $contentString
         }
     }
-
-    return $contentString
+    else {
+        return $contentString
+    }
 }
