@@ -6,22 +6,22 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 11/17/2025
 PlatyPS schema version: 2024-05-01
-title: Test-NetworkConnectivity
+title: Get-EnvironmentHistoricalUsage
 ---
 
-# Test-NetworkConnectivity
+# Get-EnvironmentHistoricalUsage
 
 ## SYNOPSIS
 
-Tests the connectivity to a given service in a specified environment.
+Retrieves the historical network usage of the specified environment.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Test-NetworkConnectivity [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
- [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [<CommonParameters>]
+Get-EnvironmentHistoricalUsage [-EnvironmentId] <string> [[-TenantId] <string>] [-Region] <string>
+ [[-Endpoint] <BAPEndpoint>] [-ShowDetails] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,51 +31,21 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Tests the connectivity to a given service in a specified environment.
-The connectivity test will attempt to establish a TCP connection to the specified destination on the specified port.
-This function is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+Retrieves the historical usage of the specified environment.
+Note, this is only the historical usage that this environment has.
+It does not include usage from other environments and it does not include any ips that might be reserved by azure.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 ### EXAMPLE 2
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
-
-### EXAMPLE 3
-
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
-
-### EXAMPLE 4
-
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod -ShowDetails
 
 ## PARAMETERS
-
-### -Destination
-
-The destination that should be used to attempt the connection. This can be a hostname or an IP address.
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
 
 ### -Endpoint
 
@@ -88,7 +58,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -100,7 +70,7 @@ HelpMessage: ''
 
 ### -EnvironmentId
 
-The Id of the environment to test connectivity for.
+The Id of the environment to get usage for.
 
 ```yaml
 Type: System.String
@@ -119,30 +89,9 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Port
-
-The port that should be used to attempt the connection. Defaults to 443
-
-```yaml
-Type: System.String
-DefaultValue: 443
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 2
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
 ### -Region
 
-The Azure region in which to test the connectivity. Defaults to the region the environment is in.
+The region that the environment belongs to.
 
 ```yaml
 Type: System.String
@@ -151,7 +100,28 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 5
+  Position: 2
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ShowDetails
+
+Switch to show detailed usage information.
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -172,7 +142,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: 1
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -193,9 +163,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
-
-A string representing the result of the connectivity test.
+### EnvironmentNetworkUsageDocument
+A class representing the historical network usage of the environment. [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
 
 {{ Fill in the Description }}
 
