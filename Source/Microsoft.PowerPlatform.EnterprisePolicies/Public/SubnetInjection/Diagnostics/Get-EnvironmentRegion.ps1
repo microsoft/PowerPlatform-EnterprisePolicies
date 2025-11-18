@@ -51,10 +51,6 @@ function Get-EnvironmentRegion{
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
-    if (-not $contentString) {
-        throw "Failed to retrieve the environment region."
-    }
-
     if($contentString) {
         [NetworkUsage] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([NetworkUsage])
         Write-Verbose "Your environment is located in region: [$($networkUsage.AzureRegion)]"
