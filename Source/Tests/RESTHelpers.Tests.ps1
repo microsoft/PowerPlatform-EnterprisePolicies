@@ -173,12 +173,12 @@ Describe 'RESTHelpers Tests' {
                 
                 $result = ConvertFrom-JsonToClass -Json $json -ClassType ([EnvironmentNetworkUsageDocument])
 
-                $result | Should -BeOfType [EnvironmentNetworkUsageDocument]
+                $result | Should -BeOfType ([EnvironmentNetworkUsageDocument])
                 $result.Id | Should -Be "env123"
                 $result.EnvironmentId | Should -Be "env-456"
                 $result.AzureRegion | Should -Be "EastUS"
                 $result.NetworkUsageData | Should -HaveCount 2
-                $result.NetworkUsageData[0] | Should -BeOfType [NetworkUsageData]
+                $result.NetworkUsageData[0] | Should -BeOfType ([NetworkUsageData])
                 $result.NetworkUsageData[0].TimeStamp | Should -Be "2024-01-01"
                 $result.NetworkUsageData[0].TotalIpUsage | Should -Be 50
                 $result.NetworkUsageData[1].TotalIpUsage | Should -Be 75
