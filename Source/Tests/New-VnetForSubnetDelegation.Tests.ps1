@@ -11,14 +11,7 @@ Describe 'New-VnetForSubnetDelegation Tests' {
         Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Set-AzContext {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock New-AzDelegation { return @{Name = "Microsoft.PowerPlatform/enterprisePolicies"; ServiceName = "Microsoft.PowerPlatform/enterprisePolicies"} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-        
-        # Mock resource provider registration
-        $mockRegisteredProvider = [PSCustomObject]@{
-            ProviderNamespace = "Microsoft.Network"
-            RegistrationState = "Registered"
-        }
-        Mock Get-AzResourceProvider { return $mockRegisteredProvider } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-        Mock Register-AzResourceProvider {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Initialize-SubscriptionForPowerPlatform { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
     Context 'Testing parameter validation' {
@@ -166,61 +159,6 @@ Describe 'New-VnetForSubnetDelegation Tests' {
             Mock Connect-Azure { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             { New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "test-vnet" -SubnetName "default" -ResourceGroupName "test-rg" } | Should -Throw "*Failed to connect to Azure*"
-        }
-    }
-
-    Context 'Testing resource provider registration' {
-        It 'Should check Microsoft.Network resource provider registration' {
-            Mock Get-AzResourceProvider { return @{ProviderNamespace = "Microsoft.Network"; RegistrationState = "Registered"} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AzVirtualNetwork { 
-                return [PSCustomObject]@{
-                    Name = "test-vnet"
-                    Id = "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg/providers/Microsoft.Network/virtualNetworks/test-vnet"
-                }
-            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AzVirtualNetworkSubnetConfig { 
-                return [PSCustomObject]@{
-                    Name = "default"
-                    Delegations = @()
-                }
-            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Add-AzDelegation { return @{} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Set-AzVirtualNetwork { return @{Name = "test-vnet"} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-
-            $result = New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "test-vnet" -SubnetName "default" -ResourceGroupName "test-rg"
-
-            Should -Invoke Get-AzResourceProvider -Times 1 -ParameterFilter { $ProviderNamespace -eq "Microsoft.Network" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-        }
-
-        It 'Should register Microsoft.Network resource provider if not registered' {
-            $mockUnregisteredProvider = [PSCustomObject]@{
-                ProviderNamespace = "Microsoft.Network"
-                RegistrationState = "NotRegistered"
-            }
-            $mockRegisteredProvider = [PSCustomObject]@{
-                ProviderNamespace = "Microsoft.Network"
-                RegistrationState = "Registered"
-            }
-
-            Mock Get-AzResourceProvider { 
-                if ($script:callCount -eq 0) {
-                    $script:callCount = 1
-                    return $mockUnregisteredProvider
-                }
-                return $mockRegisteredProvider
-            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            
-            Mock Register-AzResourceProvider {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Start-Sleep {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AzResourceGroup { return @{ResourceGroupName = "test-rg"} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AzVirtualNetwork { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock New-AzVirtualNetworkSubnetConfig { return @{} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock New-AzVirtualNetwork { return @{Name = "test-vnet"; Location = "eastus"} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-
-            $script:callCount = 0
-            $result = New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "test-vnet" -SubnetName "default" -ResourceGroupName "test-rg" -CreateVirtualNetwork -Region "eastus" -AddressPrefix "10.0.0.0/16" -SubnetPrefix "10.0.1.0/24"
-
-            Should -Invoke Register-AzResourceProvider -Times 1 -ParameterFilter { $ProviderNamespace -eq "Microsoft.Network" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
     }
 }

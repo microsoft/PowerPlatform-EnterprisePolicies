@@ -87,37 +87,9 @@ function New-VnetForSubnetDelegation {
 
     Write-Verbose "Setting subscription context to $SubscriptionId"
     $null = Set-AzContext -Subscription $SubscriptionId
-    Write-Verbose "Subscription context set"
 
-    Write-Verbose "Checking Microsoft.Network resource provider registration status..."
-    $networkProvider = Get-AzResourceProvider -ProviderNamespace Microsoft.Network | Where-Object { $_.RegistrationState -eq "Registered" }
-    
-    if ($null -eq $networkProvider) {
-        Write-Host "Microsoft.Network resource provider is not registered. Registering..."
-        Register-AzResourceProvider -ProviderNamespace Microsoft.Network | Out-Null
-        
-        $maxWaitTime = 300 # 5 minutes
-        $waitInterval = 10 # 10 seconds
-        $elapsedTime = 0
-        
-        while ($elapsedTime -lt $maxWaitTime) {
-            $provider = Get-AzResourceProvider -ProviderNamespace Microsoft.Network
-            if ($provider.RegistrationState -eq "Registered") {
-                Write-Host "Microsoft.Network resource provider registered successfully"
-                break
-            }
-            
-            Write-Host "Waiting for Microsoft.Network resource provider registration to complete..."
-            Start-Sleep -Seconds $waitInterval
-            $elapsedTime += $waitInterval
-        }
-        
-        if ($elapsedTime -ge $maxWaitTime) {
-            throw "Timeout waiting for Microsoft.Network resource provider registration. Please try again later or register manually."
-        }
-    }
-    else {
-        Write-Verbose "Microsoft.Network resource provider is already registered"
+    if(-not(Initialize-SubscriptionForPowerPlatform -SubscriptionId $SubscriptionId)) {
+        throw "Failed to initialize subscription for Power Platform. Please ensure the subscription is registered for Microsoft.PowerPlatform, Microsoft.Network and the enterprisePoliciesPreview feature is enabled."
     }
 
     if ($CreateVirtualNetwork) {
@@ -177,17 +149,14 @@ function New-VnetForSubnetDelegation {
     else {
         Write-Verbose "Subnet retrieved successfully"
     }
-
-    # Add delegation to subnet
-    Write-Verbose "Adding delegation for Microsoft.PowerPlatform/enterprisePolicies to subnet '$SubnetName'..."
     
-    # Check if delegation already exists
     $existingDelegation = $subnet.Delegations | Where-Object { $_.ServiceName -eq "Microsoft.PowerPlatform/enterprisePolicies" }
     
     if ($existingDelegation) {
         Write-Host "Delegation already exists on subnet '$SubnetName'" -ForegroundColor Yellow
     }
     else {
+        Write-Verbose "Adding delegation for Microsoft.PowerPlatform/enterprisePolicies to subnet '$SubnetName'..."
         $subnet = Add-AzDelegation -Name "Microsoft.PowerPlatform/enterprisePolicies" -ServiceName "Microsoft.PowerPlatform/enterprisePolicies" -Subnet $subnet
         $virtualNetwork = Set-AzVirtualNetwork -VirtualNetwork $virtualNetwork
         Write-Host "Successfully added delegation for Microsoft.PowerPlatform/enterprisePolicies to subnet '$SubnetName'" -ForegroundColor Green
