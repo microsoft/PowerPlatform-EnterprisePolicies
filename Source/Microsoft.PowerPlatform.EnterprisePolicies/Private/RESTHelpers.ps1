@@ -176,7 +176,7 @@ function Get-EnvironmentRouteHostName {
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $EnvironmentId = $EnvironmentId.Replace("-", "")
-    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2) {
+    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2 -or $Endpoint -eq [BAPEndpoint]::usgovhigh) {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 1, 1)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 1)
     }

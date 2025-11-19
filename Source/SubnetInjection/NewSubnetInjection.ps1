@@ -7,6 +7,13 @@ THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAI
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
 
+param
+(
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("tip1", "tip2", "prod", "usgovhigh", "dod", "china")]
+    [String]$endpoint
+)
+
 # Load thescript
 . "$PSScriptRoot\..\Common\EnvironmentEnterprisePolicyOperations.ps1"
 
@@ -27,9 +34,12 @@ function NewSubnetInjection
 
     )
     
-    if (![bool]$endpoint) {
-        $endpoint = "prod"
-    }
     LinkPolicyToEnv -policyType vnet -environmentId $environmentId -policyArmId $policyArmId -endpoint $endpoint 
 }
-NewSubnetInjection
+
+if (![bool]$endpoint) 
+{
+    $endpoint = "prod"
+}
+
+NewSubnetInjection -endpoint $endpoint
