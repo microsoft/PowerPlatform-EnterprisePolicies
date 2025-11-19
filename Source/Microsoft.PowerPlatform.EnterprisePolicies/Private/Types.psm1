@@ -50,7 +50,6 @@ class SubnetUsageDocument{
     [string] $AzureRegion
     [NetworkUsageData[]] $NetworkUsageDataByWorkload
     [NetworkUsageData[]] $NetworkUsageDataByEnvironment
-    
 }
 
 enum PolicyType{

@@ -329,9 +329,15 @@ function ConvertFrom-JsonToClass {
             $itemList += ConvertFrom-JsonToClass -Json $itemJson -ClassType $elementType
         }
         return ,$itemList  
-    } else {
-        $instance = [Activator]::CreateInstance($ClassType)
     }
+    
+    # Handle primitive types and strings
+    if ($ClassType.IsPrimitive -or $ClassType -eq [string] -or $ClassType.IsValueType) {
+        return ($data -as $ClassType)
+    }
+    
+    # Handle complex types
+    $instance = [Activator]::CreateInstance($ClassType)
 
     foreach ($property in $ClassType.GetProperties()) {
         $name = $property.Name
