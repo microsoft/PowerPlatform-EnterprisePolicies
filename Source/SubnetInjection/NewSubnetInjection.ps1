@@ -9,6 +9,14 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 param
 (
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [String]$environmentId,
+
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [String]$policyArmId,
+
     [Parameter(Mandatory=$false)]
     [ValidateSet("tip1", "tip2", "prod", "usgovhigh", "dod", "china")]
     [String]$endpoint
@@ -17,29 +25,10 @@ param
 # Load thescript
 . "$PSScriptRoot\..\Common\EnvironmentEnterprisePolicyOperations.ps1"
 
-function NewSubnetInjection 
-{
-    param(
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
-        [String]$environmentId,
-
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
-        [String]$policyArmId,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet("tip1", "tip2", "prod", "usgovhigh", "dod", "china")]
-        [String]$endpoint
-
-    )
-    
-    LinkPolicyToEnv -policyType vnet -environmentId $environmentId -policyArmId $policyArmId -endpoint $endpoint 
-}
 
 if (![bool]$endpoint) 
 {
     $endpoint = "prod"
 }
 
-NewSubnetInjection -endpoint $endpoint
+LinkPolicyToEnv -policyType vnet -environmentId $environmentId -policyArmId $policyArmId -endpoint $endpoint 

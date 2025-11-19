@@ -9,37 +9,27 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 param
 (
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [String]$environmentId,
+
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [String]$newPolicyArmId,
+
     [Parameter(Mandatory=$false)]
     [ValidateSet("tip1", "tip2", "prod", "usgovhigh", "dod", "china")]
     [String]$endpoint
+
 )
 
 # Load thescript
 . "$PSScriptRoot\..\Common\EnvironmentEnterprisePolicyOperations.ps1"
 
-function SwapSubnetInjection 
-{
-    param(
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
-        [String]$environmentId,
-
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
-        [String]$newPolicyArmId,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet("tip1", "tip2", "prod", "usgovhigh", "dod", "china")]
-        [String]$endpoint
-
-    )
-        
-    SwapPolicyForEnv -policyType vnet -environmentId $environmentId -policyArmId $newPolicyArmId  -endpoint $endpoint  
-}
 
 if (![bool]$endpoint) 
 {
     $endpoint = "prod"
 }
 
-SwapSubnetInjection -endpoint $endpoint
+SwapPolicyForEnv -policyType vnet -environmentId $environmentId -policyArmId $newPolicyArmId  -endpoint $endpoint  
