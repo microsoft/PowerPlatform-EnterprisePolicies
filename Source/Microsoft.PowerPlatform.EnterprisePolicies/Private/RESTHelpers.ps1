@@ -329,9 +329,25 @@ function ConvertFrom-JsonToClass {
             $itemList += ConvertFrom-JsonToClass -Json $itemJson -ClassType $elementType
         }
         return ,$itemList  
-    } else {
-        $instance = [Activator]::CreateInstance($ClassType)
     }
+    
+    # Handle primitive types and strings
+    if ($ClassType.IsPrimitive -or $ClassType -eq [string]) {
+        return ($data -as $ClassType)
+    }
+    # Handle common value types explicitly
+    if ($ClassType -eq [DateTime]) {
+        return [DateTime]::Parse($data)
+    }
+    if ($ClassType.FullName -eq 'System.Guid') {
+        return [Guid]::Parse($data)
+    }
+    if ($ClassType.FullName -eq 'System.Decimal') {
+        return [Decimal]::Parse($data)
+    }
+    
+    # Handle complex types
+    $instance = [Activator]::CreateInstance($ClassType)
 
     foreach ($property in $ClassType.GetProperties()) {
         $name = $property.Name
