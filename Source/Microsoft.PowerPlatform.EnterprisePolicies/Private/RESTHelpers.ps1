@@ -332,8 +332,18 @@ function ConvertFrom-JsonToClass {
     }
     
     # Handle primitive types and strings
-    if ($ClassType.IsPrimitive -or $ClassType -eq [string] -or $ClassType.IsValueType) {
+    if ($ClassType.IsPrimitive -or $ClassType -eq [string]) {
         return ($data -as $ClassType)
+    }
+    # Handle common value types explicitly
+    if ($ClassType -eq [DateTime]) {
+        return [DateTime]::Parse($data)
+    }
+    if ($ClassType.FullName -eq 'System.Guid') {
+        return [Guid]::Parse($data)
+    }
+    if ($ClassType.FullName -eq 'System.Decimal') {
+        return [Decimal]::Parse($data)
     }
     
     # Handle complex types
