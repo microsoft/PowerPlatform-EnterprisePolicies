@@ -73,6 +73,14 @@ enum LinkOperation{
     unlink
 }
 
+enum AzureEnvironment{
+    AzureCloud
+    AzureChinaCloud
+    AzureUSGovernment
+    EastUs2Euap
+    CentralUSEuap
+}
+
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
     [VnetInformation]
@@ -80,6 +88,7 @@ $ExportableTypes = @(
     [BAPEndpoint]
     [LinkOperation]
     [NetworkUsage]
+    [AzureEnvironment]
     [NetworkUsageData]
     [EnvironmentNetworkUsageDocument]
     [SubnetUsageDocument]

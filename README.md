@@ -177,23 +177,35 @@ Sample Output :</br>
 The Subnet Injection scripts are present in folder [SubnetInjection](./Source/SubnetInjection/) at current location
 
 ### 1. **Setup virtual network for Subnet Injection**
-This script adds the subnet delegation for `Microsoft.PowerPlatform/enterprisePolicies` Azure service to a given virtual network and subnet </br>
-Script name : [SetupVnetForSubnetDelegation.ps1](./Source/SubnetInjection/SetupVnetForSubnetDelegation.ps1)</br>
-Input parameters :
-- virtualNetworkSubscriptionId : The subscriptionId of the virtual network
-- resourceGroupName : The resource group of the virtual network
-- virtualNetworkName : The name of the virtual network
-- subnetName : The name of the virtual network's subnet
 
-**NOTE**: this can also be achieved through Azure portal, more documentation on subnet delegation [here](https://learn.microsoft.com/en-us/azure/virtual-network/manage-subnet-delegation?tabs=manage-subnet-delegation-portal#delegate-a-subnet-to-an-azure-service)
+Use the `New-VnetForSubnetDelegation` cmdlet to create a new virtual network with subnet delegation or add delegation to an existing virtual network and subnet for `Microsoft.PowerPlatform/enterprisePolicies`.
 
-Sample Input :</br>
-![alt text](./ReadMeImages/SetupVirtualNetwork1.png)</br>
+**Example 1: Configure existing VNet and subnet**
+```powershell
+New-VnetForSubnetDelegation `
+    -SubscriptionId "12345678-1234-1234-1234-123456789012" `
+    -VirtualNetworkName "existing-vnet" `
+    -SubnetName "existing-subnet" `
+    -ResourceGroupName "myResourceGroup"
+```
 
-Sample Output : </br>
-![alt text](./ReadMeImages/SetupVirtualNetwork2.png)</br>
+**Example 2: Create new VNet with subnet and delegation**
+```powershell
+New-VnetForSubnetDelegation `
+    -SubscriptionId "12345678-1234-1234-1234-123456789012" `
+    -VirtualNetworkName "wus-vnet" `
+    -SubnetName "default" `
+    -CreateVirtualNetwork `
+    -AddressPrefix "10.0.0.0/16" `
+    -SubnetPrefix "10.0.1.0/24" `
+    -ResourceGroupName "myResourceGroup" `
+    -Region "westus" `
+    -TenantId "00000000-0000-0000-0000-000000000000"
+```
 
- ### 2. **Create Subnet Injection Enterprise Policy** 
+**NOTE**: This can also be achieved through Azure portal. More documentation on subnet delegation [here](https://learn.microsoft.com/en-us/azure/virtual-network/manage-subnet-delegation?tabs=manage-subnet-delegation-portal#delegate-a-subnet-to-an-azure-service)
+
+### 2. **Create Subnet Injection Enterprise Policy** 
 This script creates a Subnet Injection enterprise policy</br>
 Script name : [CreateSubnetInjectionEnterprisePolicy.ps1](./Source/SubnetInjection/CreateSubnetInjectionEnterprisePolicy.ps1)</br>
 Input parameters :

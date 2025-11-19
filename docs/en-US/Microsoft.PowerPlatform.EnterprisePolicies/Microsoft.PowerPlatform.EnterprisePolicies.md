@@ -30,6 +30,10 @@ Retrieves the region that the specified environment is deployed in.
 
 Retrieves the current usage of the specified environment.
 
+### [New-VnetForSubnetDelegation](New-VnetForSubnetDelegation.md)
+
+Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprisePolicies delegation, or configures an existing VNet/subnet.
+
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
 Validates that the account has the correct permissions to run diagnostic commands.
@@ -63,6 +67,10 @@ The NetworkUsageData class represents historical network usage information about
 The SubnetUsageDocument class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 
 ### Enums
+
+#### [AzureEnvironment](AzureEnvironment.md)
+
+Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
 
 #### [BAPEndpoint](BAPEndpoint.md)
 
