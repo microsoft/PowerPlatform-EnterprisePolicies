@@ -183,7 +183,7 @@ Use the `New-VnetForSubnetDelegation` cmdlet to create a new virtual network wit
 **Example 1: Configure existing VNet and subnet**
 ```powershell
 New-VnetForSubnetDelegation `
-    -SubscriptionId "42bbbe13-b1b6-4b77-b098-34eec944e955" `
+    -SubscriptionId "12345678-1234-1234-1234-123456789012" `
     -VirtualNetworkName "existing-vnet" `
     -SubnetName "existing-subnet" `
     -ResourceGroupName "myResourceGroup"
@@ -192,15 +192,15 @@ New-VnetForSubnetDelegation `
 **Example 2: Create new VNet with subnet and delegation**
 ```powershell
 New-VnetForSubnetDelegation `
-    -SubscriptionId "42bbbe13-b1b6-4b77-b098-34eec944e955" `
+    -SubscriptionId "12345678-1234-1234-1234-123456789012" `
     -VirtualNetworkName "wus-vnet" `
     -SubnetName "default" `
     -CreateVirtualNetwork `
     -AddressPrefix "10.0.0.0/16" `
     -SubnetPrefix "10.0.1.0/24" `
-    -ResourceGroupName "osfaixatEUAP2" `
+    -ResourceGroupName "myResourceGroup" `
     -Region "westus" `
-    -TenantId "d7d28f23-98e5-47fe-9f31-9ee90548088f"
+    -TenantId "00000000-0000-0000-0000-000000000000"
 ```
 
 **NOTE**: This can also be achieved through Azure portal. More documentation on subnet delegation [here](https://learn.microsoft.com/en-us/azure/virtual-network/manage-subnet-delegation?tabs=manage-subnet-delegation-portal#delegate-a-subnet-to-an-azure-service)

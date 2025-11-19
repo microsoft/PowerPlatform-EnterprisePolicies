@@ -1,4 +1,13 @@
 <#
+SAMPLE CODE NOTICE
+
+THIS SAMPLE CODE IS MADE AVAILABLE AS IS. MICROSOFT MAKES NO WARRANTIES, WHETHER EXPRESS OR IMPLIED,
+OF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OR CONDITIONS OF MERCHANTABILITY.
+THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.
+NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
+#>
+
+<#
 .SYNOPSIS
 Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprisePolicies delegation, or configures an existing VNet/subnet.
 
@@ -13,12 +22,12 @@ Microsoft.Azure.Commands.Network.Models.PSVirtualNetwork
 The virtual network object that was created or modified.
 
 .EXAMPLE
-New-VnetForSubnetDelegation -SubscriptionId "42bbbe13-b1b6-4b77-b098-34eec944e955" -VirtualNetworkName "existing-vnet" -SubnetName "existing-subnet" -ResourceGroupName "myResourceGroup"
+New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "existing-vnet" -SubnetName "existing-subnet" -ResourceGroupName "myResourceGroup"
 
 Configures an existing virtual network and subnet with the required delegation.
 
 .EXAMPLE
-New-VnetForSubnetDelegation -SubscriptionId "42bbbe13-b1b6-4b77-b098-34eec944e955" -VirtualNetworkName "wus-vnet" -SubnetName "default" -CreateVirtualNetwork -AddressPrefix "10.0.0.0/16" -SubnetPrefix "10.0.1.0/24" -ResourceGroupName "osfaixatEUAP2" -Region "westus" -TenantId "d7d28f23-98e5-47fe-9f31-9ee90548088f"
+New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "wus-vnet" -SubnetName "default" -CreateVirtualNetwork -AddressPrefix "10.0.0.0/16" -SubnetPrefix "10.0.1.0/24" -ResourceGroupName "myResourceGroup" -Region "westus" -TenantId "00000000-0000-0000-0000-000000000000"
 
 Creates a new virtual network named "wus-vnet" with address space 10.0.0.0/16 and a subnet named "default" with address prefix 10.0.1.0/24, then adds delegation. If the Vnet or subnet already exist, it will just add the delegation to the existing subnet. If the vnet exists but the subnet does not, it will create the subnet with the delegation.
 #>
@@ -79,6 +88,37 @@ function New-VnetForSubnetDelegation {
     Write-Verbose "Setting subscription context to $SubscriptionId"
     $null = Set-AzContext -Subscription $SubscriptionId
     Write-Verbose "Subscription context set"
+
+    Write-Verbose "Checking Microsoft.Network resource provider registration status..."
+    $networkProvider = Get-AzResourceProvider -ProviderNamespace Microsoft.Network | Where-Object { $_.RegistrationState -eq "Registered" }
+    
+    if ($null -eq $networkProvider) {
+        Write-Host "Microsoft.Network resource provider is not registered. Registering..."
+        Register-AzResourceProvider -ProviderNamespace Microsoft.Network | Out-Null
+        
+        $maxWaitTime = 300 # 5 minutes
+        $waitInterval = 10 # 10 seconds
+        $elapsedTime = 0
+        
+        while ($elapsedTime -lt $maxWaitTime) {
+            $provider = Get-AzResourceProvider -ProviderNamespace Microsoft.Network
+            if ($provider.RegistrationState -eq "Registered") {
+                Write-Host "Microsoft.Network resource provider registered successfully"
+                break
+            }
+            
+            Write-Host "Waiting for Microsoft.Network resource provider registration to complete..."
+            Start-Sleep -Seconds $waitInterval
+            $elapsedTime += $waitInterval
+        }
+        
+        if ($elapsedTime -ge $maxWaitTime) {
+            throw "Timeout waiting for Microsoft.Network resource provider registration. Please try again later or register manually."
+        }
+    }
+    else {
+        Write-Verbose "Microsoft.Network resource provider is already registered"
+    }
 
     if ($CreateVirtualNetwork) {
         Write-Verbose "Checking if resource group '$ResourceGroupName' exists..."
