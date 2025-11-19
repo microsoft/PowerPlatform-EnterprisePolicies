@@ -18,6 +18,10 @@ Microsoft PowerPlatform Enterprise policies module
 
 ## Microsoft.PowerPlatform.EnterprisePolicies
 
+### [Get-EnvironmentHistoricalUsage](Get-EnvironmentHistoricalUsage.md)
+
+Retrieves the historical network usage of the specified environment.
+
 ### [Get-EnvironmentRegion](Get-EnvironmentRegion.md)
 
 Retrieves the region that the specified environment is deployed in.
@@ -46,9 +50,21 @@ Tests the connectivity to a given service in a specified environment.
 
 ### Classes
 
+#### [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
+
+The EnvironmentNetworkUsageDocument class represents historical network usage information and network usage metadata about the delegated network of a Power Platform environment.
+
 #### [NetworkUsage](NetworkUsage.md)
 
 The NetworkUsage class represents metadata about the network configuration of a Power Platform environment.
+
+### [NetworkUsageData](NetworkUsageData.md)
+
+The NetworkUsageData class represents historical network usage information about the network configuration of a Power Platform environment.
+
+### [SubnetUsageDocument](SubnetUsageDocument.md)
+
+The SubnetUsageDocument class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 
 ### Enums
 
