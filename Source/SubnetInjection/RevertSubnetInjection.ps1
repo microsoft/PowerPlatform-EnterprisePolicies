@@ -7,31 +7,27 @@ THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAI
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
 
+param
+(
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [String]$environmentId,
+
+    [Parameter(Mandatory=$true)]
+    [ValidateNotNullOrEmpty()]
+    [String]$policyArmId,
+
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("tip1", "tip2", "prod", "usgovhigh", "dod", "china")]
+    [String]$endpoint
+)
+
 # Load thescript
 . "$PSScriptRoot\..\Common\EnvironmentEnterprisePolicyOperations.ps1"
 
-
-function RevertSubnetInjection 
+if (![bool]$endpoint) 
 {
-    param(
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
-        [String]$environmentId,
-
-        [Parameter(Mandatory=$true)]
-        [ValidateNotNullOrEmpty()]
-        [String]$policyArmId,
-
-        [Parameter(Mandatory=$false)]
-        [ValidateSet("tip1", "tip2", "prod", "usgovhigh", "dod", "china")]
-        [String]$endpoint
-
-    )
-    
-    if (![bool]$endpoint) {
-        $endpoint = "prod"
-    }
-
-    UnLinkPolicyFromEnv -policyType vnet -environmentId $environmentId -policyArmId $policyArmId -endpoint $endpoint 
+    $endpoint = "prod"
 }
-RevertSubnetInjection
+
+UnLinkPolicyFromEnv -policyType vnet -environmentId $environmentId -policyArmId $policyArmId -endpoint $endpoint 
