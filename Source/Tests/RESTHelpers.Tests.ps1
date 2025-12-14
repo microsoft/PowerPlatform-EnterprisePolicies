@@ -127,6 +127,62 @@ Describe 'RESTHelpers Tests' {
                 Should -Not -Invoke Assert-Result
                 $result | Should -Be $mockResult
             }
+
+            It 'Honors Retry-After header on 503 response' {
+                $mockClient = [HttpClientMock]::new()
+                $mock503Result = [HttpClientResultMock]::new("Service Unavailable", "text/plain", @{"Retry-After" = "2"})
+                $mock503Result.StatusCode = [System.Net.HttpStatusCode]::ServiceUnavailable
+                $mock503Result.IsSuccessStatusCode = $false
+                $mockSuccessResult = [HttpClientResultMock]::new("Success")
+                
+                $script:callCount = 0
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { 
+                    $script:callCount++
+                    if ($script:callCount -eq 1) {
+                        return $mock503Result
+                    } else {
+                        return $mockSuccessResult
+                    }
+                } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                
+                Mock Test-Result { param($Result) return $Result.IsSuccessStatusCode } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Start-Sleep { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Write-Host { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                
+                $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 3 -DelaySeconds 1
+
+                $result | Should -Be $mockSuccessResult
+                Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 2 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Honors Retry-After header on 429 response' {
+                $mockClient = [HttpClientMock]::new()
+                $mock429Result = [HttpClientResultMock]::new("Too Many Requests", "text/plain", @{"Retry-After" = (Get-Date).AddSeconds(10)})
+                $mock429Result.StatusCode = 429
+                $mock429Result.IsSuccessStatusCode = $false
+                $mockSuccessResult = [HttpClientResultMock]::new("Success")
+                
+                $script:callCount = 0
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { 
+                    $script:callCount++
+                    if ($script:callCount -eq 1) {
+                        return $mock429Result
+                    } else {
+                        return $mockSuccessResult
+                    }
+                } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                
+                Mock Test-Result { param($Result) return $Result.IsSuccessStatusCode } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Start-Sleep { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Write-Host { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                
+                $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 3 -DelaySeconds 1
+
+                $result | Should -Be $mockSuccessResult
+                Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -gt 5 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
         }
 
         Context 'Testing ConvertFrom-JsonToClass' {

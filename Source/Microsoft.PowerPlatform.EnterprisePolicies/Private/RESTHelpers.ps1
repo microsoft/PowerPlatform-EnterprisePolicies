@@ -241,10 +241,34 @@ function Send-RequestWithRetries {
     $attempt = 0
     while ($attempt -lt $MaxRetries) {
         try {
+            $sleepSeconds = $DelaySeconds
             $result = Get-AsyncResult -Task $client.SendAsync((& $RequestFactory))
 
             if(Test-Result -Result $result) {
                 return $result
+            }
+            
+            # Check for 503 Service Unavailable or 429 Too Many Requests with Retry-After header
+            if ($result.StatusCode -eq 503 -or $result.StatusCode -eq 429) {
+                if ($result.Headers.Contains("Retry-After")) {
+                    $retryAfterValue = $result.Headers.GetValues("Retry-After") | Select-Object -First 1
+                    # Retry-After can be either seconds (integer) or HTTP date
+                    if ($retryAfterValue -match '^\d+$') {
+                        $sleepSeconds = [int]$retryAfterValue
+                    } else {
+                        try {
+                            $retryAfterDate = [DateTime]::Parse($retryAfterValue)
+                            if ($retryAfterDate.Kind -ne [System.DateTimeKind]::Utc) {
+                                $retryAfterDate = $retryAfterDate.ToUniversalTime()
+                            }
+                            $sleepSeconds = [Math]::Max(1, [int]($retryAfterDate - [DateTime]::UtcNow).TotalSeconds)
+                        } catch {
+                            Write-Verbose "Could not parse Retry-After header value: $retryAfterValue. Using default delay."
+                            $sleepSeconds = $DelaySeconds
+                        }
+                    }
+                    Write-Host "The service is working on the request and has requested a retry. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
+                }
             }
             $attempt++
         }
@@ -260,8 +284,8 @@ function Send-RequestWithRetries {
             Write-Host "Request failed after $MaxRetries attempts." -ForegroundColor Red
             Assert-Result -Result $result
         }
-        Write-Verbose "Request failed on attempt $attempt. Retrying in $DelaySeconds seconds..."
-        Start-Sleep -Seconds $DelaySeconds
+        Write-Verbose "Request failed on attempt $attempt. Retrying in $sleepSeconds seconds..."
+        Start-Sleep -Seconds $sleepSeconds
     }
 }
 
@@ -277,12 +301,12 @@ function Test-Result {
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
             return $false
         }
         else
         {
-            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
             return $false
         }
     }
@@ -301,13 +325,13 @@ function Assert-Result {
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
         else
         {
-            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
     }
 }
