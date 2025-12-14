@@ -263,7 +263,7 @@ function Send-RequestWithRetries {
                             Write-Verbose "Could not parse Retry-After header value: $retryAfterValue. Using default delay."
                         }
                     }
-                    Write-Host "The service has not been provisioned yet. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
+                    Write-Host "The service is working on the request and has requested a retry. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
                 }
             }
             $attempt++
