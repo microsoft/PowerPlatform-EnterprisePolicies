@@ -1,11 +1,13 @@
 class HttpClientResultHeaderMock
 {
     [hashtable]$Headers
-    HttpClientResultHeaderMock($ContentType)
+    HttpClientResultHeaderMock($Headers)
     {
-        $this.Headers = @{
-            "Content-Type" = $ContentType
-        }
+        $this.Headers = $Headers
+    }
+    [bool]Contains($Header)
+    {
+        return $this.Headers.ContainsKey($Header)
     }
     [string]GetValues($Header)
     {
@@ -17,10 +19,10 @@ class HttpClientResultContentMock
 {
     [string]$ReadAsyncValue
     [HttpClientResultHeaderMock]$Headers
-    HttpClientResultContentMock($ReadAsyncValue, $ContentType)
+    HttpClientResultContentMock($ReadAsyncValue, $Headers)
     {
         $this.ReadAsyncValue = $ReadAsyncValue
-        $this.Headers = [HttpClientResultHeaderMock]::new($ContentType)
+        $this.Headers = [HttpClientResultHeaderMock]::new($Headers)
     }
 
     [string]ReadAsStringAsync()
@@ -33,21 +35,36 @@ class HttpClientResultMock
 {
     [string]$ReadContent
     [string]$ContentType
+    [HttpClientResultHeaderMock]$Headers
+    [System.Net.HttpStatusCode]$StatusCode = [System.Net.HttpStatusCode]::OK
+    [string]$ReasonPhrase = "mock http error message"
+    [HttpClientResultContentMock]$Content
+    [bool]$IsSuccessStatusCode = $true
     
     HttpClientResultMock($ReadContent)
     {
         $this.ReadContent = $ReadContent
         $this.ContentType = ""
+        $headersHash = @{"Content-Type" = $this.ContentType}
+        $this.Headers = [HttpClientResultHeaderMock]::new($headersHash)
+        $this.Content = [HttpClientResultContentMock]::new($this.ReadContent, $headersHash)
     }
     HttpClientResultMock($ReadContent, $ContentType)
     {
         $this.ReadContent = $ReadContent
         $this.ContentType = $ContentType
+        $headersHash = @{"Content-Type" = $this.ContentType}
+        $this.Headers = [HttpClientResultHeaderMock]::new($headersHash)
+        $this.Content = [HttpClientResultContentMock]::new($this.ReadContent, $headersHash)
     }
-
-    [System.Net.HttpStatusCode]$StatusCode = [System.Net.HttpStatusCode]::OK
-    [string]$ReasonPhrase = "mock http error message"
-    [HttpClientResultContentMock]$Content = [HttpClientResultContentMock]::new($ReadContent, $ContentType)
+    HttpClientResultMock($ReadContent, $ContentType, $Headers)
+    {
+        $this.ReadContent = $ReadContent
+        $this.ContentType = $ContentType
+        $Headers["Content-Type"] = $this.ContentType
+        $this.Headers = [HttpClientResultHeaderMock]::new($Headers)
+        $this.Content = [HttpClientResultContentMock]::new($this.ReadContent, $Headers)
+    }
 }
 
 class HttpClientMock

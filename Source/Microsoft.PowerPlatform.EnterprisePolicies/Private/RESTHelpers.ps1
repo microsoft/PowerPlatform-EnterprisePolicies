@@ -241,10 +241,30 @@ function Send-RequestWithRetries {
     $attempt = 0
     while ($attempt -lt $MaxRetries) {
         try {
+            $sleepSeconds = $DelaySeconds
             $result = Get-AsyncResult -Task $client.SendAsync((& $RequestFactory))
 
             if(Test-Result -Result $result) {
                 return $result
+            }
+            
+            # Check for 503 Service Unavailable with Retry-After header
+            if ($result.StatusCode -eq 503) {
+                if ($result.Headers.Contains("Retry-After")) {
+                    $retryAfterValue = $result.Headers.GetValues("Retry-After") | Select-Object -First 1
+                    # Retry-After can be either seconds (integer) or HTTP date
+                    if ($retryAfterValue -match '^\d+$') {
+                        $sleepSeconds = [int]$retryAfterValue
+                    } else {
+                        try {
+                            $retryAfterDate = [DateTime]::Parse($retryAfterValue)
+                            $sleepSeconds = [Math]::Max(1, [int]($retryAfterDate - [DateTime]::UtcNow).TotalSeconds)
+                        } catch {
+                            Write-Verbose "Could not parse Retry-After header value: $retryAfterValue. Using default delay."
+                        }
+                    }
+                    Write-Host "The service has not been provisioned yet. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
+                }
             }
             $attempt++
         }
@@ -260,8 +280,8 @@ function Send-RequestWithRetries {
             Write-Host "Request failed after $MaxRetries attempts." -ForegroundColor Red
             Assert-Result -Result $result
         }
-        Write-Verbose "Request failed on attempt $attempt. Retrying in $DelaySeconds seconds..."
-        Start-Sleep -Seconds $DelaySeconds
+        Write-Verbose "Request failed on attempt $attempt. Retrying in $sleepSeconds seconds..."
+        Start-Sleep -Seconds $sleepSeconds
     }
 }
 
