@@ -25,7 +25,7 @@ Describe 'Utilities Tests' {
 
             It 'Uses UTC time not local time' {
                 $result = Get-LogDate
-                $utcNow = Get-Date -AsUTC
+                $utcNow = [DateTime]::UtcNow
                 
                 # Parse the date portion from result (dd/MM/yyyy)
                 $resultDate = $result.Substring(0, 10)

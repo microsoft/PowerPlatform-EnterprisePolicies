@@ -36,7 +36,7 @@ class HttpClientResultMock
     [string]$ReadContent
     [string]$ContentType
     [HttpClientResultHeaderMock]$Headers
-    [System.Net.HttpStatusCode]$StatusCode = [System.Net.HttpStatusCode]::OK
+    [int]$StatusCode = 200
     [string]$ReasonPhrase = "mock http error message"
     [HttpClientResultContentMock]$Content
     [bool]$IsSuccessStatusCode = $true
