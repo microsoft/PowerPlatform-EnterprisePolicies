@@ -264,6 +264,7 @@ function Send-RequestWithRetries {
                             $sleepSeconds = [Math]::Max(1, [int]($retryAfterDate - [DateTime]::UtcNow).TotalSeconds)
                         } catch {
                             Write-Verbose "Could not parse Retry-After header value: $retryAfterValue. Using default delay."
+                            $sleepSeconds = $DelaySeconds
                         }
                     }
                     Write-Host "The service is working on the request and has requested a retry. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
