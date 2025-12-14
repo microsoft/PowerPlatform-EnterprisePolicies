@@ -297,12 +297,12 @@ function Test-Result {
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$((Get-Date -AsUTC).ToString("dd/MM/yyyy:hh:mm:ss:z")): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
             return $false
         }
         else
         {
-            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$((Get-Date -AsUTC).ToString("dd/MM/yyyy:hh:mm:ss:z")): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
             return $false
         }
     }
@@ -321,13 +321,13 @@ function Assert-Result {
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$((Get-Date -AsUTC).ToString("dd/MM/yyyy:hh:mm:ss:z")): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "$((Get-Date -AsUTC).ToString("dd/MM/yyyy:hh:mm:ss:z")): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
         else
         {
-            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$((Get-Date -AsUTC).ToString("dd/MM/yyyy:hh:mm:ss:z")): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "$((Get-Date -AsUTC).ToString("dd/MM/yyyy:hh:mm:ss:z")): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
     }
 }
