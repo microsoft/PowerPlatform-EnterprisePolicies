@@ -248,8 +248,8 @@ function Send-RequestWithRetries {
                 return $result
             }
             
-            # Check for 503 Service Unavailable with Retry-After header
-            if ($result.StatusCode -eq 503) {
+            # Check for 503 Service Unavailable or 429 Too Many Requests with Retry-After header
+            if ($result.StatusCode -eq 503 -or $result.StatusCode -eq 429) {
                 if ($result.Headers.Contains("Retry-After")) {
                     $retryAfterValue = $result.Headers.GetValues("Retry-After") | Select-Object -First 1
                     # Retry-After can be either seconds (integer) or HTTP date
@@ -258,6 +258,9 @@ function Send-RequestWithRetries {
                     } else {
                         try {
                             $retryAfterDate = [DateTime]::Parse($retryAfterValue)
+                            if ($retryAfterDate.Kind -ne [System.DateTimeKind]::Utc) {
+                                $retryAfterDate = $retryAfterDate.ToUniversalTime()
+                            }
                             $sleepSeconds = [Math]::Max(1, [int]($retryAfterDate - [DateTime]::UtcNow).TotalSeconds)
                         } catch {
                             Write-Verbose "Could not parse Retry-After header value: $retryAfterValue. Using default delay."
