@@ -159,7 +159,7 @@ Describe 'RESTHelpers Tests' {
             It 'Honors Retry-After header on 429 response' {
                 $mockClient = [HttpClientMock]::new()
                 $mock429Result = [HttpClientResultMock]::new("Too Many Requests", "text/plain", @{"Retry-After" = (Get-Date).AddSeconds(10)})
-                $mock429Result.StatusCode = [System.Net.HttpStatusCode]::TooManyRequests
+                $mock429Result.StatusCode = 429
                 $mock429Result.IsSuccessStatusCode = $false
                 $mockSuccessResult = [HttpClientResultMock]::new("Success")
                 

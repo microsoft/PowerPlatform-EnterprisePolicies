@@ -8,5 +8,5 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 #>
 
 function Get-LogDate {
-    return (Get-Date -AsUTC).ToString("dd/MM/yyyy:HH:mm:ss:K")
+    return ([DateTime]::UtcNow).ToString("dd/MM/yyyy:HH:mm:ss:K")
 }
