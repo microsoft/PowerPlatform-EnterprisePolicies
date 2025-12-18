@@ -210,6 +210,23 @@ function Get-TenantRouteHostName {
     return "il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
 }
 
+function Get-BAPResourceUrl {
+    param (
+        [Parameter(Mandatory)]
+        [BAPEndpoint] $Endpoint
+    )
+
+    switch ($Endpoint) {
+        ([BAPEndpoint]::tip1) { return "https://preprod.powerplatform.com/" }
+        ([BAPEndpoint]::tip2) { return "https://test.powerplatform.com/" }
+        ([BAPEndpoint]::prod) { return "https://powerplatform.com/" }
+        ([BAPEndpoint]::usgovhigh) { return "https://high.powerplatform.microsoft.us/" }
+        ([BAPEndpoint]::dod) { return "https://appsplatform.us/" }
+        ([BAPEndpoint]::china) { return "https://powerplatform.partner.microsoftonline.cn/" }
+        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+    }
+}
+
 function Get-APIResourceUrl {
     param (
         [Parameter(Mandatory)]

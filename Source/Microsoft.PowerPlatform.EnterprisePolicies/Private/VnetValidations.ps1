@@ -32,6 +32,19 @@ $supportedVnetLocations.Add("sweden", "swedencentral")
 $supportedVnetLocations.Add("italy", "italynorth")
 $supportedVnetLocations.Add("usgov", "usgovtexas|usgovvirginia")
 
+function Test-PowerPlatformRegionRequiresPair
+{
+    param (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $PowerPlatformRegion
+    )
+
+    Assert-PowerPlatformRegionIsSupported -PowerPlatformRegion $PowerPlatformRegion
+    $vnetLocationsAllowed = $SupportedVnetLocations[$PowerPlatformRegion].Split(";") | ForEach-Object { $_.Split("|") }
+    return $vnetLocationsAllowed.Count -gt 1
+}
+
 function Assert-AzureRegionIsSupported
 {
     param (
@@ -76,23 +89,49 @@ function Get-SupportedVnetRegionsForPowerPlatformRegion
     return $SupportedVnetLocations[$PowerPlatformRegion].Split(";") | ForEach-Object { $_.Split("|") }
 }
 
-function Get-Vnet{
+function Get-VirtualNetwork{
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [string] $VnetId,
+        [string] $VirtualNetworkId,
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
         [string] $EnterprisePolicyLocation
     )
 
-    $vnetResource = Get-AzResource -ResourceId $vnetId
+    $vnetResource = Get-AzResource -ResourceId $VirtualNetworkId
     if ($null -eq $vnetResource.ResourceId)
     {
-        throw "Error getting virtual network for $vnetId `n"
+        throw "Error getting virtual network for $VirtualNetworkId `n"
     }
 
     Assert-AzureRegionIsSupported -PowerPlatformRegion $EnterprisePolicyLocation -AzureRegion $vnetResource.Location
 
     return $vnetResource
+}
+
+function Assert-RegionPairing {
+    param(
+        [Parameter(Mandatory)]
+        [VnetInformation[]]$VnetInformation,
+
+        [Parameter(Mandatory)]
+        $PowerPlatformRegion
+    )
+
+    if ($Vnets.Count -ne 2) {
+        throw "Region pairing validation requires exactly 2 vnets."
+    }
+    $vnetRegion1 = $Vnets[0].VnetResource.Location
+    $vnetRegion2 = $Vnets[1].VnetResource.Location
+
+    $vnetPairsAllowed = $supportedVnetLocations[$PowerPlatformRegion].Split(";")
+
+    foreach ($pair in $vnetPairsAllowed) {
+        $regions = $pair.Split("|")
+        if($regions -contains $vnetRegion1 -and $regions -contains $vnetRegion2 -and $vnetRegion1 -ne $vnetRegion2) {
+            return
+        }
+    }
+    throw "The regions $vnetRegion1 and $vnetRegion2 of the provided vnets are not a supported pair for enterprise policy location $policyLocation. The supported region pairs are: $($vnetPairsAllowed -join ", ")"
 }
