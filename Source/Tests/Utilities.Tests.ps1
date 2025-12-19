@@ -34,5 +34,18 @@ Describe 'Utilities Tests' {
                 $resultDate | Should -Be $expectedDate
             }
         }
+
+        Context 'Testing Get-ModuleVersion' {
+            It 'Returns a non-empty version string' {
+                $version = Get-ModuleVersion
+                $version | Should -Not -BeNullOrEmpty
+            }
+
+            It 'Returns a version string in valid format' {
+                $version = Get-ModuleVersion
+                # Version should match the pattern Major.Minor.Build.Revision
+                $version | Should -Match '^\d+\.\d+\.\d+(\.\d+)?$'
+            }
+        }
     }
 }
