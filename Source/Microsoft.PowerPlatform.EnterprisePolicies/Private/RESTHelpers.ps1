@@ -121,6 +121,7 @@ function Get-HttpClient
     
         $script:httpClient = New-Object -TypeName System.Net.Http.HttpClient
         $script:httpClient.DefaultRequestHeaders.Clear()
+        $script:httpClient.DefaultRequestHeaders.UserAgent.Add([System.Net.Http.Headers.ProductInfoHeaderValue]::new("Microsoft.PowerPlatform.EnterprisePolicies", (Get-ModuleVersion)))
     }
 
     return $script:httpClient

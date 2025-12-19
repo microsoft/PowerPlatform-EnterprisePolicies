@@ -64,9 +64,12 @@ Describe 'RESTHelpers Tests' {
             AfterAll {
                 $script:httpClient = $null
             }
-            It 'Returns an HttpClient with no headers' {
+            It 'Returns an HttpClient with only the User-Agent header set' {
                 $client = Get-HttpClient
-                $client.DefaultRequestHeaders | ForEach-Object { $_ | Should -BeNullOrEmpty }
+                $client.DefaultRequestHeaders.UserAgent.Count | Should -Be 1
+                $client.DefaultRequestHeaders.UserAgent[0].Product.Name | Should -Be "Microsoft.PowerPlatform.EnterprisePolicies"
+                $client.DefaultRequestHeaders.UserAgent[0].Product.Version | Should -Be "1.0.0"
+                $client.DefaultRequestHeaders.Count | Should -Be 1
             }
 
             It 'Follows a singleton pattern'{

@@ -34,5 +34,43 @@ Describe 'Utilities Tests' {
                 $resultDate | Should -Be $expectedDate
             }
         }
+
+        Context 'Testing Get-ModuleVersion' {
+            It 'Returns a non-empty version string' {
+                $version = Get-ModuleVersion
+                $version | Should -Not -BeNullOrEmpty
+            }
+
+            It 'Returns a version string in valid format' {
+                $version = Get-ModuleVersion
+                # Version should match the pattern Major.Minor.Build.Revision
+                $version | Should -Match '^\d+\.\d+\.\d+(\.\d+)?$'
+            }
+
+            It 'Stores version in script scope for reuse' {
+                # Clear any existing value
+                Remove-Variable -Name script:ModuleVersion -ErrorAction SilentlyContinue
+                
+                # First call should set the variable
+                $firstCallVersion = Get-ModuleVersion
+                $script:ModuleVersion | Should -Be $firstCallVersion
+                
+                # Modify the variable to test reuse
+                $script:ModuleVersion = "ModifiedVersion"
+                
+                # Second call should return the modified value
+                $secondCallVersion = Get-ModuleVersion
+                $secondCallVersion | Should -Be "ModifiedVersion"
+
+                # Clear any existing value
+                Remove-Variable -Name script:ModuleVersion -ErrorAction SilentlyContinue
+            }
+
+            It 'Returns consistent version across multiple calls' {
+                $version1 = Get-ModuleVersion
+                $version2 = Get-ModuleVersion
+                $version1 | Should -Be $version2
+            }
+        }
     }
 }
