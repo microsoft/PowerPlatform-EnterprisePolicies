@@ -61,6 +61,9 @@ Describe 'Utilities Tests' {
                 # Second call should return the modified value
                 $secondCallVersion = Get-ModuleVersion
                 $secondCallVersion | Should -Be "ModifiedVersion"
+
+                # Clear any existing value
+                Remove-Variable -Name script:ModuleVersion -ErrorAction SilentlyContinue
             }
 
             It 'Returns consistent version across multiple calls' {
