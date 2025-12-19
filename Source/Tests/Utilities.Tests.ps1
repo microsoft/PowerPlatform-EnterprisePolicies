@@ -62,6 +62,12 @@ Describe 'Utilities Tests' {
                 $secondCallVersion = Get-ModuleVersion
                 $secondCallVersion | Should -Be "ModifiedVersion"
             }
+
+            It 'Returns consistent version across multiple calls' {
+                $version1 = Get-ModuleVersion
+                $version2 = Get-ModuleVersion
+                $version1 | Should -Be $version2
+            }
         }
     }
 }
