@@ -10,3 +10,24 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 function Get-LogDate {
     return ([DateTime]::UtcNow).ToString("dd/MM/yyyy:HH:mm:ss:K")
 }
+
+function Get-ModuleVersion{
+    if($script:ModuleVersion){
+        return $script:ModuleVersion
+    }
+    $script:ModuleVersion = (Import-PowerShellDataFile -Path "$PSScriptRoot\..\Microsoft.PowerPlatform.EnterprisePolicies.psd1")["ModuleVersion"]
+    return $script:ModuleVersion
+}
+
+function Test-LatestModuleVersion{
+    try {
+        $currentVersion = [version](Get-ModuleVersion)
+        $latestVersion = [version](Find-Module -Name "Microsoft.PowerPlatform.EnterprisePolicies" -Repository "PSGallery" | Select-Object -ExpandProperty Version)
+        if ($latestVersion -gt $currentVersion) {
+            Write-Warning "You're using Microsoft.PowerPlatform.EnterprisePolicies version $currentVersion. The latest version is $latestVersion. Upgrade your module module using the following commands:`n  Update-Module Microsoft.PowerPlatform.EnterprisePolicies -WhatIf    -- Simulate updating your module.`n  Update-Module Microsoft.PowerPlatform.EnterprisePolicies -WhatIf            -- Simulate updating your module.`n  Update-Module Microsoft.PowerPlatform.EnterprisePolicies            -- Update your module."
+        }
+    }
+    catch {
+        Write-Verbose "Could not check for the latest module version: $_"
+    }
+}
