@@ -46,6 +46,22 @@ Describe 'Utilities Tests' {
                 # Version should match the pattern Major.Minor.Build.Revision
                 $version | Should -Match '^\d+\.\d+\.\d+(\.\d+)?$'
             }
+
+            It 'Stores version in script scope for reuse' {
+                # Clear any existing value
+                Remove-Variable -Name script:ModuleVersion -ErrorAction SilentlyContinue
+                
+                # First call should set the variable
+                $firstCallVersion = Get-ModuleVersion
+                $script:ModuleVersion | Should -Be $firstCallVersion
+                
+                # Modify the variable to test reuse
+                $script:ModuleVersion = "ModifiedVersion"
+                
+                # Second call should return the modified value
+                $secondCallVersion = Get-ModuleVersion
+                $secondCallVersion | Should -Be "ModifiedVersion"
+            }
         }
     }
 }
