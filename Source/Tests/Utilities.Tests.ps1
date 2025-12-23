@@ -72,5 +72,56 @@ Describe 'Utilities Tests' {
                 $version1 | Should -Be $version2
             }
         }
+
+        Context 'Testing Test-LatestModuleVersion' {
+            BeforeAll {
+                Mock Write-Host {}
+                Mock Write-Warning {}
+                Mock Write-Verbose {}
+            }
+
+            It 'Shows warning when a newer version is available' {
+                Mock Get-ModuleVersion { return "1.0.0" }
+                Mock Find-Module { return [PSCustomObject]@{ Version = "2.0.0" } }
+
+                Test-LatestModuleVersion
+
+                Should -Invoke Write-Warning -Times 1 -ParameterFilter { $Message -like "*latest version is 2.0.0*" }
+            }
+
+            It 'Does not show warning when current version is the latest' {
+                Mock Get-ModuleVersion { return "2.0.0" }
+                Mock Find-Module { return [PSCustomObject]@{ Version = "2.0.0" } }
+
+                Test-LatestModuleVersion
+
+                Should -Not -Invoke Write-Warning
+            }
+
+            It 'Does not show warning when current version is newer than PSGallery' {
+                Mock Get-ModuleVersion { return "3.0.0" }
+                Mock Find-Module { return [PSCustomObject]@{ Version = "2.0.0" } }
+
+                Test-LatestModuleVersion
+
+                Should -Not -Invoke Write-Warning
+            }
+
+            It 'Handles errors gracefully when Find-Module fails' {
+                Mock Get-ModuleVersion { return "1.0.0" }
+                Mock Find-Module { throw "Network error" }
+
+                { Test-LatestModuleVersion } | Should -Not -Throw
+                Should -Invoke Write-Verbose -Times 1 -ParameterFilter { $Message -like "*Could not check for the latest module version*" }
+            }
+
+            It 'Handles errors gracefully when Get-ModuleVersion fails' {
+                Mock Get-ModuleVersion { throw "Cannot read version" }
+                Mock Find-Module { return [PSCustomObject]@{ Version = "1.0.0" } }
+
+                { Test-LatestModuleVersion } | Should -Not -Throw
+                Should -Invoke Write-Verbose -Times 1 -ParameterFilter { $Message -like "*Could not check for the latest module version*" }
+            }
+        }
     }
 }
