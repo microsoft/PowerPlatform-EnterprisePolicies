@@ -4,15 +4,18 @@ These scripts automate managing (create, update, get, delete) Power Platform Ent
 In addition, we are providing sample scripts on how to associate these policies with Power Platform environments.</br>
 Please note that these scripts are provided under MIT license and its usage is the sole responsibility of the user.
 
-## How to run setup scripts
+## How to run scripts in this repository
 
-1. **Install modules script** : This script installs the required modules to run Enterprise Policies scripts.</br>
-Script name: [InstallPowerAppsCmdlets.ps1](./Source/InstallPowerAppsCmdlets.ps1)</br>
-    * Run the script to import required PowerShell modules.
+1. Download the "Source code" `.zip` or `.tar.gz` file from the [Releases page](https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases).
+2. Extract the files from the `.zip` or `.tar.gz` file.
+3. Open PowerShell and `cd` to the extracted folder. For example: `cd ~/Downloads/PowerPlatform-EnterprisePolicies-0.5.10`.
+4. Install required PowerShell modules by running `.\Source\InstallPowerAppsCmdlets.ps1`.
+5. Run any of the scripts in this repository to manage your Power Platform enterprise policies. See below for more information on each of the scripts.
 
-2. **Setup Azure subscription for Microsoft.PowerPlatform** : This script registers the Azure subscription for Microsoft.PowerPlatform resource provider
-and also allow lists the subscription for enterprisePoliciesPreview feature.</br>
-Script name: [SetupSubscriptionForPowerPlatform.ps1](./Source/SetupSubscriptionForPowerPlatform.ps1)</br>
+## How to run the Azure subscription setup script
+
+This script registers the Azure subscription for Microsoft.PowerPlatform resource provider and also allowlists the subscription for enterprisePoliciesPreview feature. This will allow you to create and manage enterprise policies in the registered subscription for use with Power Platform.
+Script name: [SetupSubscriptionForPowerPlatform.ps1](./Source/SetupSubscriptionForPowerPlatform.ps1)
     * Run the script to setup Azure subscription for Microsoft.PowerPlatform resources
 
 ## How to run CMK scripts
@@ -227,12 +230,6 @@ Input parameters :
 
 **NOTE**:
 * :exclamation: If there are more than 1 supported regions for the geo outlined in the [list of supported regions](https://learn.microsoft.com/en-us/power-platform/admin/vnet-support-overview#supported-regions), the primary and secondary VNet must have been created in ***different*** regions in the geo
-* :exclamation: To delete a Subnet Injection enterprise policy:
-    * ["Remove Subnet Injection from an environment"](#9-remove-subnet-injection-from-an-environment) for **ALL** associated environments, the following remove command should error and call out if there are environments still associated
-    * Run the following command (see the "Get Subnet Injection Enterprise Policy" scripts if needed to find the ARM Resource ID):
-        ```powershell
-        Remove-AzResource -ResourceId $policyArmId -Force
-        ```
 
 Sample Input :</br>
 ![alt text](./ReadMeImages/CreateSubnetInjectionEnterprisePolicy1.png)</br>
@@ -336,6 +333,14 @@ Sample Input :</br>
 Sample Output :</br>
 ![alt text](./ReadMeImages/RevertSubnetInjection2.png)</br>
 
+### 10. **Delete Subnet Injection Enterprise Policy**
+To delete a Subnet Injection enterprise policy:
+1. ["Remove Subnet Injection from an environment"](#9-remove-subnet-injection-from-an-environment) for **ALL** associated environments, the following remove command should error and call out if there are environments still associated
+2. Run the following command to delete the enterprise policy (see the "Get Subnet Injection Enterprise Policy" scripts if needed to find the ARM Resource ID):
+        ```powershell
+        Remove-AzResource -ResourceId $policyArmId -Force
+        ```
+   **NOTE**: The `policyArmId` should follow format: `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.PowerPlatform/enterprisePolicies/<enterprisePolicyName>`
 
 ## Using the Subnet Injection Diagnostic Module
 
@@ -417,4 +422,4 @@ Then, you can enable running the tests by going to the Run and Debug view in VSC
 #### Unable to delete VNet / Unable to modify subnet
 * ErrorCode: `InUseSubnetCannotBeDeleted` or `SubnetMissingRequiredDelegation`
 * ErrorMessage contains: *.../serviceAssociationLinks/PowerPlatformServiceLink...*
-* **Solution**: delete the Subnet Injection enterprise policy first, see the notes section in ["Create subnet injection enterprise policy"](#2-create-subnet-injection-enterprise-policy)
+* **Solution**: delete the Subnet Injection enterprise policy first, see the notes section in ["Delete Subnet Injection Enterprise Policy"](#10-delete-subnet-injection-enterprise-policy)
