@@ -336,5 +336,5 @@ function Get-EnterprisePolicy {
         [string] $PolicyArmId
     )
 
-    return Get-AZResource -ResourceId $PolicyArmId -ExpandProperties
+    return Get-AzResource -ResourceId $PolicyArmId -ExpandProperties
 }
