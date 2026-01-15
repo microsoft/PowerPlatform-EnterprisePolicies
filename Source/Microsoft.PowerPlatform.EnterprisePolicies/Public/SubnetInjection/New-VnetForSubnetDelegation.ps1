@@ -76,12 +76,16 @@ function New-VnetForSubnetDelegation {
 
         [Parameter(Mandatory=$false, ParameterSetName='ExistingVNet', HelpMessage="The Azure AD tenant ID")]
         [Parameter(Mandatory=$false, ParameterSetName='CreateVNet', HelpMessage="The Azure AD tenant ID")]
-        [string]$TenantId
+        [string]$TenantId,
+
+        [Parameter(Mandatory=$false, ParameterSetName='ExistingVNet', HelpMessage="Force re-authentication to Azure")]
+        [Parameter(Mandatory=$false, ParameterSetName='CreateVNet', HelpMessage="Force re-authentication to Azure")]
+        [switch]$ForceAuth
     )
 
     $ErrorActionPreference = "Stop"
 
-    if (-not(Connect-Azure -AzureEnvironment $AzureEnvironment -TenantId $TenantId)) {
+    if (-not(Connect-Azure -AzureEnvironment $AzureEnvironment -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
