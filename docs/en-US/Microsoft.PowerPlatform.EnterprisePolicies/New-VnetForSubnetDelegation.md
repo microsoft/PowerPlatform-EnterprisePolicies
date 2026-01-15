@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 11/17/2025
+ms.date: 01/15/2026
 PlatyPS schema version: 2024-05-01
 title: New-VnetForSubnetDelegation
 ---
@@ -22,7 +22,7 @@ Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprise
 ```
 New-VnetForSubnetDelegation -SubscriptionId <string> -VirtualNetworkName <string>
  -SubnetName <string> -ResourceGroupName <string> [-AzureEnvironment <AzureEnvironment>]
- [-TenantId <string>] [<CommonParameters>]
+ [-TenantId <string>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### CreateVNet
@@ -31,7 +31,7 @@ New-VnetForSubnetDelegation -SubscriptionId <string> -VirtualNetworkName <string
 New-VnetForSubnetDelegation -SubscriptionId <string> -VirtualNetworkName <string>
  -SubnetName <string> -ResourceGroupName <string> -Region <string> -CreateVirtualNetwork
  -AddressPrefix <string> -SubnetPrefix <string> [-AzureEnvironment <AzureEnvironment>]
- [-TenantId <string>] [<CommonParameters>]
+ [-TenantId <string>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -49,13 +49,13 @@ The subnet will be configured with delegation for Microsoft.PowerPlatform/enterp
 
 ### EXAMPLE 1
 
-New-VnetForSubnetDelegation -SubscriptionId "42bbbe13-b1b6-4b77-b098-34eec944e955" -VirtualNetworkName "existing-vnet" -SubnetName "existing-subnet" -ResourceGroupName "myResourceGroup"
+New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "existing-vnet" -SubnetName "existing-subnet" -ResourceGroupName "myResourceGroup"
 
 Configures an existing virtual network and subnet with the required delegation.
 
 ### EXAMPLE 2
 
-New-VnetForSubnetDelegation -SubscriptionId "42bbbe13-b1b6-4b77-b098-34eec944e955" -VirtualNetworkName "wus-vnet" -SubnetName "default" -CreateVirtualNetwork -AddressPrefix "10.0.0.0/16" -SubnetPrefix "10.0.1.0/24" -ResourceGroupName "osfaixatEUAP2" -Region "westus" -TenantId "d7d28f23-98e5-47fe-9f31-9ee90548088f"
+New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "wus-vnet" -SubnetName "default" -CreateVirtualNetwork -AddressPrefix "10.0.0.0/16" -SubnetPrefix "10.0.1.0/24" -ResourceGroupName "myResourceGroup" -Region "westus" -TenantId "00000000-0000-0000-0000-000000000000"
 
 Creates a new virtual network named "wus-vnet" with address space 10.0.0.0/16 and a subnet named "default" with address prefix 10.0.1.0/24, then adds delegation.
 If the Vnet or subnet already exist, it will just add the delegation to the existing subnet.
@@ -124,6 +124,33 @@ ParameterSets:
 - Name: CreateVNet
   Position: Named
   IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ForceAuth
+
+Force re-authentication to Azure
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: CreateVNet
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+- Name: ExistingVNet
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false

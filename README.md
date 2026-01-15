@@ -387,6 +387,16 @@ Get-EnvironmentUsage -EnvironmentId "your-environment-id"
 
 For a full list of available functions and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/EnterprisePolicies) folder.
 
+### Forcing re-authentication
+
+By default, the diagnostic functions will attempt to reuse an existing Azure session if one is available. If you want to manually choose which account to use instead of letting the module automatically select one, you can pass the `-ForceAuth` switch to any of the diagnostic functions:
+
+```powershell
+Get-EnvironmentUsage -EnvironmentId "your-environment-id" -ForceAuth
+```
+
+This will prompt you to re-authenticate, allowing you to select or enter the credentials for the account you want to use.
+
 ## Development
 
 To get started with development, clone the repository and open it in VSCode. The scripts are written in PowerShell and follow standard PowerShell conventions.
