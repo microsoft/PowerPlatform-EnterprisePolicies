@@ -337,9 +337,8 @@ Sample Output :</br>
 To delete a Subnet Injection enterprise policy:
 1. [Remove Subnet Injection from an environment](#9-remove-subnet-injection-from-an-environment) for **ALL** associated environments, the command in step 2 below will error if there are environments still associated.
 2. Run the following command to delete the enterprise policy (see the "Get Subnet Injection Enterprise Policy" scripts if needed to find the ARM Resource ID):
-        ```powershell
-        Remove-AzResource -ResourceId $policyArmId -Force
-        ```
+   ```powershell
+   Remove-AzResource -ResourceId $policyArmId -Force
 
    **NOTE**: The `policyArmId` should follow format: `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.PowerPlatform/enterprisePolicies/<enterprisePolicyName>`
 
