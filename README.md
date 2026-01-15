@@ -340,7 +340,7 @@ To delete a Subnet Injection enterprise policy:
    ```powershell
    Remove-AzResource -ResourceId $policyArmId -Force
 
-   **NOTE**: The `policyArmId` should follow format: `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.PowerPlatform/enterprisePolicies/<enterprisePolicyName>`
+**NOTE**: The `policyArmId` should follow format: `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.PowerPlatform/enterprisePolicies/<enterprisePolicyName>`
 
 ## Using the Subnet Injection Diagnostic Module
 
