@@ -15,8 +15,8 @@ Please note that these scripts are provided under MIT license and its usage is t
 ## How to run the Azure subscription setup script
 
 This script registers the Azure subscription for Microsoft.PowerPlatform resource provider and also allowlists the subscription for enterprisePoliciesPreview feature. This will allow you to create and manage enterprise policies in the registered subscription for use with Power Platform.
+
 Script name: [SetupSubscriptionForPowerPlatform.ps1](./Source/SetupSubscriptionForPowerPlatform.ps1)
-    * Run the script to setup Azure subscription for Microsoft.PowerPlatform resources
 
 ## How to run CMK scripts
 
@@ -335,11 +335,12 @@ Sample Output :</br>
 
 ### 10. **Delete Subnet Injection Enterprise Policy**
 To delete a Subnet Injection enterprise policy:
-1. ["Remove Subnet Injection from an environment"](#9-remove-subnet-injection-from-an-environment) for **ALL** associated environments, the following remove command should error and call out if there are environments still associated
+1. [Remove Subnet Injection from an environment](#9-remove-subnet-injection-from-an-environment) for **ALL** associated environments, the command in step 2 below will error if there are environments still associated.
 2. Run the following command to delete the enterprise policy (see the "Get Subnet Injection Enterprise Policy" scripts if needed to find the ARM Resource ID):
         ```powershell
         Remove-AzResource -ResourceId $policyArmId -Force
         ```
+
    **NOTE**: The `policyArmId` should follow format: `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/Microsoft.PowerPlatform/enterprisePolicies/<enterprisePolicyName>`
 
 ## Using the Subnet Injection Diagnostic Module
