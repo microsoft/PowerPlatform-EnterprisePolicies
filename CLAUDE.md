@@ -147,6 +147,13 @@ Required PowerShell modules (installed via `InstallPowerAppsCmdlets.ps1`):
 - Az.Accounts, Az.Network, Az.Resources, Az.PowerPlatform
 - Pester (via NuGet for testing, version in `Directory.Packages.props`)
 
+## Git Workflow
+
+- **Never push directly to main** - the repository requires pull requests
+- **Always create a feature branch** with the naming pattern: `user-alias/relevant-branch-name`
+  - Example: `osfaixat/update-environmentregion-api`
+- Create a pull request from your feature branch to main
+
 ## CI/CD
 
 Azure Pipelines with security scanning (CodeQL, CredScan, BinSkim, PoliCheck). Version managed by GitVersion with semantic versioning.
