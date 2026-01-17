@@ -32,6 +32,10 @@ $SupportedVnetLocations.Add("sweden", "swedencentral")
 $SupportedVnetLocations.Add("italy", "italynorth")
 $SupportedVnetLocations.Add("usgov", "usgovtexas|usgovvirginia")
 
+<#
+.SYNOPSIS
+Checks if a Power Platform region requires two VNets in paired Azure regions.
+#>
 function Test-PowerPlatformRegionRequiresPair
 {
     param (
@@ -45,6 +49,10 @@ function Test-PowerPlatformRegionRequiresPair
     return $vnetLocationsAllowed.Count -gt 1
 }
 
+<#
+.SYNOPSIS
+Throws if the Azure region is not valid for the given Power Platform region.
+#>
 function Assert-AzureRegionIsSupported
 {
     param (
@@ -63,6 +71,10 @@ function Assert-AzureRegionIsSupported
         throw "The location $AzureRegion is not supported for enterprise policy location $PowerPlatformRegion. The supported vnet location for the enterprise policy location are $($vnetLocationsAllowed -join ",")"
     }
 }
+<#
+.SYNOPSIS
+Throws if the Power Platform region is not supported for enterprise policies.
+#>
 function Assert-PowerPlatformRegionIsSupported
 {
     param (
@@ -77,6 +89,10 @@ function Assert-PowerPlatformRegionIsSupported
     }
 }
 
+<#
+.SYNOPSIS
+Returns the list of Azure regions that support VNet delegation for a Power Platform region.
+#>
 function Get-SupportedVnetRegionsForPowerPlatformRegion
 {
     param (
@@ -89,6 +105,10 @@ function Get-SupportedVnetRegionsForPowerPlatformRegion
     return $SupportedVnetLocations[$PowerPlatformRegion].Split(";") | ForEach-Object { $_.Split("|") }
 }
 
+<#
+.SYNOPSIS
+Retrieves and validates a virtual network resource for use with an enterprise policy.
+#>
 function Get-VirtualNetwork{
     param(
         [Parameter(Mandatory)]
@@ -110,6 +130,10 @@ function Get-VirtualNetwork{
     return $vnetResource
 }
 
+<#
+.SYNOPSIS
+Throws if the two VNets are not in a valid paired Azure region combination.
+#>
 function Assert-RegionPairing {
     param(
         [Parameter(Mandatory)]
