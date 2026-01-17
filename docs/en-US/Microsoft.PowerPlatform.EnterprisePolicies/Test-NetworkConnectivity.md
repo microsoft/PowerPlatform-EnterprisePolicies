@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 11/17/2025
+ms.date: 01/15/2026
 PlatyPS schema version: 2024-05-01
 title: Test-NetworkConnectivity
 ---
@@ -21,7 +21,8 @@ Tests the connectivity to a given service in a specified environment.
 
 ```
 Test-NetworkConnectivity [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
- [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [<CommonParameters>]
+ [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [-ForceAuth]
+ [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -111,6 +112,27 @@ ParameterSets:
 - Name: (All)
   Position: 0
   IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ForceAuth
+
+Force re-authentication to Azure.
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false

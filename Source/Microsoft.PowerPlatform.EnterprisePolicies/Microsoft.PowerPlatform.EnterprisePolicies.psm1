@@ -21,4 +21,6 @@ foreach ($script in $Private) {
 
 Initialize-Cache
 
+Test-LatestModuleVersion
+
 Export-ModuleMember -Function $Public.BaseName

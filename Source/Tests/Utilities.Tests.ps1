@@ -34,5 +34,94 @@ Describe 'Utilities Tests' {
                 $resultDate | Should -Be $expectedDate
             }
         }
+
+        Context 'Testing Get-ModuleVersion' {
+            It 'Returns a non-empty version string' {
+                $version = Get-ModuleVersion
+                $version | Should -Not -BeNullOrEmpty
+            }
+
+            It 'Returns a version string in valid format' {
+                $version = Get-ModuleVersion
+                # Version should match the pattern Major.Minor.Build.Revision
+                $version | Should -Match '^\d+\.\d+\.\d+(\.\d+)?$'
+            }
+
+            It 'Stores version in script scope for reuse' {
+                # Clear any existing value
+                Remove-Variable -Name script:ModuleVersion -ErrorAction SilentlyContinue
+                
+                # First call should set the variable
+                $firstCallVersion = Get-ModuleVersion
+                $script:ModuleVersion | Should -Be $firstCallVersion
+                
+                # Modify the variable to test reuse
+                $script:ModuleVersion = "ModifiedVersion"
+                
+                # Second call should return the modified value
+                $secondCallVersion = Get-ModuleVersion
+                $secondCallVersion | Should -Be "ModifiedVersion"
+
+                # Clear any existing value
+                Remove-Variable -Name script:ModuleVersion -ErrorAction SilentlyContinue
+            }
+
+            It 'Returns consistent version across multiple calls' {
+                $version1 = Get-ModuleVersion
+                $version2 = Get-ModuleVersion
+                $version1 | Should -Be $version2
+            }
+        }
+
+        Context 'Testing Test-LatestModuleVersion' {
+            BeforeAll {
+                Mock Write-Host {}
+                Mock Write-Warning {}
+                Mock Write-Verbose {}
+            }
+
+            It 'Shows warning when a newer version is available' {
+                Mock Get-ModuleVersion { return "1.0.0" }
+                Mock Find-Module { return [PSCustomObject]@{ Version = "2.0.0" } }
+
+                Test-LatestModuleVersion
+
+                Should -Invoke Write-Warning -Times 1 -ParameterFilter { $Message -like "*latest version is 2.0.0*" }
+            }
+
+            It 'Does not show warning when current version is the latest' {
+                Mock Get-ModuleVersion { return "2.0.0" }
+                Mock Find-Module { return [PSCustomObject]@{ Version = "2.0.0" } }
+
+                Test-LatestModuleVersion
+
+                Should -Not -Invoke Write-Warning
+            }
+
+            It 'Does not show warning when current version is newer than PSGallery' {
+                Mock Get-ModuleVersion { return "3.0.0" }
+                Mock Find-Module { return [PSCustomObject]@{ Version = "2.0.0" } }
+
+                Test-LatestModuleVersion
+
+                Should -Not -Invoke Write-Warning
+            }
+
+            It 'Handles errors gracefully when Find-Module fails' {
+                Mock Get-ModuleVersion { return "1.0.0" }
+                Mock Find-Module { throw "Network error" }
+
+                { Test-LatestModuleVersion } | Should -Not -Throw
+                Should -Invoke Write-Verbose -Times 1 -ParameterFilter { $Message -like "*Could not check for the latest module version*" }
+            }
+
+            It 'Handles errors gracefully when Get-ModuleVersion fails' {
+                Mock Get-ModuleVersion { throw "Cannot read version" }
+                Mock Find-Module { return [PSCustomObject]@{ Version = "1.0.0" } }
+
+                { Test-LatestModuleVersion } | Should -Not -Throw
+                Should -Invoke Write-Verbose -Times 1 -ParameterFilter { $Message -like "*Could not check for the latest module version*" }
+            }
+        }
     }
 }
