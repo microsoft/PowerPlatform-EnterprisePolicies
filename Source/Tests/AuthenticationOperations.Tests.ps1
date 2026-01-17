@@ -1,3 +1,6 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification="Unit test code")]
+param()
+
 BeforeDiscovery{
     . $PSScriptRoot\Shared.ps1 -Module
 }
@@ -92,6 +95,58 @@ Describe 'AuthenticationOperations Tests' {
                 Mock Get-AzContext { return $null }
                 Connect-Azure -Endpoint $endpoint -AuthScope $authScope -Force | Should -Be $true
                 Assert-MockCalled Connect-AzAccount -Exactly 1
+            }
+        }
+
+        Context 'Testing Get-AccessToken' {
+            It 'Returns token when Get-AzAccessToken succeeds' {
+                $mockToken = [PSCustomObject]@{ Token = (ConvertTo-SecureString "test-token" -AsPlainText -Force) }
+                Mock Get-AzAccessToken { return $mockToken }
+
+                $result = Get-AccessToken -Endpoint ([BAPEndpoint]::prod) -ResourceUrl "https://api.test.com"
+
+                $result | Should -Not -BeNullOrEmpty
+            }
+
+            It 'Throws when token acquisition fails completely' {
+                Mock Get-AzAccessToken { return $null }
+                Mock Connect-Azure { return $true }
+
+                { Get-AccessToken -Endpoint ([BAPEndpoint]::prod) -ResourceUrl "https://api.test.com" } | Should -Throw "*Failed to acquire access token*"
+            }
+        }
+
+        Context 'Testing Get-PPAPIAccessToken' {
+            It 'Calls Get-AccessToken with correct resource URL' {
+                $mockToken = [PSCustomObject]@{ Token = (ConvertTo-SecureString "test-token" -AsPlainText -Force) }
+                Mock Get-APIResourceUrl { return "https://api.powerplatform.com" }
+                Mock Get-AzAccessToken { return $mockToken }
+
+                $result = Get-PPAPIAccessToken -Endpoint ([BAPEndpoint]::prod)
+
+                $result | Should -Not -BeNullOrEmpty
+            }
+        }
+
+        Context 'Testing Get-BAPAccessToken' {
+            It 'Calls Get-AccessToken with BAP resource URL' {
+                $mockToken = [PSCustomObject]@{ Token = (ConvertTo-SecureString "test-token" -AsPlainText -Force) }
+                Mock Get-BAPResourceUrl { return "https://service.powerapps.com" }
+                Mock Get-AzAccessToken { return $mockToken }
+
+                $result = Get-BAPAccessToken -Endpoint ([BAPEndpoint]::prod)
+
+                $result | Should -Not -BeNullOrEmpty
+            }
+        }
+
+        Context 'Testing ConvertFrom-SecureStringInternal' {
+            It 'Converts SecureString to plain text' {
+                $secureString = ConvertTo-SecureString "test-value" -AsPlainText -Force
+
+                $result = ConvertFrom-SecureStringInternal -SecureString $secureString
+
+                $result | Should -Be "test-value"
             }
         }
     }

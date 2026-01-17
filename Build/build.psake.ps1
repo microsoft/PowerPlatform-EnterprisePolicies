@@ -212,6 +212,7 @@ Task GenerateMarkdown -depends Build, PreBuildHelp -requiredVariables DocsRootDi
         New-MarkdownCommandHelp -ModuleInfo $moduleInfo -Locale $DefaultLocale -OutputFolder $DocsRootDir\$DefaultLocale -WithModulePage -ErrorAction SilentlyContinue -Force > $null
     }
     finally {
+       "Removing module $ModuleName from session."
         Remove-Module $ModuleName
     }
 }

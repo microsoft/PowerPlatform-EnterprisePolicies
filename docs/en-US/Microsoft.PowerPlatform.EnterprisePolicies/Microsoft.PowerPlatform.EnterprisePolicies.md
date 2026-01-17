@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/15/2026
+ms.date: 01/16/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -29,6 +29,10 @@ Retrieves the region that the specified environment is deployed in.
 ### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
 
 Retrieves the current usage of the specified environment.
+
+### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
+
+Creates a new Subnet Injection Enterprise Policy for Power Platform.
 
 ### [New-VnetForSubnetDelegation](New-VnetForSubnetDelegation.md)
 

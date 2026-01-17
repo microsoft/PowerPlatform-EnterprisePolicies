@@ -9,7 +9,7 @@ Describe 'Get-EnvironmentUsage Tests' {
     BeforeAll {
         [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
         $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
-        Mock Get-AccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Get-PPAPIAccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Write-Host {}
         Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
