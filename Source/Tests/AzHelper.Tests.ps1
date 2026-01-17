@@ -383,5 +383,94 @@ Describe 'AzHelper Tests' {
                 Should -Invoke Add-ValidatedSubscriptionToCache -Times 1
             }
         }
+
+        Context 'New-EnterprisePolicyBody' {
+            It 'Creates NetworkInjection policy body with single VNet' {
+                $vnet = [PSCustomObject]@{ ResourceId = "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/vnet" }
+                $vnetInfo = [VnetInformation]::new($vnet, "subnet1")
+
+                $result = New-EnterprisePolicyBody -PolicyType ([PolicyType]::NetworkInjection) -PolicyLocation "unitedstates" -PolicyName "testPolicy" -VnetInformation @($vnetInfo)
+
+                $result.resources[0].kind | Should -Be "NetworkInjection"
+                $result.resources[0].name | Should -Be "testPolicy"
+                $result.resources[0].location | Should -Be "unitedstates"
+                $result.resources[0].properties.networkInjection.virtualNetworks.Count | Should -Be 1
+            }
+
+            It 'Creates NetworkInjection policy body with paired VNets' {
+                $vnet1 = [PSCustomObject]@{ ResourceId = "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/vnet1" }
+                $vnet2 = [PSCustomObject]@{ ResourceId = "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/vnet2" }
+                $vnetInfo = @(
+                    [VnetInformation]::new($vnet1, "subnet1"),
+                    [VnetInformation]::new($vnet2, "subnet2")
+                )
+
+                $result = New-EnterprisePolicyBody -PolicyType ([PolicyType]::NetworkInjection) -PolicyLocation "unitedstates" -PolicyName "testPolicy" -VnetInformation $vnetInfo
+
+                $result.resources[0].properties.networkInjection.virtualNetworks.Count | Should -Be 2
+            }
+
+            It 'Creates Encryption policy body with KeyVault info' {
+                $result = New-EnterprisePolicyBody -PolicyType ([PolicyType]::Encryption) -PolicyLocation "unitedstates" -PolicyName "testPolicy" -KeyVaultId "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.KeyVault/vaults/vault" -KeyName "mykey" -KeyVersion "1.0"
+
+                $result.resources[0].kind | Should -Be "Encryption"
+                $result.resources[0].properties.encryption.keyVault.id | Should -Be "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.KeyVault/vaults/vault"
+                $result.resources[0].properties.encryption.keyVault.key.name | Should -Be "mykey"
+            }
+
+            It 'Creates Identity policy body' {
+                $result = New-EnterprisePolicyBody -PolicyType ([PolicyType]::Identity) -PolicyLocation "unitedstates" -PolicyName "testPolicy"
+
+                $result.resources[0].kind | Should -Be "Identity"
+                $result.resources[0].identity.type | Should -Be "SystemAssigned"
+            }
+        }
+
+        Context 'Set-EnterprisePolicy' {
+            It 'Returns true when deployment succeeds' {
+                Mock New-TemporaryFile { return [PSCustomObject]@{ FullName = "C:\temp\test.json" } }
+                Mock Out-File {}
+                Mock Remove-Item {}
+                Mock New-AzResourceGroupDeployment {
+                    return [PSCustomObject]@{ ProvisioningState = "Succeeded" }
+                }
+
+                $body = @{ resources = @() }
+                $result = Set-EnterprisePolicy -ResourceGroup "test-rg" -Body $body
+
+                $result | Should -Be $true
+            }
+
+            It 'Returns false when deployment fails' {
+                Mock New-TemporaryFile { return [PSCustomObject]@{ FullName = "C:\temp\test.json" } }
+                Mock Out-File {}
+                Mock Remove-Item {}
+                Mock Write-Error {}
+                Mock New-AzResourceGroupDeployment {
+                    return [PSCustomObject]@{ ProvisioningState = "Failed" }
+                }
+
+                $body = @{ resources = @() }
+                $result = Set-EnterprisePolicy -ResourceGroup "test-rg" -Body $body
+
+                $result | Should -Be $false
+            }
+        }
+
+        Context 'Get-EnterprisePolicy' {
+            It 'Returns policy resource' {
+                $mockPolicy = [PSCustomObject]@{
+                    ResourceId = "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.PowerPlatform/enterprisePolicies/policy"
+                    Name = "policy"
+                    Properties = @{}
+                }
+                Mock Get-AzResource { return $mockPolicy }
+
+                $result = Get-EnterprisePolicy -PolicyArmId $mockPolicy.ResourceId
+
+                $result.Name | Should -Be "policy"
+                Should -Invoke Get-AzResource -Times 1 -ParameterFilter { $ExpandProperties -eq $true }
+            }
+        }
     }
 }

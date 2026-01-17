@@ -288,8 +288,8 @@ function New-EnterprisePolicyBody {
                 @{
                     "type" = "Microsoft.PowerPlatform/enterprisePolicies"
                     "apiVersion" = "2020-10-30"
-                    "name" = $policyName
-                    "location"= $policyLocation
+                    "name" = $PolicyName
+                    "location"= $PolicyLocation
                     "kind" = "Identity"
                 
                     "identity" = @{

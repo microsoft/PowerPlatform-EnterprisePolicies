@@ -129,7 +129,7 @@ function Get-AccessToken {
         [BAPEndpoint]$Endpoint,
 
         [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty]
+        [ValidateNotNullOrEmpty()]
         [string]$ResourceUrl,
 
         [Parameter(Mandatory=$false)]
