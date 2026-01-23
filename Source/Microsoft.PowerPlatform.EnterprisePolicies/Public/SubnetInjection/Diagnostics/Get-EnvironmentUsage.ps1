@@ -62,7 +62,7 @@ function Get-EnvironmentUsage{
     }
 
     $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
-        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
     }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()

@@ -93,7 +93,21 @@ function Connect-Azure {
     return $true
 }
 
-function Get-AccessToken {
+function Get-BAPAccessToken {
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [BAPEndpoint]$Endpoint,
+
+        [Parameter(Mandatory=$false)]
+        [string]$TenantId = $null
+    )
+
+    $resourceUrl = Get-BAPResourceUrl -Endpoint $Endpoint
+    return Get-AccessToken -Endpoint $Endpoint -ResourceUrl $resourceUrl -TenantId $TenantId
+}
+
+function Get-PPAPIAccessToken {
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -104,6 +118,23 @@ function Get-AccessToken {
     )
 
     $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
+
+    return Get-AccessToken -Endpoint $Endpoint -ResourceUrl $resourceUrl -TenantId $TenantId
+}
+
+function Get-AccessToken {
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [BAPEndpoint]$Endpoint,
+
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$ResourceUrl,
+
+        [Parameter(Mandatory=$false)]
+        [string]$TenantId = $null
+    )
 
     $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString -ErrorAction SilentlyContinue
     if ($null -eq $token) {

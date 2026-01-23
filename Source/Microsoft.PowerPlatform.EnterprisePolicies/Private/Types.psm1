@@ -8,8 +8,13 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 #>
 
 class VnetInformation{
-    [string] $VnetId
+    [object] $VnetResource
     [string] $SubnetName
+
+    VnetInformation([object]$VnetResource, [string]$SubnetName) {
+        $this.VnetResource = $VnetResource
+        $this.SubnetName = $SubnetName
+    }
 }
 
 class NetworkUsage{

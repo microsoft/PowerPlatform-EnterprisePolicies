@@ -198,6 +198,8 @@ Task PostBuild {
 
 # Executes before the GenerateMarkdown phase of the BuildHelp task.
 Task PreBuildHelp {
+    # When loading the module we don't want to run the prereq checks as that slows things down and forces certain unnecessary things to happen for building help docs.
+    $Global:PrereqsChecked = $true
 }
 
 # Executes after the BuildHelpImpl phase of the BuildHelp task.

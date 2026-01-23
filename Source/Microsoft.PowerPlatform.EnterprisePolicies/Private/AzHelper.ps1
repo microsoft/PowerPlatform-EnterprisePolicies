@@ -186,3 +186,155 @@ function Initialize-SubscriptionForPowerPlatform {
     Add-ValidatedSubscriptionToCache -SubscriptionId $SubscriptionId
     return $true
 }
+
+function New-EnterprisePolicyBody {
+    param (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [PolicyType] $PolicyType,
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $PolicyLocation,
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $PolicyName,
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string] $KeyVaultId,
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string] $KeyName,
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string] $KeyVersion,
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [VnetInformation[]] $VnetInformation
+    )
+
+    switch($PolicyType){
+        ([PolicyType]::Encryption){
+            $body = @{
+                "`$schema" = "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+                "contentVersion" = "1.0.0.0"
+                "parameters"= @{}
+                "resources" = @(
+                    @{
+                        "type" = "Microsoft.PowerPlatform/enterprisePolicies"
+                        "apiVersion" = "2020-10-30"
+                        "name" = $PolicyName
+                        "location"= $PolicyLocation
+                        "kind" = "Encryption"
+
+                        "identity" = @{
+                            "type"= "SystemAssigned"
+                        }
+
+                        "properties" = @{
+                            "encryption" = @{
+                                "state" = "Enabled"
+                                "keyVault" = @{
+                                    "id" = $KeyVaultId
+                                    "key" = @{
+                                        "name" = $KeyName
+                                        "version" =  $KeyVersion
+                                    }
+                                }
+                            }
+                            "networkInjection" = $null
+                        }
+                    }
+                )
+            }
+        }
+       ([PolicyType]::NetworkInjection){
+            $body = @{
+                "`$schema" = "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+                "contentVersion" = "1.0.0.0"
+                "parameters"= @{}
+                "resources" = @(
+                    @{
+                        "type" = "Microsoft.PowerPlatform/enterprisePolicies"
+                        "apiVersion" = "2020-10-30"
+                        "name" = $PolicyName
+                        "location"= $PolicyLocation
+                        "kind" = "NetworkInjection"
+
+                        "properties" = @{
+                            "networkInjection" = @{
+                                "virtualNetworks" = @()
+                            }
+                        }
+                    }
+                )
+            }
+
+            foreach($vnet in $VnetInformation)
+            {
+                $body.resources[0].properties.networkInjection.virtualNetworks += @{
+                    "id" = $vnet.VnetResource.ResourceId
+                    "subnet" = @{
+                        "name" = $vnet.SubnetName
+                    }
+                }
+            }
+        }
+        ([PolicyType]::Identity){
+            $body = @{
+            "`$schema" = "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+            "contentVersion" = "1.0.0.0"
+            "parameters"= @{}
+            "resources" = @(
+                @{
+                    "type" = "Microsoft.PowerPlatform/enterprisePolicies"
+                    "apiVersion" = "2020-10-30"
+                    "name" = $PolicyName
+                    "location"= $PolicyLocation
+                    "kind" = "Identity"
+                
+                    "identity" = @{
+                        "type"= "SystemAssigned"
+                    }               
+                   
+                }
+            )
+        }
+    }
+    Default { throw "The provided policy type is unsupported $PolicyType" }
+    }
+    return $body
+}
+
+function Set-EnterprisePolicy {
+    param (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $ResourceGroup,
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        $Body
+    )
+
+    $tmp = New-TemporaryFile
+    $Body | ConvertTo-Json -Depth 7 | Out-File $tmp.FullName
+    $policy = New-AzResourceGroupDeployment -DeploymentName "EnterprisePolicyDeployment" -ResourceGroupName $ResourceGroup -TemplateFile $tmp.FullName
+
+    Remove-Item $tmp.FullName
+    if ($policy.ProvisioningState.Equals("Succeeded"))
+    {
+        return $true
+    }
+    $policyString = $policy | ConvertTo-Json
+    Write-Error "Error creating/updating Enterprise policy $policyString `n"
+    return $false
+}
+
+function Get-EnterprisePolicy {
+    param (
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string] $PolicyArmId
+    )
+
+    return Get-AzResource -ResourceId $PolicyArmId -ExpandProperties
+}

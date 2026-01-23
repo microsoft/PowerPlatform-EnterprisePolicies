@@ -44,7 +44,7 @@ function Test-AccountPermissions{
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
-    $token = ConvertFrom-SecureStringInternal -SecureString (Get-AccessToken -TenantId $TenantId -Endpoint $Endpoint)
+    $token = ConvertFrom-SecureStringInternal -SecureString (Get-PPAPIAccessToken -TenantId $TenantId -Endpoint $Endpoint)
     $parts = $token.Split('.')
     if ($parts.Count -ne 3) {
         throw "Token is not in an expected format."
