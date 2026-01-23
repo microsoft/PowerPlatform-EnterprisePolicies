@@ -121,6 +121,7 @@ function Get-HttpClient
     
         $script:httpClient = New-Object -TypeName System.Net.Http.HttpClient
         $script:httpClient.DefaultRequestHeaders.Clear()
+        $script:httpClient.DefaultRequestHeaders.UserAgent.Add([System.Net.Http.Headers.ProductInfoHeaderValue]::new("Microsoft.PowerPlatform.EnterprisePolicies", (Get-ModuleVersion)))
     }
 
     return $script:httpClient
@@ -176,7 +177,7 @@ function Get-EnvironmentRouteHostName {
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $EnvironmentId = $EnvironmentId.Replace("-", "")
-    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2) {
+    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2 -or $Endpoint -eq [BAPEndpoint]::usgovhigh) {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 1, 1)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 1)
     }
@@ -199,7 +200,7 @@ function Get-TenantRouteHostName {
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $TenantId = $TenantId.Replace("-", "")
-    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2) {
+    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2 -or $Endpoint -eq [BAPEndpoint]::usgovhigh) {
         $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
         $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
     }
@@ -208,6 +209,23 @@ function Get-TenantRouteHostName {
         $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 2)
     }
     return "il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
+}
+
+function Get-BAPResourceUrl {
+    param (
+        [Parameter(Mandatory)]
+        [BAPEndpoint] $Endpoint
+    )
+
+    switch ($Endpoint) {
+        ([BAPEndpoint]::tip1) { return "https://preprod.powerplatform.com/" }
+        ([BAPEndpoint]::tip2) { return "https://test.powerplatform.com/" }
+        ([BAPEndpoint]::prod) { return "https://powerplatform.com/" }
+        ([BAPEndpoint]::usgovhigh) { return "https://high.powerplatform.microsoft.us/" }
+        ([BAPEndpoint]::dod) { return "https://appsplatform.us/" }
+        ([BAPEndpoint]::china) { return "https://powerplatform.partner.microsoftonline.cn/" }
+        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+    }
 }
 
 function Get-APIResourceUrl {
@@ -241,10 +259,34 @@ function Send-RequestWithRetries {
     $attempt = 0
     while ($attempt -lt $MaxRetries) {
         try {
+            $sleepSeconds = $DelaySeconds
             $result = Get-AsyncResult -Task $client.SendAsync((& $RequestFactory))
 
             if(Test-Result -Result $result) {
                 return $result
+            }
+            
+            # Check for 503 Service Unavailable or 429 Too Many Requests with Retry-After header
+            if ($result.StatusCode -eq 503 -or $result.StatusCode -eq 429) {
+                if ($result.Headers.Contains("Retry-After")) {
+                    $retryAfterValue = $result.Headers.GetValues("Retry-After") | Select-Object -First 1
+                    # Retry-After can be either seconds (integer) or HTTP date
+                    if ($retryAfterValue -match '^\d+$') {
+                        $sleepSeconds = [int]$retryAfterValue
+                    } else {
+                        try {
+                            $retryAfterDate = [DateTime]::Parse($retryAfterValue)
+                            if ($retryAfterDate.Kind -ne [System.DateTimeKind]::Utc) {
+                                $retryAfterDate = $retryAfterDate.ToUniversalTime()
+                            }
+                            $sleepSeconds = [Math]::Max(1, [int]($retryAfterDate - [DateTime]::UtcNow).TotalSeconds)
+                        } catch {
+                            Write-Verbose "Could not parse Retry-After header value: $retryAfterValue. Using default delay."
+                            $sleepSeconds = $DelaySeconds
+                        }
+                    }
+                    Write-Host "The service is working on the request and has requested a retry. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
+                }
             }
             $attempt++
         }
@@ -260,8 +302,8 @@ function Send-RequestWithRetries {
             Write-Host "Request failed after $MaxRetries attempts." -ForegroundColor Red
             Assert-Result -Result $result
         }
-        Write-Verbose "Request failed on attempt $attempt. Retrying in $DelaySeconds seconds..."
-        Start-Sleep -Seconds $DelaySeconds
+        Write-Verbose "Request failed on attempt $attempt. Retrying in $sleepSeconds seconds..."
+        Start-Sleep -Seconds $sleepSeconds
     }
 }
 
@@ -277,12 +319,12 @@ function Test-Result {
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
             return $false
         }
         else
         {
-            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
             return $false
         }
     }
@@ -301,13 +343,13 @@ function Assert-Result {
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
         else
         {
-            Write-Verbose "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            throw "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
         }
     }
 }
@@ -329,9 +371,25 @@ function ConvertFrom-JsonToClass {
             $itemList += ConvertFrom-JsonToClass -Json $itemJson -ClassType $elementType
         }
         return ,$itemList  
-    } else {
-        $instance = [Activator]::CreateInstance($ClassType)
     }
+    
+    # Handle primitive types and strings
+    if ($ClassType.IsPrimitive -or $ClassType -eq [string]) {
+        return ($data -as $ClassType)
+    }
+    # Handle common value types explicitly
+    if ($ClassType -eq [DateTime]) {
+        return [DateTime]::Parse($data)
+    }
+    if ($ClassType.FullName -eq 'System.Guid') {
+        return [Guid]::Parse($data)
+    }
+    if ($ClassType.FullName -eq 'System.Decimal') {
+        return [Decimal]::Parse($data)
+    }
+    
+    # Handle complex types
+    $instance = [Activator]::CreateInstance($ClassType)
 
     foreach ($property in $ClassType.GetProperties()) {
         $name = $property.Name

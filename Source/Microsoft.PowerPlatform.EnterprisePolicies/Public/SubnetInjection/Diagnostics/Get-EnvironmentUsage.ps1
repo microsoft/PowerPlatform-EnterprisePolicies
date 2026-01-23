@@ -41,12 +41,15 @@ function Get-EnvironmentUsage{
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region to filter the usage by. Defaults to the region the environment is in.")]
-        [string]$Region
+        [string]$Region,
+
+        [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
+        [switch]$ForceAuth
     )
 
     $ErrorActionPreference = "Stop"
 
-    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId)) {
+    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
@@ -59,7 +62,7 @@ function Get-EnvironmentUsage{
     }
 
     $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
-        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
     }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()

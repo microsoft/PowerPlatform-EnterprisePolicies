@@ -117,4 +117,5 @@ function CreateSubnetInjectionEnterprisePolicy
     Write-Host $policyString
 
 }
+Write-Warning "This script is deprecated and will be removed in future releases. Please use the New-SubnetInjectionEnterprisePolicy cmdlet from the Microsoft.PowerPlatform.EnterprisePolicies module instead."
 CreateSubnetInjectionEnterprisePolicy

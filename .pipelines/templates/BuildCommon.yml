@@ -90,7 +90,7 @@ steps:
     parameters:
       codesigning_path: '$(Build.SourcesDirectory)\Release'
       codesigning_pattern: | 
-        '**\*.@(ps1|psm1|psd1)'
+        **\*.@(ps1|psm1|psd1)
 
 - task: ArchiveFiles@2
   displayName: 📦 Archive Files

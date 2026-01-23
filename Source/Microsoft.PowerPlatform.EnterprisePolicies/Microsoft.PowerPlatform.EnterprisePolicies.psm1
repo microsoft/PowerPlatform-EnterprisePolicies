@@ -19,4 +19,8 @@ foreach ($script in $Private) {
     Write-Verbose "Loaded script: $($script.FullName)"
 }
 
+Initialize-Cache
+
+Test-LatestModuleVersion
+
 Export-ModuleMember -Function $Public.BaseName

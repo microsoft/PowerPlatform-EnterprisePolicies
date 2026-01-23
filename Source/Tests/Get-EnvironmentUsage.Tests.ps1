@@ -9,7 +9,7 @@ Describe 'Get-EnvironmentUsage Tests' {
     BeforeAll {
         [System.Diagnostics.CodeAnalysis.SuppressMessage('PSAvoidUsingConvertToSecureStringWithPlainText', '')]
         $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
-        Mock Get-AccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Get-PPAPIAccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Write-Host {}
         Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
@@ -18,7 +18,8 @@ Describe 'Get-EnvironmentUsage Tests' {
         It 'Returns usage data for a valid environment' {
             $resultClass = [NetworkUsage]::new()
             $resultClass.AzureRegion = "EastUs"
-            $resultJsonString = ($resultClass | ConvertTo-Json)
+            $resultClass.DnsServers = @("1", "2")
+            [string]$resultJsonString = ($resultClass | ConvertTo-Json)
             $endpoint = [BAPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $region = "westus"

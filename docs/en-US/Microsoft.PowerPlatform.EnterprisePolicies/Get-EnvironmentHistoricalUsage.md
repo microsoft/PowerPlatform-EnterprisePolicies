@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 09/08/2025
+ms.date: 01/16/2026
 PlatyPS schema version: 2024-05-01
 title: Get-EnvironmentHistoricalUsage
 ---
@@ -21,7 +21,7 @@ Retrieves the historical network usage of the specified environment.
 
 ```
 Get-EnvironmentHistoricalUsage [-EnvironmentId] <string> [[-TenantId] <string>] [-Region] <string>
- [[-ShowDetails] <bool>] [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
+ [[-Endpoint] <BAPEndpoint>] [-ShowDetails] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -58,7 +58,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -81,6 +81,27 @@ ParameterSets:
 - Name: (All)
   Position: 0
   IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ForceAuth
+
+Force re-authentication to Azure.
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -112,16 +133,16 @@ HelpMessage: ''
 
 ### -ShowDetails
 
-Whether or not to show detailed usage information. Default is 'false'.
+Switch to show detailed usage information.
 
 ```yaml
-Type: System.Boolean
+Type: System.Management.Automation.SwitchParameter
 DefaultValue: False
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false

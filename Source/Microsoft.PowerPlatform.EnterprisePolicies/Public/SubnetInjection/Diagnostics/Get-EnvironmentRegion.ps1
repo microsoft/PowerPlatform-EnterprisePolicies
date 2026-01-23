@@ -34,24 +34,36 @@ function Get-EnvironmentRegion{
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
+        [switch]$ForceAuth
     )
 
     $ErrorActionPreference = "Stop"
 
-    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId)) {
+    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
-    $path = "/plex/networkUsage"
+    $path = "/plex/environmentRegion"
     $query = "api-version=2024-10-01"
-    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
-        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+    $client = Get-HttpClient
+    $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+    $result = Get-AsyncResult -Task $client.SendAsync($request)
+
+    if (-not $result.IsSuccessStatusCode) {
+        $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+        throw "Failed to retrieve the environment region. Status code: $($result.StatusCode). $contentString"
     }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
-    if (-not $contentString) {
+    if ($contentString) {
+        $region = $contentString.Trim('"')
+        Write-Verbose "Your environment is located in region: [$region]"
+        return $region
+    } else {
         throw "Failed to retrieve the environment region."
     }
 

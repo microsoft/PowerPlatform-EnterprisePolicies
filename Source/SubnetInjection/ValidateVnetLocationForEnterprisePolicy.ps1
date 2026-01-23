@@ -30,6 +30,7 @@ $supportedVnetLocations.Add("norway", "norwaywest|norwayeast")
 $supportedVnetLocations.Add("singapore", "southeastasia")
 $supportedVnetLocations.Add("sweden", "swedencentral")
 $supportedVnetLocations.Add("italy", "italynorth")
+$supportedVnetLocations.Add("usgov", "usgovtexas|usgovvirginia")
 
 function ValidateAndGetVnet($vnetId, $enterprisePolicylocation) {
 

@@ -8,8 +8,13 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 #>
 
 class VnetInformation{
-    [string] $VnetId
+    [object] $VnetResource
     [string] $SubnetName
+
+    VnetInformation([object]$VnetResource, [string]$SubnetName) {
+        $this.VnetResource = $VnetResource
+        $this.SubnetName = $SubnetName
+    }
 }
 
 class NetworkUsage{
@@ -50,7 +55,6 @@ class SubnetUsageDocument{
     [string] $AzureRegion
     [NetworkUsageData[]] $NetworkUsageDataByWorkload
     [NetworkUsageData[]] $NetworkUsageDataByEnvironment
-    
 }
 
 enum PolicyType{
@@ -74,6 +78,14 @@ enum LinkOperation{
     unlink
 }
 
+enum AzureEnvironment{
+    AzureCloud
+    AzureChinaCloud
+    AzureUSGovernment
+    EastUs2Euap
+    CentralUSEuap
+}
+
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
     [VnetInformation]
@@ -81,6 +93,7 @@ $ExportableTypes = @(
     [BAPEndpoint]
     [LinkOperation]
     [NetworkUsage]
+    [AzureEnvironment]
     [NetworkUsageData]
     [EnvironmentNetworkUsageDocument]
     [SubnetUsageDocument]

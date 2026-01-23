@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 11/03/2025
+ms.date: 01/16/2026
 PlatyPS schema version: 2024-05-01
 title: Test-DnsResolution
 ---
@@ -21,7 +21,7 @@ Tests the DNS resolution for a given hostname in a specified environment.
 
 ```
 Test-DnsResolution [-EnvironmentId] <string> [-HostName] <string> [[-TenantId] <string>]
- [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [<CommonParameters>]
+ [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -85,6 +85,27 @@ ParameterSets:
 - Name: (All)
   Position: 0
   IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ForceAuth
+
+Force re-authentication to Azure.
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
