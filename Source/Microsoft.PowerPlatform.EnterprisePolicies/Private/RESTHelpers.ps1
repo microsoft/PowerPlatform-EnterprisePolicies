@@ -371,6 +371,8 @@ function ConvertFrom-JsonToClass {
             $itemList += ConvertFrom-JsonToClass -Json $itemJson -ClassType $elementType
         }
         return ,$itemList  
+    } else {
+        $instance = [Activator]::CreateInstance($ClassType)
     }
     
     # Handle primitive types and strings
@@ -394,7 +396,7 @@ function ConvertFrom-JsonToClass {
     foreach ($property in $ClassType.GetProperties()) {
         $name = $property.Name
         $type = Get-UnderlyingType $property.PropertyType
-        if ($data.PSObject.Properties[$name]) {
+        if ($data.PSObject.Properties -and $data.PSObject.Properties[$name]) {
             if ($type -eq [hashtable] -or $type.FullName -eq 'System.Collections.Hashtable') {
                 $instance.$name = ConvertTo-Hashtable $data.$name
             }
