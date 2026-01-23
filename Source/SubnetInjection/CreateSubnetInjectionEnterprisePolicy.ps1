@@ -97,6 +97,8 @@ function CreateSubnetInjectionEnterprisePolicy
             return
         }
 
+        Assert-RegionPairing -primaryVnet $primaryVnet -secondaryVnet $secondaryVnet -policyLocation $enterprisePolicyLocation
+
         $body = GenerateEnterprisePolicyBody -policyType "vnet" -policyLocation $enterprisePolicyLocation -policyName $enterprisePolicyName -primaryVnetId $primaryVnetId -primarySubnetName $primarySubnetName -secondaryVnetId $secondaryVnetId -secondarySubnetName $secondarySubnetName
     }
 
@@ -115,4 +117,5 @@ function CreateSubnetInjectionEnterprisePolicy
     Write-Host $policyString
 
 }
+Write-Warning "This script is deprecated and will be removed in future releases. Please use the New-SubnetInjectionEnterprisePolicy cmdlet from the Microsoft.PowerPlatform.EnterprisePolicies module instead."
 CreateSubnetInjectionEnterprisePolicy

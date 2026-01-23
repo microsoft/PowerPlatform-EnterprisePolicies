@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 11/04/2025
+ms.date: 01/16/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -18,6 +18,10 @@ Microsoft PowerPlatform Enterprise policies module
 
 ## Microsoft.PowerPlatform.EnterprisePolicies
 
+### [Get-EnvironmentHistoricalUsage](Get-EnvironmentHistoricalUsage.md)
+
+Retrieves the historical network usage of the specified environment.
+
 ### [Get-EnvironmentRegion](Get-EnvironmentRegion.md)
 
 Retrieves the region that the specified environment is deployed in.
@@ -25,6 +29,14 @@ Retrieves the region that the specified environment is deployed in.
 ### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
 
 Retrieves the current usage of the specified environment.
+
+### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
+
+Creates a new Subnet Injection Enterprise Policy for Power Platform.
+
+### [New-VnetForSubnetDelegation](New-VnetForSubnetDelegation.md)
+
+Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprisePolicies delegation, or configures an existing VNet/subnet.
 
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
@@ -46,6 +58,10 @@ Attempts to establish a TLS handshake with the provided destination and port.
 
 ### Classes
 
+#### [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
+
+The EnvironmentNetworkUsageDocument class represents historical network usage information and network usage metadata about the delegated network of a Power Platform environment.
+
 #### [NetworkUsage](NetworkUsage.md)
 
 The NetworkUsage class represents metadata about the network configuration of a Power Platform environment.
@@ -58,8 +74,19 @@ The SSLInformation class contains detailed information on the TLS handshake atte
 
 #### [CertificateInformation](CertificateInformation.md)
 The CertificateInformation class contains detailed information about the certificate presented during the TLS handshake.
+### [NetworkUsageData](NetworkUsageData.md)
+
+The NetworkUsageData class represents historical network usage information about the network configuration of a Power Platform environment.
+
+### [SubnetUsageDocument](SubnetUsageDocument.md)
+
+The SubnetUsageDocument class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 
 ### Enums
+
+#### [AzureEnvironment](AzureEnvironment.md)
+
+Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
 
 #### [BAPEndpoint](BAPEndpoint.md)
 

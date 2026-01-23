@@ -198,6 +198,8 @@ Task PostBuild {
 
 # Executes before the GenerateMarkdown phase of the BuildHelp task.
 Task PreBuildHelp {
+    # When loading the module we don't want to run the prereq checks as that slows things down and forces certain unnecessary things to happen for building help docs.
+    $Global:PrereqsChecked = $true
 }
 
 # Executes after the BuildHelpImpl phase of the BuildHelp task.
@@ -207,6 +209,10 @@ Task PostBuildHelp -requiredVariables DocsRootDir, ModuleName, DefaultLocale{
 ## Types
 
 ### Classes
+
+#### [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
+
+The `EnvironmentNetworkUsageDocument` class represents historical network usage information and network usage metadata about the delegated network of a Power Platform environment.
 
 #### [NetworkUsage](NetworkUsage.md)
 
@@ -221,7 +227,19 @@ The `SSLInformation` class contains detailed information on the TLS handshake at
 #### [CertificateInformation](CertificateInformation.md)
 The `CertificateInformation` class contains detailed information about the certificate presented during the TLS handshake.
 
+### [NetworkUsageData](NetworkUsageData.md)
+
+The `NetworkUsageData` class represents historical network usage information about the network configuration of a Power Platform environment.
+
+### [SubnetUsageDocument](SubnetUsageDocument.md)
+
+The `SubnetUsageDocument` class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
+
 ### Enums
+
+#### [AzureEnvironment](AzureEnvironment.md)
+
+Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
 
 #### [BAPEndpoint](BAPEndpoint.md)
 

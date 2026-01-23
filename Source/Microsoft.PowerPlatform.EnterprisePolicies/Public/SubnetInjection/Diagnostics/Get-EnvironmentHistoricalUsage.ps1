@@ -9,26 +9,23 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Retrieves the current usage of the specified environment.
+Retrieves the historical network usage of the specified environment.
 
 .DESCRIPTION
-Retrieves the current usage of the specified environment.
-Note, this is only the usage that this environment has. It does not include usage from other environments and it does not include any ips that might be reserved by azure.
+Retrieves the historical usage of the specified environment.
+Note, this is only the historical usage that this environment has. It does not include usage from other environments and it does not include any ips that might be reserved by azure.
 
 .OUTPUTS
-NetworkUsage
-A class representing the network usage of the environment. [NetworkUsage](NetworkUsage.md)
+EnvironmentNetworkUsageDocument
+A class representing the historical network usage of the environment. [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
 
 .EXAMPLE
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 .EXAMPLE
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
-
-.EXAMPLE
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod -ShowDetails
 #>
-function Get-EnvironmentUsage{
+function Get-EnvironmentHistoricalUsage{
     param(
         [Parameter(Mandatory, HelpMessage="The Id of the environment to get usage for.")]
         [ValidateNotNullOrEmpty()]
@@ -37,11 +34,14 @@ function Get-EnvironmentUsage{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
+        [Parameter(Mandatory, HelpMessage="The region that the environment belongs to.")]
+        [string]$Region,
+
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
 
-        [Parameter(Mandatory=$false, HelpMessage="The Azure region to filter the usage by. Defaults to the region the environment is in.")]
-        [string]$Region,
+        [Parameter(Mandatory=$false, HelpMessage="Switch to show detailed usage information.")]
+        [switch]$ShowDetails,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
         [switch]$ForceAuth
@@ -53,14 +53,11 @@ function Get-EnvironmentUsage{
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
-    $path = "/plex/networkUsage"
-
-    $query = "api-version=2024-10-01"
-    if(-not([string]::IsNullOrWhiteSpace($Region)))
-    {
-        $query += "&region=$Region"
+    $path = "/plex/networkUsage/environmentHistoricalUsage"
+    $query = "api-version=2024-10-01&region=$Region"
+    if($ShowDetails){
+        $query += "&showDetails=true"
     }
-
     $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
         return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
     }
@@ -68,9 +65,7 @@ function Get-EnvironmentUsage{
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if($contentString) {
-        [NetworkUsage] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([NetworkUsage])
-        return $networkUsage
+        return ConvertFrom-JsonToClass -Json $contentString -ClassType ([EnvironmentNetworkUsageDocument])
     } else {
-        throw "Failed to retrieve the environment region."
-    }
-}
+        throw "Failed to retrieve the environment network usage data from response."
+    }}

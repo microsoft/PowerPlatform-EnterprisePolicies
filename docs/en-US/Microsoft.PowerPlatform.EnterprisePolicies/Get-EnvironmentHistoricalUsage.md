@@ -6,22 +6,22 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 01/16/2026
 PlatyPS schema version: 2024-05-01
-title: Get-EnvironmentUsage
+title: Get-EnvironmentHistoricalUsage
 ---
 
-# Get-EnvironmentUsage
+# Get-EnvironmentHistoricalUsage
 
 ## SYNOPSIS
 
-Retrieves the current usage of the specified environment.
+Retrieves the historical network usage of the specified environment.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Get-EnvironmentUsage [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
- [[-Region] <string>] [-ForceAuth] [<CommonParameters>]
+Get-EnvironmentHistoricalUsage [-EnvironmentId] <string> [[-TenantId] <string>] [-Region] <string>
+ [[-Endpoint] <BAPEndpoint>] [-ShowDetails] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,23 +31,19 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Retrieves the current usage of the specified environment.
-Note, this is only the usage that this environment has.
+Retrieves the historical usage of the specified environment.
+Note, this is only the historical usage that this environment has.
 It does not include usage from other environments and it does not include any ips that might be reserved by azure.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 ### EXAMPLE 2
 
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
-
-### EXAMPLE 3
-
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod -ShowDetails
 
 ## PARAMETERS
 
@@ -62,7 +58,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -116,7 +112,7 @@ HelpMessage: ''
 
 ### -Region
 
-The Azure region to filter the usage by. Defaults to the region the environment is in.
+The region that the environment belongs to.
 
 ```yaml
 Type: System.String
@@ -125,7 +121,28 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: 2
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -ShowDetails
+
+Switch to show detailed usage information.
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -167,8 +184,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### NetworkUsage
-A class representing the network usage of the environment. [NetworkUsage](NetworkUsage.md)
+### EnvironmentNetworkUsageDocument
+A class representing the historical network usage of the environment. [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
 
 {{ Fill in the Description }}
 

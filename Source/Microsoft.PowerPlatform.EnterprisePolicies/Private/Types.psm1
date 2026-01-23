@@ -28,8 +28,13 @@ class TLSConnectivityInformation{
 }
 
 class VnetInformation{
-    [string] $VnetId
+    [object] $VnetResource
     [string] $SubnetName
+
+    VnetInformation([object]$VnetResource, [string]$SubnetName) {
+        $this.VnetResource = $VnetResource
+        $this.SubnetName = $SubnetName
+    }
 }
 
 class NetworkUsage{
@@ -40,6 +45,36 @@ class NetworkUsage{
     [string] $SubnetIpRange
     [string] $ContainerReservedIpCount
     [string[]] $DnsServers
+}
+
+class NetworkUsageData{
+    [string] $TimeStamp
+    [string] $NormalizedTimestamp
+    [int] $TotalIpUsage
+    [hashtable] $IpAllocations
+}
+
+class EnvironmentNetworkUsageDocument{
+    [string] $Id
+    [string] $EnvironmentId
+    [string] $TenantId
+    [string] $EnterprisePolicyId
+    [string] $VnetId
+    [string] $SubnetName
+    [int] $SubnetSize
+    [string] $AzureRegion
+    [NetworkUsageData[]] $NetworkUsageData
+}
+
+class SubnetUsageDocument{
+    [string] $TenantId
+    [string] $EnterprisePolicyId
+    [string] $VnetId
+    [string] $SubnetName
+    [int] $SubnetSize
+    [string] $AzureRegion
+    [NetworkUsageData[]] $NetworkUsageDataByWorkload
+    [NetworkUsageData[]] $NetworkUsageDataByEnvironment
 }
 
 enum PolicyType{
@@ -63,6 +98,14 @@ enum LinkOperation{
     unlink
 }
 
+enum AzureEnvironment{
+    AzureCloud
+    AzureChinaCloud
+    AzureUSGovernment
+    EastUs2Euap
+    CentralUSEuap
+}
+
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
     [TLSConnectivityInformation]
@@ -73,6 +116,10 @@ $ExportableTypes = @(
     [BAPEndpoint]
     [LinkOperation]
     [NetworkUsage]
+    [AzureEnvironment]
+    [NetworkUsageData]
+    [EnvironmentNetworkUsageDocument]
+    [SubnetUsageDocument]
 )
 
 # Get the internal TypeAccelerators class to use its static methods.

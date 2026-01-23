@@ -32,16 +32,19 @@ function Test-AccountPermissions{
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
+        [switch]$ForceAuth
     )
 
     $ErrorActionPreference = "Stop"
 
-    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId)) {
+    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
-    $token = ConvertFrom-SecureStringInternal -SecureString (Get-AccessToken -TenantId $TenantId -Endpoint $Endpoint)
+    $token = ConvertFrom-SecureStringInternal -SecureString (Get-PPAPIAccessToken -TenantId $TenantId -Endpoint $Endpoint)
     $parts = $token.Split('.')
     if ($parts.Count -ne 3) {
         throw "Token is not in an expected format."
