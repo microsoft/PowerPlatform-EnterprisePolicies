@@ -35,12 +35,15 @@ function Get-SubnetHistoricalUsage{
         [string]$Region,
 
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
+        [switch]$ForceAuth
     )
 
     $ErrorActionPreference = "Stop"
 
-    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId)) {
+    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
@@ -48,7 +51,7 @@ function Get-SubnetHistoricalUsage{
     $query = "api-version=2024-10-01&enterprisePolicyId=$EnterprisePolicyId&region=$Region"
 
     $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
-        return New-HomeTenantRouteRequest -TenantId $TenantId -Path $path -Query $query -AccessToken (Get-AccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+        return New-HomeTenantRouteRequest -TenantId $TenantId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
     }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
