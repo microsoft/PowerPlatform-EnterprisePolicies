@@ -371,8 +371,6 @@ function ConvertFrom-JsonToClass {
             $itemList += ConvertFrom-JsonToClass -Json $itemJson -ClassType $elementType
         }
         return ,$itemList  
-    } else {
-        $instance = [Activator]::CreateInstance($ClassType)
     }
     
     # Handle primitive types and strings
@@ -390,6 +388,9 @@ function ConvertFrom-JsonToClass {
         return [Decimal]::Parse($data)
     }
     
+    if ($null -eq $data) {
+        return $null
+    }
     # Handle complex types
     $instance = [Activator]::CreateInstance($ClassType)
 

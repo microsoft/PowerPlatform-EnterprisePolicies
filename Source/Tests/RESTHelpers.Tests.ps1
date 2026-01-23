@@ -253,6 +253,15 @@ Describe 'RESTHelpers Tests' {
                 $result.VnetId | Should -BeNullOrEmpty
             }
 
+            It 'Handles null or missing properties that are other custom classes gracefully' {
+                $json = '{"TCPConnectivity":false,"Certificate":null,"SSLWithoutCRL":null,"SSLWithCRL":null}'
+                $result = ConvertFrom-JsonToClass -Json $json -ClassType ([TLSConnectivityInformation])
+
+                $result | Should -BeOfType [TLSConnectivityInformation]
+                $result.TCPConnectivity | Should -Be $false
+                $result.Certificate | Should -Be $null
+            }
+
             It 'Handles hashtable properties' {
                 $json = '{"TimeStamp":"2024-01-01","TotalIpUsage":100,"IpAllocations":{"Key1":"Value1","Key2":"Value2"}}'
                 $result = ConvertFrom-JsonToClass -Json $json -ClassType ([NetworkUsageData])
