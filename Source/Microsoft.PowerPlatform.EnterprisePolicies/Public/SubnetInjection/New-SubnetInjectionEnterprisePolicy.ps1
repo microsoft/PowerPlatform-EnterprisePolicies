@@ -62,7 +62,7 @@ function New-SubnetInjectionEnterprisePolicy{
         [Parameter(Mandatory, HelpMessage="The Azure AD tenant ID")]
         [string]$TenantId,
 
-        [Parameter(Mandatory, HelpMessage="The Azure environment to use")]
+        [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use")]
         [AzureEnvironment]$AzureEnvironment,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]

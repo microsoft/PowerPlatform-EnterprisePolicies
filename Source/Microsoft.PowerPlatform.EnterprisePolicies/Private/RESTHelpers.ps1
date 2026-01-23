@@ -257,6 +257,7 @@ function Send-RequestWithRetries {
 
     $client = Get-HttpClient
     $attempt = 0
+    $retryAfterFound = $false
     while ($attempt -lt $MaxRetries) {
         try {
             $sleepSeconds = $DelaySeconds
@@ -269,6 +270,7 @@ function Send-RequestWithRetries {
             # Check for 503 Service Unavailable or 429 Too Many Requests with Retry-After header
             if ($result.StatusCode -eq 503 -or $result.StatusCode -eq 429) {
                 if ($result.Headers.Contains("Retry-After")) {
+                    $retryAfterFound = $true
                     $retryAfterValue = $result.Headers.GetValues("Retry-After") | Select-Object -First 1
                     # Retry-After can be either seconds (integer) or HTTP date
                     if ($retryAfterValue -match '^\d+$') {
@@ -287,6 +289,11 @@ function Send-RequestWithRetries {
                     }
                     Write-Host "The service is working on the request and has requested a retry. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
                 }
+            }
+            elseif($result.StatusCode -eq 502 -and $retryAfterFound) {
+                # If we previously saw a Retry-After header, extend the wait time as the gateway might not have the route configured yet.
+                $sleepSeconds = 60
+                Write-Host "The gateway has not updated the route information yet. Waiting for $sleepSeconds seconds before retrying..." -ForegroundColor Yellow
             }
             $attempt++
         }
