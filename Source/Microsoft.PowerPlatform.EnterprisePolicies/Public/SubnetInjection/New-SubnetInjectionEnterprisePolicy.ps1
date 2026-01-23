@@ -63,7 +63,7 @@ function New-SubnetInjectionEnterprisePolicy{
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use")]
-        [AzureEnvironment]$AzureEnvironment,
+        [AzureEnvironment]$AzureEnvironment = [AzureEnvironment]::AzureCloud,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth

@@ -165,10 +165,10 @@ Describe 'RESTHelpers Tests' {
                 $mock429Result.StatusCode = 429
                 $mock429Result.IsSuccessStatusCode = $false
                 $mockSuccessResult = [HttpClientResultMock]::new("Success")
-                
+
                 $script:callCount = 0
                 Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-                Mock Get-AsyncResult { 
+                Mock Get-AsyncResult {
                     $script:callCount++
                     if ($script:callCount -eq 1) {
                         return $mock429Result
@@ -176,15 +176,80 @@ Describe 'RESTHelpers Tests' {
                         return $mockSuccessResult
                     }
                 } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-                
+
                 Mock Test-Result { param($Result) return $Result.IsSuccessStatusCode } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
                 Mock Start-Sleep { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
                 Mock Write-Host { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-                
+
                 $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 3 -DelaySeconds 1
 
                 $result | Should -Be $mockSuccessResult
                 Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -gt 5 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Waits 60 seconds on 502 Bad Gateway after 503 with Retry-After header' {
+                $mockClient = [HttpClientMock]::new()
+                $mock503Result = [HttpClientResultMock]::new("Service Unavailable", "text/plain", @{"Retry-After" = "2"})
+                $mock503Result.StatusCode = [System.Net.HttpStatusCode]::ServiceUnavailable
+                $mock503Result.IsSuccessStatusCode = $false
+                $mock502Result = [HttpClientResultMock]::new("Bad Gateway", "text/plain", @{})
+                $mock502Result.StatusCode = [System.Net.HttpStatusCode]::BadGateway
+                $mock502Result.IsSuccessStatusCode = $false
+                $mockSuccessResult = [HttpClientResultMock]::new("Success")
+
+                $script:callCount = 0
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult {
+                    $script:callCount++
+                    if ($script:callCount -eq 1) {
+                        return $mock503Result
+                    } elseif ($script:callCount -eq 2) {
+                        return $mock502Result
+                    } else {
+                        return $mockSuccessResult
+                    }
+                } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                Mock Test-Result { param($Result) return $Result.IsSuccessStatusCode } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Start-Sleep { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Write-Host { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 5 -DelaySeconds 1
+
+                $result | Should -Be $mockSuccessResult
+                # First sleep is 2 seconds (from Retry-After), second sleep is 60 seconds (502 after Retry-After)
+                Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 2 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 60 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Uses default delay on 502 Bad Gateway without prior Retry-After header' {
+                $mockClient = [HttpClientMock]::new()
+                $mock502Result = [HttpClientResultMock]::new("Bad Gateway", "text/plain", @{})
+                $mock502Result.StatusCode = [System.Net.HttpStatusCode]::BadGateway
+                $mock502Result.IsSuccessStatusCode = $false
+                $mockSuccessResult = [HttpClientResultMock]::new("Success")
+
+                $script:callCount = 0
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult {
+                    $script:callCount++
+                    if ($script:callCount -eq 1) {
+                        return $mock502Result
+                    } else {
+                        return $mockSuccessResult
+                    }
+                } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                Mock Test-Result { param($Result) return $Result.IsSuccessStatusCode } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Start-Sleep { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Write-Host { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 3 -DelaySeconds 5
+
+                $result | Should -Be $mockSuccessResult
+                # Should use default delay (5 seconds), not the 60-second extended wait
+                Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 5 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Should -Invoke Start-Sleep -Times 0 -ParameterFilter { $Seconds -eq 60 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             }
         }
 
