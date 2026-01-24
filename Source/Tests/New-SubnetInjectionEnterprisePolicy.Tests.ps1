@@ -57,8 +57,7 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
                 -PolicyLocation $script:testPolicyLocation `
                 -VirtualNetworkId $script:testVnetId `
                 -SubnetName $script:testSubnetName `
-                -TenantId $script:testTenantId `
-                -AzureEnvironment AzureCloud
+                -TenantId $script:testTenantId
 
             $result | Should -Not -BeNullOrEmpty
             $parsedResult = $result | ConvertFrom-Json
@@ -97,8 +96,7 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
                 -SubnetName $script:testSubnetName `
                 -VirtualNetworkId2 $script:testVnetId2 `
                 -SubnetName2 $script:testSubnetName2 `
-                -TenantId $script:testTenantId `
-                -AzureEnvironment AzureCloud
+                -TenantId $script:testTenantId
 
             $result | Should -Not -BeNullOrEmpty
             Should -Invoke Assert-RegionPairing -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -116,8 +114,7 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
                 -SubnetName $script:testSubnetName `
                 -VirtualNetworkId2 $script:testVnetId2 `
                 -SubnetName2 $script:testSubnetName2 `
-                -TenantId $script:testTenantId `
-                -AzureEnvironment AzureCloud } | Should -Throw "*not a supported pair*"
+                -TenantId $script:testTenantId } | Should -Throw "*not a supported pair*"
         }
     }
 
@@ -132,8 +129,7 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
                 -PolicyLocation $script:testPolicyLocation `
                 -VirtualNetworkId $script:testVnetId `
                 -SubnetName $script:testSubnetName `
-                -TenantId $script:testTenantId `
-                -AzureEnvironment AzureCloud } | Should -Throw "*Failed to connect to Azure*"
+                -TenantId $script:testTenantId } | Should -Throw "*Failed to connect to Azure*"
         }
 
         It 'Should throw when subscription initialization fails' {
@@ -147,8 +143,7 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
                 -PolicyLocation $script:testPolicyLocation `
                 -VirtualNetworkId $script:testVnetId `
                 -SubnetName $script:testSubnetName `
-                -TenantId $script:testTenantId `
-                -AzureEnvironment AzureCloud } | Should -Throw "*Failed to initialize subscription*"
+                -TenantId $script:testTenantId } | Should -Throw "*Failed to initialize subscription*"
         }
 
         It 'Should throw when VNet retrieval fails' {
@@ -164,8 +159,7 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
                 -PolicyLocation $script:testPolicyLocation `
                 -VirtualNetworkId $script:testVnetId `
                 -SubnetName $script:testSubnetName `
-                -TenantId $script:testTenantId `
-                -AzureEnvironment AzureCloud } | Should -Throw "*Error getting virtual network*"
+                -TenantId $script:testTenantId } | Should -Throw "*Error getting virtual network*"
         }
 
         It 'Should throw when policy deployment fails' {
@@ -183,8 +177,7 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
                 -PolicyLocation $script:testPolicyLocation `
                 -VirtualNetworkId $script:testVnetId `
                 -SubnetName $script:testSubnetName `
-                -TenantId $script:testTenantId `
-                -AzureEnvironment AzureCloud } | Should -Throw "*Failed to create Subnet Injection Enterprise Policy*"
+                -TenantId $script:testTenantId } | Should -Throw "*Failed to create Subnet Injection Enterprise Policy*"
         }
     }
 }
