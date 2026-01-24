@@ -71,6 +71,6 @@ function Get-EnvironmentUsage{
         [NetworkUsage] $networkUsage = ConvertFrom-JsonToClass -Json $contentString -ClassType ([NetworkUsage])
         return $networkUsage
     } else {
-        throw "Failed to retrieve the environment region."
+        throw "Failed to retrieve the environment usage."
     }
 }

@@ -6,21 +6,21 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 01/22/2026
 PlatyPS schema version: 2024-05-01
-title: Test-NetworkConnectivity
+title: Test-TLSHandshake
 ---
 
-# Test-NetworkConnectivity
+# Test-TLSHandshake
 
 ## SYNOPSIS
 
-Tests the connectivity to a given service in a specified environment.
+Attempts to establish a TLS handshake with the provided destination and port.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Test-NetworkConnectivity [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
+Test-TLSHandshake [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
  [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [-ForceAuth]
  [<CommonParameters>]
 ```
@@ -32,8 +32,8 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Tests the connectivity to a given service in a specified environment.
-The connectivity test will attempt to establish a TCP connection to the specified destination on the specified port.
+Tests that a TLS handshake can be established against the provided destination and port.
+
 This function is executed in the context of your delegated subnet in the region that you have specified.
 If the region is not specified, it defaults to the region of the environment.
 
@@ -41,25 +41,25 @@ If the region is not specified, it defaults to the region of the environment.
 
 ### EXAMPLE 1
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
 ### EXAMPLE 2
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
 
 ### EXAMPLE 3
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
 
 ### EXAMPLE 4
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
 
 ## PARAMETERS
 
 ### -Destination
 
-The destination that should be used to attempt the connection. This can be a hostname or an IP address.
+The destination that should be used to attempt the handshake for. This should only be a hostname.
 
 ```yaml
 Type: System.String
@@ -101,7 +101,7 @@ HelpMessage: ''
 
 ### -EnvironmentId
 
-The Id of the environment to test connectivity for.
+The Id of the environment to test the handshake for.
 
 ```yaml
 Type: System.String
@@ -143,7 +143,7 @@ HelpMessage: ''
 
 ### -Port
 
-The port that should be used to attempt the connection. Defaults to 443
+The port that should be used to attempt the handshake for. Defaults to 443
 
 ```yaml
 Type: System.String
@@ -164,7 +164,7 @@ HelpMessage: ''
 
 ### -Region
 
-The Azure region in which to test the connectivity. Defaults to the region the environment is in.
+The Azure region in which to test the handshake. Defaults to the region the environment is in.
 
 ```yaml
 Type: System.String
@@ -215,9 +215,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
-
-A string representing the result of the connectivity test.
+### TLSConnectivityInformation
+A class representing the result of the TLS handshake. [TLSConnectivityInformation](TLSConnectivityInformation.md)
 
 {{ Fill in the Description }}
 

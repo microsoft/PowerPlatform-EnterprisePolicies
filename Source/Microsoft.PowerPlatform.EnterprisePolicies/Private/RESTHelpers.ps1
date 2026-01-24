@@ -361,7 +361,7 @@ function ConvertFrom-JsonToClass {
     )
 
     $data = $Json | ConvertFrom-Json
-    
+
     # Handle array types directly
     if ($ClassType.IsArray) {
         $elementType = $ClassType.GetElementType()
@@ -388,19 +388,25 @@ function ConvertFrom-JsonToClass {
         return [Decimal]::Parse($data)
     }
     
+    if ($null -eq $data) {
+        return $null
+    }
     # Handle complex types
     $instance = [Activator]::CreateInstance($ClassType)
 
     foreach ($property in $ClassType.GetProperties()) {
         $name = $property.Name
         $type = Get-UnderlyingType $property.PropertyType
-        if ($data.PSObject.Properties[$name]) {
+        if ($data.PSObject.Properties -and $data.PSObject.Properties[$name]) {
             if ($type -eq [hashtable] -or $type.FullName -eq 'System.Collections.Hashtable') {
                 $instance.$name = ConvertTo-Hashtable $data.$name
             }
             elseif ($type.IsClass -and $type -ne [string]) {
                 $nestedJson = $data.$name | ConvertTo-Json -Depth 10
                 $instance.$name = ConvertFrom-JsonToClass -Json $nestedJson -ClassType $type
+            }
+            elseif ($type.IsEnum){
+                $instance.$name = [System.Enum]::Parse($type, $data.$name)
             }
             else {
                 $instance.$name = $data.$name
@@ -410,7 +416,6 @@ function ConvertFrom-JsonToClass {
 
     return $instance
 }
-
 
 function Get-UnderlyingType([type]$t) {
     if ($t.IsGenericType -and $t.GetGenericTypeDefinition().FullName -eq 'System.Nullable`1') {

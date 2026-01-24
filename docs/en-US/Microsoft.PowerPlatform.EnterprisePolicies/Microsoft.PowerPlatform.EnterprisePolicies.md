@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/16/2026
+ms.date: 01/22/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -50,6 +50,10 @@ Tests the DNS resolution for a given hostname in a specified environment.
 
 Tests the connectivity to a given service in a specified environment.
 
+### [Test-TLSHandshake](Test-TLSHandshake.md)
+
+Attempts to establish a TLS handshake with the provided destination and port.
+
 ## Types
 
 ### Classes
@@ -61,6 +65,18 @@ The EnvironmentNetworkUsageDocument class represents historical network usage in
 #### [NetworkUsage](NetworkUsage.md)
 
 The NetworkUsage class represents metadata about the network configuration of a Power Platform environment.
+
+#### [TLSConnectivityInformation](TLSConnectivityInformation.md)
+
+A class representing the result of the TLS handshake.
+
+#### [SSLInformation](SSLInformation.md)
+
+The SSLInformation class contains detailed information on the TLS handshake attempt.
+
+#### [CertificateInformation](CertificateInformation.md)
+
+The CertificateInformation class contains detailed information about the certificate presented during the TLS handshake.
 
 ### [NetworkUsageData](NetworkUsageData.md)
 

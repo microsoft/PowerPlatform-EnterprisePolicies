@@ -80,6 +80,7 @@ function Test-DnsResolution {
         try {
             return ConvertFrom-Json -InputObject $contentString
         } catch {
+            Write-Verbose "Failed to convert response to JSON: $($_.Exception.Message)"
             # If JSON conversion fails, return the raw string
             return $contentString
         }

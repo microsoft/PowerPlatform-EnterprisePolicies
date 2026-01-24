@@ -65,7 +65,15 @@ function Get-EnvironmentHistoricalUsage{
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if($contentString) {
-        return ConvertFrom-JsonToClass -Json $contentString -ClassType ([EnvironmentNetworkUsageDocument])
+        try {
+            return ConvertFrom-JsonToClass -Json $contentString -ClassType ([EnvironmentNetworkUsageDocument])
+        }
+        catch {
+            Write-Verbose "Failed to convert response to EnvironmentNetworkUsageDocument: $($_.Exception.Message)"
+            # If JSON conversion fails, return the raw string
+            return $contentString
+        }
     } else {
         throw "Failed to retrieve the environment network usage data from response."
-    }}
+    }
+}
