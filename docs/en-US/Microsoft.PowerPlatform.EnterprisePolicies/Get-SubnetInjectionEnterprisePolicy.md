@@ -21,28 +21,28 @@ Retrieves Subnet Injection Enterprise Policies for Power Platform.
 
 ```
 Get-SubnetInjectionEnterprisePolicy -SubscriptionId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Raw] [<CommonParameters>]
 ```
 
 ### ByResourceId
 
 ```
 Get-SubnetInjectionEnterprisePolicy -PolicyResourceId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Raw] [<CommonParameters>]
 ```
 
 ### ByEnvironment
 
 ```
 Get-SubnetInjectionEnterprisePolicy -EnvironmentId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Raw] [<CommonParameters>]
 ```
 
 ### ByResourceGroup
 
 ```
 Get-SubnetInjectionEnterprisePolicy -SubscriptionId <string> -ResourceGroupName <string>
- [-TenantId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-TenantId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Raw] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -176,6 +176,27 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -Raw
+
+Return the raw Azure resource object instead of the typed EnterprisePolicy object
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
 ### -ResourceGroupName
 
 The Azure resource group name to search for policies
@@ -256,9 +277,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
+### EnterprisePolicy
 
-A JSON string representation of the enterprise policy resource(s)
+Returns typed EnterprisePolicy object(s)
 
 {{ Fill in the Description }}
 

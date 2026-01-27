@@ -55,15 +55,14 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should retrieve all policies in subscription and return valid JSON' {
+        It 'Should retrieve all policies in subscription and return EnterprisePolicy object' {
             Mock Get-EnterprisePolicy { return @($script:mockPolicy) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             $result = Get-SubnetInjectionEnterprisePolicy `
                 -SubscriptionId $script:testSubscriptionId
 
             $result | Should -Not -BeNullOrEmpty
-            $parsedResult = $result | ConvertFrom-Json
-            $parsedResult.Name | Should -Be $script:testPolicyName
+            @($result)[0].Name | Should -Be $script:testPolicyName
         }
 
         It 'Should return null when no policies found in subscription' {
@@ -81,7 +80,7 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should retrieve all policies in resource group and return valid JSON' {
+        It 'Should retrieve all policies in resource group and return EnterprisePolicy object' {
             Mock Get-EnterprisePolicy { return @($script:mockPolicy) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             $result = Get-SubnetInjectionEnterprisePolicy `
@@ -89,8 +88,7 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
                 -ResourceGroupName $script:testResourceGroup
 
             $result | Should -Not -BeNullOrEmpty
-            $parsedResult = $result | ConvertFrom-Json
-            $parsedResult.Name | Should -Be $script:testPolicyName
+            @($result)[0].Name | Should -Be $script:testPolicyName
         }
 
         It 'Should return null when no policies found in resource group' {
@@ -110,15 +108,14 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
             Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should retrieve policy by resource ID and return valid JSON' {
+        It 'Should retrieve policy by resource ID and return EnterprisePolicy object' {
             $result = Get-SubnetInjectionEnterprisePolicy `
                 -PolicyResourceId $script:testPolicyResourceId `
                 -TenantId $script:testTenantId
 
             $result | Should -Not -BeNullOrEmpty
-            $parsedResult = $result | ConvertFrom-Json
-            $parsedResult.Name | Should -Be $script:testPolicyName
-            $parsedResult.Kind | Should -Be "NetworkInjection"
+            $result.Name | Should -Be $script:testPolicyName
+            $result.Kind | Should -Be "NetworkInjection"
         }
 
         It 'Should throw when PolicyResourceId format is invalid' {
@@ -143,7 +140,7 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should retrieve policy linked to environment and return valid JSON' {
+        It 'Should retrieve policy linked to environment and return EnterprisePolicy object' {
             Mock Get-BAPEnvironment { return $script:mockEnvironmentWithPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
@@ -152,8 +149,7 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
                 -Endpoint Prod
 
             $result | Should -Not -BeNullOrEmpty
-            $parsedResult = $result | ConvertFrom-Json
-            $parsedResult.Name | Should -Be $script:testPolicyName
+            $result.Name | Should -Be $script:testPolicyName
         }
 
         It 'Should return null when environment has no linked policy' {
@@ -222,6 +218,31 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
                 -ForceAuth
 
             Should -Invoke Connect-Azure -Times 1 -ParameterFilter { $Force -eq $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+    }
+
+    Context 'Raw parameter' {
+        BeforeAll {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should pass Raw to Get-EnterprisePolicy when specified' {
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            Get-SubnetInjectionEnterprisePolicy `
+                -SubscriptionId $script:testSubscriptionId `
+                -Raw
+
+            Should -Invoke Get-EnterprisePolicy -Times 1 -ParameterFilter { $Raw -eq $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should not pass Raw to Get-EnterprisePolicy when not specified' {
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            Get-SubnetInjectionEnterprisePolicy `
+                -SubscriptionId $script:testSubscriptionId
+
+            Should -Invoke Get-EnterprisePolicy -Times 1 -ParameterFilter { $Raw -eq $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
     }
 }

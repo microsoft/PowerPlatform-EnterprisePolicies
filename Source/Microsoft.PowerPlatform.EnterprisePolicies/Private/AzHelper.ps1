@@ -346,6 +346,9 @@ function Get-EnterprisePolicy {
 
     .PARAMETER Kind
     Optional filter for policy kind.
+
+    .PARAMETER Raw
+    Return the raw Azure resource object instead of the typed EnterprisePolicy object.
     #>
     [CmdletBinding(DefaultParameterSetName = 'List')]
     param (
@@ -358,7 +361,10 @@ function Get-EnterprisePolicy {
         [string] $ResourceGroupName,
 
         [Parameter(Mandatory=$false, ParameterSetName = 'List')]
-        [PolicyType] $Kind
+        [PolicyType] $Kind,
+
+        [Parameter(Mandatory=$false)]
+        [switch] $Raw
     )
 
     $params = @{
@@ -381,5 +387,14 @@ function Get-EnterprisePolicy {
         $policies = $policies | Where-Object { $_.Kind -eq $Kind.ToString() }
     }
 
-    return $policies
+    if ($Raw) {
+        return $policies
+    }
+
+    if ($null -eq $policies) {
+        return $null
+    }
+
+    $json = $policies | ConvertTo-Json -Depth 10
+    return ConvertFrom-JsonToClass -Json $json -ClassType ([EnterprisePolicy[]])
 }

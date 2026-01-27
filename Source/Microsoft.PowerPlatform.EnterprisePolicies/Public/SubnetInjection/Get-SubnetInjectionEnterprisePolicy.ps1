@@ -19,9 +19,9 @@ This cmdlet retrieves Subnet Injection Enterprise Policies using one of four met
 - By Resource Group: Retrieves all Subnet Injection policies in a specific resource group
 
 .OUTPUTS
-System.String
+EnterprisePolicy
 
-A JSON string representation of the enterprise policy resource(s), or $null if no policy is found.
+Returns typed EnterprisePolicy object(s), or raw Azure resource object(s) when -Raw is specified, or $null if no policy is found.
 
 .EXAMPLE
 Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321"
@@ -76,7 +76,10 @@ function Get-SubnetInjectionEnterprisePolicy{
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
-        [switch]$ForceAuth
+        [switch]$ForceAuth,
+
+        [Parameter(Mandatory=$false, HelpMessage="Return the raw Azure resource object instead of the typed EnterprisePolicy object")]
+        [switch]$Raw
     )
 
     $ErrorActionPreference = "Stop"
@@ -106,33 +109,33 @@ function Get-SubnetInjectionEnterprisePolicy{
     switch ($PSCmdlet.ParameterSetName) {
         'BySubscription' {
             Write-Verbose "Retrieving all Subnet Injection enterprise policies in subscription: $SubscriptionId"
-            $policies = Get-EnterprisePolicy -Kind ([PolicyType]::NetworkInjection)
+            $policies = Get-EnterprisePolicy -Kind ([PolicyType]::NetworkInjection) -Raw:$Raw
 
             if ($null -eq $policies -or @($policies).Count -eq 0) {
                 Write-Host "No Subnet Injection Enterprise Policies found in subscription: $SubscriptionId" -ForegroundColor Yellow
                 return $null
             }
-            return $policies | ConvertTo-Json -Depth 7
+            return $policies
         }
         'ByResourceGroup' {
             Write-Verbose "Retrieving all Subnet Injection enterprise policies in resource group: $ResourceGroupName"
-            $policies = Get-EnterprisePolicy -ResourceGroupName $ResourceGroupName -Kind ([PolicyType]::NetworkInjection)
+            $policies = Get-EnterprisePolicy -ResourceGroupName $ResourceGroupName -Kind ([PolicyType]::NetworkInjection) -Raw:$Raw
 
             if ($null -eq $policies -or @($policies).Count -eq 0) {
                 Write-Host "No Subnet Injection Enterprise Policies found in resource group: $ResourceGroupName" -ForegroundColor Yellow
                 return $null
             }
-            return $policies | ConvertTo-Json -Depth 7
+            return $policies
         }
         'ByResourceId' {
             Write-Verbose "Retrieving enterprise policy: $PolicyResourceId"
-            $policy = Get-EnterprisePolicy -PolicyArmId $PolicyResourceId
+            $policy = Get-EnterprisePolicy -PolicyArmId $PolicyResourceId -Raw:$Raw
 
             if ($null -eq $policy) {
                 Write-Warning "No enterprise policy found with resource ID: $PolicyResourceId"
                 return $null
             }
-            return $policy | ConvertTo-Json -Depth 7
+            return $policy
         }
         'ByEnvironment' {
             Write-Verbose "Retrieving environment information for: $EnvironmentId"
@@ -158,13 +161,13 @@ function Get-SubnetInjectionEnterprisePolicy{
                 $null = Set-AzContext -Subscription $Matches[1]
             }
 
-            $policy = Get-EnterprisePolicy -PolicyArmId $policyArmId
+            $policy = Get-EnterprisePolicy -PolicyArmId $policyArmId -Raw:$Raw
 
             if ($null -eq $policy) {
                 Write-Warning "Could not retrieve enterprise policy details for: $policyArmId"
                 return $null
             }
-            return $policy | ConvertTo-Json -Depth 7
+            return $policy
         }
     }
 }
