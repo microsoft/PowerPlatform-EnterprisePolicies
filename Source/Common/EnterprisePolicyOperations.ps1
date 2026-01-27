@@ -58,6 +58,7 @@ function PutEnterprisePolicy($subscriptionId, $resourceGroup, $body)
 
 function GetEnterprisePolicy($policyArmId)
  {
+    Write-Warning "DEPRECATED: This function is deprecated. Use 'Get-EnterprisePolicy -PolicyArmId' from the Microsoft.PowerPlatform.EnterprisePolicies module instead."
 
     $policy = Get-AZResource -ResourceId $policyArmId -ExpandProperties
     return $policy
@@ -66,6 +67,7 @@ function GetEnterprisePolicy($policyArmId)
 
 function GetEnterprisePoliciesInSubscription($subscriptionId, $policyType)
 {
+    Write-Warning "DEPRECATED: This function is deprecated. Use 'Get-EnterprisePolicy -Kind' from the Microsoft.PowerPlatform.EnterprisePolicies module instead."
 
     $setSubscription = Set-AzContext -Subscription $subscriptionId
     $allPolicies = Get-AZResource -ResourceType Microsoft.Powerplatform/enterprisePolicies
@@ -83,6 +85,7 @@ function GetEnterprisePoliciesInSubscription($subscriptionId, $policyType)
 
 function GetEnterprisePoliciesInResourceGroup($subscriptionId, $policyType, $resourceGroup)
 {
+    Write-Warning "DEPRECATED: This function is deprecated. Use 'Get-EnterprisePolicy -ResourceGroupName -Kind' from the Microsoft.PowerPlatform.EnterprisePolicies module instead."
 
     $setSubscription = Set-AzContext -Subscription $subscriptionId
     $allPolicies = Get-AZResource -ResourceType Microsoft.Powerplatform/enterprisePolicies -ResourceGroupName $resourceGroup

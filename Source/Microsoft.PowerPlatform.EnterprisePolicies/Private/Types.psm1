@@ -77,6 +77,38 @@ class SubnetUsageDocument{
     [NetworkUsageData[]] $NetworkUsageDataByEnvironment
 }
 
+class SubnetReference {
+    [string] $Name
+}
+
+class VirtualNetworkReference {
+    [string] $Id
+    [SubnetReference] $Subnet
+}
+
+class NetworkInjectionProperties {
+    [VirtualNetworkReference[]] $VirtualNetworks
+}
+
+class EnterprisePolicyProperties {
+    [string] $SystemId
+    [NetworkInjectionProperties] $NetworkInjection
+}
+
+class EnterprisePolicy {
+    [string] $ResourceId
+    [string] $Id
+    [string] $Kind
+    [string] $Location
+    [string] $ResourceName
+    [string] $Name
+    [EnterprisePolicyProperties] $Properties
+    [string] $ResourceGroupName
+    [string] $Type
+    [string] $ResourceType
+    [string] $SubscriptionId
+}
+
 enum PolicyType{
     Encryption
     NetworkInjection
@@ -120,6 +152,11 @@ $ExportableTypes = @(
     [NetworkUsageData]
     [EnvironmentNetworkUsageDocument]
     [SubnetUsageDocument]
+    [SubnetReference]
+    [VirtualNetworkReference]
+    [NetworkInjectionProperties]
+    [EnterprisePolicyProperties]
+    [EnterprisePolicy]
 )
 
 # Get the internal TypeAccelerators class to use its static methods.

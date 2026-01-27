@@ -105,7 +105,7 @@ function New-SubnetInjectionEnterprisePolicy{
     Write-Verbose "Subnet Injection Enterprise Policy $PolicyName created successfully."
 
     $policyArmId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.PowerPlatform/enterprisePolicies/$PolicyName"
-    $policy = Get-EnterprisePolicy $policyArmId
+    $policy = Get-EnterprisePolicy -PolicyArmId $policyArmId
     $policyString = $policy | ConvertTo-Json -Depth 7
     return $policyString
 }

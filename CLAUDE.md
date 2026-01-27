@@ -71,6 +71,7 @@ Source/Microsoft.PowerPlatform.EnterprisePolicies/
 ├── Public/
 │   └── SubnetInjection/
 │       ├── New-SubnetInjectionEnterprisePolicy.ps1  # Create subnet injection policy
+│       ├── Get-SubnetInjectionEnterprisePolicy.ps1  # Retrieve subnet injection policies
 │       ├── New-VnetForSubnetDelegation.ps1          # VNet setup cmdlet
 │       └── Diagnostics/                              # Diagnostic cmdlets
 │           ├── Get-EnvironmentUsage.ps1
@@ -80,8 +81,9 @@ Source/Microsoft.PowerPlatform.EnterprisePolicies/
 │           ├── Test-DnsResolution.ps1
 │           └── Test-NetworkConnectivity.ps1
 └── Private/                   # Internal implementation
-    ├── Types.psm1             # Enums: BAPEndpoint, AzureEnvironment, PolicyType
-    ├── AuthenticationOperations.ps1  # Connect-Azure, Get-AccessToken
+    ├── Types.psm1             # Enums and data classes
+    ├── AuthenticationOperations.ps1  # Azure authentication
+    ├── EnvironmentOperations.ps1     # BAP environment operations
     ├── RESTHelpers.ps1        # HTTP client with retry logic, BAP API endpoints
     ├── AzHelper.ps1           # Azure resource operations
     ├── CacheMethods.ps1       # Response caching
@@ -147,6 +149,15 @@ Public cmdlets that call Azure/BAP APIs should include these common parameters:
 - Use `$ErrorActionPreference = "Stop"` at the start of functions
 - In `HelpMessage` attributes, do not enumerate specific enum values (e.g., don't say "AzureCloud, AzureUSGovernment, AzureChinaCloud") - enum values may change over time
 
+### PowerShell Best Practices
+- **Avoid code duplication**: Consolidate similar functions into one using parameter sets
+- **Use parameter sets**: When a function has mutually exclusive behaviors, use `ParameterSetName` to define them
+- **Use splatting**: Build `$params` hashtable and call cmdlets with `@params` instead of long parameter lists
+- **Use enums**: When a parameter accepts a fixed set of values, use the defined enums (`PolicyType`, `BAPEndpoint`, etc.) instead of strings
+- **Always use named parameters**: When calling functions, use `-ParameterName $value` syntax, not positional arguments
+- **Validate parameters**: Use `[ValidateNotNullOrEmpty()]` for mandatory string parameters; use `[string]::IsNullOrWhiteSpace()` for optional parameters when building splatted calls
+- **Single authentication call**: Call `Connect-Azure` once at the start of a function, not in each branch
+
 ### Testing Conventions
 - Write concise, meaningful tests focused on behavior and error handling
 - Avoid testing implementation details (e.g., "Should call X with correct parameters") - focus on outcomes
@@ -173,6 +184,22 @@ Required PowerShell modules (installed via `InstallPowerAppsCmdlets.ps1`):
 
 Azure Pipelines with security scanning (CodeQL, CredScan, BinSkim, PoliCheck). Version managed by GitVersion with semantic versioning.
 
+### Commit Message Versioning
+
+Use these in commit messages to control version bumps:
+
+- **`+semver:major`** (suffix) - Breaking API changes or milestone accomplishments (use sparingly)
+- **`+semver:minor`** (suffix) - New public cmdlets or significant behavior changes via private functions
+- **`+semver:patch`** (suffix) - Small bug fixes (default if no suffix)
+- **`[skip ci]`** (prefix) - Changes that don't affect the module (CLAUDE.md, README.md, docs, legacy scripts)
+
+Examples:
+```
+Add Get-SubnetInjectionEnterprisePolicy cmdlet +semver:minor
+Fix null reference in error handling +semver:patch
+[skip ci] Update CLAUDE.md with coding guidelines
+```
+
 ## PR Checklist
 
 Before submitting a PR, ensure:
@@ -180,6 +207,24 @@ Before submitting a PR, ensure:
    - Tests pass in both PowerShell Core (`pwsh`) and Windows PowerShell (`powershell`)
    - Run `Build/build.ps1 -Tasks @("BuildHelp")` to regenerate docs
 2. Update `README.md` if adding new user-facing features or parameters
-3. If modifying `Types.psm1`, manually update the corresponding docs in `docs/`
+3. **If modifying `Types.psm1`**:
+   - Create/update manual documentation in `docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/`
+   - Update `Build/build.settings.ps1` PostBuildHelp task to include references to new types
+   - Add new types to the `$ExportableTypes` array in Types.psm1
 
 **Note:** Tests are not required for changes to legacy scripts, README.md, CLAUDE.md, or other non-module files.
+
+## Adding New Types
+
+When adding new classes or enums to `Private/Types.psm1`:
+
+1. **Keep types minimal**: Only include properties that are actually needed. Don't add every possible property from an API response - include only what consumers will use.
+
+2. **Add to $ExportableTypes**: New types must be added to the `$ExportableTypes` array at the bottom of Types.psm1 to be exported.
+
+3. **Create manual documentation**: Types cannot be auto-documented. Create a markdown file in `docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/` with:
+   - Class name and description
+   - Properties table (Property, Type, Description)
+   - Example JSON if applicable
+
+4. **Update build.settings.ps1**: Add entries to the `$markdownToAppend` variable in the `PostBuildHelp` task to link to your documentation file.

@@ -1,0 +1,170 @@
+<#
+SAMPLE CODE NOTICE
+
+THIS SAMPLE CODE IS MADE AVAILABLE AS IS. MICROSOFT MAKES NO WARRANTIES, WHETHER EXPRESS OR IMPLIED,
+OF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OR CONDITIONS OF MERCHANTABILITY.
+THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.
+NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
+#>
+
+<#
+.SYNOPSIS
+Retrieves Subnet Injection Enterprise Policies for Power Platform.
+
+.DESCRIPTION
+This cmdlet retrieves Subnet Injection Enterprise Policies using one of four methods:
+- By Resource ID: Retrieves a specific policy using its Azure ARM resource ID
+- By Environment: Retrieves the policy linked to a specific Power Platform environment
+- By Subscription: Retrieves all Subnet Injection policies in the current subscription
+- By Resource Group: Retrieves all Subnet Injection policies in a specific resource group
+
+.OUTPUTS
+System.String
+
+A JSON string representation of the enterprise policy resource(s), or $null if no policy is found.
+
+.EXAMPLE
+Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321"
+
+Retrieves a Subnet Injection Enterprise Policy by its ARM resource ID.
+
+.EXAMPLE
+Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint Prod
+
+Retrieves the Subnet Injection Enterprise Policy linked to the specified Power Platform environment.
+
+.EXAMPLE
+Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+
+Retrieves the Subnet Injection Enterprise Policy linked to an environment in the US Government High cloud.
+
+.EXAMPLE
+Get-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012"
+
+Retrieves all Subnet Injection Enterprise Policies in the specified subscription.
+
+.EXAMPLE
+Get-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup"
+
+Retrieves all Subnet Injection Enterprise Policies in the specified resource group.
+#>
+
+function Get-SubnetInjectionEnterprisePolicy{
+    [CmdletBinding(DefaultParameterSetName = 'BySubscription')]
+    param(
+        [Parameter(Mandatory, ParameterSetName = 'ByResourceId', HelpMessage="The full Azure ARM resource ID of the enterprise policy")]
+        [ValidateNotNullOrEmpty()]
+        [string]$PolicyResourceId,
+
+        [Parameter(Mandatory, ParameterSetName = 'ByEnvironment', HelpMessage="The Power Platform environment ID to retrieve the linked policy for")]
+        [ValidateNotNullOrEmpty()]
+        [string]$EnvironmentId,
+
+        [Parameter(Mandatory, ParameterSetName = 'BySubscription', HelpMessage="The Azure subscription ID to search for policies")]
+        [Parameter(Mandatory, ParameterSetName = 'ByResourceGroup', HelpMessage="The Azure subscription ID containing the resource group")]
+        [ValidateNotNullOrEmpty()]
+        [string]$SubscriptionId,
+
+        [Parameter(Mandatory, ParameterSetName = 'ByResourceGroup', HelpMessage="The Azure resource group name to search for policies")]
+        [ValidateNotNullOrEmpty()]
+        [string]$ResourceGroupName,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [string]$TenantId,
+
+        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
+        [switch]$ForceAuth
+    )
+
+    $ErrorActionPreference = "Stop"
+
+    # For ByResourceId, extract and validate subscription ID from the resource ID
+    if ($PSCmdlet.ParameterSetName -eq 'ByResourceId') {
+        if ($PolicyResourceId -match "/subscriptions/([^/]+)/") {
+            $SubscriptionId = $Matches[1]
+        }
+        else {
+            throw "Invalid PolicyResourceId format. Expected format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerPlatform/enterprisePolicies/{policyName}"
+        }
+    }
+
+    # Connect to Azure
+    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
+        throw "Failed to connect to Azure. Please check your credentials and try again."
+    }
+
+    # Set subscription context for non-ByEnvironment parameter sets
+    if ($PSCmdlet.ParameterSetName -ne 'ByEnvironment') {
+        Write-Verbose "Setting subscription context to $SubscriptionId"
+        $null = Set-AzContext -Subscription $SubscriptionId
+    }
+
+    # Retrieve policies based on parameter set
+    switch ($PSCmdlet.ParameterSetName) {
+        'BySubscription' {
+            Write-Verbose "Retrieving all Subnet Injection enterprise policies in subscription: $SubscriptionId"
+            $policies = Get-EnterprisePolicy -Kind ([PolicyType]::NetworkInjection)
+
+            if ($null -eq $policies -or @($policies).Count -eq 0) {
+                Write-Host "No Subnet Injection Enterprise Policies found in subscription: $SubscriptionId" -ForegroundColor Yellow
+                return $null
+            }
+            return $policies | ConvertTo-Json -Depth 7
+        }
+        'ByResourceGroup' {
+            Write-Verbose "Retrieving all Subnet Injection enterprise policies in resource group: $ResourceGroupName"
+            $policies = Get-EnterprisePolicy -ResourceGroupName $ResourceGroupName -Kind ([PolicyType]::NetworkInjection)
+
+            if ($null -eq $policies -or @($policies).Count -eq 0) {
+                Write-Host "No Subnet Injection Enterprise Policies found in resource group: $ResourceGroupName" -ForegroundColor Yellow
+                return $null
+            }
+            return $policies | ConvertTo-Json -Depth 7
+        }
+        'ByResourceId' {
+            Write-Verbose "Retrieving enterprise policy: $PolicyResourceId"
+            $policy = Get-EnterprisePolicy -PolicyArmId $PolicyResourceId
+
+            if ($null -eq $policy) {
+                Write-Warning "No enterprise policy found with resource ID: $PolicyResourceId"
+                return $null
+            }
+            return $policy | ConvertTo-Json -Depth 7
+        }
+        'ByEnvironment' {
+            Write-Verbose "Retrieving environment information for: $EnvironmentId"
+            $environment = Get-BAPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
+
+            if ($null -eq $environment) {
+                throw "Failed to retrieve environment with ID: $EnvironmentId"
+            }
+
+            Write-Verbose "Environment retrieved successfully"
+
+            if ($null -eq $environment.properties.enterprisePolicies -or $null -eq $environment.properties.enterprisePolicies.VNets) {
+                Write-Host "No Subnet Injection Enterprise Policy is linked to environment: $EnvironmentId" -ForegroundColor Yellow
+                return $null
+            }
+
+            $policyArmId = $environment.properties.enterprisePolicies.VNets.id
+            Write-Verbose "Found linked Subnet Injection Enterprise Policy: $policyArmId"
+
+            # Set subscription context from the policy ARM ID
+            if ($policyArmId -match "/subscriptions/([^/]+)/") {
+                Write-Verbose "Setting subscription context to $($Matches[1])"
+                $null = Set-AzContext -Subscription $Matches[1]
+            }
+
+            $policy = Get-EnterprisePolicy -PolicyArmId $policyArmId
+
+            if ($null -eq $policy) {
+                Write-Warning "Could not retrieve enterprise policy details for: $policyArmId"
+                return $null
+            }
+            return $policy | ConvertTo-Json -Depth 7
+        }
+    }
+}

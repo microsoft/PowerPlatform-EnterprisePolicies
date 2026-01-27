@@ -351,8 +351,10 @@ function SwapPolicyForEnv
 }
 
 
-function GetEnterprisePolicyForEnvironment 
+function GetEnterprisePolicyForEnvironment
 {
+    Write-Warning "DEPRECATED: This function is deprecated. Use 'Get-SubnetInjectionEnterprisePolicy -EnvironmentId' from the Microsoft.PowerPlatform.EnterprisePolicies module instead."
+
     param(
         [Parameter(Mandatory=$true)]
         [ValidateSet("cmk","vnet", "identity")]
