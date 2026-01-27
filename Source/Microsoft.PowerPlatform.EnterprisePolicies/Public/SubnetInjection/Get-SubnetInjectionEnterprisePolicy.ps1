@@ -21,7 +21,7 @@ This cmdlet retrieves Subnet Injection Enterprise Policies using one of four met
 .OUTPUTS
 EnterprisePolicy
 
-Returns typed EnterprisePolicy object(s), or raw Azure resource object(s) when -Raw is specified, or $null if no policy is found.
+Returns typed EnterprisePolicy object(s), or raw Azure resource object(s) when -Raw is specified. Throws an error if no policy is found.
 
 .EXAMPLE
 Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321"
@@ -112,8 +112,7 @@ function Get-SubnetInjectionEnterprisePolicy{
             $policies = Get-EnterprisePolicy -Kind ([PolicyType]::NetworkInjection) -Raw:$Raw
 
             if ($null -eq $policies -or @($policies).Count -eq 0) {
-                Write-Host "No Subnet Injection Enterprise Policies found in subscription: $SubscriptionId" -ForegroundColor Yellow
-                return $null
+                throw "No Subnet Injection Enterprise Policies found in subscription: $SubscriptionId"
             }
             return $policies
         }
@@ -122,8 +121,7 @@ function Get-SubnetInjectionEnterprisePolicy{
             $policies = Get-EnterprisePolicy -ResourceGroupName $ResourceGroupName -Kind ([PolicyType]::NetworkInjection) -Raw:$Raw
 
             if ($null -eq $policies -or @($policies).Count -eq 0) {
-                Write-Host "No Subnet Injection Enterprise Policies found in resource group: $ResourceGroupName" -ForegroundColor Yellow
-                return $null
+                throw "No Subnet Injection Enterprise Policies found in resource group: $ResourceGroupName"
             }
             return $policies
         }
@@ -132,8 +130,7 @@ function Get-SubnetInjectionEnterprisePolicy{
             $policy = Get-EnterprisePolicy -PolicyArmId $PolicyResourceId -Raw:$Raw
 
             if ($null -eq $policy) {
-                Write-Warning "No enterprise policy found with resource ID: $PolicyResourceId"
-                return $null
+                throw "No enterprise policy found with resource ID: $PolicyResourceId"
             }
             return $policy
         }
@@ -148,8 +145,7 @@ function Get-SubnetInjectionEnterprisePolicy{
             Write-Verbose "Environment retrieved successfully"
 
             if ($null -eq $environment.properties.enterprisePolicies -or $null -eq $environment.properties.enterprisePolicies.VNets) {
-                Write-Host "No Subnet Injection Enterprise Policy is linked to environment: $EnvironmentId" -ForegroundColor Yellow
-                return $null
+                throw "No Subnet Injection Enterprise Policy is linked to environment: $EnvironmentId"
             }
 
             $policyArmId = $environment.properties.enterprisePolicies.VNets.id
@@ -164,8 +160,7 @@ function Get-SubnetInjectionEnterprisePolicy{
             $policy = Get-EnterprisePolicy -PolicyArmId $policyArmId -Raw:$Raw
 
             if ($null -eq $policy) {
-                Write-Warning "Could not retrieve enterprise policy details for: $policyArmId"
-                return $null
+                throw "Could not retrieve enterprise policy details for: $policyArmId"
             }
             return $policy
         }

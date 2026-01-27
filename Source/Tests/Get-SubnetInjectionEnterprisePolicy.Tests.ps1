@@ -46,7 +46,6 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
         }
 
         Mock Write-Verbose {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-        Mock Write-Host {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Set-AzContext {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
@@ -65,13 +64,11 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
             @($result)[0].Name | Should -Be $script:testPolicyName
         }
 
-        It 'Should return null when no policies found in subscription' {
+        It 'Should throw when no policies found in subscription' {
             Mock Get-EnterprisePolicy { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Get-SubnetInjectionEnterprisePolicy `
-                -SubscriptionId $script:testSubscriptionId
-
-            $result | Should -BeNullOrEmpty
+            { Get-SubnetInjectionEnterprisePolicy `
+                -SubscriptionId $script:testSubscriptionId } | Should -Throw "*No Subnet Injection Enterprise Policies found in subscription*"
         }
     }
 
@@ -91,14 +88,12 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
             @($result)[0].Name | Should -Be $script:testPolicyName
         }
 
-        It 'Should return null when no policies found in resource group' {
+        It 'Should throw when no policies found in resource group' {
             Mock Get-EnterprisePolicy { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Get-SubnetInjectionEnterprisePolicy `
+            { Get-SubnetInjectionEnterprisePolicy `
                 -SubscriptionId $script:testSubscriptionId `
-                -ResourceGroupName $script:testResourceGroup
-
-            $result | Should -BeNullOrEmpty
+                -ResourceGroupName $script:testResourceGroup } | Should -Throw "*No Subnet Injection Enterprise Policies found in resource group*"
         }
     }
 
@@ -124,14 +119,12 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
                 -TenantId $script:testTenantId } | Should -Throw "*Invalid PolicyResourceId format*"
         }
 
-        It 'Should return null when policy is not found' {
+        It 'Should throw when policy is not found' {
             Mock Get-EnterprisePolicy { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Get-SubnetInjectionEnterprisePolicy `
+            { Get-SubnetInjectionEnterprisePolicy `
                 -PolicyResourceId $script:testPolicyResourceId `
-                -TenantId $script:testTenantId
-
-            $result | Should -BeNullOrEmpty
+                -TenantId $script:testTenantId } | Should -Throw "*No enterprise policy found with resource ID*"
         }
     }
 
@@ -152,14 +145,12 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
             $result.Name | Should -Be $script:testPolicyName
         }
 
-        It 'Should return null when environment has no linked policy' {
+        It 'Should throw when environment has no linked policy' {
             Mock Get-BAPEnvironment { return $script:mockEnvironmentWithoutPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Get-SubnetInjectionEnterprisePolicy `
+            { Get-SubnetInjectionEnterprisePolicy `
                 -EnvironmentId $script:testEnvironmentId `
-                -Endpoint Prod
-
-            $result | Should -BeNullOrEmpty
+                -Endpoint Prod } | Should -Throw "*No Subnet Injection Enterprise Policy is linked to environment*"
         }
 
         It 'Should throw when environment retrieval fails' {
