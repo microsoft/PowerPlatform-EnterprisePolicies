@@ -90,23 +90,23 @@ The NetworkUsageData class represents historical network usage information about
 
 The SubnetUsageDocument class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 
-#### [EnterprisePolicy](EnterprisePolicy-Types.md)
+#### [EnterprisePolicy](EnterprisePolicy.md)
 
 The EnterprisePolicy class represents an Azure ARM Enterprise Policy resource returned by cmdlets like Get-SubnetInjectionEnterprisePolicy.
 
-#### [EnterprisePolicyProperties](EnterprisePolicy-Types.md)
+#### [EnterprisePolicyProperties](EnterprisePolicy.md)
 
-The EnterprisePolicyProperties class contains policy-specific properties including system ID, health status, and network injection configuration.
+The EnterprisePolicyProperties class contains policy-specific properties including system ID and network injection configuration.
 
-#### [NetworkInjectionProperties](EnterprisePolicy-Types.md)
+#### [NetworkInjectionProperties](EnterprisePolicy.md)
 
 The NetworkInjectionProperties class contains the virtual network configuration for Network Injection Enterprise Policies.
 
-#### [VirtualNetworkReference](EnterprisePolicy-Types.md)
+#### [VirtualNetworkReference](EnterprisePolicy.md)
 
 The VirtualNetworkReference class represents a reference to an Azure Virtual Network and its delegated subnet.
 
-#### [SubnetReference](EnterprisePolicy-Types.md)
+#### [SubnetReference](EnterprisePolicy.md)
 
 The SubnetReference class represents a reference to a subnet within a virtual network.
 
