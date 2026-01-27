@@ -212,28 +212,4 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
         }
     }
 
-    Context 'Raw parameter' {
-        BeforeAll {
-            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-        }
-
-        It 'Should pass Raw to Get-EnterprisePolicy when specified' {
-            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-
-            Get-SubnetInjectionEnterprisePolicy `
-                -SubscriptionId $script:testSubscriptionId `
-                -Raw
-
-            Should -Invoke Get-EnterprisePolicy -Times 1 -ParameterFilter { $Raw -eq $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-        }
-
-        It 'Should not pass Raw to Get-EnterprisePolicy when not specified' {
-            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-
-            Get-SubnetInjectionEnterprisePolicy `
-                -SubscriptionId $script:testSubscriptionId
-
-            Should -Invoke Get-EnterprisePolicy -Times 1 -ParameterFilter { $Raw -eq $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-        }
-    }
 }

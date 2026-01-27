@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/26/2026
+ms.date: 01/27/2026
 PlatyPS schema version: 2024-05-01
 title: Get-SubnetInjectionEnterprisePolicy
 ---
@@ -21,28 +21,28 @@ Retrieves Subnet Injection Enterprise Policies for Power Platform.
 
 ```
 Get-SubnetInjectionEnterprisePolicy -SubscriptionId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Raw] [<CommonParameters>]
+ [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### ByResourceId
 
 ```
 Get-SubnetInjectionEnterprisePolicy -PolicyResourceId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Raw] [<CommonParameters>]
+ [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### ByEnvironment
 
 ```
 Get-SubnetInjectionEnterprisePolicy -EnvironmentId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Raw] [<CommonParameters>]
+ [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### ByResourceGroup
 
 ```
 Get-SubnetInjectionEnterprisePolicy -SubscriptionId <string> -ResourceGroupName <string>
- [-TenantId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Raw] [<CommonParameters>]
+ [-TenantId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -176,27 +176,6 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Raw
-
-Return the raw Azure resource object instead of the typed EnterprisePolicy object
-
-```yaml
-Type: System.Management.Automation.SwitchParameter
-DefaultValue: False
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
 ### -ResourceGroupName
 
 The Azure resource group name to search for policies
@@ -277,9 +256,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### EnterprisePolicy
+### Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
 
-Returns typed EnterprisePolicy object(s)
+Returns PSResource object(s) representing the enterprise policy Azure resources. Throws an error if no policy is found.
 
 {{ Fill in the Description }}
 

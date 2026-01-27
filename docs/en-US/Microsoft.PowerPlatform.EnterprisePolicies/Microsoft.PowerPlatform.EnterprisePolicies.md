@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/26/2026
+ms.date: 01/27/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -64,11 +64,11 @@ Attempts to establish a TLS handshake with the provided destination and port.
 
 #### [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
 
-The EnvironmentNetworkUsageDocument class represents historical network usage information and network usage metadata about the delegated network of a Power Platform environment.
+The `EnvironmentNetworkUsageDocument` class represents historical network usage information and network usage metadata about the delegated network of a Power Platform environment.
 
 #### [NetworkUsage](NetworkUsage.md)
 
-The NetworkUsage class represents metadata about the network configuration of a Power Platform environment.
+The `NetworkUsage` class represents metadata about the network configuration of a Power Platform environment.
 
 #### [TLSConnectivityInformation](TLSConnectivityInformation.md)
 
@@ -76,39 +76,19 @@ A class representing the result of the TLS handshake.
 
 #### [SSLInformation](SSLInformation.md)
 
-The SSLInformation class contains detailed information on the TLS handshake attempt.
+The `SSLInformation` class contains detailed information on the TLS handshake attempt.
 
 #### [CertificateInformation](CertificateInformation.md)
 
-The CertificateInformation class contains detailed information about the certificate presented during the TLS handshake.
+The `CertificateInformation` class contains detailed information about the certificate presented during the TLS handshake.
 
 #### [NetworkUsageData](NetworkUsageData.md)
 
-The NetworkUsageData class represents historical network usage information about the network configuration of a Power Platform environment.
+The `NetworkUsageData` class represents historical network usage information about the network configuration of a Power Platform environment.
 
 #### [SubnetUsageDocument](SubnetUsageDocument.md)
 
-The SubnetUsageDocument class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
-
-#### [EnterprisePolicy](EnterprisePolicy.md)
-
-The EnterprisePolicy class represents an Azure ARM Enterprise Policy resource returned by cmdlets like Get-SubnetInjectionEnterprisePolicy.
-
-#### [EnterprisePolicyProperties](EnterprisePolicy.md)
-
-The EnterprisePolicyProperties class contains policy-specific properties including system ID and network injection configuration.
-
-#### [NetworkInjectionProperties](EnterprisePolicy.md)
-
-The NetworkInjectionProperties class contains the virtual network configuration for Network Injection Enterprise Policies.
-
-#### [VirtualNetworkReference](EnterprisePolicy.md)
-
-The VirtualNetworkReference class represents a reference to an Azure Virtual Network and its delegated subnet.
-
-#### [SubnetReference](EnterprisePolicy.md)
-
-The SubnetReference class represents a reference to a subnet within a virtual network.
+The `SubnetUsageDocument` class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 
 ### Enums
 
