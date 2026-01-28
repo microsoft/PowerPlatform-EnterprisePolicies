@@ -1,0 +1,154 @@
+<#
+SAMPLE CODE NOTICE
+
+THIS SAMPLE CODE IS MADE AVAILABLE AS IS. MICROSOFT MAKES NO WARRANTIES, WHETHER EXPRESS OR IMPLIED,
+OF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OR CONDITIONS OF MERCHANTABILITY.
+THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.
+NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
+#>
+
+<#
+.SYNOPSIS
+Enables Subnet Injection for a Power Platform environment by linking it to an Enterprise Policy.
+
+.DESCRIPTION
+This cmdlet links an existing Subnet Injection Enterprise Policy to a Power Platform environment,
+enabling the environment to use the delegated virtual network subnets configured in the policy.
+
+The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
+Use -NoWait to return immediately after the operation is initiated.
+
+.OUTPUTS
+System.Management.Automation.PSCustomObject
+
+Returns the operation result when the link operation completes successfully.
+
+.EXAMPLE
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+
+Enables Subnet Injection for the environment by linking it to the specified policy.
+
+.EXAMPLE
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+
+Enables Subnet Injection for an environment in the US Government High cloud.
+
+.EXAMPLE
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait
+
+Initiates the link operation without waiting for completion.
+#>
+
+function Enable-SubnetInjection {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, HelpMessage="The Power Platform environment ID")]
+        [ValidateNotNullOrEmpty()]
+        [string]$EnvironmentId,
+
+        [Parameter(Mandatory, HelpMessage="The full Azure ARM resource ID of the Subnet Injection Enterprise Policy")]
+        [ValidateNotNullOrEmpty()]
+        [string]$PolicyArmId,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [string]$TenantId,
+
+        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
+        [switch]$ForceAuth,
+
+        [Parameter(Mandatory=$false, HelpMessage="Return immediately without waiting for the operation to complete")]
+        [switch]$NoWait,
+
+        [Parameter(Mandatory=$false, HelpMessage="Maximum time in seconds to wait for the operation to complete")]
+        [int]$TimeoutSeconds = 600
+    )
+
+    $ErrorActionPreference = "Stop"
+
+    # Connect to Azure
+    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
+        throw "Failed to connect to Azure. Please check your credentials and try again."
+    }
+
+    # Validate that the environment exists
+    Write-Verbose "Retrieving environment: $EnvironmentId"
+    $environment = Get-BAPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
+
+    if ($null -eq $environment) {
+        throw "Failed to retrieve environment with ID: $EnvironmentId"
+    }
+
+    Write-Verbose "Environment retrieved successfully"
+
+    # Check if environment already has a linked Subnet Injection policy
+    if ($null -ne $environment.properties.enterprisePolicies -and $null -ne $environment.properties.enterprisePolicies.VNets) {
+        $existingPolicyId = $environment.properties.enterprisePolicies.VNets.id
+        if ($existingPolicyId -ieq $PolicyArmId) {
+            Write-Host "Subnet Injection is already enabled with this policy." -ForegroundColor Yellow
+            return
+        }
+        Write-Warning "Environment already has Subnet Injection enabled with a different policy: $existingPolicyId. The existing policy will be replaced."
+    }
+
+    # Extract subscription ID from policy ARM ID and set context
+    if ($PolicyArmId -match "/subscriptions/([^/]+)/") {
+        $subscriptionId = $Matches[1]
+        Write-Verbose "Setting subscription context to $subscriptionId"
+        $null = Set-AzContext -Subscription $subscriptionId
+    }
+    else {
+        throw "Invalid PolicyArmId format. Expected format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerPlatform/enterprisePolicies/{policyName}"
+    }
+
+    # Get the enterprise policy and extract SystemId
+    Write-Verbose "Retrieving enterprise policy: $PolicyArmId"
+    $policy = Get-EnterprisePolicy -PolicyArmId $PolicyArmId
+
+    if ($null -eq $policy) {
+        throw "Failed to retrieve enterprise policy with ARM ID: $PolicyArmId"
+    }
+
+    if ($policy.Kind -ne "NetworkInjection") {
+        throw "The specified policy is not a Subnet Injection (NetworkInjection) policy. Policy kind: $($policy.Kind)"
+    }
+
+    $policySystemId = $policy.Properties.systemId
+    if ([string]::IsNullOrWhiteSpace($policySystemId)) {
+        throw "Enterprise policy does not have a systemId. The policy may not be fully provisioned."
+    }
+
+    Write-Verbose "Enterprise policy SystemId: $policySystemId"
+
+    # Link the policy to the environment
+    Write-Host "Enabling Subnet Injection for environment..." -ForegroundColor Yellow
+    $linkResult = Set-EnvironmentEnterprisePolicy -EnvironmentId $EnvironmentId -PolicyType ([PolicyType]::NetworkInjection) -PolicySystemId $policySystemId -Operation ([LinkOperation]::link) -Endpoint $Endpoint -TenantId $TenantId
+
+    if ($linkResult.StatusCode -ne 202) {
+        $contentString = Get-AsyncResult -Task $linkResult.Content.ReadAsStringAsync()
+        throw "Failed to initiate link operation. Status code: $($linkResult.StatusCode). $contentString"
+    }
+
+    Write-Verbose "Link operation initiated successfully"
+
+    if ($NoWait) {
+        Write-Host "Operation initiated. Use the Power Platform admin center to check the operation status." -ForegroundColor Green
+        return
+    }
+
+    # Get operation-location header and poll for completion
+    if (-not $linkResult.Headers.Contains("operation-location")) {
+        throw "Link response did not contain operation-location header"
+    }
+
+    $operationUrl = $linkResult.Headers.GetValues("operation-location") | Select-Object -First 1
+    Write-Verbose "Polling operation: $operationUrl"
+
+    $operationResult = Wait-EnterprisePolicyOperation -OperationUrl $operationUrl -Endpoint $Endpoint -TenantId $TenantId -TimeoutSeconds $TimeoutSeconds
+
+    Write-Host "Subnet Injection enabled successfully for environment $EnvironmentId" -ForegroundColor Green
+
+    return $operationResult
+}
