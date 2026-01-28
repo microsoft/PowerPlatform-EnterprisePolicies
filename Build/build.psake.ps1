@@ -228,6 +228,7 @@ Task BuildHelpImpl -depends GenerateMarkdown -requiredVariables DocsRootDir, Out
     }
 
     foreach ($locale in (Get-ChildItem -Path $DocsRootDir -Directory).Name) {
+        "Processing locale: $locale"
         $resolvedDir = Resolve-Path -Path "$DocsRootDir\$locale\$ModuleName"
         pushd $resolvedDir
         Get-ChildItem $resolvedDir -Recurse -Filter *.md |
@@ -237,6 +238,8 @@ Task BuildHelpImpl -depends GenerateMarkdown -requiredVariables DocsRootDir, Out
             Export-MamlCommandHelp -OutputFolder $OutDir\$locale -Force -Verbose:$VerbosePreference
         popd
     }
+
+    "Finished processing locales."
 
     Move-Item -Path $OutDir\$locale\$ModuleName\* -Destination $OutDir\$locale -Force -Verbose:$VerbosePreference
     Remove-Item -Path $OutDir\$locale\$ModuleName -Recurse -Force -Verbose:$VerbosePreference

@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/22/2026
+ms.date: 01/27/2026
 PlatyPS schema version: 2024-05-01
 title: New-SubnetInjectionEnterprisePolicy
 ---

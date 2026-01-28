@@ -1,4 +1,29 @@
 # If you want to test a parameter in a filter, make sure you define it in the function signature.
+
+# Mock for Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
+# This is the type returned by Get-AzResource when the Az module is loaded
+if (-not ('Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource' -as [type])) {
+    Add-Type -TypeDefinition @"
+namespace Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels
+{
+    public class PSResource
+    {
+        public string ResourceId { get; set; }
+        public string Id { get; set; }
+        public string Kind { get; set; }
+        public string Location { get; set; }
+        public string ResourceName { get; set; }
+        public string Name { get; set; }
+        public object Properties { get; set; }
+        public string ResourceGroupName { get; set; }
+        public string Type { get; set; }
+        public string ResourceType { get; set; }
+        public string SubscriptionId { get; set; }
+    }
+}
+"@
+}
+
 function Connect-AzAccount {
     param(
         [string] $Tenant,

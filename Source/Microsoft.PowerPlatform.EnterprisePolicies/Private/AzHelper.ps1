@@ -330,11 +330,56 @@ function Set-EnterprisePolicy {
 }
 
 function Get-EnterprisePolicy {
+    <#
+    .SYNOPSIS
+    Retrieves enterprise policies.
+
+    .DESCRIPTION
+    Gets Microsoft.PowerPlatform/enterprisePolicies resources. Can retrieve a specific policy by ARM ID,
+    or list policies in the current subscription with optional resource group and kind filters.
+
+    .PARAMETER PolicyArmId
+    The full ARM resource ID of a specific policy to retrieve.
+
+    .PARAMETER ResourceGroupName
+    Optional resource group name to filter policies.
+
+    .PARAMETER Kind
+    Optional filter for policy kind.
+    #>
+    [CmdletBinding(DefaultParameterSetName = 'List')]
     param (
-        [Parameter(Mandatory)]
+        [Parameter(Mandatory, ParameterSetName = 'ByArmId')]
         [ValidateNotNullOrEmpty()]
-        [string] $PolicyArmId
+        [string] $PolicyArmId,
+
+        [Parameter(Mandatory=$false, ParameterSetName = 'List')]
+        [ValidateNotNullOrEmpty()]
+        [string] $ResourceGroupName,
+
+        [Parameter(Mandatory=$false, ParameterSetName = 'List')]
+        [PolicyType] $Kind
     )
 
-    return Get-AzResource -ResourceId $PolicyArmId -ExpandProperties
+    $params = @{
+        ExpandProperties = $true
+    }
+
+    if ($PSCmdlet.ParameterSetName -eq 'ByArmId') {
+        $params['ResourceId'] = $PolicyArmId
+    }
+    else {
+        $params['ResourceType'] = "Microsoft.PowerPlatform/enterprisePolicies"
+        if (-not [string]::IsNullOrWhiteSpace($ResourceGroupName)) {
+            $params['ResourceGroupName'] = $ResourceGroupName
+        }
+    }
+
+    $policies = Get-AzResource @params
+
+    if ($PSBoundParameters.ContainsKey('Kind')) {
+        $policies = $policies | Where-Object { $_.Kind -eq $Kind.ToString() }
+    }
+
+    return $policies
 }

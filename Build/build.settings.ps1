@@ -230,11 +230,11 @@ The `SSLInformation` class contains detailed information on the TLS handshake at
 
 The `CertificateInformation` class contains detailed information about the certificate presented during the TLS handshake.
 
-### [NetworkUsageData](NetworkUsageData.md)
+#### [NetworkUsageData](NetworkUsageData.md)
 
 The `NetworkUsageData` class represents historical network usage information about the network configuration of a Power Platform environment.
 
-### [SubnetUsageDocument](SubnetUsageDocument.md)
+#### [SubnetUsageDocument](SubnetUsageDocument.md)
 
 The `SubnetUsageDocument` class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 

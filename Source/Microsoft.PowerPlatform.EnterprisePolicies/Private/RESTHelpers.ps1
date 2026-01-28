@@ -211,6 +211,23 @@ function Get-TenantRouteHostName {
     return "il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
 }
 
+function Get-BAPEndpointUrl {
+    param (
+        [Parameter(Mandatory)]
+        [BAPEndpoint] $Endpoint
+    )
+
+    switch ($Endpoint) {
+        ([BAPEndpoint]::tip1) { return "https://tip1.api.bap.microsoft.com/" }
+        ([BAPEndpoint]::tip2) { return "https://tip2.api.bap.microsoft.com/" }
+        ([BAPEndpoint]::prod) { return "https://api.bap.microsoft.com/" }
+        ([BAPEndpoint]::usgovhigh) { return "https://high.api.bap.microsoft.us/" }
+        ([BAPEndpoint]::dod) { return "https://api.bap.appsplatform.us/" }
+        ([BAPEndpoint]::china) { return "https://api.bap.partner.microsoftonline.cn/" }
+        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+    }
+}
+
 function Get-BAPResourceUrl {
     param (
         [Parameter(Mandatory)]
@@ -218,15 +235,16 @@ function Get-BAPResourceUrl {
     )
 
     switch ($Endpoint) {
-        ([BAPEndpoint]::tip1) { return "https://preprod.powerplatform.com/" }
-        ([BAPEndpoint]::tip2) { return "https://test.powerplatform.com/" }
-        ([BAPEndpoint]::prod) { return "https://powerplatform.com/" }
-        ([BAPEndpoint]::usgovhigh) { return "https://high.powerplatform.microsoft.us/" }
-        ([BAPEndpoint]::dod) { return "https://appsplatform.us/" }
-        ([BAPEndpoint]::china) { return "https://powerplatform.partner.microsoftonline.cn/" }
+        ([BAPEndpoint]::tip1) { return "https://service.powerapps.com/" }
+        ([BAPEndpoint]::tip2) { return "https://service.powerapps.com/" }
+        ([BAPEndpoint]::prod) { return "https://service.powerapps.com/" }
+        ([BAPEndpoint]::usgovhigh) { return "https://high.service.powerapps.us/" }
+        ([BAPEndpoint]::dod) { return "https://service.apps.appsplatform.us/" }
+        ([BAPEndpoint]::china) { return "https://service.powerapps.cn/" }
         Default { throw "Unsupported BAP endpoint: $Endpoint" }
     }
 }
+
 
 function Get-APIResourceUrl {
     param (

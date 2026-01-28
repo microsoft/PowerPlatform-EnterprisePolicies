@@ -12,6 +12,8 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 function GetSubnetInjectionEnterprisePoliciesInSubscription
 {
+    Write-Warning "DEPRECATED: This script is deprecated. Use 'Get-SubnetInjectionEnterprisePolicy -SubscriptionId' from the Microsoft.PowerPlatform.EnterprisePolicies module instead."
+
      param(
         [Parameter(
             Mandatory=$true,
