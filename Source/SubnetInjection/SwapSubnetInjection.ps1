@@ -23,6 +23,8 @@ param
 
 )
 
+Write-Warning "This script is deprecated. Please use the Enable-SubnetInjection cmdlet with the -Swap parameter from the Microsoft.PowerPlatform.EnterprisePolicies module instead."
+
 # Load thescript
 . "$PSScriptRoot\..\Common\EnvironmentEnterprisePolicyOperations.ps1"
 

@@ -213,7 +213,7 @@ Task GenerateMarkdown -depends Build, PreBuildHelp -requiredVariables DocsRootDi
     }
     finally {
        "Removing module $ModuleName from session."
-        Remove-Module $ModuleName
+        Remove-Module $ModuleName -ErrorAction SilentlyContinue
     }
 }
 

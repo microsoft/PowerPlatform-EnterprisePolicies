@@ -142,6 +142,16 @@ function Enable-SubnetInjection {
 
     Write-Verbose "Enterprise policy SystemId: $policySystemId"
 
+    # Validate that the environment location matches the policy location
+    $environmentLocation = $environment.location
+    $policyLocation = $policy.Location
+
+    if ($environmentLocation -ine $policyLocation) {
+        throw "Environment location '$environmentLocation' does not match the enterprise policy location '$policyLocation'. The environment and policy must be in the same location."
+    }
+
+    Write-Verbose "Environment location '$environmentLocation' matches policy location '$policyLocation'"
+
     # Link the policy to the environment
     Write-Verbose "Enabling Subnet Injection for environment..."
     $linkResult = Set-EnvironmentEnterprisePolicy -EnvironmentId $EnvironmentId -PolicyType ([PolicyType]::NetworkInjection) -PolicySystemId $policySystemId -Operation ([LinkOperation]::link) -Endpoint $Endpoint -TenantId $TenantId

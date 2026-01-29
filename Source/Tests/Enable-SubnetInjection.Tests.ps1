@@ -14,9 +14,11 @@ Describe 'Enable-SubnetInjection Tests' {
         $script:testTenantId = "87654321-4321-4321-4321-210987654321"
         $script:testPolicyArmId = "/subscriptions/$script:testSubscriptionId/resourceGroups/$script:testResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/$script:testPolicyName"
         $script:testPolicySystemId = "/regions/unitedstates/providers/Microsoft.PowerPlatform/enterprisePolicies/00000000-0000-0000-0000-000000000002"
+        $script:testRegion = "unitedstates"
 
         $script:mockEnvironmentWithoutPolicy = [PSCustomObject]@{
             name = $script:testEnvironmentId
+            location = $script:testRegion
             properties = @{
                 enterprisePolicies = $null
             }
@@ -24,6 +26,7 @@ Describe 'Enable-SubnetInjection Tests' {
 
         $script:mockEnvironmentWithSamePolicy = [PSCustomObject]@{
             name = $script:testEnvironmentId
+            location = $script:testRegion
             properties = @{
                 enterprisePolicies = @{
                     VNets = @{
@@ -35,6 +38,7 @@ Describe 'Enable-SubnetInjection Tests' {
 
         $script:mockEnvironmentWithDifferentPolicy = [PSCustomObject]@{
             name = $script:testEnvironmentId
+            location = $script:testRegion
             properties = @{
                 enterprisePolicies = @{
                     VNets = @{
@@ -44,10 +48,19 @@ Describe 'Enable-SubnetInjection Tests' {
             }
         }
 
+        $script:mockEnvironmentDifferentLocation = [PSCustomObject]@{
+            name = $script:testEnvironmentId
+            location = "europe"
+            properties = @{
+                enterprisePolicies = $null
+            }
+        }
+
         $script:mockPolicy = [PSCustomObject]@{
             ResourceId = $script:testPolicyArmId
             Name = $script:testPolicyName
             Kind = "NetworkInjection"
+            Location = $script:testRegion
             Properties = @{
                 systemId = $script:testPolicySystemId
             }
@@ -57,6 +70,7 @@ Describe 'Enable-SubnetInjection Tests' {
             ResourceId = $script:testPolicyArmId
             Name = $script:testPolicyName
             Kind = "Encryption"
+            Location = $script:testRegion
             Properties = @{
                 systemId = $script:testPolicySystemId
             }
@@ -197,6 +211,16 @@ Describe 'Enable-SubnetInjection Tests' {
             { Enable-SubnetInjection `
                 -EnvironmentId $script:testEnvironmentId `
                 -PolicyArmId $script:testPolicyArmId } | Should -Throw "*not a Subnet Injection*"
+        }
+
+        It 'Should throw when environment location does not match policy location' {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-BAPEnvironment { return $script:mockEnvironmentDifferentLocation } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            { Enable-SubnetInjection `
+                -EnvironmentId $script:testEnvironmentId `
+                -PolicyArmId $script:testPolicyArmId } | Should -Throw "*does not match*"
         }
     }
 }

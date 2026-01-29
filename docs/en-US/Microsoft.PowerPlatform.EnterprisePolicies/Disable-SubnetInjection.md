@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 01/28/2026
 PlatyPS schema version: 2024-05-01
 title: Disable-SubnetInjection
 ---
@@ -20,8 +20,8 @@ Disables Subnet Injection for a Power Platform environment by unlinking it from 
 ### __AllParameterSets
 
 ```
-Disable-SubnetInjection [-EnvironmentId] <string> [-PolicyArmId] <string> [[-TenantId] <string>]
- [[-Endpoint] <BAPEndpoint>] [[-TimeoutSeconds] <int>] [-ForceAuth] [-NoWait] [<CommonParameters>]
+Disable-SubnetInjection [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
+ [[-TimeoutSeconds] <int>] [-ForceAuth] [-NoWait] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,7 +31,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet unlinks a Subnet Injection Enterprise Policy from a Power Platform environment,
+This cmdlet unlinks the Subnet Injection Enterprise Policy from a Power Platform environment,
 disabling the environment's use of delegated virtual network subnets.
 
 The operation is asynchronous.
@@ -42,19 +42,19 @@ Use -NoWait to return immediately after the operation is initiated.
 
 ### EXAMPLE 1
 
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
-Disables Subnet Injection for the environment by unlinking it from the specified policy.
+Disables Subnet Injection for the environment by unlinking it from its currently linked policy.
 
 ### EXAMPLE 2
 
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
 
 Disables Subnet Injection for an environment in the US Government High cloud.
 
 ### EXAMPLE 3
 
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -NoWait
 
 Initiates the unlink operation without waiting for completion.
 
@@ -71,7 +71,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: 2
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -144,27 +144,6 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -PolicyArmId
-
-The full Azure ARM resource ID of the Subnet Injection Enterprise Policy to unlink
-
-```yaml
-Type: System.String
-DefaultValue: ''
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: 1
-  IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
 ### -TenantId
 
 The Azure AD tenant ID
@@ -176,7 +155,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: 1
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -197,7 +176,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -218,9 +197,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Management.Automation.PSCustomObject
+### System.Boolean
 
-Returns the operation result when the unlink operation completes successfully.
+Returns $true when the operation completes successfully
 
 {{ Fill in the Description }}
 

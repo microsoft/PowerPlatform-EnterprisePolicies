@@ -22,6 +22,8 @@ param
     [String]$endpoint
 )
 
+Write-Warning "This script is deprecated. Please use the Disable-SubnetInjection cmdlet from the Microsoft.PowerPlatform.EnterprisePolicies module instead."
+
 # Load thescript
 . "$PSScriptRoot\..\Common\EnvironmentEnterprisePolicyOperations.ps1"
 

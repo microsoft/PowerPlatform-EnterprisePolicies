@@ -108,9 +108,10 @@ Describe 'EnvironmentOperations Tests' {
                 $mockClient = [HttpClientMock]::new()
                 Mock Get-HttpClient { return $mockClient }
                 Mock Get-BAPAccessToken { return (ConvertTo-SecureString "mock-token" -AsPlainText -Force) }
+                Mock Write-Host {}
             }
 
-            It 'Should return operation result when succeeded' {
+            It 'Should return Succeeded when operation succeeds' {
                 $mockSuccessResult = [HttpClientResultMock]::new('{"id":"op-1","state":{"id":"Succeeded"}}', "application/json")
                 Mock Send-RequestWithRetries { return $mockSuccessResult }
                 Mock Get-AsyncResult { return '{"id":"op-1","state":{"id":"Succeeded"}}' }
@@ -120,7 +121,7 @@ Describe 'EnvironmentOperations Tests' {
                     -Endpoint ([BAPEndpoint]::Prod) `
                     -TimeoutSeconds 60
 
-                $result.state.id | Should -Be "Succeeded"
+                $result | Should -Be "Succeeded"
             }
 
             It 'Should throw when operation fails' {
@@ -132,6 +133,33 @@ Describe 'EnvironmentOperations Tests' {
                     -OperationUrl "https://api.bap.microsoft.com/operations/op-1" `
                     -Endpoint ([BAPEndpoint]::Prod) `
                     -TimeoutSeconds 60 } | Should -Throw "*operation failed*"
+            }
+
+            It 'Should wait and poll when state is NotStarted then Succeeded' {
+                $script:callCount = 0
+                Mock Send-RequestWithRetries {
+                    $script:callCount++
+                    if ($script:callCount -eq 1) {
+                        return [HttpClientResultMock]::new('{"id":"op-1","state":{"id":"NotStarted"}}', "application/json")
+                    }
+                    return [HttpClientResultMock]::new('{"id":"op-1","state":{"id":"Succeeded"}}', "application/json")
+                }
+                Mock Get-AsyncResult {
+                    if ($script:callCount -eq 1) {
+                        return '{"id":"op-1","state":{"id":"NotStarted"}}'
+                    }
+                    return '{"id":"op-1","state":{"id":"Succeeded"}}'
+                }
+                Mock Start-Sleep {}
+
+                $result = Wait-EnterprisePolicyOperation `
+                    -OperationUrl "https://api.bap.microsoft.com/operations/op-1" `
+                    -Endpoint ([BAPEndpoint]::Prod) `
+                    -TimeoutSeconds 120 `
+                    -PollIntervalSeconds 30
+
+                $result | Should -Be "Succeeded"
+                Should -Invoke Start-Sleep -Times 1
             }
         }
     }
