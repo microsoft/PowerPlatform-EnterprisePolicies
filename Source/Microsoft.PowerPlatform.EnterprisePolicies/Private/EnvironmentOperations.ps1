@@ -31,7 +31,6 @@ function Get-BAPEnvironment {
     }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-    $contentString
     $environment = $contentString | ConvertFrom-Json
 
     return $environment
@@ -53,7 +52,7 @@ function Set-EnvironmentEnterprisePolicy {
     The type of enterprise policy (NetworkInjection, Encryption, Identity).
 
     .PARAMETER PolicySystemId
-    The system ID of the enterprise policy (from properties.systemId).
+    The system ID of the enterprise policy (from properties.systemId). Required for link operations.
 
     .PARAMETER Operation
     The operation to perform: link or unlink.
@@ -160,14 +159,14 @@ function Wait-EnterprisePolicyOperation {
 
         switch ($state) {
             "Succeeded" {
-                return $operation
+                return $state
             }
             "Failed" {
                 $errorMessage = if ($operation.error -and $operation.error.message) { $operation.error.message } else { "Unknown error" }
                 throw "Enterprise policy operation failed: $errorMessage"
             }
-            "Running" {
-                Write-Host "Operation in progress. Waiting $PollIntervalSeconds seconds..." -ForegroundColor Yellow
+            { $_ -in "Running", "NotStarted" } {
+                Write-Host "Operation in progress ($state). Waiting $PollIntervalSeconds seconds..." -ForegroundColor Yellow
                 Start-Sleep -Seconds $PollIntervalSeconds
                 $elapsed += $PollIntervalSeconds
             }

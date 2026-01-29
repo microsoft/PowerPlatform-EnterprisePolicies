@@ -12,29 +12,29 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 Disables Subnet Injection for a Power Platform environment by unlinking it from its Enterprise Policy.
 
 .DESCRIPTION
-This cmdlet unlinks a Subnet Injection Enterprise Policy from a Power Platform environment,
+This cmdlet unlinks the Subnet Injection Enterprise Policy from a Power Platform environment,
 disabling the environment's use of delegated virtual network subnets.
 
 The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
 Use -NoWait to return immediately after the operation is initiated.
 
 .OUTPUTS
-System.Management.Automation.PSCustomObject
+System.Boolean
 
-Returns the operation result when the unlink operation completes successfully.
-
-.EXAMPLE
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
-
-Disables Subnet Injection for the environment by unlinking it from the specified policy.
+Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated.
 
 .EXAMPLE
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000"
+
+Disables Subnet Injection for the environment by unlinking it from its currently linked policy.
+
+.EXAMPLE
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
 
 Disables Subnet Injection for an environment in the US Government High cloud.
 
 .EXAMPLE
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -NoWait
 
 Initiates the unlink operation without waiting for completion.
 #>
@@ -45,10 +45,6 @@ function Disable-SubnetInjection {
         [Parameter(Mandatory, HelpMessage="The Power Platform environment ID")]
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
-
-        [Parameter(Mandatory, HelpMessage="The full Azure ARM resource ID of the Subnet Injection Enterprise Policy to unlink")]
-        [ValidateNotNullOrEmpty()]
-        [string]$PolicyArmId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
         [string]$TenantId,
@@ -78,7 +74,7 @@ function Disable-SubnetInjection {
     $environment = Get-BAPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
 
     if ($null -eq $environment) {
-        throw "Failed to retrieve environment with ID: $EnvironmentId"
+        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environment exists, ensure you have the necessary permissions to access it and that you are connecting to the correct BAP endpoint."
     }
 
     Write-Verbose "Environment retrieved successfully"
@@ -86,31 +82,29 @@ function Disable-SubnetInjection {
     # Check if environment has Subnet Injection enabled
     if ($null -eq $environment.properties.enterprisePolicies -or $null -eq $environment.properties.enterprisePolicies.VNets) {
         Write-Host "Subnet Injection is not enabled for this environment." -ForegroundColor Yellow
-        return
+        return $false
     }
 
-    # Verify the policy ARM ID matches
-    $linkedPolicyId = $environment.properties.enterprisePolicies.VNets.id
-    if ($linkedPolicyId -ine $PolicyArmId) {
-        throw "The specified PolicyArmId does not match the environment's linked policy. Environment is linked to: $linkedPolicyId"
-    }
+    # Get the linked policy ARM ID from the environment
+    $linkedPolicyArmId = $environment.properties.enterprisePolicies.VNets.id
+    Write-Verbose "Environment is linked to policy: $linkedPolicyArmId"
 
     # Extract subscription ID from policy ARM ID and set context
-    if ($PolicyArmId -match "/subscriptions/([^/]+)/") {
+    if ($linkedPolicyArmId -match "/subscriptions/([^/]+)/") {
         $subscriptionId = $Matches[1]
         Write-Verbose "Setting subscription context to $subscriptionId"
         $null = Set-AzContext -Subscription $subscriptionId
     }
     else {
-        throw "Invalid PolicyArmId format. Expected format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerPlatform/enterprisePolicies/{policyName}"
+        throw "Invalid linked policy ARM ID format: $linkedPolicyArmId"
     }
 
     # Get the enterprise policy and extract SystemId
-    Write-Verbose "Retrieving enterprise policy: $PolicyArmId"
-    $policy = Get-EnterprisePolicy -PolicyArmId $PolicyArmId
+    Write-Verbose "Retrieving enterprise policy: $linkedPolicyArmId"
+    $policy = Get-EnterprisePolicy -PolicyArmId $linkedPolicyArmId
 
     if ($null -eq $policy) {
-        throw "Failed to retrieve enterprise policy with ARM ID: $PolicyArmId"
+        throw "Failed to retrieve the linked enterprise policy with ARM ID: $linkedPolicyArmId. The policy may have been deleted."
     }
 
     $policySystemId = $policy.Properties.systemId
@@ -121,7 +115,7 @@ function Disable-SubnetInjection {
     Write-Verbose "Enterprise policy SystemId: $policySystemId"
 
     # Unlink the policy from the environment
-    Write-Host "Disabling Subnet Injection for environment..." -ForegroundColor Yellow
+    Write-Verbose "Disabling Subnet Injection for environment..."
     $unlinkResult = Set-EnvironmentEnterprisePolicy -EnvironmentId $EnvironmentId -PolicyType ([PolicyType]::NetworkInjection) -PolicySystemId $policySystemId -Operation ([LinkOperation]::unlink) -Endpoint $Endpoint -TenantId $TenantId
 
     if ($unlinkResult.StatusCode -ne 202) {
@@ -133,7 +127,7 @@ function Disable-SubnetInjection {
 
     if ($NoWait) {
         Write-Host "Operation initiated. Use the Power Platform admin center to check the operation status." -ForegroundColor Green
-        return
+        return $true
     }
 
     # Get operation-location header and poll for completion
@@ -148,5 +142,5 @@ function Disable-SubnetInjection {
 
     Write-Host "Subnet Injection disabled successfully for environment $EnvironmentId" -ForegroundColor Green
 
-    return $operationResult
+    return $operationResult -eq "Succeeded"
 }

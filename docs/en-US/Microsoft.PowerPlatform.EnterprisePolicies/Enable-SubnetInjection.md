@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 01/28/2026
 PlatyPS schema version: 2024-05-01
 title: Enable-SubnetInjection
 ---
@@ -21,7 +21,8 @@ Enables Subnet Injection for a Power Platform environment by linking it to an En
 
 ```
 Enable-SubnetInjection [-EnvironmentId] <string> [-PolicyArmId] <string> [[-TenantId] <string>]
- [[-Endpoint] <BAPEndpoint>] [[-TimeoutSeconds] <int>] [-ForceAuth] [-NoWait] [<CommonParameters>]
+ [[-Endpoint] <BAPEndpoint>] [[-TimeoutSeconds] <int>] [-ForceAuth] [-Swap] [-NoWait]
+ [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -33,6 +34,9 @@ This cmdlet has the following aliases,
 
 This cmdlet links an existing Subnet Injection Enterprise Policy to a Power Platform environment,
 enabling the environment to use the delegated virtual network subnets configured in the policy.
+
+If the environment already has a different policy linked, use the -Swap switch to replace it.
+Without -Swap, the cmdlet will throw an error to prevent accidental policy replacement.
 
 The operation is asynchronous.
 By default, the cmdlet waits for the operation to complete.
@@ -53,6 +57,12 @@ Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -Po
 Enables Subnet Injection for an environment in the US Government High cloud.
 
 ### EXAMPLE 3
+
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/newPolicy" -Swap
+
+Replaces the existing Subnet Injection policy with a new one.
+
+### EXAMPLE 4
 
 Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait
 
@@ -165,6 +175,27 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
+### -Swap
+
+Replace an existing linked policy with the new one
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
 ### -TenantId
 
 The Azure AD tenant ID
@@ -218,9 +249,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Management.Automation.PSCustomObject
+### System.Boolean
 
-Returns the operation result when the link operation completes successfully.
+Returns $true when the operation completes successfully
 
 {{ Fill in the Description }}
 
