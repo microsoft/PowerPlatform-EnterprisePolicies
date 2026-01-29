@@ -15,13 +15,16 @@ Enables Subnet Injection for a Power Platform environment by linking it to an En
 This cmdlet links an existing Subnet Injection Enterprise Policy to a Power Platform environment,
 enabling the environment to use the delegated virtual network subnets configured in the policy.
 
+If the environment already has a different policy linked, use the -Swap switch to replace it.
+Without -Swap, the cmdlet will throw an error to prevent accidental policy replacement.
+
 The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
 Use -NoWait to return immediately after the operation is initiated.
 
 .OUTPUTS
-System.Management.Automation.PSCustomObject
+System.Boolean
 
-Returns the operation result when the link operation completes successfully.
+Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated.
 
 .EXAMPLE
 Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
@@ -32,6 +35,11 @@ Enables Subnet Injection for the environment by linking it to the specified poli
 Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
 
 Enables Subnet Injection for an environment in the US Government High cloud.
+
+.EXAMPLE
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/newPolicy" -Swap
+
+Replaces the existing Subnet Injection policy with a new one.
 
 .EXAMPLE
 Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait
@@ -59,6 +67,9 @@ function Enable-SubnetInjection {
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth,
 
+        [Parameter(Mandatory=$false, HelpMessage="Replace an existing linked policy with the new one")]
+        [switch]$Swap,
+
         [Parameter(Mandatory=$false, HelpMessage="Return immediately without waiting for the operation to complete")]
         [switch]$NoWait,
 
@@ -78,19 +89,28 @@ function Enable-SubnetInjection {
     $environment = Get-BAPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
 
     if ($null -eq $environment) {
-        throw "Failed to retrieve environment with ID: $EnvironmentId"
+        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environement exists, ensure you have the necessary permissions to access it and that you are connecting to the correct BAP endpoint."
     }
 
     Write-Verbose "Environment retrieved successfully"
 
     # Check if environment already has a linked Subnet Injection policy
-    if ($null -ne $environment.properties.enterprisePolicies -and $null -ne $environment.properties.enterprisePolicies.VNets) {
+    $hasExistingPolicy = $null -ne $environment.properties.enterprisePolicies -and $null -ne $environment.properties.enterprisePolicies.VNets
+
+    if ($hasExistingPolicy) {
         $existingPolicyId = $environment.properties.enterprisePolicies.VNets.id
         if ($existingPolicyId -ieq $PolicyArmId) {
             Write-Host "Subnet Injection is already enabled with this policy." -ForegroundColor Yellow
             return
         }
-        Write-Warning "Environment already has Subnet Injection enabled with a different policy: $existingPolicyId. The existing policy will be replaced."
+        # Different policy is linked
+        if (-not $Swap) {
+            throw "Environment already has Subnet Injection enabled with a different policy: $existingPolicyId. Use the -Swap parameter to replace it."
+        }
+        Write-Host "Swapping existing policy with the new one..." -ForegroundColor Yellow
+    }
+    elseif ($Swap) {
+        throw "Cannot use -Swap when no Subnet Injection policy is currently linked to the environment. Remove the -Swap parameter to enable Subnet Injection."
     }
 
     # Extract subscription ID from policy ARM ID and set context
@@ -108,7 +128,7 @@ function Enable-SubnetInjection {
     $policy = Get-EnterprisePolicy -PolicyArmId $PolicyArmId
 
     if ($null -eq $policy) {
-        throw "Failed to retrieve enterprise policy with ARM ID: $PolicyArmId"
+        throw "Failed to retrieve enterprise policy with ARM ID: $PolicyArmId. Ensure the policy exists, you have access to it, and its of type 'NetworkInjection'."
     }
 
     if ($policy.Kind -ne "NetworkInjection") {
@@ -123,7 +143,7 @@ function Enable-SubnetInjection {
     Write-Verbose "Enterprise policy SystemId: $policySystemId"
 
     # Link the policy to the environment
-    Write-Host "Enabling Subnet Injection for environment..." -ForegroundColor Yellow
+    Write-Verbose "Enabling Subnet Injection for environment..."
     $linkResult = Set-EnvironmentEnterprisePolicy -EnvironmentId $EnvironmentId -PolicyType ([PolicyType]::NetworkInjection) -PolicySystemId $policySystemId -Operation ([LinkOperation]::link) -Endpoint $Endpoint -TenantId $TenantId
 
     if ($linkResult.StatusCode -ne 202) {
@@ -135,7 +155,7 @@ function Enable-SubnetInjection {
 
     if ($NoWait) {
         Write-Host "Operation initiated. Use the Power Platform admin center to check the operation status." -ForegroundColor Green
-        return
+        return $true
     }
 
     # Get operation-location header and poll for completion
@@ -150,5 +170,5 @@ function Enable-SubnetInjection {
 
     Write-Host "Subnet Injection enabled successfully for environment $EnvironmentId" -ForegroundColor Green
 
-    return $operationResult
+    return $operationResult -eq "Succeeded"
 }

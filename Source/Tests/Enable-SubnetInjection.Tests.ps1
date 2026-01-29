@@ -71,12 +71,7 @@ Describe 'Enable-SubnetInjection Tests' {
         $script:mockLinkResponse.Headers | Add-Member -MemberType ScriptMethod -Name "Contains" -Value { param($key) return $this.ContainsKey($key) } -Force
         $script:mockLinkResponse.Headers | Add-Member -MemberType ScriptMethod -Name "GetValues" -Value { param($key) return @($this[$key]) } -Force
 
-        $script:mockOperationResult = [PSCustomObject]@{
-            id = "00000000-0000-0000-0000-000000000003"
-            state = @{
-                id = "Succeeded"
-            }
-        }
+        $script:mockOperationResult = "Succeeded"
 
         Mock Write-Verbose {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Write-Host {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -98,8 +93,7 @@ Describe 'Enable-SubnetInjection Tests' {
                 -EnvironmentId $script:testEnvironmentId `
                 -PolicyArmId $script:testPolicyArmId
 
-            $result | Should -Not -BeNullOrEmpty
-            $result.state.id | Should -Be "Succeeded"
+            $result | Should -Be $true
         }
 
         It 'Should call Set-EnvironmentEnterprisePolicy with link operation' {
@@ -145,6 +139,44 @@ Describe 'Enable-SubnetInjection Tests' {
                 -PolicyArmId $script:testPolicyArmId
 
             Should -Invoke Set-EnvironmentEnterprisePolicy -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+    }
+
+    Context 'Swap parameter' {
+        BeforeAll {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-EnvironmentEnterprisePolicy { return $script:mockLinkResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Wait-EnterprisePolicyOperation { return $script:mockOperationResult } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should swap policy when -Swap is specified and different policy exists' {
+            Mock Get-BAPEnvironment { return $script:mockEnvironmentWithDifferentPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            $result = Enable-SubnetInjection `
+                -EnvironmentId $script:testEnvironmentId `
+                -PolicyArmId $script:testPolicyArmId `
+                -Swap
+
+            $result | Should -Be $true
+            Should -Invoke Set-EnvironmentEnterprisePolicy -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should throw when different policy exists and -Swap not specified' {
+            Mock Get-BAPEnvironment { return $script:mockEnvironmentWithDifferentPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            { Enable-SubnetInjection `
+                -EnvironmentId $script:testEnvironmentId `
+                -PolicyArmId $script:testPolicyArmId } | Should -Throw "*Use the -Swap parameter*"
+        }
+
+        It 'Should throw when -Swap is specified but no policy is linked' {
+            Mock Get-BAPEnvironment { return $script:mockEnvironmentWithoutPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            { Enable-SubnetInjection `
+                -EnvironmentId $script:testEnvironmentId `
+                -PolicyArmId $script:testPolicyArmId `
+                -Swap } | Should -Throw "*Cannot use -Swap*"
         }
     }
 

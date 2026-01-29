@@ -163,7 +163,7 @@ function Wait-EnterprisePolicyOperation {
                 return $operation
             }
             "Failed" {
-                $errorMessage = if ($operation.error) { $operation.error.message } else { "Unknown error" }
+                $errorMessage = if ($operation.error -and $operation.error.message) { $operation.error.message } else { "Unknown error" }
                 throw "Enterprise policy operation failed: $errorMessage"
             }
             "Running" {
