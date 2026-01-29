@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 01/28/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -17,6 +17,14 @@ title: Microsoft.PowerPlatform.EnterprisePolicies Module
 Microsoft PowerPlatform Enterprise policies module
 
 ## Microsoft.PowerPlatform.EnterprisePolicies
+
+### [Disable-SubnetInjection](Disable-SubnetInjection.md)
+
+Disables Subnet Injection for a Power Platform environment by unlinking it from its Enterprise Policy.
+
+### [Enable-SubnetInjection](Enable-SubnetInjection.md)
+
+Enables Subnet Injection for a Power Platform environment by linking it to an Enterprise Policy.
 
 ### [Get-EnvironmentHistoricalUsage](Get-EnvironmentHistoricalUsage.md)
 
@@ -64,11 +72,11 @@ Attempts to establish a TLS handshake with the provided destination and port.
 
 #### [EnvironmentNetworkUsageDocument](EnvironmentNetworkUsageDocument.md)
 
-The `EnvironmentNetworkUsageDocument` class represents historical network usage information and network usage metadata about the delegated network of a Power Platform environment.
+The EnvironmentNetworkUsageDocument class represents historical network usage information and network usage metadata about the delegated network of a Power Platform environment.
 
 #### [NetworkUsage](NetworkUsage.md)
 
-The `NetworkUsage` class represents metadata about the network configuration of a Power Platform environment.
+The NetworkUsage class represents metadata about the network configuration of a Power Platform environment.
 
 #### [TLSConnectivityInformation](TLSConnectivityInformation.md)
 
@@ -76,19 +84,19 @@ A class representing the result of the TLS handshake.
 
 #### [SSLInformation](SSLInformation.md)
 
-The `SSLInformation` class contains detailed information on the TLS handshake attempt.
+The SSLInformation class contains detailed information on the TLS handshake attempt.
 
 #### [CertificateInformation](CertificateInformation.md)
 
-The `CertificateInformation` class contains detailed information about the certificate presented during the TLS handshake.
+The CertificateInformation class contains detailed information about the certificate presented during the TLS handshake.
 
 #### [NetworkUsageData](NetworkUsageData.md)
 
-The `NetworkUsageData` class represents historical network usage information about the network configuration of a Power Platform environment.
+The NetworkUsageData class represents historical network usage information about the network configuration of a Power Platform environment.
 
 #### [SubnetUsageDocument](SubnetUsageDocument.md)
 
-The `SubnetUsageDocument` class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
+The SubnetUsageDocument class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 
 ### Enums
 

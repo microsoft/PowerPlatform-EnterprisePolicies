@@ -31,8 +31,150 @@ function Get-BAPEnvironment {
     }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-    $contentString
     $environment = $contentString | ConvertFrom-Json
 
     return $environment
+}
+
+function Set-EnvironmentEnterprisePolicy {
+    <#
+    .SYNOPSIS
+    Links or unlinks an enterprise policy to/from a Power Platform environment.
+
+    .DESCRIPTION
+    Calls the BAP API to link or unlink an enterprise policy to/from a Power Platform environment.
+    This is an async operation that returns a 202 Accepted response with operation-location header.
+
+    .PARAMETER EnvironmentId
+    The Power Platform environment ID.
+
+    .PARAMETER PolicyType
+    The type of enterprise policy (NetworkInjection, Encryption, Identity).
+
+    .PARAMETER PolicySystemId
+    The system ID of the enterprise policy (from properties.systemId). Required for link operations.
+
+    .PARAMETER Operation
+    The operation to perform: link or unlink.
+
+    .PARAMETER Endpoint
+    The BAP endpoint to use.
+
+    .PARAMETER TenantId
+    Optional Azure AD tenant ID.
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$EnvironmentId,
+
+        [Parameter(Mandatory)]
+        [PolicyType]$PolicyType,
+
+        [Parameter(Mandatory)]
+        [string]$PolicySystemId,
+
+        [Parameter(Mandatory)]
+        [LinkOperation]$Operation,
+
+        [Parameter(Mandatory)]
+        [BAPEndpoint]$Endpoint,
+
+        [Parameter(Mandatory=$false)]
+        [string]$TenantId
+    )
+
+    $apiVersion = "2019-10-01"
+    $baseUri = Get-BAPEndpointUrl -Endpoint $Endpoint
+    $uri = "${baseUri}providers/Microsoft.BusinessAppPlatform/environments/${EnvironmentId}/enterprisePolicies/${PolicyType}/${Operation}?api-version=${apiVersion}"
+
+    $body = @{ SystemId = $PolicySystemId } | ConvertTo-Json
+
+    $result = Send-RequestWithRetries -RequestFactory {
+        return New-JsonRequestMessage -Uri $uri -AccessToken (Get-BAPAccessToken -Endpoint $Endpoint -TenantId $TenantId) -Content $body -HttpMethod ([System.Net.Http.HttpMethod]::Post)
+    } -MaxRetries 3 -DelaySeconds 5
+
+    return $result
+}
+
+function Wait-EnterprisePolicyOperation {
+    <#
+    .SYNOPSIS
+    Polls an enterprise policy operation until completion.
+
+    .DESCRIPTION
+    Polls the operation-location URL returned from a link/unlink operation until it succeeds, fails, or times out.
+
+    .PARAMETER OperationUrl
+    The operation-location URL to poll.
+
+    .PARAMETER Endpoint
+    The BAP endpoint to use.
+
+    .PARAMETER TenantId
+    Optional Azure AD tenant ID.
+
+    .PARAMETER TimeoutSeconds
+    Maximum time to wait for the operation to complete. Default is 600 seconds (10 minutes).
+
+    .PARAMETER PollIntervalSeconds
+    Interval between polls. Default is 30 seconds.
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [string]$OperationUrl,
+
+        [Parameter(Mandatory)]
+        [BAPEndpoint]$Endpoint,
+
+        [Parameter(Mandatory=$false)]
+        [string]$TenantId,
+
+        [Parameter(Mandatory=$false)]
+        [int]$TimeoutSeconds = 600,
+
+        [Parameter(Mandatory=$false)]
+        [int]$PollIntervalSeconds = 30
+    )
+
+    $elapsed = 0
+    while ($elapsed -lt $TimeoutSeconds) {
+        $result = Send-RequestWithRetries -RequestFactory {
+            return New-JsonRequestMessage -Uri $OperationUrl -AccessToken (Get-BAPAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
+        } -MaxRetries 3 -DelaySeconds 5
+
+        if (-not $result.IsSuccessStatusCode) {
+            $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+            throw "Failed to poll operation status. Status code: $($result.StatusCode). $contentString"
+        }
+
+        $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+        $operation = $contentString | ConvertFrom-Json
+
+        if ($null -eq $operation -or $null -eq $operation.state -or $null -eq $operation.state.id) {
+            throw "Invalid operation response: $contentString"
+        }
+
+        $state = $operation.state.id
+        Write-Verbose "Operation state: $state"
+
+        switch ($state) {
+            "Succeeded" {
+                return $state
+            }
+            "Failed" {
+                $errorMessage = if ($operation.error -and $operation.error.message) { $operation.error.message } else { "Unknown error" }
+                throw "Enterprise policy operation failed: $errorMessage"
+            }
+            { $_ -in "Running", "NotStarted" } {
+                Write-Host "Operation in progress ($state). Waiting $PollIntervalSeconds seconds..." -ForegroundColor Yellow
+                Start-Sleep -Seconds $PollIntervalSeconds
+                $elapsed += $PollIntervalSeconds
+            }
+            default {
+                throw "Unknown operation state: $state"
+            }
+        }
+    }
+
+    throw "Operation timed out after $TimeoutSeconds seconds"
 }

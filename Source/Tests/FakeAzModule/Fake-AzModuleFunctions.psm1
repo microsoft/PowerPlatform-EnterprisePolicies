@@ -38,3 +38,30 @@ function Get-AzADApplication {}
 function New-AzADApplication {}
 function New-AzADServicePrincipal {}
 function Get-AzADServicePrincipal {}
+
+# Az.Resources cmdlets
+function Get-AzResourceGroup {}
+function New-AzResourceGroup {}
+function Get-AzResource {
+    param(
+        [string]$ResourceId,
+        [string]$ResourceType,
+        [string]$ResourceGroupName,
+        [switch]$ExpandProperties
+    )
+}
+function New-AzResourceGroupDeployment {}
+function Get-AzResourceProvider {}
+function Register-AzResourceProvider {}
+function Get-AzProviderFeature {}
+function Register-AzProviderFeature {}
+
+# Az.Network cmdlets
+function Get-AzVirtualNetwork {}
+function New-AzVirtualNetwork {}
+function Set-AzVirtualNetwork {}
+function Get-AzVirtualNetworkSubnetConfig {}
+function New-AzVirtualNetworkSubnetConfig {}
+function Add-AzVirtualNetworkSubnetConfig {}
+function New-AzDelegation {}
+function Add-AzDelegation {}

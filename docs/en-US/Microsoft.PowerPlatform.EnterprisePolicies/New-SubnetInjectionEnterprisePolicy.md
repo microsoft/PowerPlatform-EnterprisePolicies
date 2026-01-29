@@ -23,7 +23,7 @@ Creates a new Subnet Injection Enterprise Policy for Power Platform.
 New-SubnetInjectionEnterprisePolicy [-SubscriptionId] <string> [-ResourceGroupName] <string>
  [-PolicyName] <string> [-PolicyLocation] <string> [-VirtualNetworkId] <string>
  [-SubnetName] <string> [[-VirtualNetworkId2] <string>] [[-SubnetName2] <string>]
- [-TenantId] <string> [-AzureEnvironment] <AzureEnvironment> [-ForceAuth] [<CommonParameters>]
+ [-TenantId] <string> [[-AzureEnvironment] <AzureEnvironment>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -61,13 +61,13 @@ The Azure environment to use
 
 ```yaml
 Type: AzureEnvironment
-DefaultValue: ''
+DefaultValue: AzureCloud
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
   Position: 9
-  IsRequired: true
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false

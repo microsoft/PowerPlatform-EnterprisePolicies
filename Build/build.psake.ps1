@@ -213,7 +213,7 @@ Task GenerateMarkdown -depends Build, PreBuildHelp -requiredVariables DocsRootDi
     }
     finally {
        "Removing module $ModuleName from session."
-        Remove-Module $ModuleName
+        Remove-Module $ModuleName -ErrorAction SilentlyContinue
     }
 }
 
@@ -325,6 +325,8 @@ Task Test -depends Build -requiredVariables TestRootDir, ModuleName, CodeCoverag
     finally {
         Microsoft.PowerShell.Management\Pop-Location
         Remove-Module $ModuleName -ErrorAction SilentlyContinue
+        # Invoke PostTest task for cleanup (runs regardless of test success/failure)
+        & $psake.context.Peek().tasks['PostTest'].Action
     }
 }
 
