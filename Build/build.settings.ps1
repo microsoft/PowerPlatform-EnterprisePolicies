@@ -256,6 +256,16 @@ Represents the different BAP endpoints that can be used to connect to Power Plat
 }
 
 ###############################################################################
+# Customize these tasks for performing operations before and/or after Test.
+###############################################################################
+
+# Executes after the Test task completes.
+Task PostTest {
+    # Clean up the FakeAZ module to prevent it from interfering with real Az cmdlets
+    Remove-Module FakeAZ -ErrorAction SilentlyContinue
+}
+
+###############################################################################
 # Customize these tasks for performing operations before and/or after Install.
 ###############################################################################
 
