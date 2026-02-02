@@ -119,6 +119,11 @@ function Get-VirtualNetwork{
         [string] $EnterprisePolicyLocation
     )
 
+    if ($VirtualNetworkId.EndsWith("/"))
+    {
+        throw "The VirtualNetworkId parameter has a trailing slash. Please remove the trailing slash and try again. Provided value: $VirtualNetworkId"
+    }
+
     $vnetResource = Get-AzResource -ResourceId $VirtualNetworkId
     if ($null -eq $vnetResource.ResourceId)
     {
