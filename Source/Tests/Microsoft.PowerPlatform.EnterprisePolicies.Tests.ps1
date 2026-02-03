@@ -19,7 +19,8 @@ Describe 'Module Manifest Tests' {
             $disclaimer = '<#\r\nSAMPLE CODE NOTICE\r\n\r\nTHIS SAMPLE CODE IS MADE AVAILABLE AS IS. MICROSOFT MAKES NO WARRANTIES, WHETHER EXPRESS OR IMPLIED,\r\nOF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OR CONDITIONS OF MERCHANTABILITY.\r\nTHE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.\r\nNO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.\r\n#>'
             $excludeFromTestFile = @(
                 "Assert-PrereqsAreInstalledAndLoaded.ps1", #This file is used to check if the required modules are installed and loaded. It does not have any logic that requires testing.
-                "Types.psm1" #This file only contains type definitions and does not have any logic that requires testing. 
+                "Types.psm1" #This file only contains type definitions and does not have any logic that requires testing.
+                "MSALWrapper.ps1" #This file is a wrapper for MSAL authentication and does not have any logic that requires testing.
             )
         }
 

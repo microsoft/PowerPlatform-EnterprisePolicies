@@ -49,7 +49,15 @@ Describe 'New-AuthorizationApplication Tests' {
     Context 'Successful application creation for prod endpoint' {
         BeforeAll {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AzADServicePrincipal { return $script:mockServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AzADApplication { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            # First call for API SP lookup returns the API SP, second call for app SP check returns null
+            Mock Get-AzADServicePrincipal {
+                param($Filter)
+                if ($Filter -like "*$($script:prodApiId)*") {
+                    return $script:mockServicePrincipal
+                }
+                return $null
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADApplication { return $script:mockApplication } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Update-AzADApplication {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADServicePrincipal { return $script:mockAppServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -92,7 +100,15 @@ Describe 'New-AuthorizationApplication Tests' {
             }
 
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AzADServicePrincipal { return $script:mockTipServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AzADApplication { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            # First call for API SP lookup returns the API SP, second call for app SP check returns null
+            Mock Get-AzADServicePrincipal {
+                param($Filter)
+                if ($Filter -like "*$($script:tipApiId)*") {
+                    return $script:mockTipServicePrincipal
+                }
+                return $null
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADApplication { return $script:mockApplication } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Update-AzADApplication {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADServicePrincipal { return $script:mockAppServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -111,6 +127,56 @@ Describe 'New-AuthorizationApplication Tests' {
         }
     }
 
+    Context 'Existing application handling' {
+        BeforeAll {
+            $script:mockExistingApp = [PSCustomObject]@{
+                Id = $script:testAppObjectId
+                AppId = $script:testAppId
+                DisplayName = $script:testDisplayName
+            }
+
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AzADServicePrincipal { return $script:mockServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Update-AzADApplication {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock New-AzADServicePrincipal { return $script:mockAppServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should not create new app when app already exists without -Update switch' {
+            Mock Get-AzADApplication { return $script:mockExistingApp } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock New-AzADApplication { return $script:mockApplication } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            $result = New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
+
+            $result | Should -BeNullOrEmpty
+            Should -Invoke New-AzADApplication -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should update existing app when -Update switch is used' {
+            Mock Get-AzADApplication { return $script:mockExistingApp } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            $result = New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Update
+
+            $result | Should -Be $script:testAppId
+            Should -Invoke Update-AzADApplication -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should create service principal if it does not exist when updating' {
+            Mock Get-AzADApplication { return $script:mockExistingApp } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            # First call for API lookup returns the API SP, second call for app SP check returns null
+            Mock Get-AzADServicePrincipal {
+                param($Filter)
+                if ($Filter -like "*$($script:prodApiId)*") {
+                    return $script:mockServicePrincipal
+                }
+                return $null
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Update
+
+            Should -Invoke New-AzADServicePrincipal -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+    }
+
     Context 'Error handling' {
         It 'Should throw when Connect-Azure fails' {
             Mock Connect-Azure { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -120,6 +186,7 @@ Describe 'New-AuthorizationApplication Tests' {
 
         It 'Should throw when API service principal not found' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AzADApplication { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AzADServicePrincipal { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             { New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId } | Should -Throw "*Could not find service principal*"
@@ -127,6 +194,7 @@ Describe 'New-AuthorizationApplication Tests' {
 
         It 'Should throw when application creation fails' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AzADApplication { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AzADServicePrincipal { return $script:mockServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADApplication { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
@@ -135,7 +203,15 @@ Describe 'New-AuthorizationApplication Tests' {
 
         It 'Should throw when service principal creation fails' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AzADServicePrincipal { return $script:mockServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AzADApplication { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            # First call for API SP lookup returns the API SP, second call for app SP check returns null
+            Mock Get-AzADServicePrincipal {
+                param($Filter)
+                if ($Filter -like "*$($script:prodApiId)*") {
+                    return $script:mockServicePrincipal
+                }
+                return $null
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADApplication { return $script:mockApplication } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Update-AzADApplication {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADServicePrincipal { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"

@@ -9,7 +9,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Creates a new Azure AD application registration and service principal for Power Platform Authorization.
+Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
 
 .DESCRIPTION
 This cmdlet creates a public client application (app registration) and its associated service principal
@@ -17,18 +17,27 @@ in Azure AD with the required API permissions for Power Platform Authorization o
 is configured as a single-tenant app with delegated permissions for Authorization.RoleAssignments.Read
 and Authorization.RoleAssignments.Write.
 
+If an application with the specified display name already exists, the cmdlet will prompt you to use
+Test-AuthorizationApplication to verify the configuration, or use the -Update switch to update the
+existing application with the required settings.
+
 Admin consent is NOT granted automatically. A tenant administrator must grant consent before
 the application can be used.
 
 .OUTPUTS
 System.String
 
-Returns the Application (client) ID of the created application.
+Returns the Application (client) ID of the created or updated application.
 
 .EXAMPLE
 New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012"
 
 Creates a new app registration and service principal named "MyAuthorizationApp".
+
+.EXAMPLE
+New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Update
+
+Updates an existing app registration named "MyAuthorizationApp" with the required permissions.
 
 .EXAMPLE
 New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint usgovhigh
@@ -50,6 +59,9 @@ function New-AuthorizationApplication {
         [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
 
+        [Parameter(Mandatory=$false, HelpMessage="Update an existing application with the required configuration")]
+        [switch]$Update,
+
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth
     )
@@ -59,6 +71,24 @@ function New-AuthorizationApplication {
     # Connect to Azure
     if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
+    }
+
+    # Check if an application with this display name already exists
+    Write-Verbose "Checking if application '$DisplayName' already exists..."
+    $existingApp = Get-AzADApplication -Filter "displayName eq '$DisplayName'" -ErrorAction SilentlyContinue
+
+    if ($null -ne $existingApp -and -not $Update) {
+        Write-Host ""
+        Write-Host "An application with the display name '$DisplayName' already exists." -ForegroundColor Yellow
+        Write-Host "  Application (client) ID: $($existingApp.AppId)" -ForegroundColor Yellow
+        Write-Host ""
+        Write-Host "To verify if this application is correctly configured, run:" -ForegroundColor Cyan
+        Write-Host "  Test-AuthorizationApplication -ApplicationId '$($existingApp.AppId)' -TenantId '$TenantId' -Endpoint $Endpoint" -ForegroundColor White
+        Write-Host ""
+        Write-Host "If the test fails, run this command with the -Update switch to update the application:" -ForegroundColor Cyan
+        Write-Host "  New-AuthorizationApplication -DisplayName '$DisplayName' -TenantId '$TenantId' -Endpoint $Endpoint -Update" -ForegroundColor White
+        Write-Host ""
+        return
     }
 
     # Determine the API ID based on endpoint
@@ -115,48 +145,50 @@ function New-AuthorizationApplication {
         )
     }
 
-    # Create the application as a public client (for native/mobile apps, no client secret)
-    Write-Verbose "Creating application registration: $DisplayName"
+    # Define redirect URI for public client (required for interactive MSAL authentication)
+    $redirectUri = "http://localhost"
 
-    $appParams = @{
-        DisplayName = $DisplayName
-        SignInAudience = "AzureADMyOrg"  # Single tenant
-        RequiredResourceAccess = $requiredResourceAccess
-        IsFallbackPublicClient = $true  # Public client application
+    # Either update existing or create new application
+    if ($Update -and $null -ne $existingApp) {
+        Write-Verbose "Updating existing application: $DisplayName"
+        Update-AzADApplication -ObjectId $existingApp.Id -RequiredResourceAccess $requiredResourceAccess -IsFallbackPublicClient -PublicClientRedirectUri $redirectUri
+        $application = $existingApp
+        $isUpdate = $true
+    }
+    else {
+        Write-Verbose "Creating application registration: $DisplayName"
+        $application = New-AzADApplication -DisplayName $DisplayName -SignInAudience "AzureADMyOrg" -RequiredResourceAccess $requiredResourceAccess -IsFallbackPublicClient -PublicClientRedirectUri $redirectUri
+
+        if ($null -eq $application) {
+            throw "Failed to create the application registration."
+        }
+        $isUpdate = $false
     }
 
-    $application = New-AzADApplication @appParams
-
-    if ($null -eq $application) {
-        throw "Failed to create the application registration."
-    }
-
-    Write-Verbose "Application registration created: $($application.AppId)"
-
-    # Set the Application ID URI in the format api://{appId}
+    # Set the Application ID URI
     $identifierUri = "api://$($application.AppId)"
     Write-Verbose "Setting Application ID URI: $identifierUri"
     Update-AzADApplication -ObjectId $application.Id -IdentifierUri $identifierUri
 
-    # Create the service principal for the application
-    Write-Verbose "Creating service principal for application: $($application.AppId)"
-    $appServicePrincipal = New-AzADServicePrincipal -ApplicationId $application.AppId
-
+    # Ensure service principal exists
+    $appServicePrincipal = Get-AzADServicePrincipal -Filter "appId eq '$($application.AppId)'" -ErrorAction SilentlyContinue
     if ($null -eq $appServicePrincipal) {
-        throw "Failed to create the service principal for the application."
+        Write-Verbose "Creating service principal for application: $($application.AppId)"
+        $appServicePrincipal = New-AzADServicePrincipal -ApplicationId $application.AppId
+
+        if ($null -eq $appServicePrincipal) {
+            throw "Failed to create the service principal for the application."
+        }
     }
 
-    Write-Host "Application and service principal created successfully." -ForegroundColor Green
+    # Output results
+    $action = if ($isUpdate) { "updated" } else { "created" }
+    Write-Host "Application $action successfully." -ForegroundColor Green
     Write-Host "  Display Name: $($application.DisplayName)" -ForegroundColor Green
     Write-Host "  Application (client) ID: $($application.AppId)" -ForegroundColor Green
     Write-Host "  Application ID URI: $identifierUri" -ForegroundColor Green
     Write-Host "  Application Object ID: $($application.Id)" -ForegroundColor Green
     Write-Host "  Service Principal Object ID: $($appServicePrincipal.Id)" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "IMPORTANT: Admin consent is required before this application can be used." -ForegroundColor Yellow
-    Write-Host "A tenant administrator must grant consent for the following permissions:" -ForegroundColor Yellow
-    Write-Host "  - Authorization.RoleAssignments.Read" -ForegroundColor Yellow
-    Write-Host "  - Authorization.RoleAssignments.Write" -ForegroundColor Yellow
 
     return $application.AppId
 }

@@ -106,6 +106,25 @@ enum AzureEnvironment{
     CentralUSEuap
 }
 
+enum AuthorizationPrincipalType{
+    User
+    Group
+    ApplicationUser
+}
+
+enum SubnetInjectionDiagnosticsRole{
+    Administrator
+    Operator
+    Reader
+}
+
+enum AuthorizationRole{
+    Administrator
+    Reader
+    Contributor
+    Owner
+}
+
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
     [TLSConnectivityInformation]
@@ -120,6 +139,9 @@ $ExportableTypes = @(
     [NetworkUsageData]
     [EnvironmentNetworkUsageDocument]
     [SubnetUsageDocument]
+    [AuthorizationPrincipalType]
+    [SubnetInjectionDiagnosticsRole]
+    [AuthorizationRole]
 )
 
 # Get the internal TypeAccelerators class to use its static methods.
