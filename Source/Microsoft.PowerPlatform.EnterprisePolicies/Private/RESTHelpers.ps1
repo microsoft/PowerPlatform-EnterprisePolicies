@@ -118,10 +118,16 @@ function Get-HttpClient
     if($null -eq $script:httpClient)
     {
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls13 -bor [System.Net.SecurityProtocolType]::Tls12
-    
+
         $script:httpClient = New-Object -TypeName System.Net.Http.HttpClient
         $script:httpClient.DefaultRequestHeaders.Clear()
-        $script:httpClient.DefaultRequestHeaders.UserAgent.Add([System.Net.Http.Headers.ProductInfoHeaderValue]::new("Microsoft.PowerPlatform.EnterprisePolicies", (Get-ModuleVersion)))
+
+        $moduleName = "Microsoft.PowerPlatform.EnterprisePolicies"
+        $moduleVersion = Get-ModuleVersion
+        $osPlatform = [System.Environment]::OSVersion.Platform
+
+        $script:httpClient.DefaultRequestHeaders.UserAgent.Add([System.Net.Http.Headers.ProductInfoHeaderValue]::new($moduleName, $moduleVersion))
+        $script:httpClient.DefaultRequestHeaders.Add("x-ms-useragent", "$moduleName/$moduleVersion ($osPlatform)")
     }
 
     return $script:httpClient
