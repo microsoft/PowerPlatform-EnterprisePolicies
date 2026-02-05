@@ -59,13 +59,8 @@ $modules = [PSCustomObject]@{
 }, [PSCustomObject]@{
     Name = "Az.Network"
     RequiredVersion = "7.22.0"
-}, [PSCustomObject]@{
-    Name = "Microsoft.PowerApps.Administration.PowerShell"
-    RequiredVersion = "2.0.214"
-}, [PSCustomObject]@{
-    Name = "Microsoft.PowerApps.PowerShell"
-    RequiredVersion = "1.0.40"
 }
+
 foreach ($module in $modules) {
     if($PSVersionTable.PSEdition -eq "Core") {
         $availableModule = Get-Module -Name $module.Name -ListAvailable | Where-Object { [version]$_.Version -eq [version]$module.RequiredVersion }
