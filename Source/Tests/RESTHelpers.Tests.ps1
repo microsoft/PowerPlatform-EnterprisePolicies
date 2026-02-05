@@ -58,25 +58,28 @@ Describe 'RESTHelpers Tests' {
 
         Context 'Testing Get-HttpClient' {
             BeforeEach {
-                #This test could be flaky if other tests create HttpClient instances, ensure that doesn't happen
-                $script:httpClient = $null
+                InModuleScope "Microsoft.PowerPlatform.EnterprisePolicies" {
+                    $script:httpClient = $null
+                }
             }
             AfterAll {
-                $script:httpClient = $null
+                InModuleScope "Microsoft.PowerPlatform.EnterprisePolicies" {
+                    $script:httpClient = $null
+                }
             }
-            It 'Returns an HttpClient with only the User-Agent header set' {
+            It 'Returns an HttpClient with User-Agent and x-ms-useragent headers set' {
                 $client = Get-HttpClient
                 $client.DefaultRequestHeaders.UserAgent.Count | Should -Be 1
                 $client.DefaultRequestHeaders.UserAgent[0].Product.Name | Should -Be "Microsoft.PowerPlatform.EnterprisePolicies"
                 $client.DefaultRequestHeaders.UserAgent[0].Product.Version | Should -Be "1.0.0"
-                $client.DefaultRequestHeaders.Count | Should -Be 1
+                $client.DefaultRequestHeaders.Contains("x-ms-useragent") | Should -BeTrue
+                $client.DefaultRequestHeaders.GetValues("x-ms-useragent") | Should -Be "Microsoft.PowerPlatform.EnterprisePolicies/1.0.0 ($([System.Environment]::OSVersion.Platform))"
             }
 
             It 'Follows a singleton pattern'{
-                Mock New-Object -ParameterFilter { $TypeName -eq 'System.Net.Http.HttpClient' } { [System.Net.Http.HttpClient]::new() } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-                Get-HttpClient
-                Get-HttpClient
-                Should -Invoke New-Object -Times 1
+                $client1 = Get-HttpClient
+                $client2 = Get-HttpClient
+                [Object]::ReferenceEquals($client1, $client2) | Should -BeTrue
             }
         }
 
