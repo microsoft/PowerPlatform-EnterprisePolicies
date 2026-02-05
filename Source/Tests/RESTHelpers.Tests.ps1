@@ -58,14 +58,10 @@ Describe 'RESTHelpers Tests' {
 
         Context 'Testing Get-HttpClient' {
             BeforeEach {
-                InModuleScope "Microsoft.PowerPlatform.EnterprisePolicies" {
-                    $script:httpClient = $null
-                }
+                $script:httpClient = $null
             }
             AfterAll {
-                InModuleScope "Microsoft.PowerPlatform.EnterprisePolicies" {
-                    $script:httpClient = $null
-                }
+                $script:httpClient = $null
             }
             It 'Returns an HttpClient with User-Agent and x-ms-useragent headers set' {
                 $client = Get-HttpClient
