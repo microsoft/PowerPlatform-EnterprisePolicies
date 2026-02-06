@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/05/2026
 PlatyPS schema version: 2024-05-01
 title: New-SubnetInjectionEnterprisePolicy
 ---
@@ -297,9 +297,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
+### Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
 
-A JSON string representation of the created enterprise policy resource.
+Returns the PSResource object representing the created enterprise policy Azure resource.
 
 {{ Fill in the Description }}
 

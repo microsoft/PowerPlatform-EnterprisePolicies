@@ -17,9 +17,9 @@ This cmdlet creates a Subnet Injection Enterprise Policy that enables Power Plat
 Some Power Platform regions require two virtual networks in paired Azure regions. Use the VirtualNetworkId2 and SubnetName2 parameters when deploying to these regions.
 
 .OUTPUTS
-System.String
+Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
 
-A JSON string representation of the created enterprise policy resource.
+Returns the PSResource object representing the created enterprise policy Azure resource.
 
 .EXAMPLE
 New-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup" -PolicyName "myPolicy" -PolicyLocation "unitedstates" -VirtualNetworkId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myVnet" -SubnetName "default" -AzureEnvironment AzureCloud
@@ -105,7 +105,5 @@ function New-SubnetInjectionEnterprisePolicy{
     Write-Verbose "Subnet Injection Enterprise Policy $PolicyName created successfully."
 
     $policyArmId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.PowerPlatform/enterprisePolicies/$PolicyName"
-    $policy = Get-EnterprisePolicy -PolicyArmId $policyArmId
-    $policyString = $policy | ConvertTo-Json -Depth 7
-    return $policyString
+    return Get-EnterprisePolicy -PolicyArmId $policyArmId
 }
