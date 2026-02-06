@@ -55,6 +55,12 @@ function Get-AzResourceProvider {}
 function Register-AzResourceProvider {}
 function Get-AzProviderFeature {}
 function Register-AzProviderFeature {}
+function Remove-AzResource {
+    param(
+        [string]$ResourceId,
+        [switch]$Force
+    )
+}
 
 # Az.Network cmdlets
 function Get-AzVirtualNetwork {}

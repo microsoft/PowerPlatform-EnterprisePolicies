@@ -117,7 +117,10 @@ function Wait-EnterprisePolicyOperation {
     Maximum time to wait for the operation to complete. Default is 600 seconds (10 minutes).
 
     .PARAMETER PollIntervalSeconds
-    Interval between polls. Default is 30 seconds.
+    Interval between polls when operation is running. Default is 15 seconds.
+
+    .PARAMETER NotStartedPollIntervalSeconds
+    Interval between polls when operation has not started yet. Default is 5 seconds.
     #>
     param(
         [Parameter(Mandatory)]
@@ -133,7 +136,10 @@ function Wait-EnterprisePolicyOperation {
         [int]$TimeoutSeconds = 600,
 
         [Parameter(Mandatory=$false)]
-        [int]$PollIntervalSeconds = 30
+        [int]$PollIntervalSeconds = 15,
+
+        [Parameter(Mandatory=$false)]
+        [int]$NotStartedPollIntervalSeconds = 5
     )
 
     $elapsed = 0
@@ -165,10 +171,15 @@ function Wait-EnterprisePolicyOperation {
                 $errorMessage = if ($operation.error -and $operation.error.message) { $operation.error.message } else { "Unknown error" }
                 throw "Enterprise policy operation failed: $errorMessage"
             }
-            { $_ -in "Running", "NotStarted" } {
+            "Running" {
                 Write-Host "Operation in progress ($state). Waiting $PollIntervalSeconds seconds..." -ForegroundColor Yellow
                 Start-Sleep -Seconds $PollIntervalSeconds
                 $elapsed += $PollIntervalSeconds
+            }
+            "NotStarted" {
+                Write-Host "Operation not started yet. Waiting $NotStartedPollIntervalSeconds seconds..." -ForegroundColor Yellow
+                Start-Sleep -Seconds $NotStartedPollIntervalSeconds
+                $elapsed += $NotStartedPollIntervalSeconds
             }
             default {
                 throw "Unknown operation state: $state"

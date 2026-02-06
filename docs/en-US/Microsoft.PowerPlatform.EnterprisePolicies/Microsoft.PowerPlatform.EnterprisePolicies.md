@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/28/2026
+ms.date: 02/05/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -49,6 +49,10 @@ Creates a new Subnet Injection Enterprise Policy for Power Platform.
 ### [New-VnetForSubnetDelegation](New-VnetForSubnetDelegation.md)
 
 Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprisePolicies delegation, or configures an existing VNet/subnet.
+
+### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
+
+Removes a Subnet Injection Enterprise Policy for Power Platform.
 
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 

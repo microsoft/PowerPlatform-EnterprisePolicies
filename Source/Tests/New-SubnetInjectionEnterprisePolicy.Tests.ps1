@@ -49,7 +49,7 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
             Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should create policy and return valid JSON' {
+        It 'Should create policy and return PSResource object' {
             $result = New-SubnetInjectionEnterprisePolicy `
                 -SubscriptionId $script:testSubscriptionId `
                 -ResourceGroupName $script:testResourceGroup `
@@ -60,8 +60,7 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
                 -TenantId $script:testTenantId
 
             $result | Should -Not -BeNullOrEmpty
-            $parsedResult = $result | ConvertFrom-Json
-            $parsedResult.Name | Should -Be $script:testPolicyName
+            $result.Name | Should -Be $script:testPolicyName
         }
     }
 
