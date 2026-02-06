@@ -19,6 +19,15 @@ foreach ($script in $Private) {
     Write-Verbose "Loaded script: $($script.FullName)"
 }
 
+# Load MSAL wrapper only when not running in Pester tests (to avoid type resolution issues)
+if (-not $Global:InPesterExecution) {
+    $msalWrapper = Join-Path $PSScriptRoot "Private\RuntimeLoaded\MSALWrapper.ps1"
+    if (Test-Path $msalWrapper) {
+        . $msalWrapper
+        Write-Verbose "Loaded MSAL wrapper: $msalWrapper"
+    }
+}
+
 Initialize-Cache
 
 Test-LatestModuleVersion

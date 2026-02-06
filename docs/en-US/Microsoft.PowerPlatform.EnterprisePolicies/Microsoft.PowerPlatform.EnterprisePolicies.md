@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/28/2026
+ms.date: 01/29/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -41,6 +41,10 @@ Retrieves the current usage of the specified environment.
 ### [Get-SubnetInjectionEnterprisePolicy](Get-SubnetInjectionEnterprisePolicy.md)
 
 Retrieves Subnet Injection Enterprise Policies for Power Platform.
+
+### [New-AuthorizationApplication](New-AuthorizationApplication.md)
+
+Creates a new Azure AD application registration and service principal for Power Platform Authorization.
 
 ### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
 

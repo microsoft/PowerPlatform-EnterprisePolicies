@@ -149,5 +149,182 @@ Describe 'AuthenticationOperations Tests' {
                 $result | Should -Be "test-value"
             }
         }
+
+        Context 'Testing New-AuthorizationServiceMsalClient' {
+            BeforeAll {
+                # Define stub function so it can be mocked (the real one is dot-sourced at runtime)
+                function Get-PublicClientApplicationBuilder { param($ClientId) }
+
+                # Create mock objects that simulate MSAL fluent API
+                $script:mockApp = [PSCustomObject]@{}
+                $script:mockApp | Add-Member -MemberType ScriptMethod -Name 'AcquireTokenInteractive' -Value { return $null }
+                $script:mockApp | Add-Member -MemberType ScriptMethod -Name 'AcquireTokenSilent' -Value { return $null }
+
+                $script:mockBuilder = [PSCustomObject]@{}
+                $script:mockBuilder | Add-Member -MemberType ScriptMethod -Name 'WithAuthority' -Value { return $script:mockBuilder }
+                $script:mockBuilder | Add-Member -MemberType ScriptMethod -Name 'WithRedirectUri' -Value { return $script:mockBuilder }
+                $script:mockBuilder | Add-Member -MemberType ScriptMethod -Name 'Build' -Value { return $script:mockApp }
+            }
+
+            BeforeEach {
+                # Reset module-scoped cache before each test
+                $script:AuthorizationServiceCache = @{}
+                $script:AuthorizationServiceCurrentKey = $null
+            }
+
+            It 'Returns true on successful connection' {
+                Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
+
+                $result = New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
+
+                $result | Should -Be $true
+            }
+
+            It 'Uses correct authority for prod endpoint' {
+                $capturedAuthority = $null
+                $builderWithCapture = [PSCustomObject]@{}
+                $builderWithCapture | Add-Member -MemberType ScriptMethod -Name 'WithAuthority' -Value {
+                    param($auth)
+                    $script:capturedAuthority = $auth
+                    return $script:mockBuilder
+                }
+                Mock Get-PublicClientApplicationBuilder { return $builderWithCapture }
+
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "my-tenant" -Endpoint ([BAPEndpoint]::prod)
+
+                $script:capturedAuthority | Should -Be "https://login.microsoftonline.com/my-tenant"
+            }
+
+            It 'Uses correct authority for usgovhigh endpoint' {
+                $capturedAuthority = $null
+                $builderWithCapture = [PSCustomObject]@{}
+                $builderWithCapture | Add-Member -MemberType ScriptMethod -Name 'WithAuthority' -Value {
+                    param($auth)
+                    $script:capturedAuthority = $auth
+                    return $script:mockBuilder
+                }
+                Mock Get-PublicClientApplicationBuilder { return $builderWithCapture }
+
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "my-tenant" -Endpoint ([BAPEndpoint]::usgovhigh)
+
+                $script:capturedAuthority | Should -Be "https://login.microsoftonline.us/my-tenant"
+            }
+
+            It 'Uses correct authority for china endpoint' {
+                $capturedAuthority = $null
+                $builderWithCapture = [PSCustomObject]@{}
+                $builderWithCapture | Add-Member -MemberType ScriptMethod -Name 'WithAuthority' -Value {
+                    param($auth)
+                    $script:capturedAuthority = $auth
+                    return $script:mockBuilder
+                }
+                Mock Get-PublicClientApplicationBuilder { return $builderWithCapture }
+
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "my-tenant" -Endpoint ([BAPEndpoint]::china)
+
+                $script:capturedAuthority | Should -Be "https://login.chinacloudapi.cn/my-tenant"
+            }
+
+            It 'Skips connection if already connected and Force not specified' {
+                Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
+
+                # Connect first time
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
+                # Connect second time without Force
+                $result = New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
+
+                $result | Should -Be $true
+                Should -Invoke Get-PublicClientApplicationBuilder -Times 1
+            }
+
+            It 'Reconnects when Force is specified' {
+                Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
+
+                # Connect first time
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
+                # Connect second time with Force
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id" -Force
+
+                Should -Invoke Get-PublicClientApplicationBuilder -Times 2
+            }
+        }
+
+        Context 'Testing Get-AuthorizationServiceToken' {
+            BeforeAll {
+                # Define stub function so it can be mocked
+                function Get-PublicClientApplicationBuilder { param($ClientId) }
+
+                # Create mock objects that simulate MSAL fluent API
+                $script:mockAuthResult = [PSCustomObject]@{
+                    AccessToken = "mock-access-token"
+                    Account = [PSCustomObject]@{ Username = "user@test.com" }
+                }
+
+                $script:mockAwaiter = [PSCustomObject]@{}
+                $script:mockAwaiter | Add-Member -MemberType ScriptMethod -Name 'GetResult' -Value { return $script:mockAuthResult }
+
+                $script:mockTask = [PSCustomObject]@{}
+                $script:mockTask | Add-Member -MemberType ScriptMethod -Name 'GetAwaiter' -Value { return $script:mockAwaiter }
+
+                $script:mockInteractiveRequest = [PSCustomObject]@{}
+                $script:mockInteractiveRequest | Add-Member -MemberType ScriptMethod -Name 'ExecuteAsync' -Value { return $script:mockTask }
+
+                $script:mockSilentRequest = [PSCustomObject]@{}
+                $script:mockSilentRequest | Add-Member -MemberType ScriptMethod -Name 'ExecuteAsync' -Value { return $script:mockTask }
+
+                $script:mockApp = [PSCustomObject]@{}
+                $script:mockApp | Add-Member -MemberType ScriptMethod -Name 'AcquireTokenInteractive' -Value { return $script:mockInteractiveRequest }
+                $script:mockApp | Add-Member -MemberType ScriptMethod -Name 'AcquireTokenSilent' -Value { return $script:mockSilentRequest }
+
+                $script:mockBuilder = [PSCustomObject]@{}
+                $script:mockBuilder | Add-Member -MemberType ScriptMethod -Name 'WithAuthority' -Value { return $script:mockBuilder }
+                $script:mockBuilder | Add-Member -MemberType ScriptMethod -Name 'WithRedirectUri' -Value { return $script:mockBuilder }
+                $script:mockBuilder | Add-Member -MemberType ScriptMethod -Name 'Build' -Value { return $script:mockApp }
+            }
+
+            BeforeEach {
+                # Reset module-scoped cache before each test
+                $script:AuthorizationServiceCache = @{}
+                $script:AuthorizationServiceCurrentKey = $null
+            }
+
+            It 'Throws when not connected' {
+                { Get-AuthorizationServiceToken -Scopes @("scope") } | Should -Throw "*Call New-AuthorizationServiceMsalClient first*"
+            }
+
+            It 'Returns access token after interactive authentication' {
+                Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
+
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
+                $result = Get-AuthorizationServiceToken -Scopes @("https://api.powerplatform.com/.default")
+
+                $result | Should -Be "mock-access-token"
+            }
+
+            It 'Throws when token acquisition fails' {
+                $mockFailedResult = [PSCustomObject]@{
+                    AccessToken = $null
+                    Account = $null
+                }
+                $mockFailedAwaiter = [PSCustomObject]@{}
+                $mockFailedAwaiter | Add-Member -MemberType ScriptMethod -Name 'GetResult' -Value { return $mockFailedResult }
+                $mockFailedTask = [PSCustomObject]@{}
+                $mockFailedTask | Add-Member -MemberType ScriptMethod -Name 'GetAwaiter' -Value { return $mockFailedAwaiter }
+                $mockFailedRequest = [PSCustomObject]@{}
+                $mockFailedRequest | Add-Member -MemberType ScriptMethod -Name 'ExecuteAsync' -Value { return $mockFailedTask }
+                $mockFailedApp = [PSCustomObject]@{}
+                $mockFailedApp | Add-Member -MemberType ScriptMethod -Name 'AcquireTokenInteractive' -Value { return $mockFailedRequest }
+                $mockFailedApp | Add-Member -MemberType ScriptMethod -Name 'AcquireTokenSilent' -Value { return $mockFailedRequest }
+                $mockFailedBuilder = [PSCustomObject]@{}
+                $mockFailedBuilder | Add-Member -MemberType ScriptMethod -Name 'WithAuthority' -Value { return $mockFailedBuilder }
+                $mockFailedBuilder | Add-Member -MemberType ScriptMethod -Name 'WithRedirectUri' -Value { return $mockFailedBuilder }
+                $mockFailedBuilder | Add-Member -MemberType ScriptMethod -Name 'Build' -Value { return $mockFailedApp }
+
+                Mock Get-PublicClientApplicationBuilder { return $mockFailedBuilder }
+
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
+                { Get-AuthorizationServiceToken -Scopes @("scope") } | Should -Throw "*Failed to acquire access token*"
+            }
+        }
     }
 }

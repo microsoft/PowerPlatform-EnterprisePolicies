@@ -25,9 +25,8 @@ Describe 'Test-DnsResolution Tests' {
 
             $token = "ey.$([Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(($payload | ConvertTo-Json))).TrimEnd('=') -replace '\+','-' -replace '/','_').ey"
 
-            $secureString = (ConvertTo-SecureString $token -AsPlainText -Force)
-            Mock Get-PPAPIAccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            
+            Mock Get-PPAPIAccessToken { return $token } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
             Test-AccountPermissions | Should -Be $true
         }
 
@@ -44,9 +43,8 @@ Describe 'Test-DnsResolution Tests' {
 
             $token = "ey.$([Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(($payload | ConvertTo-Json))).TrimEnd('=') -replace '\+','-' -replace '/','_').ey"
 
-            $secureString = (ConvertTo-SecureString $token -AsPlainText -Force)
-            Mock Get-PPAPIAccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            
+            Mock Get-PPAPIAccessToken { return $token } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
             Test-AccountPermissions | Should -Be $false
         }
 
@@ -62,9 +60,8 @@ Describe 'Test-DnsResolution Tests' {
 
             $token = "ey.$([Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(($payload | ConvertTo-Json))).TrimEnd('=') -replace '\+','-' -replace '/','_').ey"
 
-            $secureString = (ConvertTo-SecureString $token -AsPlainText -Force)
-            Mock Get-PPAPIAccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            
+            Mock Get-PPAPIAccessToken { return $token } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
             Test-AccountPermissions | Should -Be $false
         }
     }

@@ -1,4 +1,3 @@
-[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification="Unit test code")]
 param()
 
 BeforeDiscovery{
@@ -7,8 +6,7 @@ BeforeDiscovery{
 
 Describe 'Get-EnvironmentRegion Tests' {
     BeforeAll {
-        $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
-        Mock Get-PPAPIAccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Get-PPAPIAccessToken { return "mock-access-token" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Write-Host {}
         Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }

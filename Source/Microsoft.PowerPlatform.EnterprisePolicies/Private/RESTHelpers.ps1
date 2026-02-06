@@ -26,10 +26,10 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 function New-JsonRequestMessage
 {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory)]
         [string] $Uri,
-        [Parameter(Mandatory=$true)]
-        [System.Security.SecureString] $AccessToken,
+        [Parameter(Mandatory)]
+        [string] $AccessToken,
         [Parameter(Mandatory=$false)]
         [string] $Content,
         [Parameter(Mandatory=$false)]
@@ -42,7 +42,7 @@ function New-JsonRequestMessage
     {
         $request.Content = New-Object -TypeName System.Net.Http.StringContent -ArgumentList @($Content, [System.Text.Encoding]::UTF8, "application/json")
     }
-    $request.Headers.Authorization = "Bearer $(ConvertFrom-SecureStringInternal $AccessToken)"
+    $request.Headers.Authorization = "Bearer $AccessToken"
 
     return $request
 }
@@ -58,8 +58,8 @@ function New-EnvironmentRouteRequest
         [string] $Query,
         [Parameter(Mandatory)]
         [BAPEndpoint] $Endpoint,
-        [Parameter(Mandatory=$true)]
-        [System.Security.SecureString] $AccessToken,
+        [Parameter(Mandatory)]
+        [string] $AccessToken,
         [Parameter(Mandatory=$false)]
         [string] $Content,
         [Parameter(Mandatory=$false)]
@@ -89,8 +89,8 @@ function New-HomeTenantRouteRequest
         [string] $Query,
         [Parameter(Mandatory)]
         [BAPEndpoint] $Endpoint,
-        [Parameter(Mandatory=$true)]
-        [System.Security.SecureString] $AccessToken,
+        [Parameter(Mandatory)]
+        [string] $AccessToken,
         [Parameter(Mandatory=$false)]
         [string] $Content,
         [Parameter(Mandatory=$false)]
