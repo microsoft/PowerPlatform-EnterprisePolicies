@@ -170,4 +170,18 @@ Describe 'Remove-SubnetInjectionEnterprisePolicy Tests' {
             Should -Invoke Remove-AzResource -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
     }
+
+    Context 'Force parameter' {
+        BeforeAll {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Remove-AzResource {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should remove policy without confirmation when Force is specified' {
+            Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId $script:testPolicyResourceId -Force
+
+            Should -Invoke Remove-AzResource -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+    }
 }

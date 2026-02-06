@@ -50,6 +50,11 @@ If multiple policies exist, their ARM IDs are output so you can specify which on
 Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -AzureEnvironment AzureUSGovernment
 
 Removes the specified policy in the Azure US Government cloud.
+
+.EXAMPLE
+Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -Force
+
+Removes the specified policy without prompting for confirmation.
 #>
 
 function Remove-SubnetInjectionEnterprisePolicy{
@@ -75,10 +80,17 @@ function Remove-SubnetInjectionEnterprisePolicy{
         [AzureEnvironment]$AzureEnvironment = [AzureEnvironment]::AzureCloud,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
-        [switch]$ForceAuth
+        [switch]$ForceAuth,
+
+        [Parameter(Mandatory=$false, HelpMessage="Remove the policy without prompting for confirmation")]
+        [switch]$Force
     )
 
     $ErrorActionPreference = "Stop"
+
+    if ($Force) {
+        $ConfirmPreference = 'None'
+    }
 
     # For ByResourceId, extract subscription ID from the resource ID
     if ($PSCmdlet.ParameterSetName -eq 'ByResourceId') {

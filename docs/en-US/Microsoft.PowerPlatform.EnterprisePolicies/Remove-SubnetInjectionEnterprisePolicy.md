@@ -21,22 +21,24 @@ Removes a Subnet Injection Enterprise Policy for Power Platform.
 
 ```
 Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId <string> [-TenantId <string>]
- [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ### ByResourceGroup
 
 ```
 Remove-SubnetInjectionEnterprisePolicy -SubscriptionId <string> -ResourceGroupName <string>
- [-TenantId <string>] [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+ [-TenantId <string>] [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-Force] [-WhatIf]
+ [-Confirm] [<CommonParameters>]
 ```
 
 ### BySubscription
 
 ```
 Remove-SubnetInjectionEnterprisePolicy -SubscriptionId <string> [-TenantId <string>]
- [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
+ [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -87,6 +89,12 @@ Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../ent
 
 Removes the specified policy in the Azure US Government cloud.
 
+### EXAMPLE 5
+
+Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -Force
+
+Removes the specified policy without prompting for confirmation.
+
 ## PARAMETERS
 
 ### -AzureEnvironment
@@ -120,6 +128,27 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases:
 - cf
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Force
+
+Remove the policy without prompting for confirmation
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
 ParameterSets:
 - Name: (All)
   Position: Named
