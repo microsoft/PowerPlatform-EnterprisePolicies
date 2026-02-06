@@ -65,6 +65,22 @@ Tests use Pester loaded from NuGet packages (version defined in `Directory.Packa
 # Mock Azure module: Source/Tests/FakeAzModule/FakeAZ.psd1
 ```
 
+### Fake Az Module for Testing
+
+The tests use a fake Az module (`Source/Tests/FakeAzModule/`) instead of the real Az module. When adding new cmdlets that call Az cmdlets:
+
+1. Check if the Az cmdlet is already in `Fake-AzModuleFunctions.psm1`
+2. If not, add a stub function with the required parameters:
+   ```powershell
+   function Remove-AzResource {
+       param(
+           [string]$ResourceId,
+           [switch]$Force
+       )
+   }
+   ```
+3. In tests, mock the function with `-ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"`
+
 ## Architecture
 
 ### Module Structure
@@ -72,10 +88,11 @@ Tests use Pester loaded from NuGet packages (version defined in `Directory.Packa
 Source/Microsoft.PowerPlatform.EnterprisePolicies/
 ├── Public/
 │   └── SubnetInjection/
-│       ├── New-SubnetInjectionEnterprisePolicy.ps1  # Create subnet injection policy
-│       ├── Get-SubnetInjectionEnterprisePolicy.ps1  # Retrieve subnet injection policies
-│       ├── New-VnetForSubnetDelegation.ps1          # VNet setup cmdlet
-│       └── Diagnostics/                              # Diagnostic cmdlets
+│       ├── New-SubnetInjectionEnterprisePolicy.ps1     # Create subnet injection policy
+│       ├── Get-SubnetInjectionEnterprisePolicy.ps1     # Retrieve subnet injection policies
+│       ├── Remove-SubnetInjectionEnterprisePolicy.ps1  # Remove subnet injection policy
+│       ├── New-VnetForSubnetDelegation.ps1             # VNet setup cmdlet
+│       └── Diagnostics/                                 # Diagnostic cmdlets
 │           ├── Get-EnvironmentUsage.ps1
 │           ├── Get-EnvironmentHistoricalUsage.ps1
 │           ├── Get-EnvironmentRegion.ps1
@@ -84,7 +101,7 @@ Source/Microsoft.PowerPlatform.EnterprisePolicies/
 │           └── Test-NetworkConnectivity.ps1
 └── Private/                   # Internal implementation
     ├── Types.psm1             # Enums and data classes
-    ├── AuthenticationOperations.ps1  # Azure authentication
+    ├── AuthenticationOperations.ps1  # Azure authentication, MSAL client caching
     ├── EnvironmentOperations.ps1     # BAP environment operations
     ├── RESTHelpers.ps1        # HTTP client with retry logic, BAP API endpoints
     ├── AzHelper.ps1           # Azure resource operations
@@ -144,6 +161,21 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 ```
 
 **Exception:** Test files (`Source/Tests/*.Tests.ps1`) do not require this header.
+
+### Creating New PowerShell Files (CRLF Line Endings)
+
+**CRITICAL:** The Write tool creates files with LF line endings, but the header disclaimer test expects CRLF (`\r\n`). After creating any new `.ps1` file in the module, you **MUST** fix the line endings by running:
+
+```powershell
+Set-Content -Path 'path/to/file.ps1' -Value (Get-Content 'path/to/file.ps1')
+```
+
+This reads the file and writes it back with Windows CRLF line endings. Without this step, the "Contains header disclaimer file" test will fail.
+
+**Example workflow for creating a new cmdlet:**
+1. Use the Write tool to create the file with the header and code
+2. Immediately run the `Set-Content` command to fix line endings
+3. Then run tests
 
 ### Common Parameters for Public Cmdlets
 Public cmdlets that call Azure/BAP APIs should include these common parameters:
