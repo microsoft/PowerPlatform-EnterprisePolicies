@@ -24,11 +24,13 @@ Describe 'Remove-SubnetInjectionEnterprisePolicy Tests' {
 
         Mock Write-Verbose {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Write-Host {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Set-AzContext {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
     Context 'ByResourceId parameter set' {
         BeforeAll {
-            Mock Get-SubnetInjectionEnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Remove-AzResource {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
@@ -40,47 +42,53 @@ Describe 'Remove-SubnetInjectionEnterprisePolicy Tests' {
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should pass TenantId to Get-SubnetInjectionEnterprisePolicy' {
+        It 'Should pass TenantId to Connect-Azure' {
             Remove-SubnetInjectionEnterprisePolicy `
                 -PolicyResourceId $script:testPolicyResourceId `
                 -TenantId $script:testTenantId `
                 -Confirm:$false
 
-            Should -Invoke Get-SubnetInjectionEnterprisePolicy -Times 1 -ParameterFilter {
+            Should -Invoke Connect-Azure -Times 1 -ParameterFilter {
                 $TenantId -eq $script:testTenantId
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should pass Endpoint to Get-SubnetInjectionEnterprisePolicy' {
+        It 'Should pass AzureEnvironment to Connect-Azure' {
             Remove-SubnetInjectionEnterprisePolicy `
                 -PolicyResourceId $script:testPolicyResourceId `
-                -Endpoint usgovhigh `
+                -AzureEnvironment AzureUSGovernment `
                 -Confirm:$false
 
-            Should -Invoke Get-SubnetInjectionEnterprisePolicy -Times 1 -ParameterFilter {
-                $Endpoint -eq [BAPEndpoint]::usgovhigh
+            Should -Invoke Connect-Azure -Times 1 -ParameterFilter {
+                $AzureEnvironment -eq [AzureEnvironment]::AzureUSGovernment
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should pass ForceAuth to Get-SubnetInjectionEnterprisePolicy' {
+        It 'Should pass ForceAuth to Connect-Azure' {
             Remove-SubnetInjectionEnterprisePolicy `
                 -PolicyResourceId $script:testPolicyResourceId `
                 -ForceAuth `
                 -Confirm:$false
 
-            Should -Invoke Get-SubnetInjectionEnterprisePolicy -Times 1 -ParameterFilter {
-                $ForceAuth -eq $true
+            Should -Invoke Connect-Azure -Times 1 -ParameterFilter {
+                $Force -eq $true
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should throw when PolicyResourceId format is invalid' {
+            { Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "invalid-resource-id" -Confirm:$false } |
+                Should -Throw "*Invalid PolicyResourceId format*"
         }
     }
 
     Context 'BySubscription parameter set' {
         BeforeAll {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Remove-AzResource {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should remove single policy in subscription' {
-            Mock Get-SubnetInjectionEnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             Remove-SubnetInjectionEnterprisePolicy -SubscriptionId $script:testSubscriptionId -Confirm:$false
 
@@ -88,7 +96,7 @@ Describe 'Remove-SubnetInjectionEnterprisePolicy Tests' {
         }
 
         It 'Should output policy IDs when multiple policies found in subscription' {
-            Mock Get-SubnetInjectionEnterprisePolicy { return @($script:mockPolicy, $script:mockPolicy2) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return @($script:mockPolicy, $script:mockPolicy2) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             Remove-SubnetInjectionEnterprisePolicy -SubscriptionId $script:testSubscriptionId -Confirm:$false
 
@@ -99,11 +107,12 @@ Describe 'Remove-SubnetInjectionEnterprisePolicy Tests' {
 
     Context 'ByResourceGroup parameter set' {
         BeforeAll {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Remove-AzResource {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should remove single policy in resource group' {
-            Mock Get-SubnetInjectionEnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             Remove-SubnetInjectionEnterprisePolicy `
                 -SubscriptionId $script:testSubscriptionId `
@@ -114,7 +123,7 @@ Describe 'Remove-SubnetInjectionEnterprisePolicy Tests' {
         }
 
         It 'Should output policy IDs when multiple policies found in resource group' {
-            Mock Get-SubnetInjectionEnterprisePolicy { return @($script:mockPolicy, $script:mockPolicy2) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return @($script:mockPolicy, $script:mockPolicy2) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             Remove-SubnetInjectionEnterprisePolicy `
                 -SubscriptionId $script:testSubscriptionId `
@@ -127,17 +136,31 @@ Describe 'Remove-SubnetInjectionEnterprisePolicy Tests' {
     }
 
     Context 'Policy not found' {
+        BeforeAll {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
         It 'Should throw when policy does not exist' {
-            Mock Get-SubnetInjectionEnterprisePolicy { throw "No enterprise policy found with resource ID: $script:testPolicyResourceId" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             { Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId $script:testPolicyResourceId -Confirm:$false } |
-                Should -Throw "*No enterprise policy found*"
+                Should -Throw "*No enterprise policies found*"
+        }
+    }
+
+    Context 'Connection failure' {
+        It 'Should throw when Connect-Azure fails' {
+            Mock Connect-Azure { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            { Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId $script:testPolicyResourceId -Confirm:$false } |
+                Should -Throw "*Failed to connect to Azure*"
         }
     }
 
     Context 'WhatIf support' {
         BeforeAll {
-            Mock Get-SubnetInjectionEnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Remove-AzResource {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 

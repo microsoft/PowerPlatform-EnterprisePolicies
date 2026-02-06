@@ -21,14 +21,14 @@ Removes a Subnet Injection Enterprise Policy for Power Platform.
 
 ```
 Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### ByResourceGroup
 
 ```
 Remove-SubnetInjectionEnterprisePolicy -SubscriptionId <string> -ResourceGroupName <string>
- [-TenantId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [-WhatIf] [-Confirm]
+ [-TenantId <string>] [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
 
@@ -36,7 +36,7 @@ Remove-SubnetInjectionEnterprisePolicy -SubscriptionId <string> -ResourceGroupNa
 
 ```
 Remove-SubnetInjectionEnterprisePolicy -SubscriptionId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [-WhatIf] [-Confirm] [<CommonParameters>]
+ [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -81,18 +81,23 @@ Lists all Subnet Injection Enterprise Policies in the resource group.
 If only one policy exists, it will be removed.
 If multiple policies exist, their ARM IDs are output so you can specify which one to remove.
 
+### EXAMPLE 4
+
+Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -AzureEnvironment AzureUSGovernment
+
+Removes the specified policy in the Azure US Government cloud.
+
 ## PARAMETERS
 
-### -Confirm
+### -AzureEnvironment
 
-Prompts you for confirmation before running the cmdlet.
+The Azure environment to connect to
 
 ```yaml
-Type: System.Management.Automation.SwitchParameter
-DefaultValue: ''
+Type: AzureEnvironment
+DefaultValue: AzureCloud
 SupportsWildcards: false
-Aliases:
-- cf
+Aliases: []
 ParameterSets:
 - Name: (All)
   Position: Named
@@ -105,15 +110,16 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Endpoint
+### -Confirm
 
-The BAP endpoint to connect to
+Prompts you for confirmation before running the cmdlet.
 
 ```yaml
-Type: BAPEndpoint
-DefaultValue: prod
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: ''
 SupportsWildcards: false
-Aliases: []
+Aliases:
+- cf
 ParameterSets:
 - Name: (All)
   Position: Named

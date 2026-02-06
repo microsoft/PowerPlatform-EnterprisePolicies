@@ -45,6 +45,11 @@ Remove-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-
 
 Lists all Subnet Injection Enterprise Policies in the resource group. If only one policy exists, it will be removed.
 If multiple policies exist, their ARM IDs are output so you can specify which one to remove.
+
+.EXAMPLE
+Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -AzureEnvironment AzureUSGovernment
+
+Removes the specified policy in the Azure US Government cloud.
 #>
 
 function Remove-SubnetInjectionEnterprisePolicy{
@@ -66,8 +71,8 @@ function Remove-SubnetInjectionEnterprisePolicy{
         [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Azure environment to connect to")]
+        [AzureEnvironment]$AzureEnvironment = [AzureEnvironment]::AzureCloud,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth
@@ -75,34 +80,42 @@ function Remove-SubnetInjectionEnterprisePolicy{
 
     $ErrorActionPreference = "Stop"
 
-    # Build parameters for Get-SubnetInjectionEnterprisePolicy
-    $getParams = @{
-        Endpoint = $Endpoint
-        ForceAuth = $ForceAuth
-    }
-    if (-not [string]::IsNullOrWhiteSpace($TenantId)) {
-        $getParams['TenantId'] = $TenantId
+    # For ByResourceId, extract subscription ID from the resource ID
+    if ($PSCmdlet.ParameterSetName -eq 'ByResourceId') {
+        if ($PolicyResourceId -match "/subscriptions/([^/]+)/") {
+            $SubscriptionId = $Matches[1]
+        }
+        else {
+            throw "Invalid PolicyResourceId format. Expected format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerPlatform/enterprisePolicies/{policyName}"
+        }
     }
 
-    # Add parameter set specific parameters
+    # Connect to Azure
+    if (-not(Connect-Azure -AzureEnvironment $AzureEnvironment -TenantId $TenantId -Force:$ForceAuth)) {
+        throw "Failed to connect to Azure. Please check your credentials and try again."
+    }
+
+    # Set subscription context
+    Write-Verbose "Setting subscription context to $SubscriptionId"
+    $null = Set-AzContext -Subscription $SubscriptionId
+
+    # Get the policies based on parameter set
     switch ($PSCmdlet.ParameterSetName) {
         'ByResourceId' {
-            $getParams['PolicyResourceId'] = $PolicyResourceId
+            Write-Verbose "Retrieving enterprise policy: $PolicyResourceId"
+            $policies = @(Get-EnterprisePolicy -PolicyArmId $PolicyResourceId)
         }
         'BySubscription' {
-            $getParams['SubscriptionId'] = $SubscriptionId
+            Write-Verbose "Retrieving all Subnet Injection enterprise policies in subscription: $SubscriptionId"
+            $policies = @(Get-EnterprisePolicy -Kind ([PolicyType]::NetworkInjection))
         }
         'ByResourceGroup' {
-            $getParams['SubscriptionId'] = $SubscriptionId
-            $getParams['ResourceGroupName'] = $ResourceGroupName
+            Write-Verbose "Retrieving all Subnet Injection enterprise policies in resource group: $ResourceGroupName"
+            $policies = @(Get-EnterprisePolicy -ResourceGroupName $ResourceGroupName -Kind ([PolicyType]::NetworkInjection))
         }
     }
 
-    # Get the policies
-    Write-Verbose "Retrieving enterprise policies..."
-    $policies = @(Get-SubnetInjectionEnterprisePolicy @getParams)
-
-    if ($null -eq $policies -or $policies.Count -eq 0) {
+    if ($null -eq $policies -or $policies.Count -eq 0 -or ($policies.Count -eq 1 -and $null -eq $policies[0])) {
         throw "No enterprise policies found."
     }
 
