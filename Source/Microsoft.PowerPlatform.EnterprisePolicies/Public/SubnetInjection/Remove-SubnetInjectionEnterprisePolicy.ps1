@@ -107,6 +107,11 @@ function Remove-SubnetInjectionEnterprisePolicy{
     Write-Verbose "Setting subscription context to $SubscriptionId"
     $null = Set-AzContext -Subscription $SubscriptionId
 
+    # Verify subscription is initialized for Power Platform
+    if (-not(Initialize-SubscriptionForPowerPlatform -SubscriptionId $SubscriptionId)) {
+        throw "Failed to initialize subscription for Power Platform. Please ensure the subscription is registered for Microsoft.PowerPlatform, Microsoft.Network and the enterprisePoliciesPreview feature is enabled."
+    }
+
     # Get the policies based on parameter set
     switch ($PSCmdlet.ParameterSetName) {
         'ByResourceId' {
