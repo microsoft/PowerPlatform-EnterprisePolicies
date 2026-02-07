@@ -98,8 +98,10 @@ class ValidateAzureResourceIdAttribute : System.Management.Automation.ValidateAr
         }
 
         # Pattern: /subscriptions/{guid}/resourceGroups/{name}/providers/{provider}/{type}/{name}
+        # GUID format: 8-4-4-4-12 hexadecimal characters
+        $guidPattern = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
         $escapedType = [regex]::Escape($this.ResourceType)
-        $pattern = "^/subscriptions/[a-fA-F0-9-]+/resourceGroups/[^/]+/providers/$escapedType/[^/]+$"
+        $pattern = "^/subscriptions/$guidPattern/resourceGroups/[^/]+/providers/$escapedType/[^/]+$"
 
         if ($value -notmatch $pattern) {
             throw [System.Management.Automation.ValidationMetadataException]::new(
