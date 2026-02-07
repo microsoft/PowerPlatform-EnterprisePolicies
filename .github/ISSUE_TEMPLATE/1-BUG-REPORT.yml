@@ -15,7 +15,7 @@ body:
   attributes:
     label: Description
     description: >
-      Please describe the issue and expected result. Please paste error script to next "Debug output" section 
+      Please describe the issue and the expected result here. Paste your repro script and any error/debug output in the next section ("Issue script & Debug output").
   validations:
     required: true
 - type: textarea

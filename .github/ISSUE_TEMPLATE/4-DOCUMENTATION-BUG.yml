@@ -1,5 +1,5 @@
 name: ✒️ Documentation issue or question
-description: Report documentation related issue
+description: Report a documentation-related issue
 title: '[Doc]: '
 labels: [needs-triage]
 
@@ -13,7 +13,7 @@ body:
       
       - Cmdlet reference doc: https://github.com/microsoft/PowerPlatform-EnterprisePolicies/tree/main/docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies
       
-      - Engineering doc on Github repo: https://github.com/microsoft/PowerPlatform-EnterprisePolicies/blob/main/README.md
+      - Engineering doc on GitHub repo: https://github.com/microsoft/PowerPlatform-EnterprisePolicies/blob/main/README.md
 - type: markdown
   attributes:
     value: Select the issue type, and describe the issue in the text box below. Add as much detail as needed to help us resolve the issue.

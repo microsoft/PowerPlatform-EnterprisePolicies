@@ -10,7 +10,7 @@ body:
 
       - Please search the existing questions to see if there has been a similar issue filed
       
-      - For questions related to architecture or related to the functionality of VNET feature, please refer to our [Engage Community](https://engage.cloud.microsoft/main/org/microsoft.com/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyNDY2NTkxNzAzMDQifQ). For access submit a request [here](https://forms.office.com/r/qe94aGXWgp).
+      - For questions related to the architecture or functionality of the VNET feature, please refer to our [Engage Community](https://engage.cloud.microsoft/main/org/microsoft.com/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyNDY2NTkxNzAzMDQifQ). For access submit a request [here](https://forms.office.com/r/qe94aGXWgp).
 - type: textarea
   attributes:
     label: Description

@@ -9,7 +9,7 @@ body:
     value: >
       Thanks for reporting.
       
-      - Please search the existing feature request to see if there has been a similar issue filed.
+      - Please search the existing feature requests to see if there has been a similar issue filed.
 - type: textarea
   attributes:
     label: Description of the new feature

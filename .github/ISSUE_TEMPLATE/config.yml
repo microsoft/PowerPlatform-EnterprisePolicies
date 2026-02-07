@@ -9,7 +9,7 @@ contact_links:
   - name: General PowerShell Question
     url: https://github.com/PowerShell/PowerShell/issues/
     about: PowerShell module or language related question
-  - name: AZ Powershell Module Question
+  - name: Az PowerShell Module Question
     url: https://github.com/Azure/azure-powershell/issues/
-    about: AZ Powershell module related question
+    about: Az PowerShell module related question
   
