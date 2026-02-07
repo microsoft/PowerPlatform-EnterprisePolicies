@@ -55,7 +55,7 @@ function Enable-SubnetInjection {
         [string]$EnvironmentId,
 
         [Parameter(Mandatory, HelpMessage="The full Azure ARM resource ID of the Subnet Injection Enterprise Policy")]
-        [ValidateNotNullOrEmpty()]
+        [ValidateAzureResourceId("Microsoft.PowerPlatform/enterprisePolicies")]
         [string]$PolicyArmId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
@@ -113,15 +113,11 @@ function Enable-SubnetInjection {
         throw "Cannot use -Swap when no Subnet Injection policy is currently linked to the environment. Remove the -Swap parameter to enable Subnet Injection."
     }
 
-    # Extract subscription ID from policy ARM ID and set context
-    if ($PolicyArmId -match "/subscriptions/([^/]+)/") {
-        $subscriptionId = $Matches[1]
-        Write-Verbose "Setting subscription context to $subscriptionId"
-        $null = Set-AzContext -Subscription $subscriptionId
-    }
-    else {
-        throw "Invalid PolicyArmId format. Expected format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerPlatform/enterprisePolicies/{policyName}"
-    }
+    # Extract subscription ID from policy ARM ID and set context (format validated by attribute)
+    $null = $PolicyArmId -match "/subscriptions/([^/]+)/"
+    $subscriptionId = $Matches[1]
+    Write-Verbose "Setting subscription context to $subscriptionId"
+    $null = Set-AzContext -Subscription $subscriptionId
 
     # Get the enterprise policy and extract SystemId
     Write-Verbose "Retrieving enterprise policy: $PolicyArmId"

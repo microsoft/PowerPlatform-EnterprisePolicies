@@ -202,10 +202,20 @@ Public cmdlets that call Azure/BAP APIs should include these common parameters:
 ### Testing Conventions
 - Write concise, meaningful tests focused on behavior and error handling
 - Avoid testing implementation details (e.g., "Should call X with correct parameters") - focus on outcomes
+- Avoid redundant tests that exercise the same code path with different inputs
 - When using `ConvertTo-SecureString -AsPlainText` in tests, add the suppression attribute at the top of the file:
   ```powershell
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification="Unit test code")]
   param()
+  ```
+- **Testing internal types**: Custom types defined in `Private/Types.psm1` aren't directly accessible in tests. Use `InModuleScope` to access them:
+  ```powershell
+  It 'Should validate resource ID' {
+      InModuleScope "Microsoft.PowerPlatform.EnterprisePolicies" {
+          $attribute = [ValidateAzureResourceIdAttribute]::new("Microsoft.PowerPlatform/enterprisePolicies")
+          { $attribute.Validate($resourceId, $null) } | Should -Not -Throw
+      }
+  }
   ```
 
 ## Dependencies
@@ -266,6 +276,14 @@ When adding new classes or enums to `Private/Types.psm1`:
 3. **Create manual documentation**: Types cannot be auto-documented. Create a markdown file in `docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/` following the manual type documentation format (see below).
 
 4. **Update build.settings.ps1**: Add entries to the `$markdownToAppend` variable in the `PostBuildHelp` task to link to your documentation file.
+
+### Custom Validation Attributes
+
+When creating custom `ValidateArgumentsAttribute` classes (like `ValidateAzureResourceIdAttribute`), the type accelerator registration in Types.psm1 automatically registers both:
+- The full name (e.g., `ValidateAzureResourceIdAttribute`)
+- The short name without "Attribute" suffix (e.g., `ValidateAzureResourceId`)
+
+This allows using `[ValidateAzureResourceId("...")]` syntax in parameter declarations. The registration logic handles this automatically for any type ending in "Attribute".
 
 ### Manual Type Documentation Format
 
