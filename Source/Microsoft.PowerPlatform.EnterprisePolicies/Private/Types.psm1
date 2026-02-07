@@ -77,6 +77,38 @@ class SubnetUsageDocument{
     [NetworkUsageData[]] $NetworkUsageDataByEnvironment
 }
 
+class ValidateAzureResourceIdAttribute : System.Management.Automation.ValidateArgumentsAttribute {
+    [string]$ResourceType
+
+    ValidateAzureResourceIdAttribute([string]$resourceType) {
+        $this.ResourceType = $resourceType
+    }
+
+    [void] Validate([object]$arguments, [System.Management.Automation.EngineIntrinsics]$engineIntrinsics) {
+        $value = [string]$arguments
+
+        if ([string]::IsNullOrWhiteSpace($value)) {
+            throw [System.Management.Automation.ValidationMetadataException]::new("Value cannot be null or empty.")
+        }
+
+        if ($value.EndsWith('/')) {
+            throw [System.Management.Automation.ValidationMetadataException]::new(
+                "Resource ID cannot have a trailing slash."
+            )
+        }
+
+        # Pattern: /subscriptions/{guid}/resourceGroups/{name}/providers/{provider}/{type}/{name}
+        $escapedType = [regex]::Escape($this.ResourceType)
+        $pattern = "^/subscriptions/[a-fA-F0-9-]+/resourceGroups/[^/]+/providers/$escapedType/[^/]+$"
+
+        if ($value -notmatch $pattern) {
+            throw [System.Management.Automation.ValidationMetadataException]::new(
+                "Invalid resource ID format. Expected: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/$($this.ResourceType)/{name}"
+            )
+        }
+    }
+}
+
 enum PolicyType{
     Encryption
     NetworkInjection
@@ -112,6 +144,7 @@ $ExportableTypes = @(
     [SSLInformation]
     [CertificateInformation]
     [VnetInformation]
+    [ValidateAzureResourceIdAttribute]
     [PolicyType]
     [BAPEndpoint]
     [LinkOperation]
@@ -155,12 +188,27 @@ foreach ($Type in $ExportableTypes) {
         continue
     }
     $TypeAcceleratorsClass::Add($Type.FullName, $Type)
-    [string[]]$global:ImportedTypes += $Type
+    [string[]]$global:ImportedTypes += $Type.FullName
+
+    # For attribute types, also register the short name (without Attribute suffix)
+    # This allows [ValidateAzureResourceId] to resolve to ValidateAzureResourceIdAttribute
+    if ($Type.Name.EndsWith('Attribute')) {
+        $shortName = $Type.Name.Substring(0, $Type.Name.Length - 9)
+        if ($shortName -notin $ExistingTypeAccelerators.Keys -and $shortName -notin $global:ImportedTypes) {
+            $TypeAcceleratorsClass::Add($shortName, $Type)
+            [string[]]$global:ImportedTypes += $shortName
+        }
+    }
 }
 
 # Remove type accelerators when the module is removed.
 $MyInvocation.MyCommand.ScriptBlock.Module.OnRemove = {
     foreach($Type in $ExportableTypes) {
         $TypeAcceleratorsClass::Remove($Type.FullName)
+        # Also remove the short name for attribute types
+        if ($Type.Name.EndsWith('Attribute')) {
+            $shortName = $Type.Name.Substring(0, $Type.Name.Length - 9)
+            $TypeAcceleratorsClass::Remove($shortName)
+        }
     }
 }.GetNewClosure()

@@ -77,7 +77,7 @@ Describe 'Remove-SubnetInjectionEnterprisePolicy Tests' {
 
         It 'Should throw when PolicyResourceId format is invalid' {
             { Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "invalid-resource-id" -Confirm:$false } |
-                Should -Throw "*Invalid PolicyResourceId format*"
+                Should -Throw "*Invalid resource ID format*"
         }
     }
 

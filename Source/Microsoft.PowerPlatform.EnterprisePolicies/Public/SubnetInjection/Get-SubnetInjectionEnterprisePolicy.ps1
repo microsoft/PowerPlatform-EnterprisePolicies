@@ -53,7 +53,7 @@ function Get-SubnetInjectionEnterprisePolicy{
     [CmdletBinding(DefaultParameterSetName = 'BySubscription')]
     param(
         [Parameter(Mandatory, ParameterSetName = 'ByResourceId', HelpMessage="The full Azure ARM resource ID of the enterprise policy")]
-        [ValidateNotNullOrEmpty()]
+        [ValidateAzureResourceId("Microsoft.PowerPlatform/enterprisePolicies")]
         [string]$PolicyResourceId,
 
         [Parameter(Mandatory, ParameterSetName = 'ByEnvironment', HelpMessage="The Power Platform environment ID to retrieve the linked policy for")]
@@ -81,14 +81,10 @@ function Get-SubnetInjectionEnterprisePolicy{
 
     $ErrorActionPreference = "Stop"
 
-    # For ByResourceId, extract and validate subscription ID from the resource ID
+    # For ByResourceId, extract subscription ID from the resource ID (format already validated by attribute)
     if ($PSCmdlet.ParameterSetName -eq 'ByResourceId') {
-        if ($PolicyResourceId -match "/subscriptions/([^/]+)/") {
-            $SubscriptionId = $Matches[1]
-        }
-        else {
-            throw "Invalid PolicyResourceId format. Expected format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerPlatform/enterprisePolicies/{policyName}"
-        }
+        $null = $PolicyResourceId -match "/subscriptions/([^/]+)/"
+        $SubscriptionId = $Matches[1]
     }
 
     # Connect to Azure
