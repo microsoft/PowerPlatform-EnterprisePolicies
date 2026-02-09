@@ -48,12 +48,14 @@ function New-SubnetInjectionEnterprisePolicy{
         [string]$PolicyLocation,
 
         [Parameter(Mandatory, HelpMessage="The full Azure resource ID of the virtual network")]
+        [ValidateAzureResourceId("Microsoft.Network/virtualNetworks")]
         [string]$VirtualNetworkId,
 
         [Parameter(Mandatory, HelpMessage="The name of the subnet within the virtual network")]
         [string]$SubnetName,
 
         [Parameter(HelpMessage="The full Azure resource ID of a second virtual network (required for regions needing paired VNets)")]
+        [ValidateAzureResourceId("Microsoft.Network/virtualNetworks")]
         [string]$VirtualNetworkId2,
 
         [Parameter(HelpMessage="The name of the subnet within the second virtual network")]

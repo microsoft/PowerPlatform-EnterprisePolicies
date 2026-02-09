@@ -116,7 +116,7 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
         It 'Should throw when PolicyResourceId format is invalid' {
             { Get-SubnetInjectionEnterprisePolicy `
                 -PolicyResourceId "invalid-resource-id" `
-                -TenantId $script:testTenantId } | Should -Throw "*Invalid PolicyResourceId format*"
+                -TenantId $script:testTenantId } | Should -Throw "*Invalid resource ID format*"
         }
 
         It 'Should throw when policy is not found' {
