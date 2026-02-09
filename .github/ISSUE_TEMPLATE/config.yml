@@ -1,0 +1,15 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Power Platform Virtual Network discussions
+    url: https://engage.cloud.microsoft/main/org/microsoft.com/groups/eyJfdHlwZSI6Ikdyb3VwIiwiaWQiOiIyNDY2NTkxNzAzMDQifQ
+    about: For questions related to architecture or related to the functionality of VNET feature, please refer to our Engage Community.
+  - name: Power Platform Virtual Network Engage Community access request
+    url: https://forms.office.com/r/qe94aGXWgp
+    about: For requesting access to the Power Platform Virtual Network Engage Community.
+  - name: General PowerShell Question
+    url: https://github.com/PowerShell/PowerShell/issues/
+    about: PowerShell module or language related question
+  - name: Az PowerShell Module Question
+    url: https://github.com/Azure/azure-powershell/issues/
+    about: Az PowerShell module related question
+  
