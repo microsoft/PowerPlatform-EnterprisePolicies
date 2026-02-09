@@ -32,9 +32,15 @@ function Read-InstallMissingPrerequisite {
 
 
 function Test-AdminRights {
-    $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
-    $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
-    return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    if ($IsWindows -or $PSVersionTable.PSEdition -eq 'Desktop') {
+        $currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+        $principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
+        return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    }
+    else {
+        # On Linux/macOS, check if running as root (UID 0)
+        return (id -u) -eq 0
+    }
 }
 
 
