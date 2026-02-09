@@ -164,6 +164,6 @@ function New-VnetForSubnetDelegation {
         $subnet = Add-AzDelegation -Name "Microsoft.PowerPlatform/enterprisePolicies" -ServiceName "Microsoft.PowerPlatform/enterprisePolicies" -Subnet $subnet
         $virtualNetwork = Set-AzVirtualNetwork -VirtualNetwork $virtualNetwork
         Write-Host "Successfully added delegation for Microsoft.PowerPlatform/enterprisePolicies to subnet '$SubnetName'" -ForegroundColor Green
-        return $virtualNetwork
     }
+    return $virtualNetwork
 }
