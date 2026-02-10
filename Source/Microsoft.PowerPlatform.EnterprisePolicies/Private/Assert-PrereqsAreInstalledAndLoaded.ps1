@@ -16,14 +16,27 @@ function Read-InstallMissingPrerequisite {
 
     $response = Read-Host "The $($Module.Name) module is not installed or the required version [$($Module.RequiredVersion)] is not installed. The exact version is required. Do you want to install it now? (Y/N)"
     if ($response -eq 'Y' -or $response -eq 'y') {
-        if(-not(Test-AdminRights)) {
-            throw "You must run this script as an Administrator to install the required module."
-        }
         try {
-            Install-Module -Name $Module.Name -RequiredVersion $Module.RequiredVersion -AllowClobber -Force
+            $installParams = @{
+                Name = $Module.Name
+                RequiredVersion = $Module.RequiredVersion
+                AllowClobber = $true
+                Force = $true
+            }
+
+            # Install to CurrentUser scope if not elevated, AllUsers if elevated
+            if (-not(Test-AdminRights)) {
+                $installParams['Scope'] = 'CurrentUser'
+                Write-Host "Installing $($Module.Name) for current user..." -ForegroundColor Yellow
+            }
+            else {
+                Write-Host "Installing $($Module.Name) for all users..." -ForegroundColor Yellow
+            }
+
+            Install-Module @installParams
             Write-Host "$($Module.Name) module installed successfully." -ForegroundColor Green
         } catch {
-            throw "Failed to install $($Module.Name) module. Please install it manually."
+            throw "Failed to install $($Module.Name) module. Please install it manually. Error: $_"
         }
     } else {
         throw "This module can't be run without previously installing version [$($Module.RequiredVersion)] of the [$($Module.Name)] module. The exact version is required."
