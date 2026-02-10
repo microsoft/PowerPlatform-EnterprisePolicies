@@ -147,7 +147,12 @@ function Enable-SubnetInjection {
     $policyLocation = $policy.Location
 
     if ($environmentLocation -ine $policyLocation) {
-        throw "Environment location '$environmentLocation' does not match the enterprise policy location '$policyLocation'. The environment and policy must be in the same location."
+        if($environmentLocation -eq "unitedstates" -and $policyLocation -eq "unitedstateseuap") {
+            Write-Verbose "Environment is in 'unitedstates' and policy is in 'unitedstateseuap'. Treating locations as compatible."
+        }
+        else {
+            throw "Environment location '$environmentLocation' does not match the enterprise policy location '$policyLocation'. The environment and policy must be in the same location."
+        }
     }
 
     Write-Verbose "Environment location '$environmentLocation' matches policy location '$policyLocation'"

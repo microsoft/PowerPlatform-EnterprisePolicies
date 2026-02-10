@@ -222,5 +222,36 @@ Describe 'Enable-SubnetInjection Tests' {
                 -EnvironmentId $script:testEnvironmentId `
                 -PolicyArmId $script:testPolicyArmId } | Should -Throw "*does not match*"
         }
+
+        It 'Should treat unitedstates environment with unitedstateseuap policy as compatible' {
+            $mockEnvironmentUnitedStates = [PSCustomObject]@{
+                name = $script:testEnvironmentId
+                location = "unitedstates"
+                properties = @{
+                    enterprisePolicies = $null
+                }
+            }
+            $mockPolicyEuap = [PSCustomObject]@{
+                ResourceId = $script:testPolicyArmId
+                Name = $script:testPolicyName
+                Kind = "NetworkInjection"
+                Location = "unitedstateseuap"
+                Properties = @{
+                    systemId = $script:testPolicySystemId
+                }
+            }
+
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-BAPEnvironment { return $mockEnvironmentUnitedStates } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $mockPolicyEuap } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-EnvironmentEnterprisePolicy { return $script:mockLinkResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Wait-EnterprisePolicyOperation { return "Succeeded" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            $result = Enable-SubnetInjection `
+                -EnvironmentId $script:testEnvironmentId `
+                -PolicyArmId $script:testPolicyArmId
+
+            $result | Should -Be $true
+        }
     }
 }

@@ -143,13 +143,18 @@ function Get-AccessToken {
         {
             Write-Host "Failed to acquire token silently. Please log in interactively." -ForegroundColor Red
             Connect-Azure -AuthScope $resourceUrl -Endpoint $Endpoint -TenantId $TenantId
-            $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString
         }
-        else
+        elseif($null -ne $tokenError.Exception.AuthenticationErrorCode)
         {
             Write-Host "Failed to acquire access token: $($tokenError.Exception.AuthenticationErrorCode)" -ForegroundColor Red
             Connect-Azure -AuthScope $resourceUrl -Endpoint $Endpoint -TenantId $TenantId -Force
         }
+        else {
+            Write-Host "Failed to acquire access token: $($tokenError.Exception.Message)" -ForegroundColor Red
+            Connect-Azure -AuthScope $resourceUrl -Endpoint $Endpoint -TenantId $TenantId -Force
+        }
+
+        $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString
 
         if($null -eq $token) {
             throw "Failed to acquire access token. Please check your Azure login and try again."
