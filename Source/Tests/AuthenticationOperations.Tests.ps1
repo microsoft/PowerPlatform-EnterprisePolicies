@@ -114,6 +114,18 @@ Describe 'AuthenticationOperations Tests' {
 
                 { Get-AccessToken -Endpoint ([BAPEndpoint]::prod) -ResourceUrl "https://api.test.com" } | Should -Throw "*Failed to acquire access token*"
             }
+
+            It 'Re-authenticates and returns token when initial acquisition fails then succeeds' {
+                $mockToken = [PSCustomObject]@{ Token = (ConvertTo-SecureString "test-token" -AsPlainText -Force) }
+                # Mock returns null first (with SilentlyContinue), then token on second call
+                Mock Get-AzAccessToken { return $null } -ParameterFilter { $ErrorAction -eq 'SilentlyContinue' }
+                Mock Get-AzAccessToken { return $mockToken } -ParameterFilter { $ErrorAction -ne 'SilentlyContinue' }
+                Mock Connect-Azure { return $true }
+
+                $result = Get-AccessToken -Endpoint ([BAPEndpoint]::prod) -ResourceUrl "https://api.test.com"
+
+                $result | Should -Not -BeNullOrEmpty
+            }
         }
 
         Context 'Testing Get-PPAPIAccessToken' {
