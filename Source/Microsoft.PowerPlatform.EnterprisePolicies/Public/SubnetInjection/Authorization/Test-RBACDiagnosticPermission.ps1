@@ -15,6 +15,10 @@ Tests RBAC diagnostic permissions for a principal on an environment.
 This cmdlet tests whether a principal (user, group, or application) has a specific
 Subnet Injection diagnostic permission on a Power Platform environment.
 
+If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+When -ClientId is provided, it is stored in the cache for future use.
+
 Use one of the switches to test a specific permission level:
 - ReadDiagnostic: Can view diagnostic information
 - RunDiagnostic: Can execute diagnostic actions
@@ -45,8 +49,7 @@ Tests the RunMitigation permission for a group.
 function Test-RBACDiagnosticPermission {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory, HelpMessage="The application (client) ID of the app registration")]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory=$false, HelpMessage="The application (client) ID of the app registration")]
         [string]$ClientId,
 
         [Parameter(Mandatory, HelpMessage="The Azure AD tenant ID")]
@@ -81,6 +84,16 @@ function Test-RBACDiagnosticPermission {
     )
 
     $ErrorActionPreference = "Stop"
+
+    if ([string]::IsNullOrWhiteSpace($ClientId)) {
+        $ClientId = Get-CachedClientId
+        if ([string]::IsNullOrWhiteSpace($ClientId)) {
+            throw "ClientId was not provided and no cached ClientId was found. Run New-AuthorizationApplication or specify -ClientId."
+        }
+    }
+    else {
+        Set-CachedClientId -ClientId $ClientId
+    }
 
     # Connect to Authorization Service
     if (-not(New-AuthorizationServiceMsalClient -ClientId $ClientId -TenantId $TenantId -Endpoint $Endpoint -Force:$ForceAuth)) {

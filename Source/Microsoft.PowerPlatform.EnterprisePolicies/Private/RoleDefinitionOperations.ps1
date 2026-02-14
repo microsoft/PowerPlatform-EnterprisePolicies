@@ -32,9 +32,7 @@ function Get-RoleDefinitions {
 
     Write-Verbose "Fetching role definitions from: $uri"
 
-    $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
-    $tokenScopes = @("$resourceUrl.default")
-    $accessToken = Get-AuthorizationServiceToken -Scopes $tokenScopes
+    $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
 
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
         New-JsonRequestMessage -Uri $uri -AccessToken $accessToken -HttpMethod ([System.Net.Http.HttpMethod]::Get)

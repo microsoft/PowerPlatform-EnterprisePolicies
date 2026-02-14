@@ -36,6 +36,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should get tenant-scoped role assignments' {
@@ -63,6 +64,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should get environment-scoped role assignments' {
@@ -80,42 +82,91 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
     }
 
-    Context 'Optional parameters' {
+    Context 'Default behavior enables all expansions' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should pass IncludeParentScopes when specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -IncludeParentScopes
+        It 'Should default IncludeParentScopes to true' {
+            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $IncludeParentScopes -eq $true
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should pass ExpandSecurityGroups when specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -ExpandSecurityGroups
+        It 'Should default ExpandSecurityGroups to true' {
+            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $ExpandSecurityGroups -eq $true
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should pass ExpandEnvironmentGroups when specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -ExpandEnvironmentGroups
+        It 'Should default ExpandEnvironmentGroups to true' {
+            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $ExpandEnvironmentGroups -eq $true
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should pass IncludeNestedScopes when specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -IncludeNestedScopes
+        It 'Should default IncludeNestedScopes to true' {
+            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $IncludeNestedScopes -eq $true
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+    }
+
+    Context 'Negative switches disable expansions' {
+        BeforeAll {
+            Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should set IncludeParentScopes to false when ExcludeParentScopes is specified' {
+            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -ExcludeParentScopes
+
+            Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
+                $IncludeParentScopes -eq $false
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should set ExpandSecurityGroups to false when NoExpandSecurityGroups is specified' {
+            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -NoExpandSecurityGroups
+
+            Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
+                $ExpandSecurityGroups -eq $false
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should set ExpandEnvironmentGroups to false when NoExpandEnvironmentGroups is specified' {
+            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -NoExpandEnvironmentGroups
+
+            Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
+                $ExpandEnvironmentGroups -eq $false
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should set IncludeNestedScopes to false when ExcludeNestedScopes is specified' {
+            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -ExcludeNestedScopes
+
+            Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
+                $IncludeNestedScopes -eq $false
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+    }
+
+    Context 'Optional filter parameters' {
+        BeforeAll {
+            Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should pass PrincipalType when specified' {
@@ -144,9 +195,35 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
     }
 
+    Context 'Uses cached ClientId when not specified' {
+        BeforeAll {
+            Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-CachedClientId { return $script:testClientId } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should use cached ClientId when not specified' {
+            $result = Get-RBACRoleAssignment -TenantId $script:testTenantId
+
+            $result | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Throws when no ClientId specified and none cached' {
+        BeforeAll {
+            Mock Get-CachedClientId { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should throw when no ClientId specified and none cached' {
+            { Get-RBACRoleAssignment -TenantId $script:testTenantId } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
+        }
+    }
+
     Context 'Error handling' {
         It 'Should throw when New-AuthorizationServiceMsalClient fails' {
             Mock New-AuthorizationServiceMsalClient { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             { Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId } | Should -Throw "*Failed to connect to Authorization Service*"
         }

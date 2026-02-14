@@ -21,6 +21,7 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Remove-RoleAssignment { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should remove a tenant-scoped role assignment' {
@@ -48,6 +49,7 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Remove-RoleAssignment { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should remove an environment-scoped role assignment' {
@@ -69,6 +71,7 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Remove-RoleAssignment { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should remove an environment group-scoped role assignment' {
@@ -90,6 +93,7 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Remove-RoleAssignment { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should return false when role assignment is not found' {
@@ -99,9 +103,35 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         }
     }
 
+    Context 'Uses cached ClientId when not specified' {
+        BeforeAll {
+            Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Remove-RoleAssignment { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-CachedClientId { return $script:testClientId } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should use cached ClientId when not specified' {
+            $result = Remove-RBACRoleAssignment -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
+
+            $result | Should -Be $true
+        }
+    }
+
+    Context 'Throws when no ClientId specified and none cached' {
+        BeforeAll {
+            Mock Get-CachedClientId { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should throw when no ClientId specified and none cached' {
+            { Remove-RBACRoleAssignment -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
+        }
+    }
+
     Context 'Error handling' {
         It 'Should throw when New-AuthorizationServiceMsalClient fails' {
             Mock New-AuthorizationServiceMsalClient { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             { Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force } | Should -Throw "*Failed to connect to Authorization Service*"
         }

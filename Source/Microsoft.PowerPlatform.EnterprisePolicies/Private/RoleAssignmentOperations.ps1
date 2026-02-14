@@ -81,12 +81,8 @@ function New-RoleAssignment {
 
     Write-Verbose "Request URI: $uri"
 
-    # Determine the scope for token acquisition based on endpoint
-    $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
-    $tokenScopes = @("$resourceUrl.default")
-
     # Get authorization service token
-    $accessToken = Get-AuthorizationServiceToken -Scopes $tokenScopes
+    $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
 
     # Create and send the request
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
@@ -193,12 +189,8 @@ function Get-RoleAssignments {
 
     Write-Verbose "Request URI: $uri"
 
-    # Determine the scope for token acquisition based on endpoint
-    $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
-    $tokenScopes = @("$resourceUrl.default")
-
     # Get authorization service token
-    $accessToken = Get-AuthorizationServiceToken -Scopes $tokenScopes
+    $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
 
     # Create and send the initial request (POST with body)
     $httpMethod = [System.Net.Http.HttpMethod]::Post
@@ -291,12 +283,8 @@ function Remove-RoleAssignment {
 
     Write-Verbose "Request URI: $uri"
 
-    # Determine the scope for token acquisition based on endpoint
-    $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
-    $tokenScopes = @("$resourceUrl.default")
-
     # Get authorization service token
-    $accessToken = Get-AuthorizationServiceToken -Scopes $tokenScopes
+    $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
 
     # Create and send the request
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
@@ -362,12 +350,8 @@ function Test-PrincipalPermission {
 
     Write-Verbose "Request URI: $uri"
 
-    # Determine the scope for token acquisition based on endpoint
-    $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
-    $tokenScopes = @("$resourceUrl.default")
-
     # Get authorization service token
-    $accessToken = Get-AuthorizationServiceToken -Scopes $tokenScopes
+    $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
 
     # Create and send the request
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {

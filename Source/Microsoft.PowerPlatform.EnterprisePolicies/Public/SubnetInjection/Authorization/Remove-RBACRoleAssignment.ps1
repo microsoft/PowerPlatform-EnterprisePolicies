@@ -15,6 +15,10 @@ Removes an RBAC role assignment.
 This cmdlet removes a role assignment by its ID. The scope can be at the tenant,
 environment, or environment group level.
 
+If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+When -ClientId is provided, it is stored in the cache for future use.
+
 Returns $true if the role assignment was deleted, $false if it was not found.
 
 .OUTPUTS
@@ -40,8 +44,7 @@ Removes an environment group-scoped role assignment.
 function Remove-RBACRoleAssignment {
     [CmdletBinding(DefaultParameterSetName = 'TenantScope', SupportsShouldProcess, ConfirmImpact = 'High')]
     param(
-        [Parameter(Mandatory, HelpMessage="The application (client) ID of the app registration")]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory=$false, HelpMessage="The application (client) ID of the app registration")]
         [string]$ClientId,
 
         [Parameter(Mandatory, HelpMessage="The ID of the role assignment to remove")]
@@ -71,6 +74,16 @@ function Remove-RBACRoleAssignment {
     )
 
     $ErrorActionPreference = "Stop"
+
+    if ([string]::IsNullOrWhiteSpace($ClientId)) {
+        $ClientId = Get-CachedClientId
+        if ([string]::IsNullOrWhiteSpace($ClientId)) {
+            throw "ClientId was not provided and no cached ClientId was found. Run New-AuthorizationApplication or specify -ClientId."
+        }
+    }
+    else {
+        Set-CachedClientId -ClientId $ClientId
+    }
 
     if ($Force) {
         $ConfirmPreference = 'None'

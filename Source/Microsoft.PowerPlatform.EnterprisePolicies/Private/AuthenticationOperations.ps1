@@ -7,6 +7,21 @@ THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAI
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
 
+function Select-PreferredContext {
+    param(
+        $Contexts
+    )
+    if ($null -eq $Contexts) {
+        return $null
+    }
+    # Prefer ServicePrincipal over User accounts
+    $spContext = $Contexts | Where-Object { $_.Account.Type -eq "ServicePrincipal" } | Select-Object -First 1
+    if ($spContext) {
+        return $spContext
+    }
+    return $Contexts | Select-Object -First 1
+}
+
 function Connect-Azure {
     param(
         [Parameter(Mandatory, ParameterSetName = 'ByEndpoint')]
@@ -40,7 +55,8 @@ function Connect-Azure {
 
     if(-not($Force) -and [string]::IsNullOrWhiteSpace($AuthScope) -and $null -ne $context) {
         if([string]::IsNullOrWhiteSpace($TenantId)) {
-            $matchedContext = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment } | Select-Object -First 1
+            $matchedContexts = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment }
+            $matchedContext = Select-PreferredContext -Contexts $matchedContexts
             if($matchedContext) {
                 Set-AzContext -Context $matchedContext
                 Write-Host "Already connected to Azure environment: $AzureEnvironment with account $($matchedContext.Account.Id) with tenants [$($matchedContext.Account.Tenants -join ",")]" -ForegroundColor Yellow
@@ -49,14 +65,16 @@ function Connect-Azure {
         }
         else {
             # Prioritize the home tenant if it exists
-            $homeTenantContext = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Tenant.TenantCategory -eq "Home" -and $_.Tenant.Id -eq $TenantId } | Select-Object -First 1
+            $homeTenantContexts = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Tenant.TenantCategory -eq "Home" -and $_.Tenant.Id -eq $TenantId }
+            $homeTenantContext = Select-PreferredContext -Contexts $homeTenantContexts
             if($homeTenantContext) {
                 Set-AzContext -Context $homeTenantContext
                 Write-Host "Already connected to Azure environment: $AzureEnvironment with account $($homeTenantContext.Account.Id) with home tenant Id $TenantId" -ForegroundColor Yellow
                 $foundContext = $true
             }
             else {
-                $tenantContext = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Account.Tenants -contains $TenantId } | Select-Object -First 1
+                $tenantContexts = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Account.Tenants -contains $TenantId }
+                $tenantContext = Select-PreferredContext -Contexts $tenantContexts
                 if ($tenantContext) {
                     Set-AzContext -Context $tenantContext
                     Write-Host "Already connected to Azure environment: $AzureEnvironment with account $($tenantContext.Account.Id) with tenant Id $TenantId" -ForegroundColor Yellow
@@ -240,9 +258,8 @@ function New-AuthorizationServiceMsalClient {
 
 function Get-AuthorizationServiceToken {
     param(
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string[]]$Scopes,
+        [Parameter(Mandatory=$false)]
+        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false)]
         [int]$TimeoutSeconds = 60
@@ -251,6 +268,9 @@ function Get-AuthorizationServiceToken {
     if ($null -eq $script:AuthorizationServiceCurrentKey -or -not $script:AuthorizationServiceCache.ContainsKey($script:AuthorizationServiceCurrentKey)) {
         throw "Authorization Service MSAL client application not created. Call New-AuthorizationServiceMsalClient first."
     }
+
+    $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
+    $Scopes = @("$resourceUrl.default")
 
     $cached = $script:AuthorizationServiceCache[$script:AuthorizationServiceCurrentKey]
     $app = $cached.App

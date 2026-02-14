@@ -16,6 +16,10 @@ This cmdlet creates a role assignment for a principal (user, group, or applicati
 permissions via Power Platform RBAC. The role can be scoped at the tenant,
 environment, or environment group level.
 
+If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+When -ClientId is provided, it is stored in the cache for future use.
+
 The Role parameter accepts the role definition name as returned by the Power Platform
 Authorization API (e.g., "Power Platform Reader"). Use -RefreshRoles to update the
 cached list of available roles.
@@ -48,8 +52,7 @@ Creates a role assignment while forcing a refresh of the cached role definitions
 function New-RBACRoleAssignment {
     [CmdletBinding(DefaultParameterSetName = 'TenantScope')]
     param(
-        [Parameter(Mandatory, HelpMessage="The application (client) ID of the app registration")]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory=$false, HelpMessage="The application (client) ID of the app registration")]
         [string]$ClientId,
 
         [Parameter(Mandatory, HelpMessage="The object ID of the principal to assign the role to")]
@@ -86,6 +89,16 @@ function New-RBACRoleAssignment {
     )
 
     $ErrorActionPreference = "Stop"
+
+    if ([string]::IsNullOrWhiteSpace($ClientId)) {
+        $ClientId = Get-CachedClientId
+        if ([string]::IsNullOrWhiteSpace($ClientId)) {
+            throw "ClientId was not provided and no cached ClientId was found. Run New-AuthorizationApplication or specify -ClientId."
+        }
+    }
+    else {
+        Set-CachedClientId -ClientId $ClientId
+    }
 
     # Connect to Authorization Service
     if (-not(New-AuthorizationServiceMsalClient -ClientId $ClientId -TenantId $TenantId -Endpoint $Endpoint -Force:$ForceAuth)) {

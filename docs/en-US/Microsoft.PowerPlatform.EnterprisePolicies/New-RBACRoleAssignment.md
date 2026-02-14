@@ -20,26 +20,25 @@ Creates an RBAC role assignment.
 ### TenantScope (Default)
 
 ```
-New-RBACRoleAssignment -ClientId <string> -PrincipalObjectId <string>
- -PrincipalType <AuthorizationPrincipalType> -Role <string> -TenantId <string>
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
+New-RBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType>
+ -Role <string> -TenantId <string> [-ClientId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth]
+ [-RefreshRoles] [<CommonParameters>]
 ```
 
 ### EnvironmentScope
 
 ```
-New-RBACRoleAssignment -ClientId <string> -PrincipalObjectId <string>
- -PrincipalType <AuthorizationPrincipalType> -Role <string> -TenantId <string>
- -EnvironmentId <string> [-Endpoint <BAPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
+New-RBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType>
+ -Role <string> -TenantId <string> -EnvironmentId <string> [-ClientId <string>]
+ [-Endpoint <BAPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
 ```
 
 ### EnvironmentGroupScope
 
 ```
-New-RBACRoleAssignment -ClientId <string> -PrincipalObjectId <string>
- -PrincipalType <AuthorizationPrincipalType> -Role <string> -TenantId <string>
- -EnvironmentGroupId <string> [-Endpoint <BAPEndpoint>] [-ForceAuth] [-RefreshRoles]
- [<CommonParameters>]
+New-RBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType>
+ -Role <string> -TenantId <string> -EnvironmentGroupId <string> [-ClientId <string>]
+ [-Endpoint <BAPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -53,6 +52,10 @@ This cmdlet creates a role assignment for a principal (user, group, or applicati
 permissions via Power Platform RBAC.
 The role can be scoped at the tenant,
 environment, or environment group level.
+
+If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+When -ClientId is provided, it is stored in the cache for future use.
 
 The Role parameter accepts the role definition name as returned by the Power Platform
 Authorization API (e.g., "Power Platform Reader").
@@ -99,7 +102,7 @@ Aliases: []
 ParameterSets:
 - Name: (All)
   Position: Named
-  IsRequired: true
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false

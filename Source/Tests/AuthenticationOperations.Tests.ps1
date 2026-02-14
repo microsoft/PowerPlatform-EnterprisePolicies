@@ -55,6 +55,59 @@ Describe 'AuthenticationOperations Tests' {
                 Assert-MockCalled Connect-AzAccount -Exactly 1
             }
 
+            It 'Prefers service principal context over user context (no tenant)' {
+                $endpoint = [BAPEndpoint]::prod
+                Mock Get-AzContext {
+                    return @(
+                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "user@test.com"; Type = "User"; Tenants = @("tenant1") } },
+                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "sp-app-id"; Type = "ServicePrincipal"; Tenants = @("tenant1") } }
+                    )
+                }
+                Mock Set-AzContext {}
+                Connect-Azure -Endpoint $endpoint | Should -Be $true
+                Assert-MockCalled Set-AzContext -Exactly 1 -ParameterFilter { $Context.Account.Id -eq "sp-app-id" }
+            }
+
+            It 'Prefers service principal context over user context (with tenant)' {
+                $endpoint = [BAPEndpoint]::prod
+                $tenantId = "12345678-1234-1234-1234-123456789012"
+                Mock Get-AzContext {
+                    return @(
+                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "user@test.com"; Type = "User"; Tenants = @($tenantId) }; Tenant = @{ TenantCategory = "Home"; Id = $tenantId } },
+                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "sp-app-id"; Type = "ServicePrincipal"; Tenants = @($tenantId) }; Tenant = @{ TenantCategory = "Home"; Id = $tenantId } }
+                    )
+                }
+                Mock Set-AzContext {}
+                Connect-Azure -Endpoint $endpoint -TenantId $tenantId | Should -Be $true
+                Assert-MockCalled Set-AzContext -Exactly 1 -ParameterFilter { $Context.Account.Id -eq "sp-app-id" }
+            }
+
+            It 'Falls back to user context when no SP available' {
+                $endpoint = [BAPEndpoint]::prod
+                Mock Get-AzContext {
+                    return @(
+                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "user@test.com"; Type = "User"; Tenants = @("tenant1") } }
+                    )
+                }
+                Mock Set-AzContext {}
+                Connect-Azure -Endpoint $endpoint | Should -Be $true
+                Assert-MockCalled Set-AzContext -Exactly 1 -ParameterFilter { $Context.Account.Id -eq "user@test.com" }
+            }
+
+            It 'Prefers SP in fallback tenant selection' {
+                $endpoint = [BAPEndpoint]::prod
+                $tenantId = "12345678-1234-1234-1234-123456789012"
+                Mock Get-AzContext {
+                    return @(
+                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "user@test.com"; Type = "User"; Tenants = @($tenantId) }; Tenant = @{ TenantCategory = ""; Id = "other-tenant" } },
+                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "sp-app-id"; Type = "ServicePrincipal"; Tenants = @($tenantId) }; Tenant = @{ TenantCategory = ""; Id = "other-tenant" } }
+                    )
+                }
+                Mock Set-AzContext {}
+                Connect-Azure -Endpoint $endpoint -TenantId $tenantId | Should -Be $true
+                Assert-MockCalled Set-AzContext -Exactly 1 -ParameterFilter { $Context.Account.Id -eq "sp-app-id" }
+            }
+
             It 'Forces a login in with Force switch' {
                 $endpoint = [BAPEndpoint]::prod
                 Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "AzureCloud" } -Verifiable
@@ -289,14 +342,15 @@ Describe 'AuthenticationOperations Tests' {
             }
 
             It 'Throws when not connected' {
-                { Get-AuthorizationServiceToken -Scopes @("scope") } | Should -Throw "*Call New-AuthorizationServiceMsalClient first*"
+                { Get-AuthorizationServiceToken -Endpoint ([BAPEndpoint]::Prod) } | Should -Throw "*Call New-AuthorizationServiceMsalClient first*"
             }
 
             It 'Returns access token after interactive authentication' {
                 Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
+                Mock Get-APIResourceUrl { return "https://api.powerplatform.com/" }
 
                 New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
-                $result = Get-AuthorizationServiceToken -Scopes @("https://api.powerplatform.com/.default")
+                $result = Get-AuthorizationServiceToken -Endpoint ([BAPEndpoint]::Prod)
 
                 $result | Should -Be "mock-access-token"
             }
@@ -321,9 +375,10 @@ Describe 'AuthenticationOperations Tests' {
                 $mockFailedBuilder | Add-Member -MemberType ScriptMethod -Name 'Build' -Value { return $mockFailedApp }
 
                 Mock Get-PublicClientApplicationBuilder { return $mockFailedBuilder }
+                Mock Get-APIResourceUrl { return "https://api.powerplatform.com/" }
 
                 New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
-                { Get-AuthorizationServiceToken -Scopes @("scope") } | Should -Throw "*Failed to acquire access token*"
+                { Get-AuthorizationServiceToken -Endpoint ([BAPEndpoint]::Prod) } | Should -Throw "*Failed to acquire access token*"
             }
         }
     }

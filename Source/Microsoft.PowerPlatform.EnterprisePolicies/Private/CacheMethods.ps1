@@ -15,6 +15,7 @@ function Get-EmptyCache{
         "Version" = "1.0"
         "SubscriptionsValidated" = @()
         "RoleDefinitions" = @{}
+        "ClientId" = ""
     }
 }
 
@@ -127,6 +128,45 @@ function Set-CachedRoleDefinitions{
     }
     else{
         $script:CacheData.RoleDefinitions | Add-Member -NotePropertyName $Endpoint -NotePropertyValue $entry -Force
+    }
+
+    Save-Cache
+}
+
+function Get-CachedClientId{
+    if($null -eq $script:CacheData){
+        Initialize-Cache
+    }
+
+    # Ensure ClientId key exists (for caches created before this feature)
+    if($null -eq $script:CacheData.ClientId){
+        return $null
+    }
+
+    if([string]::IsNullOrWhiteSpace($script:CacheData.ClientId)){
+        return $null
+    }
+
+    return $script:CacheData.ClientId
+}
+
+function Set-CachedClientId{
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$ClientId
+    )
+
+    if($null -eq $script:CacheData){
+        Initialize-Cache
+    }
+
+    # CacheData may be a hashtable (from Get-EmptyCache) or PSCustomObject (from JSON)
+    if($script:CacheData -is [hashtable]){
+        $script:CacheData["ClientId"] = $ClientId
+    }
+    else{
+        $script:CacheData | Add-Member -NotePropertyName "ClientId" -NotePropertyValue $ClientId -Force
     }
 
     Save-Cache

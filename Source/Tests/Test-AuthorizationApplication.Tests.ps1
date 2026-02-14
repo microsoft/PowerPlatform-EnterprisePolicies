@@ -59,13 +59,13 @@ Describe 'Test-AuthorizationApplication Tests' {
         }
 
         It 'Should return true for correctly configured application' {
-            $result = Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId
+            $result = Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId
 
             $result | Should -Be $true
         }
 
         It 'Should use prod API ID for prod endpoint' {
-            Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId -Endpoint prod
+            Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId -Endpoint prod
 
             Should -Invoke Get-AzADServicePrincipal -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter {
                 $Filter -like "*$($script:prodApiId)*"
@@ -115,7 +115,7 @@ Describe 'Test-AuthorizationApplication Tests' {
         }
 
         It 'Should use TIP API ID for tip1 endpoint' {
-            Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId -Endpoint tip1
+            Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId -Endpoint tip1
 
             Should -Invoke Get-AzADServicePrincipal -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter {
                 $Filter -like "*$($script:tipApiId)*"
@@ -127,7 +127,7 @@ Describe 'Test-AuthorizationApplication Tests' {
         It 'Should return false when Connect-Azure fails' {
             Mock Connect-Azure { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId
+            $result = Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId
 
             $result | Should -Be $false
         }
@@ -136,7 +136,7 @@ Describe 'Test-AuthorizationApplication Tests' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AzADApplication { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId
+            $result = Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId
 
             $result | Should -Be $false
         }
@@ -152,7 +152,7 @@ Describe 'Test-AuthorizationApplication Tests' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AzADApplication { return $mockNonPublicApp } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId
+            $result = Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId
 
             $result | Should -Be $false
         }
@@ -171,7 +171,7 @@ Describe 'Test-AuthorizationApplication Tests' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AzADApplication { return $mockNoRedirectApp } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId
+            $result = Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId
 
             $result | Should -Be $false
         }
@@ -190,7 +190,7 @@ Describe 'Test-AuthorizationApplication Tests' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AzADApplication { return $mockNoPermissionsApp } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId
+            $result = Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId
 
             $result | Should -Be $false
         }
@@ -217,7 +217,7 @@ Describe 'Test-AuthorizationApplication Tests' {
             Mock Get-AzADApplication { return $mockMissingReadApp } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AzADServicePrincipal { return $script:mockServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId
+            $result = Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId
 
             $result | Should -Be $false
         }
@@ -227,7 +227,7 @@ Describe 'Test-AuthorizationApplication Tests' {
             Mock Get-AzADApplication { return $script:mockValidApplication } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AzADServicePrincipal { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = Test-AuthorizationApplication -ApplicationId $script:testAppId -TenantId $script:testTenantId
+            $result = Test-AuthorizationApplication -ClientId $script:testAppId -TenantId $script:testTenantId
 
             $result | Should -Be $false
         }

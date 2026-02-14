@@ -20,8 +20,8 @@ Tests that an Azure AD application is correctly configured for Power Platform Au
 ### __AllParameterSets
 
 ```
-Test-AuthorizationApplication [-ApplicationId] <string> [-TenantId] <string>
- [[-Endpoint] <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+Test-AuthorizationApplication [-ClientId] <string> [-TenantId] <string> [[-Endpoint] <BAPEndpoint>]
+ [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -43,19 +43,19 @@ It checks:
 
 ### EXAMPLE 1
 
-Test-AuthorizationApplication -ApplicationId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012"
+Test-AuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012"
 
 Tests that the application is correctly configured for the prod endpoint.
 
 ### EXAMPLE 2
 
-Test-AuthorizationApplication -ApplicationId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint tip1
+Test-AuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint tip1
 
 Tests that the application is correctly configured for the TIP1 endpoint.
 
 ## PARAMETERS
 
-### -ApplicationId
+### -ClientId
 
 The Application (client) ID of the Azure AD application
 

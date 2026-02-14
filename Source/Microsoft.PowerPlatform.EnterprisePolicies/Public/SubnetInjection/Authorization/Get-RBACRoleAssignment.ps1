@@ -15,8 +15,12 @@ Gets RBAC role assignments at a specified scope.
 This cmdlet retrieves role assignments for Power Platform RBAC operations. The scope can be
 at the tenant or environment level.
 
-Options allow expanding security groups, environment groups, including parent scopes,
-and including nested scopes in the results.
+If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+When -ClientId is provided, it is stored in the cache for future use.
+
+By default, results include parent scopes, nested scopes, expanded security groups, and
+expanded environment groups. Use the corresponding switches to disable these behaviors.
 
 .OUTPUTS
 System.Management.Automation.PSCustomObject
@@ -25,22 +29,22 @@ Returns the role assignments from the API.
 .EXAMPLE
 Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001"
 
-Gets all role assignments at the tenant scope.
+Gets all role assignments at the tenant scope with all expansions enabled.
 
 .EXAMPLE
 Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002"
 
-Gets all role assignments at the environment scope.
+Gets all role assignments at the environment scope with all expansions enabled.
 
 .EXAMPLE
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -IncludeParentScopes -ExpandSecurityGroups
+Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -ExcludeParentScopes -NoExpandSecurityGroups
 
-Gets role assignments at the environment scope, including parent scopes and expanding security group memberships.
+Gets role assignments at the environment scope, excluding parent scopes and without expanding security group memberships.
 
 .EXAMPLE
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -IncludeNestedScopes -ExpandEnvironmentGroups
+Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -ExcludeNestedScopes -NoExpandEnvironmentGroups
 
-Gets role assignments at the tenant scope, including nested scopes and expanding environment group memberships.
+Gets role assignments at the tenant scope, excluding nested scopes and without expanding environment group memberships.
 
 .EXAMPLE
 Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -PrincipalType User -PrincipalObjectId "00000000-0000-0000-0000-000000000005"
@@ -56,8 +60,7 @@ Gets role assignments filtered by a specific permission.
 function Get-RBACRoleAssignment {
     [CmdletBinding(DefaultParameterSetName = 'TenantScope')]
     param(
-        [Parameter(Mandatory, HelpMessage="The application (client) ID of the app registration")]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory=$false, HelpMessage="The application (client) ID of the app registration")]
         [string]$ClientId,
 
         [Parameter(Mandatory, HelpMessage="The Azure AD tenant ID")]
@@ -68,17 +71,17 @@ function Get-RBACRoleAssignment {
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
 
-        [Parameter(Mandatory=$false, HelpMessage="Include role assignments from parent scopes")]
-        [switch]$IncludeParentScopes,
+        [Parameter(Mandatory=$false, HelpMessage="Exclude role assignments from parent scopes")]
+        [switch]$ExcludeParentScopes,
 
-        [Parameter(Mandatory=$false, HelpMessage="Expand security group memberships in the results")]
-        [switch]$ExpandSecurityGroups,
+        [Parameter(Mandatory=$false, HelpMessage="Do not expand security group memberships in the results")]
+        [switch]$NoExpandSecurityGroups,
 
-        [Parameter(Mandatory=$false, HelpMessage="Expand environment group memberships in the results")]
-        [switch]$ExpandEnvironmentGroups,
+        [Parameter(Mandatory=$false, HelpMessage="Do not expand environment group memberships in the results")]
+        [switch]$NoExpandEnvironmentGroups,
 
-        [Parameter(Mandatory=$false, HelpMessage="Include role assignments from nested scopes")]
-        [switch]$IncludeNestedScopes,
+        [Parameter(Mandatory=$false, HelpMessage="Exclude role assignments from nested scopes")]
+        [switch]$ExcludeNestedScopes,
 
         [Parameter(Mandatory=$false, HelpMessage="Filter by principal type")]
         [AuthorizationPrincipalType]$PrincipalType,
@@ -98,18 +101,28 @@ function Get-RBACRoleAssignment {
 
     $ErrorActionPreference = "Stop"
 
+    if ([string]::IsNullOrWhiteSpace($ClientId)) {
+        $ClientId = Get-CachedClientId
+        if ([string]::IsNullOrWhiteSpace($ClientId)) {
+            throw "ClientId was not provided and no cached ClientId was found. Run New-AuthorizationApplication or specify -ClientId."
+        }
+    }
+    else {
+        Set-CachedClientId -ClientId $ClientId
+    }
+
     # Connect to Authorization Service
     if (-not(New-AuthorizationServiceMsalClient -ClientId $ClientId -TenantId $TenantId -Endpoint $Endpoint -Force:$ForceAuth)) {
         throw "Failed to connect to Authorization Service. Please check your credentials and try again."
     }
 
-    # Build parameters for the generic function
+    # Build parameters for the generic function (switches are negatives, so invert)
     $params = @{
         TenantId = $TenantId
-        IncludeParentScopes = $IncludeParentScopes.IsPresent
-        ExpandSecurityGroups = $ExpandSecurityGroups.IsPresent
-        ExpandEnvironmentGroups = $ExpandEnvironmentGroups.IsPresent
-        IncludeNestedScopes = $IncludeNestedScopes.IsPresent
+        IncludeParentScopes = -not $ExcludeParentScopes.IsPresent
+        ExpandSecurityGroups = -not $NoExpandSecurityGroups.IsPresent
+        ExpandEnvironmentGroups = -not $NoExpandEnvironmentGroups.IsPresent
+        IncludeNestedScopes = -not $ExcludeNestedScopes.IsPresent
         Endpoint = $Endpoint
     }
 

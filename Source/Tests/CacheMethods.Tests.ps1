@@ -239,6 +239,78 @@ Describe 'CacheMethods Tests' {
             }
         }
 
+        Context 'Get-CachedClientId' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Returns null when no ClientId is cached' {
+                Get-CachedClientId | Should -BeNullOrEmpty
+            }
+
+            It 'Returns cached ClientId after it is set' {
+                Set-CachedClientId -ClientId "test-client-id"
+
+                Get-CachedClientId | Should -Be "test-client-id"
+            }
+
+            It 'Handles cache files created before ClientId feature' {
+                # Simulate an old cache without the ClientId key
+                $script:CacheData = [PSCustomObject]@{
+                    Version = "1.0"
+                    SubscriptionsValidated = @()
+                    RoleDefinitions = @{}
+                }
+
+                Get-CachedClientId | Should -BeNullOrEmpty
+            }
+        }
+
+        Context 'Set-CachedClientId' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Stores ClientId in the cache' {
+                Set-CachedClientId -ClientId "my-client-id"
+
+                $script:CacheData.ClientId | Should -Be "my-client-id"
+            }
+
+            It 'Persists to disk after setting' {
+                Set-CachedClientId -ClientId "my-client-id"
+
+                Test-Path $script:TestCachePath | Should -Be $true
+                $savedData = Get-Content $script:TestCachePath | ConvertFrom-Json
+                $savedData.ClientId | Should -Be "my-client-id"
+            }
+
+            It 'Overwrites existing ClientId' {
+                Set-CachedClientId -ClientId "old-client-id"
+                Set-CachedClientId -ClientId "new-client-id"
+
+                $script:CacheData.ClientId | Should -Be "new-client-id"
+            }
+
+            It 'Handles cache files created before ClientId feature' {
+                # Simulate an old cache without the ClientId key
+                $script:CacheData = [PSCustomObject]@{
+                    Version = "1.0"
+                    SubscriptionsValidated = @()
+                    RoleDefinitions = @{}
+                }
+
+                Set-CachedClientId -ClientId "new-client-id"
+
+                $script:CacheData.ClientId | Should -Be "new-client-id"
+            }
+
+            It 'Throws when ClientId is null or empty' {
+                { Set-CachedClientId -ClientId $null } | Should -Throw
+                { Set-CachedClientId -ClientId "" } | Should -Throw
+            }
+        }
+
         Context 'Set-CachedRoleDefinitions' {
             BeforeEach {
                 Initialize-Cache

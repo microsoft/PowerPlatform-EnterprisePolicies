@@ -27,6 +27,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Test-PrincipalPermission { return $script:mockPermissionResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should return permission results' {
@@ -40,6 +41,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Test-PrincipalPermission { return $script:mockPermissionResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should test only Read permission when -ReadDiagnostic specified' {
@@ -74,6 +76,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Test-PrincipalPermission { return $script:mockPermissionResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should pass correct parameters to Test-PrincipalPermission' {
@@ -88,9 +91,35 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         }
     }
 
+    Context 'Uses cached ClientId when not specified' {
+        BeforeAll {
+            Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Test-PrincipalPermission { return $script:mockPermissionResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-CachedClientId { return $script:testClientId } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should use cached ClientId when not specified' {
+            $result = Test-RBACDiagnosticPermission -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic
+
+            $result | Should -Not -BeNullOrEmpty
+        }
+    }
+
+    Context 'Throws when no ClientId specified and none cached' {
+        BeforeAll {
+            Mock Get-CachedClientId { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should throw when no ClientId specified and none cached' {
+            { Test-RBACDiagnosticPermission -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
+        }
+    }
+
     Context 'Error handling' {
         It 'Should throw when New-AuthorizationServiceMsalClient fails' {
             Mock New-AuthorizationServiceMsalClient { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             { Test-RBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic } | Should -Throw "*Failed to connect to Authorization Service*"
         }

@@ -31,7 +31,11 @@ function Connect-AzAccount {
     )
 }
 function Get-AzContext {}
-function Set-AzContext {}
+function Set-AzContext {
+    param(
+        $Context
+    )
+}
 function Get-AzADAppCredential {}
 function New-AzADAppCredential {}
 function Get-AzADApplication {

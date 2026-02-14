@@ -83,7 +83,7 @@ function New-AuthorizationApplication {
         Write-Host "  Application (client) ID: $($existingApp.AppId)" -ForegroundColor Yellow
         Write-Host ""
         Write-Host "To verify if this application is correctly configured, run:" -ForegroundColor Cyan
-        Write-Host "  Test-AuthorizationApplication -ApplicationId '$($existingApp.AppId)' -TenantId '$TenantId' -Endpoint $Endpoint" -ForegroundColor White
+        Write-Host "  Test-AuthorizationApplication -ClientId '$($existingApp.AppId)' -TenantId '$TenantId' -Endpoint $Endpoint" -ForegroundColor White
         Write-Host ""
         Write-Host "If the test fails, run this command with the -Update switch to update the application:" -ForegroundColor Cyan
         Write-Host "  New-AuthorizationApplication -DisplayName '$DisplayName' -TenantId '$TenantId' -Endpoint $Endpoint -Update" -ForegroundColor White
@@ -189,6 +189,8 @@ function New-AuthorizationApplication {
     Write-Host "  Application ID URI: $identifierUri" -ForegroundColor Green
     Write-Host "  Application Object ID: $($application.Id)" -ForegroundColor Green
     Write-Host "  Service Principal Object ID: $($appServicePrincipal.Id)" -ForegroundColor Green
+
+    Set-CachedClientId -ClientId $application.AppId
 
     return $application.AppId
 }

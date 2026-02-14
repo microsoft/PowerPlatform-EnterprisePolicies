@@ -25,12 +25,12 @@ System.Boolean
 Returns $true if the application is correctly configured, $false otherwise.
 
 .EXAMPLE
-Test-AuthorizationApplication -ApplicationId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012"
+Test-AuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012"
 
 Tests that the application is correctly configured for the prod endpoint.
 
 .EXAMPLE
-Test-AuthorizationApplication -ApplicationId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint tip1
+Test-AuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint tip1
 
 Tests that the application is correctly configured for the TIP1 endpoint.
 #>
@@ -40,7 +40,7 @@ function Test-AuthorizationApplication {
     param(
         [Parameter(Mandatory, HelpMessage="The Application (client) ID of the Azure AD application")]
         [ValidateNotNullOrEmpty()]
-        [string]$ApplicationId,
+        [string]$ClientId,
 
         [Parameter(Mandatory, HelpMessage="The Azure AD tenant ID")]
         [ValidateNotNullOrEmpty()]
@@ -71,13 +71,13 @@ function Test-AuthorizationApplication {
         }
     }
 
-    Write-Verbose "Validating application $ApplicationId against API $expectedApiId"
+    Write-Verbose "Validating application $ClientId against API $expectedApiId"
 
     # Check if the application exists
-    $application = Get-AzADApplication -Filter "appId eq '$ApplicationId'" -ErrorAction SilentlyContinue
+    $application = Get-AzADApplication -Filter "appId eq '$ClientId'" -ErrorAction SilentlyContinue
 
     if ($null -eq $application) {
-        Write-Warning "Application with ID '$ApplicationId' not found in tenant '$TenantId'."
+        Write-Warning "Application with ID '$ClientId' not found in tenant '$TenantId'."
         return $false
     }
 

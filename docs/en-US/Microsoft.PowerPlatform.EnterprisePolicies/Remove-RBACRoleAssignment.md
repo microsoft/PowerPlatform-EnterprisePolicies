@@ -20,23 +20,23 @@ Removes an RBAC role assignment.
 ### TenantScope (Default)
 
 ```
-Remove-RBACRoleAssignment -ClientId <string> -RoleAssignmentId <string> -TenantId <string>
+Remove-RBACRoleAssignment -RoleAssignmentId <string> -TenantId <string> [-ClientId <string>]
  [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### EnvironmentScope
 
 ```
-Remove-RBACRoleAssignment -ClientId <string> -RoleAssignmentId <string> -TenantId <string>
- -EnvironmentId <string> [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
+Remove-RBACRoleAssignment -RoleAssignmentId <string> -TenantId <string> -EnvironmentId <string>
+ [-ClientId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
 
 ### EnvironmentGroupScope
 
 ```
-Remove-RBACRoleAssignment -ClientId <string> -RoleAssignmentId <string> -TenantId <string>
- -EnvironmentGroupId <string> [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
+Remove-RBACRoleAssignment -RoleAssignmentId <string> -TenantId <string> -EnvironmentGroupId <string>
+ [-ClientId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
 
@@ -50,6 +50,10 @@ This cmdlet has the following aliases,
 This cmdlet removes a role assignment by its ID.
 The scope can be at the tenant,
 environment, or environment group level.
+
+If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+When -ClientId is provided, it is stored in the cache for future use.
 
 Returns $true if the role assignment was deleted, $false if it was not found.
 
@@ -87,7 +91,7 @@ Aliases: []
 ParameterSets:
 - Name: (All)
   Position: Named
-  IsRequired: true
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false

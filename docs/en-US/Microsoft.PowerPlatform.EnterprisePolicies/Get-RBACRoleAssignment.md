@@ -20,8 +20,8 @@ Gets RBAC role assignments at a specified scope.
 ### TenantScope (Default)
 
 ```
-Get-RBACRoleAssignment -ClientId <string> -TenantId <string> [-IncludeParentScopes]
- [-ExpandSecurityGroups] [-ExpandEnvironmentGroups] [-IncludeNestedScopes]
+Get-RBACRoleAssignment -TenantId <string> [-ClientId <string>] [-ExcludeParentScopes]
+ [-NoExpandSecurityGroups] [-NoExpandEnvironmentGroups] [-ExcludeNestedScopes]
  [-PrincipalType <AuthorizationPrincipalType>] [-PrincipalObjectId <string>] [-Permission <string>]
  [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
@@ -29,10 +29,10 @@ Get-RBACRoleAssignment -ClientId <string> -TenantId <string> [-IncludeParentScop
 ### EnvironmentScope
 
 ```
-Get-RBACRoleAssignment -ClientId <string> -TenantId <string> -EnvironmentId <string>
- [-IncludeParentScopes] [-ExpandSecurityGroups] [-ExpandEnvironmentGroups] [-IncludeNestedScopes]
- [-PrincipalType <AuthorizationPrincipalType>] [-PrincipalObjectId <string>] [-Permission <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+Get-RBACRoleAssignment -TenantId <string> -EnvironmentId <string> [-ClientId <string>]
+ [-ExcludeParentScopes] [-NoExpandSecurityGroups] [-NoExpandEnvironmentGroups]
+ [-ExcludeNestedScopes] [-PrincipalType <AuthorizationPrincipalType>] [-PrincipalObjectId <string>]
+ [-Permission <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -46,8 +46,13 @@ This cmdlet retrieves role assignments for Power Platform RBAC operations.
 The scope can be
 at the tenant or environment level.
 
-Options allow expanding security groups, environment groups, including parent scopes,
-and including nested scopes in the results.
+If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+When -ClientId is provided, it is stored in the cache for future use.
+
+By default, results include parent scopes, nested scopes, expanded security groups, and
+expanded environment groups.
+Use the corresponding switches to disable these behaviors.
 
 ## EXAMPLES
 
@@ -55,25 +60,25 @@ and including nested scopes in the results.
 
 Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001"
 
-Gets all role assignments at the tenant scope.
+Gets all role assignments at the tenant scope with all expansions enabled.
 
 ### EXAMPLE 2
 
 Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002"
 
-Gets all role assignments at the environment scope.
+Gets all role assignments at the environment scope with all expansions enabled.
 
 ### EXAMPLE 3
 
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -IncludeParentScopes -ExpandSecurityGroups
+Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -ExcludeParentScopes -NoExpandSecurityGroups
 
-Gets role assignments at the environment scope, including parent scopes and expanding security group memberships.
+Gets role assignments at the environment scope, excluding parent scopes and without expanding security group memberships.
 
 ### EXAMPLE 4
 
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -IncludeNestedScopes -ExpandEnvironmentGroups
+Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -ExcludeNestedScopes -NoExpandEnvironmentGroups
 
-Gets role assignments at the tenant scope, including nested scopes and expanding environment group memberships.
+Gets role assignments at the tenant scope, excluding nested scopes and without expanding environment group memberships.
 
 ### EXAMPLE 5
 
@@ -101,7 +106,7 @@ Aliases: []
 ParameterSets:
 - Name: (All)
   Position: Named
-  IsRequired: true
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -152,9 +157,9 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ExpandEnvironmentGroups
+### -ExcludeNestedScopes
 
-Expand environment group memberships in the results
+Exclude role assignments from nested scopes
 
 ```yaml
 Type: System.Management.Automation.SwitchParameter
@@ -173,9 +178,9 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -ExpandSecurityGroups
+### -ExcludeParentScopes
 
-Expand security group memberships in the results
+Exclude role assignments from parent scopes
 
 ```yaml
 Type: System.Management.Automation.SwitchParameter
@@ -215,9 +220,9 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -IncludeNestedScopes
+### -NoExpandEnvironmentGroups
 
-Include role assignments from nested scopes
+Do not expand environment group memberships in the results
 
 ```yaml
 Type: System.Management.Automation.SwitchParameter
@@ -236,9 +241,9 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -IncludeParentScopes
+### -NoExpandSecurityGroups
 
-Include role assignments from parent scopes
+Do not expand security group memberships in the results
 
 ```yaml
 Type: System.Management.Automation.SwitchParameter

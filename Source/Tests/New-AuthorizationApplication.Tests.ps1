@@ -61,6 +61,7 @@ Describe 'New-AuthorizationApplication Tests' {
             Mock New-AzADApplication { return $script:mockApplication } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Update-AzADApplication {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADServicePrincipal { return $script:mockAppServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should create application and return AppId' {
@@ -79,6 +80,14 @@ Describe 'New-AuthorizationApplication Tests' {
             New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
 
             Should -Invoke New-AzADServicePrincipal -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should cache the returned ClientId' {
+            New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
+
+            Should -Invoke Set-CachedClientId -Times 1 -ParameterFilter {
+                $ClientId -eq $script:testAppId
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
     }
 
@@ -112,6 +121,7 @@ Describe 'New-AuthorizationApplication Tests' {
             Mock New-AzADApplication { return $script:mockApplication } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Update-AzADApplication {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADServicePrincipal { return $script:mockAppServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should succeed with tip1 endpoint' {
@@ -139,6 +149,7 @@ Describe 'New-AuthorizationApplication Tests' {
             Mock Get-AzADServicePrincipal { return $script:mockServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Update-AzADApplication {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADServicePrincipal { return $script:mockAppServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should not create new app when app already exists without -Update switch' {

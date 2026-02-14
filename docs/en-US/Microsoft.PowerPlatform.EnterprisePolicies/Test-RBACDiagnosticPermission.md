@@ -20,24 +20,24 @@ Tests RBAC diagnostic permissions for a principal on an environment.
 ### ReadDiagnostic
 
 ```
-Test-RBACDiagnosticPermission -ClientId <string> -TenantId <string> -EnvironmentId <string>
- -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType> -ReadDiagnostic
+Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -PrincipalObjectId <string>
+ -PrincipalType <AuthorizationPrincipalType> -ReadDiagnostic [-ClientId <string>]
  [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### RunDiagnostic
 
 ```
-Test-RBACDiagnosticPermission -ClientId <string> -TenantId <string> -EnvironmentId <string>
- -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType> -RunDiagnostic
+Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -PrincipalObjectId <string>
+ -PrincipalType <AuthorizationPrincipalType> -RunDiagnostic [-ClientId <string>]
  [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### RunMitigation
 
 ```
-Test-RBACDiagnosticPermission -ClientId <string> -TenantId <string> -EnvironmentId <string>
- -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType> -RunMitigation
+Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -PrincipalObjectId <string>
+ -PrincipalType <AuthorizationPrincipalType> -RunMitigation [-ClientId <string>]
  [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
@@ -50,6 +50,10 @@ This cmdlet has the following aliases,
 
 This cmdlet tests whether a principal (user, group, or application) has a specific
 Subnet Injection diagnostic permission on a Power Platform environment.
+
+If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+When -ClientId is provided, it is stored in the cache for future use.
 
 Use one of the switches to test a specific permission level:
 - ReadDiagnostic: Can view diagnostic information
@@ -92,7 +96,7 @@ Aliases: []
 ParameterSets:
 - Name: (All)
   Position: Named
-  IsRequired: true
+  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
