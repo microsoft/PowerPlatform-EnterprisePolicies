@@ -9,7 +9,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Removes a role assignment for Authorization.
+Removes an RBAC role assignment.
 
 .DESCRIPTION
 This cmdlet removes a role assignment by its ID. The scope can be at the tenant,
@@ -22,22 +22,22 @@ System.Boolean
 Returns $true if the role assignment was deleted, $false if it was not found.
 
 .EXAMPLE
-Remove-AuthorizationRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002"
+Remove-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002"
 
 Removes a tenant-scoped role assignment.
 
 .EXAMPLE
-Remove-AuthorizationRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
+Remove-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
 
 Removes an environment-scoped role assignment.
 
 .EXAMPLE
-Remove-AuthorizationRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
+Remove-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
 
 Removes an environment group-scoped role assignment.
 #>
 
-function Remove-AuthorizationRoleAssignment {
+function Remove-RBACRoleAssignment {
     [CmdletBinding(DefaultParameterSetName = 'TenantScope', SupportsShouldProcess, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory, HelpMessage="The application (client) ID of the app registration")]
@@ -95,7 +95,7 @@ function Remove-AuthorizationRoleAssignment {
         $params['EnvironmentGroupId'] = $EnvironmentGroupId
     }
 
-    if ($PSCmdlet.ShouldProcess($RoleAssignmentId, "Remove Authorization Role Assignment")) {
+    if ($PSCmdlet.ShouldProcess($RoleAssignmentId, "Remove RBAC Role Assignment")) {
         $result = Remove-RoleAssignment @params
 
         if ($result) {

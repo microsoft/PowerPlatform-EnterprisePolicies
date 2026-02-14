@@ -9,40 +9,43 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Creates a role assignment for Authorization.
+Creates an RBAC role assignment.
 
 .DESCRIPTION
 This cmdlet creates a role assignment for a principal (user, group, or application) to grant
-permissions for Authorization operations. The role can be scoped at the tenant,
+permissions via Power Platform RBAC. The role can be scoped at the tenant,
 environment, or environment group level.
 
-Available roles:
-- Administrator: Full administrative access
-- Reader: Read-only access
-- Contributor: Contributor access
-- Owner: Owner access with full control
+The Role parameter accepts the role definition name as returned by the Power Platform
+Authorization API (e.g., "Power Platform Reader"). Use -RefreshRoles to update the
+cached list of available roles.
 
 .OUTPUTS
 System.Management.Automation.PSCustomObject
 Returns the created role assignment object from the API.
 
 .EXAMPLE
-New-AuthorizationRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType User -Role Reader -TenantId "00000000-0000-0000-0000-000000000002"
+New-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType User -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002"
 
-Creates a tenant-scoped Reader role assignment for a user.
-
-.EXAMPLE
-New-AuthorizationRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType Group -Role Contributor -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
-
-Creates an environment-scoped Contributor role assignment for a group.
+Creates a tenant-scoped role assignment for a user with the "Power Platform Reader" role.
 
 .EXAMPLE
-New-AuthorizationRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType ApplicationUser -Role Owner -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
+New-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType Group -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
 
-Creates an environment group-scoped Owner role assignment for an application.
+Creates an environment-scoped role assignment for a group.
+
+.EXAMPLE
+New-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType ApplicationUser -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
+
+Creates an environment group-scoped role assignment for an application.
+
+.EXAMPLE
+New-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType User -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -RefreshRoles
+
+Creates a role assignment while forcing a refresh of the cached role definitions.
 #>
 
-function New-AuthorizationRoleAssignment {
+function New-RBACRoleAssignment {
     [CmdletBinding(DefaultParameterSetName = 'TenantScope')]
     param(
         [Parameter(Mandatory, HelpMessage="The application (client) ID of the app registration")]
@@ -56,8 +59,9 @@ function New-AuthorizationRoleAssignment {
         [Parameter(Mandatory, HelpMessage="The type of principal")]
         [AuthorizationPrincipalType]$PrincipalType,
 
-        [Parameter(Mandatory, HelpMessage="The role to assign")]
-        [AuthorizationRole]$Role,
+        [Parameter(Mandatory, HelpMessage="The role definition name to assign (e.g., 'Power Platform Reader')")]
+        [ValidateNotNullOrEmpty()]
+        [string]$Role,
 
         [Parameter(Mandatory, HelpMessage="The Azure AD tenant ID")]
         [ValidateNotNullOrEmpty()]
@@ -75,7 +79,10 @@ function New-AuthorizationRoleAssignment {
         [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
-        [switch]$ForceAuth
+        [switch]$ForceAuth,
+
+        [Parameter(Mandatory=$false, HelpMessage="Force re-fetch of role definitions from the API")]
+        [switch]$RefreshRoles
     )
 
     $ErrorActionPreference = "Stop"
@@ -85,13 +92,8 @@ function New-AuthorizationRoleAssignment {
         throw "Failed to connect to Authorization Service. Please check your credentials and try again."
     }
 
-    # Map role to role definition ID
-    $roleDefinitionId = switch ($Role) {
-        ([AuthorizationRole]::Administrator) { "95e94555-018c-447b-8691-bdac8e12211e" }
-        ([AuthorizationRole]::Reader) { "c886ad2e-27f7-4874-8381-5849b8d8a090" }
-        ([AuthorizationRole]::Contributor) { "ff954d61-a89a-4fbe-ace9-01c367b89f87" }
-        ([AuthorizationRole]::Owner) { "0cb07c69-1631-4725-ab35-e59e001c51ea" }
-    }
+    # Resolve role name to role definition ID
+    $roleDefinitionId = Resolve-RoleDefinitionId -RoleName $Role -Endpoint $Endpoint -RefreshRoles:$RefreshRoles
 
     # Build parameters for the generic function
     $params = @{

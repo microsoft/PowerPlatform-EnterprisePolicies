@@ -6,22 +6,22 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 02/13/2026
 PlatyPS schema version: 2024-05-01
-title: New-AuthorizationApplication
+title: Test-AuthorizationApplication
 ---
 
-# New-AuthorizationApplication
+# Test-AuthorizationApplication
 
 ## SYNOPSIS
 
-Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
+Tests that an Azure AD application is correctly configured for Power Platform Authorization.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-New-AuthorizationApplication [-DisplayName] <string> [-TenantId] <string>
- [[-Endpoint] <BAPEndpoint>] [-Update] [-ForceAuth] [<CommonParameters>]
+Test-AuthorizationApplication [-ApplicationId] <string> [-TenantId] <string>
+ [[-Endpoint] <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,45 +31,33 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet creates a public client application (app registration) and its associated service principal
-in Azure AD with the required API permissions for Power Platform Authorization operations.
-The application
-is configured as a single-tenant app with delegated permissions for Authorization.RoleAssignments.Read
-and Authorization.RoleAssignments.Write.
-
-If an application with the specified display name already exists, the cmdlet will prompt you to use
-Test-AuthorizationApplication to verify the configuration, or use the -Update switch to update the
-existing application with the required settings.
-
-Admin consent is NOT granted automatically.
-A tenant administrator must grant consent before
-the application can be used.
+This cmdlet validates that an Azure AD application registration exists and is properly configured
+for Power Platform Authorization operations.
+It checks:
+- The application exists in Azure AD
+- The application has the required API permissions configured (Authorization.RoleAssignments.Read and Write)
+- The application is configured as a public client
+- The application has http://localhost configured as a redirect URI
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012"
+Test-AuthorizationApplication -ApplicationId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012"
 
-Creates a new app registration and service principal named "MyAuthorizationApp".
+Tests that the application is correctly configured for the prod endpoint.
 
 ### EXAMPLE 2
 
-New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Update
+Test-AuthorizationApplication -ApplicationId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint tip1
 
-Updates an existing app registration named "MyAuthorizationApp" with the required permissions.
-
-### EXAMPLE 3
-
-New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint usgovhigh
-
-Creates a new app registration and service principal for the US Government High cloud.
+Tests that the application is correctly configured for the TIP1 endpoint.
 
 ## PARAMETERS
 
-### -DisplayName
+### -ApplicationId
 
-The display name for the application registration
+The Application (client) ID of the Azure AD application
 
 ```yaml
 Type: System.String
@@ -90,7 +78,7 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The BAP endpoint to validate against
 
 ```yaml
 Type: BAPEndpoint
@@ -151,27 +139,6 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -Update
-
-Update an existing application with the required configuration
-
-```yaml
-Type: System.Management.Automation.SwitchParameter
-DefaultValue: False
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
 ### CommonParameters
 
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable,
@@ -183,9 +150,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
+### System.Boolean
 
-Returns the Application (client) ID of the created or updated application.
+Returns $true if the application is correctly configured
 
 {{ Fill in the Description }}
 

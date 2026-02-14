@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/29/2026
+ms.date: 02/13/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -38,13 +38,21 @@ Retrieves the region that the specified environment is deployed in.
 
 Retrieves the current usage of the specified environment.
 
+### [Get-RBACRoleAssignment](Get-RBACRoleAssignment.md)
+
+Gets RBAC role assignments at a specified scope.
+
 ### [Get-SubnetInjectionEnterprisePolicy](Get-SubnetInjectionEnterprisePolicy.md)
 
 Retrieves Subnet Injection Enterprise Policies for Power Platform.
 
 ### [New-AuthorizationApplication](New-AuthorizationApplication.md)
 
-Creates a new Azure AD application registration and service principal for Power Platform Authorization.
+Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
+
+### [New-RBACRoleAssignment](New-RBACRoleAssignment.md)
+
+Creates an RBAC role assignment.
 
 ### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
 
@@ -54,9 +62,17 @@ Creates a new Subnet Injection Enterprise Policy for Power Platform.
 
 Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprisePolicies delegation, or configures an existing VNet/subnet.
 
+### [Remove-RBACRoleAssignment](Remove-RBACRoleAssignment.md)
+
+Removes an RBAC role assignment.
+
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
 Validates that the account has the correct permissions to run diagnostic commands.
+
+### [Test-AuthorizationApplication](Test-AuthorizationApplication.md)
+
+Tests that an Azure AD application is correctly configured for Power Platform Authorization.
 
 ### [Test-DnsResolution](Test-DnsResolution.md)
 
@@ -65,6 +81,10 @@ Tests the DNS resolution for a given hostname in a specified environment.
 ### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
 
 Tests the connectivity to a given service in a specified environment.
+
+### [Test-RBACDiagnosticPermission](Test-RBACDiagnosticPermission.md)
+
+Tests RBAC diagnostic permissions for a principal on an environment.
 
 ### [Test-TLSHandshake](Test-TLSHandshake.md)
 

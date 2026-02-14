@@ -14,6 +14,7 @@ function Get-EmptyCache{
     return @{
         "Version" = "1.0"
         "SubscriptionsValidated" = @()
+        "RoleDefinitions" = @{}
     }
 }
 
@@ -39,7 +40,7 @@ function Save-Cache{
     if(-not(Test-Path -Path (Split-Path -Path $script:CachePath))){
         New-Item -ItemType Directory -Path (Split-Path -Path $script:CachePath) -Force | Out-Null
     }
-    $script:CacheData | ConvertTo-Json | Out-File -FilePath $script:CachePath -Force
+    $script:CacheData | ConvertTo-Json -Depth 10 | Out-File -FilePath $script:CachePath -Force
 }
 
 function Test-SubscriptionValidated{
@@ -63,4 +64,70 @@ function Add-ValidatedSubscriptionToCache{
         $script:CacheData.SubscriptionsValidated += $SubscriptionId
         Save-Cache
     }
+}
+
+function Get-CachedRoleDefinitions{
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Endpoint
+    )
+
+    if($null -eq $script:CacheData){
+        Initialize-Cache
+    }
+
+    # Ensure RoleDefinitions key exists (for caches created before this feature)
+    if($null -eq $script:CacheData.RoleDefinitions){
+        $script:CacheData | Add-Member -NotePropertyName "RoleDefinitions" -NotePropertyValue @{} -Force
+    }
+
+    $entry = $script:CacheData.RoleDefinitions.$Endpoint
+    if($null -eq $entry){
+        return $null
+    }
+
+    $fetchedAt = [DateTime]::Parse($entry.fetchedAt).ToUniversalTime()
+    $age = [DateTime]::UtcNow - $fetchedAt
+
+    if($age.TotalHours -ge 1){
+        return $null
+    }
+
+    return $entry.value
+}
+
+function Set-CachedRoleDefinitions{
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Endpoint,
+
+        [Parameter(Mandatory)]
+        $RoleDefinitions
+    )
+
+    if($null -eq $script:CacheData){
+        Initialize-Cache
+    }
+
+    # Ensure RoleDefinitions key exists
+    if($null -eq $script:CacheData.RoleDefinitions){
+        $script:CacheData | Add-Member -NotePropertyName "RoleDefinitions" -NotePropertyValue @{} -Force
+    }
+
+    $entry = @{
+        fetchedAt = [DateTime]::UtcNow.ToString("o")
+        value = $RoleDefinitions
+    }
+
+    # CacheData.RoleDefinitions may be a PSCustomObject (from JSON) or a hashtable
+    if($script:CacheData.RoleDefinitions -is [hashtable]){
+        $script:CacheData.RoleDefinitions[$Endpoint] = $entry
+    }
+    else{
+        $script:CacheData.RoleDefinitions | Add-Member -NotePropertyName $Endpoint -NotePropertyValue $entry -Force
+    }
+
+    Save-Cache
 }
