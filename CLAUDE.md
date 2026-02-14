@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 PowerShell module and scripts for managing Power Platform Enterprise Policies as Azure resources. Supports:
 - **Customer Managed Key (CMK)** policies for encryption
 - **Subnet Injection** policies for virtual network delegation
+- **Power Platform RBAC** (authorization) for role assignments and permission management
 - Diagnostic tools for VNET functionality troubleshooting
 
 Supports multiple Azure environments: AzureCloud, AzureUSGovernment (DoD, USGovHigh), AzureChinaCloud.
@@ -71,6 +72,12 @@ Tests use Pester loaded from NuGet packages (version defined in `Directory.Packa
 ```
 Source/Microsoft.PowerPlatform.EnterprisePolicies/
 ├── Public/
+│   ├── Authorization/                                # Power Platform RBAC cmdlets
+│   │   ├── Get-RBACRoleAssignment.ps1               # Query role assignments
+│   │   ├── New-RBACRoleAssignment.ps1               # Create role assignments
+│   │   ├── Remove-RBACRoleAssignment.ps1            # Delete role assignments
+│   │   ├── New-AuthorizationApplication.ps1         # Create Azure AD app for auth
+│   │   └── Test-AuthorizationApplication.ps1        # Validate auth app setup
 │   └── SubnetInjection/
 │       ├── New-SubnetInjectionEnterprisePolicy.ps1  # Create subnet injection policy
 │       ├── Get-SubnetInjectionEnterprisePolicy.ps1  # Retrieve subnet injection policies
@@ -81,14 +88,17 @@ Source/Microsoft.PowerPlatform.EnterprisePolicies/
 │           ├── Get-EnvironmentRegion.ps1
 │           ├── Test-AccountPermissions.ps1
 │           ├── Test-DnsResolution.ps1
-│           └── Test-NetworkConnectivity.ps1
+│           ├── Test-NetworkConnectivity.ps1
+│           └── Test-RBACDiagnosticPermission.ps1    # Test RBAC diagnostic permissions
 └── Private/                   # Internal implementation
     ├── Types.psm1             # Enums and data classes
-    ├── AuthenticationOperations.ps1  # Azure authentication
+    ├── AuthenticationOperations.ps1  # Azure auth + MSAL client for Authorization Service
     ├── EnvironmentOperations.ps1     # BAP environment operations
     ├── RESTHelpers.ps1        # HTTP client with retry logic, BAP API endpoints
     ├── AzHelper.ps1           # Azure resource operations
-    ├── CacheMethods.ps1       # Response caching
+    ├── CacheMethods.ps1       # Response caching (ClientId, role definitions, subscriptions)
+    ├── RoleAssignmentOperations.ps1  # Generic RBAC role assignment API calls
+    ├── RoleDefinitionOperations.ps1  # Role definition resolution and caching
     └── VnetValidations.ps1    # Network validation
 ```
 
@@ -121,12 +131,24 @@ Before creating new helper functions, check if one already exists:
 - **`Get-BAPEndpointUrl`** (RESTHelpers.ps1): Gets BAP API endpoint URLs for a given endpoint
 - **`Get-BAPResourceUrl`** (RESTHelpers.ps1): Gets BAP resource/audience URLs for token acquisition
 - **`Connect-Azure`** (AuthenticationOperations.ps1): Handles Azure authentication with endpoint mapping
+- **`New-AuthorizationServiceMsalClient`** (AuthenticationOperations.ps1): Creates MSAL client for Authorization Service; resolves ClientId from cache if not provided, caches it when provided
+- **`Select-PreferredContext`** (AuthenticationOperations.ps1): Selects best Azure context, preferring service principal over user accounts
+- **`Initialize-Cache`** (CacheMethods.ps1): Initializes the local cache — called once on module load, do not call again in individual functions
 
 ### Authentication Flow
-`AuthenticationOperations.ps1` handles Azure authentication:
-- Reuses existing `AzContext` when available
+`AuthenticationOperations.ps1` handles two authentication flows:
+
+**Azure Context (`Connect-Azure`):**
+- Reuses existing `AzContext` when available, preferring service principal contexts over user contexts
 - Maps `BAPEndpoint` to `AzureEnvironment` for login
 - Supports tenant-specific authentication with `-TenantId`
+- `-Force` switch bypasses context reuse entirely
+
+**Authorization Service (`New-AuthorizationServiceMsalClient`):**
+- Creates MSAL public client applications for Power Platform RBAC operations
+- ClientId resolution: if not provided, looks up from local cache; if provided, stores in cache for future calls
+- Caches MSAL clients per `Endpoint|TenantId|ClientId` combination
+- Used by all Authorization/RBAC cmdlets
 
 ## Code Conventions
 
@@ -157,6 +179,7 @@ Public cmdlets that call Azure/BAP APIs should include these common parameters:
 - Functions use advanced parameter validation with `CmdletBinding`
 - Use `$ErrorActionPreference = "Stop"` at the start of functions
 - In `HelpMessage` attributes, do not enumerate specific enum values (e.g., don't say "AzureCloud, AzureUSGovernment, AzureChinaCloud") - enum values may change over time
+- When referring to RBAC in documentation or help text, always say **"Power Platform RBAC"** — never bare "RBAC", since this is the Power Platform authorization system, not Azure RBAC
 
 ### PowerShell Best Practices
 - **Avoid code duplication**: Consolidate similar functions into one using parameter sets
@@ -175,6 +198,8 @@ Public cmdlets that call Azure/BAP APIs should include these common parameters:
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification="Unit test code")]
   param()
   ```
+- **FakeAzModule stubs**: If you need to use `-ParameterFilter` on `Assert-MockCalled`/`Should -Invoke` for a mock, the stub function in `Source/Tests/FakeAzModule/Fake-AzModuleFunctions.psm1` must declare that parameter. Stubs with no parameters won't capture filter values.
+- **Do not run build tasks in parallel**: All build tasks (Build, Test, BuildHelp) share the `Release/` directory. Running them concurrently causes file lock conflicts.
 
 ## Dependencies
 
