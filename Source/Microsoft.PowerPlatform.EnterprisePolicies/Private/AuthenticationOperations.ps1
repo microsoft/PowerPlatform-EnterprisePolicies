@@ -204,8 +204,7 @@ $script:AuthorizationServiceCurrentKey = $null
 
 function New-AuthorizationServiceMsalClient {
     param(
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory = $false)]
         [string]$ClientId,
 
         [Parameter(Mandatory)]
@@ -218,6 +217,17 @@ function New-AuthorizationServiceMsalClient {
         [Parameter(Mandatory = $false)]
         [switch]$Force
     )
+
+    # Resolve ClientId from cache if not provided; cache it if provided
+    if ([string]::IsNullOrWhiteSpace($ClientId)) {
+        $ClientId = Get-CachedClientId
+        if ([string]::IsNullOrWhiteSpace($ClientId)) {
+            throw "ClientId was not provided and no cached ClientId was found. Run New-AuthorizationApplication or specify -ClientId."
+        }
+    }
+    else {
+        Set-CachedClientId -ClientId $ClientId
+    }
 
     $cacheKey = "$Endpoint|$TenantId|$ClientId"
 

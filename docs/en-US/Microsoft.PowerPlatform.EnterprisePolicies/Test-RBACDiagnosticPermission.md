@@ -13,7 +13,7 @@ title: Test-RBACDiagnosticPermission
 
 ## SYNOPSIS
 
-Tests RBAC diagnostic permissions for a principal on an environment.
+Tests Power Platform RBAC diagnostic permissions for a principal on an environment.
 
 ## SYNTAX
 
@@ -52,7 +52,7 @@ This cmdlet tests whether a principal (user, group, or application) has a specif
 Subnet Injection diagnostic permission on a Power Platform environment.
 
 If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
-New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+New-AuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
 When -ClientId is provided, it is stored in the cache for future use.
 
 Use one of the switches to test a specific permission level:

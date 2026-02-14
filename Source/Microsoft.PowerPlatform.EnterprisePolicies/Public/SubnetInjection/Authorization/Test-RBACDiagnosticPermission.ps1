@@ -9,14 +9,14 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Tests RBAC diagnostic permissions for a principal on an environment.
+Tests Power Platform RBAC diagnostic permissions for a principal on an environment.
 
 .DESCRIPTION
 This cmdlet tests whether a principal (user, group, or application) has a specific
 Subnet Injection diagnostic permission on a Power Platform environment.
 
 If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
-New-AuthorizationApplication or any RBAC cmdlet that was given -ClientId explicitly.
+New-AuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
 When -ClientId is provided, it is stored in the cache for future use.
 
 Use one of the switches to test a specific permission level:
@@ -85,17 +85,7 @@ function Test-RBACDiagnosticPermission {
 
     $ErrorActionPreference = "Stop"
 
-    if ([string]::IsNullOrWhiteSpace($ClientId)) {
-        $ClientId = Get-CachedClientId
-        if ([string]::IsNullOrWhiteSpace($ClientId)) {
-            throw "ClientId was not provided and no cached ClientId was found. Run New-AuthorizationApplication or specify -ClientId."
-        }
-    }
-    else {
-        Set-CachedClientId -ClientId $ClientId
-    }
-
-    # Connect to Authorization Service
+    # Connect to Authorization Service (resolves ClientId from cache if not provided)
     if (-not(New-AuthorizationServiceMsalClient -ClientId $ClientId -TenantId $TenantId -Endpoint $Endpoint -Force:$ForceAuth)) {
         throw "Failed to connect to Authorization Service. Please check your credentials and try again."
     }

@@ -40,7 +40,7 @@ Retrieves the current usage of the specified environment.
 
 ### [Get-RBACRoleAssignment](Get-RBACRoleAssignment.md)
 
-Gets RBAC role assignments at a specified scope.
+Gets Power Platform RBAC role assignments at a specified scope.
 
 ### [Get-SubnetInjectionEnterprisePolicy](Get-SubnetInjectionEnterprisePolicy.md)
 
@@ -52,7 +52,7 @@ Creates or updates an Azure AD application registration and service principal fo
 
 ### [New-RBACRoleAssignment](New-RBACRoleAssignment.md)
 
-Creates an RBAC role assignment.
+Creates a Power Platform RBAC role assignment.
 
 ### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
 
@@ -64,7 +64,7 @@ Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprise
 
 ### [Remove-RBACRoleAssignment](Remove-RBACRoleAssignment.md)
 
-Removes an RBAC role assignment.
+Removes a Power Platform RBAC role assignment.
 
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
@@ -84,7 +84,7 @@ Tests the connectivity to a given service in a specified environment.
 
 ### [Test-RBACDiagnosticPermission](Test-RBACDiagnosticPermission.md)
 
-Tests RBAC diagnostic permissions for a principal on an environment.
+Tests Power Platform RBAC diagnostic permissions for a principal on an environment.
 
 ### [Test-TLSHandshake](Test-TLSHandshake.md)
 

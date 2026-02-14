@@ -74,10 +74,6 @@ function Get-CachedRoleDefinitions{
         [string]$Endpoint
     )
 
-    if($null -eq $script:CacheData){
-        Initialize-Cache
-    }
-
     # Ensure RoleDefinitions key exists (for caches created before this feature)
     if($null -eq $script:CacheData.RoleDefinitions){
         $script:CacheData | Add-Member -NotePropertyName "RoleDefinitions" -NotePropertyValue @{} -Force
@@ -108,10 +104,6 @@ function Set-CachedRoleDefinitions{
         $RoleDefinitions
     )
 
-    if($null -eq $script:CacheData){
-        Initialize-Cache
-    }
-
     # Ensure RoleDefinitions key exists
     if($null -eq $script:CacheData.RoleDefinitions){
         $script:CacheData | Add-Member -NotePropertyName "RoleDefinitions" -NotePropertyValue @{} -Force
@@ -134,10 +126,6 @@ function Set-CachedRoleDefinitions{
 }
 
 function Get-CachedClientId{
-    if($null -eq $script:CacheData){
-        Initialize-Cache
-    }
-
     # Ensure ClientId key exists (for caches created before this feature)
     if($null -eq $script:CacheData.ClientId){
         return $null
@@ -156,10 +144,6 @@ function Set-CachedClientId{
         [ValidateNotNullOrEmpty()]
         [string]$ClientId
     )
-
-    if($null -eq $script:CacheData){
-        Initialize-Cache
-    }
 
     # CacheData may be a hashtable (from Get-EmptyCache) or PSCustomObject (from JSON)
     if($script:CacheData -is [hashtable]){

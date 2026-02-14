@@ -223,6 +223,7 @@ Describe 'AuthenticationOperations Tests' {
                 # Reset module-scoped cache before each test
                 $script:AuthorizationServiceCache = @{}
                 $script:AuthorizationServiceCurrentKey = $null
+                Mock Set-CachedClientId {}
             }
 
             It 'Returns true on successful connection' {
@@ -231,6 +232,29 @@ Describe 'AuthenticationOperations Tests' {
                 $result = New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
 
                 $result | Should -Be $true
+            }
+
+            It 'Resolves ClientId from cache when not provided' {
+                Mock Get-CachedClientId { return "cached-client-id" }
+                Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
+
+                $result = New-AuthorizationServiceMsalClient -TenantId "test-tenant-id"
+
+                $result | Should -Be $true
+            }
+
+            It 'Throws when ClientId not provided and not cached' {
+                Mock Get-CachedClientId { return $null }
+
+                { New-AuthorizationServiceMsalClient -TenantId "test-tenant-id" } | Should -Throw "*no cached ClientId was found*"
+            }
+
+            It 'Caches ClientId when explicitly provided' {
+                Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
+
+                New-AuthorizationServiceMsalClient -ClientId "my-client-id" -TenantId "test-tenant-id"
+
+                Should -Invoke Set-CachedClientId -Exactly 1 -ParameterFilter { $ClientId -eq "my-client-id" }
             }
 
             It 'Uses correct authority for prod endpoint' {
