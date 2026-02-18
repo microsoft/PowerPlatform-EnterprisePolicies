@@ -93,8 +93,8 @@ Source/Microsoft.PowerPlatform.EnterprisePolicies/
 └── Private/                   # Internal implementation
     ├── Types.psm1             # Enums and data classes
     ├── AuthenticationOperations.ps1  # Azure auth + MSAL client for Authorization Service
-    ├── EnvironmentOperations.ps1     # BAP environment operations
-    ├── RESTHelpers.ps1        # HTTP client with retry logic, BAP API endpoints
+    ├── EnvironmentOperations.ps1     # Power Platform environment operations
+    ├── RESTHelpers.ps1        # HTTP client with retry logic, Power Platform API endpoints
     ├── AzHelper.ps1           # Azure resource operations
     ├── CacheMethods.ps1       # Response caching (ClientId, role definitions, subscriptions)
     ├── RoleAssignmentOperations.ps1  # Generic RBAC role assignment API calls
@@ -114,22 +114,22 @@ Everything under `Source/` outside the module and tests is legacy code being rep
 `Source/Tests/` is NOT legacy - it contains the Pester tests for the module.
 
 ### Key Types (Private/Types.psm1)
-- `BAPEndpoint` enum: tip1, tip2, prod, usgovhigh, dod, china
+- `PPEndpoint` enum: tip1, tip2, prod, usgovhigh, dod, china
 - `AzureEnvironment` enum: AzureCloud, AzureChinaCloud, AzureUSGovernment
 - `PolicyType` enum: Encryption, NetworkInjection, Identity
 - Data classes: `NetworkUsage`, `VnetInformation`, `EnvironmentNetworkUsageDocument`
 
 ### REST API Pattern
-The module uses `RESTHelpers.ps1` for all BAP (Business Application Platform) API calls:
+The module uses `RESTHelpers.ps1` for all Power Platform API calls:
 - Singleton `HttpClient` with User-Agent header
 - Retry logic with `Retry-After` header support (429/503 responses)
-- Environment-specific endpoints via `Get-BAPEndpointUrl`
+- Environment-specific endpoints via `Get-PPEndpointUrl`
 
 ### Existing Utility Functions
 Before creating new helper functions, check if one already exists:
 - **`ConvertFrom-JsonToClass`** (RESTHelpers.ps1): Converts JSON to typed classes. Use this instead of creating custom converters.
-- **`Get-BAPEndpointUrl`** (RESTHelpers.ps1): Gets BAP API endpoint URLs for a given endpoint
-- **`Get-BAPResourceUrl`** (RESTHelpers.ps1): Gets BAP resource/audience URLs for token acquisition
+- **`Get-PPEndpointUrl`** (RESTHelpers.ps1): Gets Power Platform API endpoint URLs for a given endpoint
+- **`Get-PPResourceUrl`** (RESTHelpers.ps1): Gets Power Platform resource/audience URLs for token acquisition
 - **`Connect-Azure`** (AuthenticationOperations.ps1): Handles Azure authentication with endpoint mapping
 - **`New-AuthorizationServiceMsalClient`** (AuthenticationOperations.ps1): Creates MSAL client for Authorization Service; resolves ClientId from cache if not provided, caches it when provided
 - **`Select-PreferredContext`** (AuthenticationOperations.ps1): Selects best Azure context, preferring service principal over user accounts
@@ -140,7 +140,7 @@ Before creating new helper functions, check if one already exists:
 
 **Azure Context (`Connect-Azure`):**
 - Reuses existing `AzContext` when available, preferring service principal contexts over user contexts
-- Maps `BAPEndpoint` to `AzureEnvironment` for login
+- Maps `PPEndpoint` to `AzureEnvironment` for login
 - Supports tenant-specific authentication with `-TenantId`
 - `-Force` switch bypasses context reuse entirely
 
@@ -168,9 +168,9 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 **Exception:** Test files (`Source/Tests/*.Tests.ps1`) do not require this header.
 
 ### Common Parameters for Public Cmdlets
-Public cmdlets that call Azure/BAP APIs should include these common parameters:
+Public cmdlets that call Azure/Power Platform APIs should include these common parameters:
 - `TenantId` - Optional Azure AD tenant ID
-- `Endpoint` - BAP endpoint (default: `[BAPEndpoint]::Prod`)
+- `Endpoint` - Power Platform endpoint (default: `[PPEndpoint]::Prod`)
 - `ForceAuth` - Switch to force re-authentication instead of reusing existing session
 
 ### General Conventions
@@ -185,7 +185,7 @@ Public cmdlets that call Azure/BAP APIs should include these common parameters:
 - **Avoid code duplication**: Consolidate similar functions into one using parameter sets
 - **Use parameter sets**: When a function has mutually exclusive behaviors, use `ParameterSetName` to define them
 - **Use splatting**: Build `$params` hashtable and call cmdlets with `@params` instead of long parameter lists
-- **Use enums**: When a parameter accepts a fixed set of values, use the defined enums (`PolicyType`, `BAPEndpoint`, etc.) instead of strings
+- **Use enums**: When a parameter accepts a fixed set of values, use the defined enums (`PolicyType`, `PPEndpoint`, etc.) instead of strings
 - **Always use named parameters**: When calling functions, use `-ParameterName $value` syntax, not positional arguments
 - **Validate parameters**: Use `[ValidateNotNullOrEmpty()]` for mandatory string parameters; use `[string]::IsNullOrWhiteSpace()` for optional parameters when building splatted calls
 - **Single authentication call**: Call `Connect-Azure` once at the start of a function, not in each branch

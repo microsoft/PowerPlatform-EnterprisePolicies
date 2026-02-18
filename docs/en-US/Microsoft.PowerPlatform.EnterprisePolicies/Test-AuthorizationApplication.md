@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/13/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Test-AuthorizationApplication
 ---
@@ -20,7 +20,7 @@ Tests that an Azure AD application is correctly configured for Power Platform Au
 ### __AllParameterSets
 
 ```
-Test-AuthorizationApplication [-ClientId] <string> [-TenantId] <string> [[-Endpoint] <BAPEndpoint>]
+Test-AuthorizationApplication [-ClientId] <string> [-TenantId] <string> [[-Endpoint] <PPEndpoint>]
  [-ForceAuth] [<CommonParameters>]
 ```
 
@@ -78,10 +78,10 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The BAP endpoint to validate against
+The Power Platform endpoint to validate against
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/13/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Get-RBACRoleAssignment
 ---
@@ -23,7 +23,7 @@ Gets Power Platform RBAC role assignments at a specified scope.
 Get-RBACRoleAssignment -TenantId <string> [-ClientId <string>] [-ExcludeParentScopes]
  [-NoExpandSecurityGroups] [-NoExpandEnvironmentGroups] [-ExcludeNestedScopes]
  [-PrincipalType <AuthorizationPrincipalType>] [-PrincipalObjectId <string>] [-Permission <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### EnvironmentScope
@@ -32,7 +32,7 @@ Get-RBACRoleAssignment -TenantId <string> [-ClientId <string>] [-ExcludeParentSc
 Get-RBACRoleAssignment -TenantId <string> -EnvironmentId <string> [-ClientId <string>]
  [-ExcludeParentScopes] [-NoExpandSecurityGroups] [-NoExpandEnvironmentGroups]
  [-ExcludeNestedScopes] [-PrincipalType <AuthorizationPrincipalType>] [-PrincipalObjectId <string>]
- [-Permission <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Permission <string>] [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -117,10 +117,10 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The Power Platform endpoint to connect to
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

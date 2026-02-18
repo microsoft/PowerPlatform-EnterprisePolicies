@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/13/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: New-AuthorizationApplication
 ---
@@ -20,8 +20,8 @@ Creates or updates an Azure AD application registration and service principal fo
 ### __AllParameterSets
 
 ```
-New-AuthorizationApplication [-DisplayName] <string> [-TenantId] <string>
- [[-Endpoint] <BAPEndpoint>] [-Update] [-ForceAuth] [<CommonParameters>]
+New-AuthorizationApplication [-DisplayName] <string> [-TenantId] <string> [[-Endpoint] <PPEndpoint>]
+ [-Update] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -90,10 +90,10 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The Power Platform endpoint to connect to
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

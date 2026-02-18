@@ -76,8 +76,8 @@ function Test-RBACDiagnosticPermission {
         [Parameter(Mandatory, ParameterSetName='RunMitigation', HelpMessage="Test RunMitigation permission (EnvironmentManagement.SubnetDiagnostics.Write)")]
         [switch]$RunMitigation,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth

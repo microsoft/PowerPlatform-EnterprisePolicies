@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/13/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: New-RBACRoleAssignment
 ---
@@ -21,7 +21,7 @@ Creates a Power Platform RBAC role assignment.
 
 ```
 New-RBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType>
- -Role <string> -TenantId <string> [-ClientId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth]
+ -Role <string> -TenantId <string> [-ClientId <string>] [-Endpoint <PPEndpoint>] [-ForceAuth]
  [-RefreshRoles] [<CommonParameters>]
 ```
 
@@ -30,7 +30,7 @@ New-RBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <Authorization
 ```
 New-RBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType>
  -Role <string> -TenantId <string> -EnvironmentId <string> [-ClientId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
 ```
 
 ### EnvironmentGroupScope
@@ -38,7 +38,7 @@ New-RBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <Authorization
 ```
 New-RBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType>
  -Role <string> -TenantId <string> -EnvironmentGroupId <string> [-ClientId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -113,10 +113,10 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The Power Platform endpoint to connect to
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

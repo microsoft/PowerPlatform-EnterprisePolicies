@@ -56,8 +56,8 @@ function New-AuthorizationApplication {
         [ValidateNotNullOrEmpty()]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Update an existing application with the required configuration")]
         [switch]$Update,
@@ -94,7 +94,7 @@ function New-AuthorizationApplication {
     # Determine the API ID based on endpoint
     # TIP1 and TIP2 use a different API ID than prod and sovereign clouds
     $apiId = switch ($Endpoint) {
-        { $_ -in [BAPEndpoint]::tip1, [BAPEndpoint]::tip2 } {
+        { $_ -in [PPEndpoint]::tip1, [PPEndpoint]::tip2 } {
             "0ddb742a-e7dc-4899-a31e-80e797ec7144"
         }
         default {

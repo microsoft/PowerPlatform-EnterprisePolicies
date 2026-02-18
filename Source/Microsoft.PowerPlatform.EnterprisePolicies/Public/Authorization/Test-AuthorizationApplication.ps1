@@ -46,8 +46,8 @@ function Test-AuthorizationApplication {
         [ValidateNotNullOrEmpty()]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to validate against")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to validate against")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth
@@ -63,7 +63,7 @@ function Test-AuthorizationApplication {
 
     # Determine the expected API ID based on endpoint
     $expectedApiId = switch ($Endpoint) {
-        { $_ -in [BAPEndpoint]::tip1, [BAPEndpoint]::tip2 } {
+        { $_ -in [PPEndpoint]::tip1, [PPEndpoint]::tip2 } {
             "0ddb742a-e7dc-4899-a31e-80e797ec7144"
         }
         default {

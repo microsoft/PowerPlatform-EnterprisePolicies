@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Test-NetworkConnectivity
 ---
@@ -21,7 +21,7 @@ Tests the connectivity to a given service in a specified environment.
 
 ```
 Test-NetworkConnectivity [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
- [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [-ForceAuth]
+ [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>] [[-Region] <string>] [-ForceAuth]
  [<CommonParameters>]
 ```
 
@@ -49,11 +49,11 @@ Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -
 
 ### EXAMPLE 3
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
 ### EXAMPLE 4
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
 
 ## PARAMETERS
 
@@ -80,10 +80,10 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Default is 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Get-EnvironmentRegion
 ---
@@ -20,7 +20,7 @@ Retrieves the region that the specified environment is deployed in.
 ### __AllParameterSets
 
 ```
-Get-EnvironmentRegion [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
+Get-EnvironmentRegion [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>]
  [-ForceAuth] [<CommonParameters>]
 ```
 
@@ -42,16 +42,16 @@ Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
 ### EXAMPLE 2
 
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
 ## PARAMETERS
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Default is 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

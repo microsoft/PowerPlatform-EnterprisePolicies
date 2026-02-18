@@ -23,7 +23,7 @@ Whether the account has the required permissions.
 Test-AccountPermissions
 
 .EXAMPLE
-Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 #>
 
 function Test-AccountPermissions{
@@ -31,8 +31,8 @@ function Test-AccountPermissions{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Default is 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
         [switch]$ForceAuth

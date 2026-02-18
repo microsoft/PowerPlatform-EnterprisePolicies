@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/13/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -128,6 +128,6 @@ The SubnetUsageDocument class represents historical network usage information an
 
 Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
 
-#### [BAPEndpoint](BAPEndpoint.md)
+#### [PPEndpoint](PPEndpoint.md)
 
-Represents the different BAP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+Represents the different Power Platform endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.

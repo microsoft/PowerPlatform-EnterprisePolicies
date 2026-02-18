@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/13/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Test-RBACDiagnosticPermission
 ---
@@ -22,7 +22,7 @@ Tests Power Platform RBAC diagnostic permissions for a principal on an environme
 ```
 Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -PrincipalObjectId <string>
  -PrincipalType <AuthorizationPrincipalType> -ReadDiagnostic [-ClientId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### RunDiagnostic
@@ -30,7 +30,7 @@ Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -Princi
 ```
 Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -PrincipalObjectId <string>
  -PrincipalType <AuthorizationPrincipalType> -RunDiagnostic [-ClientId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### RunMitigation
@@ -38,7 +38,7 @@ Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -Princi
 ```
 Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -PrincipalObjectId <string>
  -PrincipalType <AuthorizationPrincipalType> -RunMitigation [-ClientId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -107,10 +107,10 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The Power Platform endpoint to connect to
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

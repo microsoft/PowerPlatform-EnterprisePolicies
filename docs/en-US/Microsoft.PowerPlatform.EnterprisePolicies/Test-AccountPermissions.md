@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Test-AccountPermissions
 ---
@@ -20,7 +20,7 @@ Validates that the account has the correct permissions to run diagnostic command
 ### __AllParameterSets
 
 ```
-Test-AccountPermissions [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [-ForceAuth]
+Test-AccountPermissions [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>] [-ForceAuth]
  [<CommonParameters>]
 ```
 
@@ -42,16 +42,16 @@ Test-AccountPermissions
 
 ### EXAMPLE 2
 
-Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
 ## PARAMETERS
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Default is 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

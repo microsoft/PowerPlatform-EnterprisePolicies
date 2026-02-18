@@ -26,14 +26,14 @@ Describe 'EnvironmentOperations Tests' {
             Mock Write-Verbose {}
         }
 
-        Context 'Get-BAPEnvironment' {
+        Context 'Get-PPEnvironment' {
             BeforeAll {
                 $mockClient = [HttpClientMock]::new()
                 $mockSuccessResult = [HttpClientResultMock]::new(($script:mockEnvironment | ConvertTo-Json -Depth 10), "application/json")
 
                 Mock Get-HttpClient { return $mockClient }
-                Mock Get-BAPEndpointUrl { return "https://api.powerplatform.com/" }
-                Mock Get-BAPAccessToken { return (ConvertTo-SecureString "mock-token" -AsPlainText -Force) }
+                Mock Get-PPEndpointUrl { return "https://api.powerplatform.com/" }
+                Mock Get-PPAccessToken { return (ConvertTo-SecureString "mock-token" -AsPlainText -Force) }
                 Mock Send-RequestWithRetries { return $mockSuccessResult }
                 Mock Get-AsyncResult {
                     param($task)
@@ -43,16 +43,16 @@ Describe 'EnvironmentOperations Tests' {
             }
 
             It 'Should retrieve environment successfully' {
-                $result = Get-BAPEnvironment -EnvironmentId $script:testEnvironmentId -Endpoint ([BAPEndpoint]::Prod)
+                $result = Get-PPEnvironment -EnvironmentId $script:testEnvironmentId -Endpoint ([PPEndpoint]::Prod)
 
                 $result | Should -Not -BeNullOrEmpty
                 $result.name | Should -Be $script:testEnvironmentId
             }
 
-            It 'Should call Get-BAPEndpointUrl with correct endpoint' {
-                Get-BAPEnvironment -EnvironmentId $script:testEnvironmentId -Endpoint ([BAPEndpoint]::usgovhigh)
+            It 'Should call Get-PPEndpointUrl with correct endpoint' {
+                Get-PPEnvironment -EnvironmentId $script:testEnvironmentId -Endpoint ([PPEndpoint]::usgovhigh)
 
-                Should -Invoke Get-BAPEndpointUrl -Times 1 -ParameterFilter { $Endpoint -eq [BAPEndpoint]::usgovhigh }
+                Should -Invoke Get-PPEndpointUrl -Times 1 -ParameterFilter { $Endpoint -eq [PPEndpoint]::usgovhigh }
             }
 
             It 'Should throw when API call fails' {
@@ -62,7 +62,7 @@ Describe 'EnvironmentOperations Tests' {
                 Mock Send-RequestWithRetries { return $mockErrorResult }
                 Mock Get-AsyncResult { return "Environment not found" } -ParameterFilter { $task -ne "SendAsyncResult" }
 
-                { Get-BAPEnvironment -EnvironmentId "invalid-id" -Endpoint ([BAPEndpoint]::Prod) } | Should -Throw "*Failed to retrieve environment*"
+                { Get-PPEnvironment -EnvironmentId "invalid-id" -Endpoint ([PPEndpoint]::Prod) } | Should -Throw "*Failed to retrieve environment*"
             }
         }
 
@@ -75,8 +75,8 @@ Describe 'EnvironmentOperations Tests' {
                 $mock202Result.StatusCode = 202
 
                 Mock Get-HttpClient { return $mockClient }
-                Mock Get-BAPEndpointUrl { return "https://api.bap.microsoft.com/" }
-                Mock Get-BAPAccessToken { return (ConvertTo-SecureString "mock-token" -AsPlainText -Force) }
+                Mock Get-PPEndpointUrl { return "https://api.bap.microsoft.com/" }
+                Mock Get-PPAccessToken { return (ConvertTo-SecureString "mock-token" -AsPlainText -Force) }
                 Mock Send-RequestWithRetries { return $mock202Result }
             }
 
@@ -86,7 +86,7 @@ Describe 'EnvironmentOperations Tests' {
                     -PolicyType ([PolicyType]::NetworkInjection) `
                     -PolicySystemId $script:testPolicySystemId `
                     -Operation ([LinkOperation]::link) `
-                    -Endpoint ([BAPEndpoint]::Prod)
+                    -Endpoint ([PPEndpoint]::Prod)
 
                 Should -Invoke Send-RequestWithRetries -Times 1
             }
@@ -97,7 +97,7 @@ Describe 'EnvironmentOperations Tests' {
                     -PolicyType ([PolicyType]::NetworkInjection) `
                     -PolicySystemId $script:testPolicySystemId `
                     -Operation ([LinkOperation]::link) `
-                    -Endpoint ([BAPEndpoint]::Prod)
+                    -Endpoint ([PPEndpoint]::Prod)
 
                 $result.StatusCode | Should -Be 202
             }
@@ -107,7 +107,7 @@ Describe 'EnvironmentOperations Tests' {
             BeforeAll {
                 $mockClient = [HttpClientMock]::new()
                 Mock Get-HttpClient { return $mockClient }
-                Mock Get-BAPAccessToken { return (ConvertTo-SecureString "mock-token" -AsPlainText -Force) }
+                Mock Get-PPAccessToken { return (ConvertTo-SecureString "mock-token" -AsPlainText -Force) }
                 Mock Write-Host {}
             }
 
@@ -118,7 +118,7 @@ Describe 'EnvironmentOperations Tests' {
 
                 $result = Wait-EnterprisePolicyOperation `
                     -OperationUrl "https://api.bap.microsoft.com/operations/op-1" `
-                    -Endpoint ([BAPEndpoint]::Prod) `
+                    -Endpoint ([PPEndpoint]::Prod) `
                     -TimeoutSeconds 60
 
                 $result | Should -Be "Succeeded"
@@ -131,7 +131,7 @@ Describe 'EnvironmentOperations Tests' {
 
                 { Wait-EnterprisePolicyOperation `
                     -OperationUrl "https://api.bap.microsoft.com/operations/op-1" `
-                    -Endpoint ([BAPEndpoint]::Prod) `
+                    -Endpoint ([PPEndpoint]::Prod) `
                     -TimeoutSeconds 60 } | Should -Throw "*operation failed*"
             }
 
@@ -154,7 +154,7 @@ Describe 'EnvironmentOperations Tests' {
 
                 $result = Wait-EnterprisePolicyOperation `
                     -OperationUrl "https://api.bap.microsoft.com/operations/op-1" `
-                    -Endpoint ([BAPEndpoint]::Prod) `
+                    -Endpoint ([PPEndpoint]::Prod) `
                     -TimeoutSeconds 120 `
                     -PollIntervalSeconds 30
 

@@ -21,7 +21,7 @@ Retrieves the historical network usage of the specified subnet based on enterpri
 
 ```
 Get-SubnetHistoricalUsage [-EnterprisePolicyId] <string> [[-TenantId] <string>] [-Region] <string>
- [[-Endpoint] <BAPEndpoint>] [<CommonParameters>]
+ [[-Endpoint] <PPEndpoint>] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -38,16 +38,16 @@ This includes usage from all environments with the specified enterprise policy i
 
 ### EXAMPLE 1
 
-Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod
+Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [PPEndpoint]::Prod
 
 ## PARAMETERS
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Default is 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

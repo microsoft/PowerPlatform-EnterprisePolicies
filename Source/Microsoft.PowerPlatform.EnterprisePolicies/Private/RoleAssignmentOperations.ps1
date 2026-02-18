@@ -34,7 +34,7 @@ function New-RoleAssignment {
         [string]$EnvironmentGroupId,
 
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod
     )
 
     # Build the scope and path based on parameter set
@@ -133,7 +133,7 @@ function Get-RoleAssignments {
         [string]$Permission,
 
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod
     )
 
     # Build the scope and path based on parameter set
@@ -257,7 +257,7 @@ function Remove-RoleAssignment {
         [string]$EnvironmentGroupId,
 
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod
     )
 
     # Build the path based on parameter set
@@ -326,7 +326,7 @@ function Test-PrincipalPermission {
         [string[]]$Permissions,
 
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod
     )
 
     $scope = "/tenants/$TenantId/environments/$EnvironmentId"

@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/28/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Disable-SubnetInjection
 ---
@@ -20,7 +20,7 @@ Disables Subnet Injection for a Power Platform environment by unlinking it from 
 ### __AllParameterSets
 
 ```
-Disable-SubnetInjection [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
+Disable-SubnetInjection [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>]
  [[-TimeoutSeconds] <int>] [-ForceAuth] [-NoWait] [<CommonParameters>]
 ```
 
@@ -62,10 +62,10 @@ Initiates the unlink operation without waiting for completion.
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The Power Platform endpoint to connect to
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []
