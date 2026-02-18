@@ -9,13 +9,12 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Attempts to establish a TLS handshake with the provided destination and port.
+Attempts to establish a Transport Layer Security (TLS) handshake with the provided destination and port.
 
 .DESCRIPTION
-Tests that a TLS handshake can be established against the provided destination and port.
-
-This function is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+The Test-TLSHandshake cmdlet tests that a TLS handshake can be established against the provided destination and port.
+The cmdlet is executed in the context of your delegated subnet in the region that you specify.
+If the region isn't specified, it defaults to the region of the environment.
 
 .OUTPUTS
 TLSConnectivityInformation

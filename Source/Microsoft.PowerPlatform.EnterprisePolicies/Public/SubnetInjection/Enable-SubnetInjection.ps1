@@ -9,14 +9,14 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Enables Subnet Injection for a Power Platform environment by linking it to an Enterprise Policy.
+Enables subnet injection for a Power Platform environment by linking it to an enterprise policy.
 
 .DESCRIPTION
-This cmdlet links an existing Subnet Injection Enterprise Policy to a Power Platform environment,
+The Enable-SubnetInjection cmdlet links an existing subnet injection enterprise policy to a Power Platform environment,
 enabling the environment to use the delegated virtual network subnets configured in the policy.
 
 If the environment already has a different policy linked, use the -Swap switch to replace it.
-Without -Swap, the cmdlet will throw an error to prevent accidental policy replacement.
+Without -Swap, the cmdlet returns an error to prevent accidental policy replacement.
 
 The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
 Use -NoWait to return immediately after the operation is initiated.
@@ -27,19 +27,19 @@ System.Boolean
 Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated.
 
 .EXAMPLE
-Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
 
-Enables Subnet Injection for the environment by linking it to the specified policy.
+Enables subnet injection for the environment by linking it to the specified policy.
 
 .EXAMPLE
-Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -TenantId "aaaabbbb-0000-cccc-1111-dddd2222eeee" -Endpoint usgovhigh
 
-Enables Subnet Injection for an environment in the US Government High cloud.
+Enables subnet injection for an environment in the US Government High cloud.
 
 .EXAMPLE
 Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/newPolicy" -Swap
 
-Replaces the existing Subnet Injection policy with a new one.
+Replaces the existing subnet injection policy with a new one.
 
 .EXAMPLE
 Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait

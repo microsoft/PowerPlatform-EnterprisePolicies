@@ -9,10 +9,10 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Disables Subnet Injection for a Power Platform environment by unlinking it from its Enterprise Policy.
+Disables subnet injection for a Power Platform environment by unlinking it from its enterprise policy.
 
 .DESCRIPTION
-This cmdlet unlinks the Subnet Injection Enterprise Policy from a Power Platform environment,
+The Disable-SubnetInjection cmdlet unlinks the subnet injection enterprise policy from a Power Platform environment,
 disabling the environment's use of delegated virtual network subnets.
 
 The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
@@ -26,12 +26,12 @@ Returns $true when the operation completes successfully, or when -NoWait is spec
 .EXAMPLE
 Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
-Disables Subnet Injection for the environment by unlinking it from its currently linked policy.
+Disables subnet injection for the environment by unlinking it from its currently linked policy.
 
 .EXAMPLE
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "aaaabbbb-0000-cccc-1111-dddd2222eeee" -Endpoint usgovhigh
 
-Disables Subnet Injection for an environment in the US Government High cloud.
+Disables subnet injection for an environment in the US Government High cloud.
 
 .EXAMPLE
 Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -NoWait

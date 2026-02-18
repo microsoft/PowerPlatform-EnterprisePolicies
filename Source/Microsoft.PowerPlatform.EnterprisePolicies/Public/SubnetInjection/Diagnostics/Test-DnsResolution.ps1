@@ -9,11 +9,11 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Tests the DNS resolution for a given hostname in a specified environment.
+Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
 
 .DESCRIPTION
-Tests the DNS resolution for a given hostname in a specified environment.
-This function is executed in the context of your delegated subnet in the region that you have specified.
+The Test-DnsResolution cmdlet tests the DNS resolution for a given hostname in a specified environment.
+This cmdlet is executed in the context of your delegated subnet in the region that you have specified.
 If the region is not specified, it defaults to the region of the environment.
 
 .OUTPUTS

@@ -12,8 +12,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 Retrieves the current usage of the specified environment.
 
 .DESCRIPTION
-Retrieves the current usage of the specified environment.
-Note, this is only the usage that this environment has. It does not include usage from other environments and it does not include any ips that might be reserved by azure.
+The Get-EnvironmentUsage cmdlet retrieves the current usage of the specified environment. This is only the usage that this environment has. It doesn't include usage from other environments and it doesn't include any IP addresses that might be reserved by Azure.
 
 .OUTPUTS
 NetworkUsage

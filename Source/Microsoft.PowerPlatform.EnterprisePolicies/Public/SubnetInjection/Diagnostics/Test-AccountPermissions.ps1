@@ -12,8 +12,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 Validates that the account has the correct permissions to run diagnostic commands.
 
 .DESCRIPTION
-Tests that the generated Bearer token for the logged in account has the claim that is necessary to be able to call the diagnostic APIs.
-The necessary permission is the Power Platform Administrator role which is assigned through the Entra portal.
+The Test-AccountPermissions cmdlet tests that the generated bearer token for the signed in account has the claim that's necessary to call the diagnostic APIs. The necessary permission is the Power Platform administrator role, which is assigned through the Microsoft Entra ID portal.
 
 .OUTPUTS
 System.Boolean

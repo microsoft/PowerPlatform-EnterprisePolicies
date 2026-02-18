@@ -9,10 +9,10 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Retrieves the region that the specified environment is deployed in.
+Retrieves the region where the specified environment is deployed.
 
 .DESCRIPTION
-Retrieves the region that the specified environment is deployed in. Note, the region is the Power Platform region, but it is aligned with an Azure region.
+The Get-EnvironmentRegion cmdlet retrieves the region where the specified environment is deployed. The region is the Power Platform region, but it's aligned with an Azure region.
 
 .OUTPUTS
 System.String

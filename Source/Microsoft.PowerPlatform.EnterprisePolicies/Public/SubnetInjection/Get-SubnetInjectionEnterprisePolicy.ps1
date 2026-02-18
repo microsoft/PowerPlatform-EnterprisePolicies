@@ -9,11 +9,11 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Retrieves Subnet Injection Enterprise Policies for Power Platform.
+Retrieves subnet injection enterprise policies for Power Platform.
 
 .DESCRIPTION
-This cmdlet retrieves Subnet Injection Enterprise Policies using one of four methods:
-- By Resource ID: Retrieves a specific policy using its Azure ARM resource ID
+The Get-SubnetInjectionEnterprisePolicy cmdlet retrieves subnet injection enterprise policies using one of four methods:
+- By Resource ID: Retrieves a specific policy using its Azure Resource Manager (ARM) resource ID
 - By Environment: Retrieves the policy linked to a specific Power Platform environment
 - By Subscription: Retrieves all Subnet Injection policies in the current subscription
 - By Resource Group: Retrieves all Subnet Injection policies in a specific resource group
@@ -26,27 +26,27 @@ Returns PSResource object(s) representing the enterprise policy Azure resources.
 .EXAMPLE
 Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321"
 
-Retrieves a Subnet Injection Enterprise Policy by its ARM resource ID.
+Retrieves a subnet injection enterprise policy by its ARM resource ID.
 
 .EXAMPLE
 Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint Prod
 
-Retrieves the Subnet Injection Enterprise Policy linked to the specified Power Platform environment.
+Retrieves the subnet injection enterprise policy linked to the specified Power Platform environment.
 
 .EXAMPLE
 Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
 
-Retrieves the Subnet Injection Enterprise Policy linked to an environment in the US Government High cloud.
+Retrieves the subnet injection enterprise policy linked to an environment in the US Government High cloud.
 
 .EXAMPLE
-Get-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012"
+Get-SubnetInjectionEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee"
 
-Retrieves all Subnet Injection Enterprise Policies in the specified subscription.
+Retrieves all subnet injection enterprise policies in the specified subscription.
 
 .EXAMPLE
-Get-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup"
+Get-SubnetInjectionEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee" -ResourceGroupName "myResourceGroup"
 
-Retrieves all Subnet Injection Enterprise Policies in the specified resource group.
+Retrieves all subnet injection enterprise policies in the specified resource group.
 #>
 
 function Get-SubnetInjectionEnterprisePolicy{
