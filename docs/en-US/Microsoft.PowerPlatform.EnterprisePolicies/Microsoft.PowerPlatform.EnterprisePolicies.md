@@ -108,6 +108,6 @@ The SubnetUsageDocument class represents historical network usage information an
 
 Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
 
-#### [BAPEndpoint](BAPEndpoint.md)
+#### [PPEndpoint](PPEndpoint.md)
 
-Represents the different BAP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+Represents the different PP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.

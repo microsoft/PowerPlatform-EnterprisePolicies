@@ -49,8 +49,8 @@ function Disable-SubnetInjection {
         [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth,
@@ -71,10 +71,10 @@ function Disable-SubnetInjection {
 
     # Validate that the environment exists
     Write-Verbose "Retrieving environment: $EnvironmentId"
-    $environment = Get-BAPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
+    $environment = Get-PPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
 
     if ($null -eq $environment) {
-        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environment exists, ensure you have the necessary permissions to access it and that you are connecting to the correct BAP endpoint."
+        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environment exists, ensure you have the necessary permissions to access it and that you are connecting to the correct PP endpoint."
     }
 
     Write-Verbose "Environment retrieved successfully"

@@ -21,7 +21,7 @@ Attempts to establish a TLS handshake with the provided destination and port.
 
 ```
 Test-TLSHandshake [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
- [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [-ForceAuth]
+ [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>] [[-Region] <string>] [-ForceAuth]
  [<CommonParameters>]
 ```
 
@@ -49,11 +49,11 @@ Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destina
 
 ### EXAMPLE 3
 
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
 ### EXAMPLE 4
 
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
 
 ## PARAMETERS
 
@@ -80,10 +80,10 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The PP endpoint to connect to. Default is 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

@@ -22,7 +22,7 @@ A class representing the historical network usage of the environment. [Environme
 Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 .EXAMPLE
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod -ShowDetails
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [PPEndpoint]::Prod -ShowDetails
 #>
 function Get-EnvironmentHistoricalUsage{
     param(
@@ -36,8 +36,8 @@ function Get-EnvironmentHistoricalUsage{
         [Parameter(Mandatory, HelpMessage="The region that the environment belongs to.")]
         [string]$Region,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to. Default is 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Switch to show detailed usage information.")]
         [switch]$ShowDetails,

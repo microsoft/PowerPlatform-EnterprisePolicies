@@ -21,7 +21,7 @@ Enables Subnet Injection for a Power Platform environment by linking it to an En
 
 ```
 Enable-SubnetInjection [-EnvironmentId] <string> [-PolicyArmId] <string> [[-TenantId] <string>]
- [[-Endpoint] <BAPEndpoint>] [[-TimeoutSeconds] <int>] [-ForceAuth] [-Swap] [-NoWait]
+ [[-Endpoint] <PPEndpoint>] [[-TimeoutSeconds] <int>] [-ForceAuth] [-Swap] [-NoWait]
  [<CommonParameters>]
 ```
 
@@ -72,10 +72,10 @@ Initiates the link operation without waiting for completion.
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The PP endpoint to connect to
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

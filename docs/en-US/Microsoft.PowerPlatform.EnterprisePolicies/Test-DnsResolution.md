@@ -21,7 +21,7 @@ Tests the DNS resolution for a given hostname in a specified environment.
 
 ```
 Test-DnsResolution [-EnvironmentId] <string> [-HostName] <string> [[-TenantId] <string>]
- [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [-ForceAuth] [<CommonParameters>]
+ [[-Endpoint] <PPEndpoint>] [[-Region] <string>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -43,20 +43,20 @@ Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostNa
 
 ### EXAMPLE 2
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
 ### EXAMPLE 3
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
 
 ## PARAMETERS
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The PP endpoint to connect to. Default is 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

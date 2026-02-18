@@ -20,7 +20,7 @@ Disables Subnet Injection for a Power Platform environment by unlinking it from 
 ### __AllParameterSets
 
 ```
-Disable-SubnetInjection [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
+Disable-SubnetInjection [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>]
  [[-TimeoutSeconds] <int>] [-ForceAuth] [-NoWait] [<CommonParameters>]
 ```
 
@@ -62,10 +62,10 @@ Initiates the unlink operation without waiting for completion.
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The PP endpoint to connect to
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

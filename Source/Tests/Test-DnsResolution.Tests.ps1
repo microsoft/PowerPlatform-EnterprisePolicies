@@ -17,7 +17,7 @@ Describe 'Test-DnsResolution Tests' {
     Context 'Testing Test-DnsResolution' {
         It 'Returns string with the DNS resolution result' {
             $stringResult = "Some string"
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $region = "westus"
             $mockResult = [HttpClientResultMock]::new($stringResult)
@@ -34,7 +34,7 @@ Describe 'Test-DnsResolution Tests' {
 
         It 'Returns string with the DNS resolution with json result' {
             $stringResult = '"Some json string"'
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $region = "westus"
             $mockResult = [HttpClientResultMock]::new($stringResult, "application/json")

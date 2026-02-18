@@ -12,7 +12,7 @@ Describe 'AuthenticationOperations Tests' {
         }
         Context 'Testing Connect-Azure' {
             It 'Connects to Azure with the correct environment' {
-                $endpoint = [BAPEndpoint]::usgovhigh
+                $endpoint = [PPEndpoint]::usgovhigh
                 Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "AzureUSGovernment" } -Verifiable
                 Mock Get-AzContext {}
                 Connect-Azure -Endpoint $endpoint | Should -Be $true
@@ -20,7 +20,7 @@ Describe 'AuthenticationOperations Tests' {
             }
 
             It 'Prefers a context with home tenant if multiple context are available' {
-                $endpoint = [BAPEndpoint]::prod
+                $endpoint = [PPEndpoint]::prod
                 $tenantId = "12345678-1234-1234-1234-123456789012"
                 Mock Get-AzContext { 
                     return @(
@@ -34,7 +34,7 @@ Describe 'AuthenticationOperations Tests' {
             }
     
             It 'Connects to Azure with a specific tenant' {
-                $endpoint = [BAPEndpoint]::china
+                $endpoint = [PPEndpoint]::china
                 $tenantId = "12345678-1234-1234-1234-123456789012"
                 Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "AzureChinaCloud" -and $Tenant -eq $tenantId } -Verifiable
                 Mock Get-AzContext {}
@@ -43,7 +43,7 @@ Describe 'AuthenticationOperations Tests' {
             }
     
             It 'Invokes Connect-AzAccount if tenant does not match' {
-                $endpoint = [BAPEndpoint]::prod
+                $endpoint = [PPEndpoint]::prod
                 $tenantId = "12345678-1234-1234-1234-123456789012"
                 Mock Get-AzContext { 
                     return @(
@@ -56,7 +56,7 @@ Describe 'AuthenticationOperations Tests' {
             }
 
             It 'Forces a login in with Force switch' {
-                $endpoint = [BAPEndpoint]::prod
+                $endpoint = [PPEndpoint]::prod
                 Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "AzureCloud" } -Verifiable
                 Mock Get-AzContext {
                     return @(
@@ -68,7 +68,7 @@ Describe 'AuthenticationOperations Tests' {
             }
 
             It 'Forces a login if auth scope is provided' {
-                $endpoint = [BAPEndpoint]::prod
+                $endpoint = [PPEndpoint]::prod
                 $authScope = "https://management.azure.com/.default"
                 Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "AzureCloud" } -Verifiable
                 Mock Get-AzContext {
@@ -81,7 +81,7 @@ Describe 'AuthenticationOperations Tests' {
             }
 
             It 'Forces a login if no context is found' {
-                $endpoint = [BAPEndpoint]::prod
+                $endpoint = [PPEndpoint]::prod
                 Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "AzureCloud" } -Verifiable
                 Mock Get-AzContext { return $null }
                 Connect-Azure -Endpoint $endpoint | Should -Be $true
@@ -89,7 +89,7 @@ Describe 'AuthenticationOperations Tests' {
             }
 
             It 'Forces a login if no context is found and auth scope is provided and force is set' {
-                $endpoint = [BAPEndpoint]::prod
+                $endpoint = [PPEndpoint]::prod
                 $authScope = "https://management.azure.com/.default"
                 Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "AzureCloud" } -Verifiable
                 Mock Get-AzContext { return $null }
@@ -103,7 +103,7 @@ Describe 'AuthenticationOperations Tests' {
                 $mockToken = [PSCustomObject]@{ Token = (ConvertTo-SecureString "test-token" -AsPlainText -Force) }
                 Mock Get-AzAccessToken { return $mockToken }
 
-                $result = Get-AccessToken -Endpoint ([BAPEndpoint]::prod) -ResourceUrl "https://api.test.com"
+                $result = Get-AccessToken -Endpoint ([PPEndpoint]::prod) -ResourceUrl "https://api.test.com"
 
                 $result | Should -Not -BeNullOrEmpty
             }
@@ -112,7 +112,7 @@ Describe 'AuthenticationOperations Tests' {
                 Mock Get-AzAccessToken { return $null }
                 Mock Connect-Azure { return $true }
 
-                { Get-AccessToken -Endpoint ([BAPEndpoint]::prod) -ResourceUrl "https://api.test.com" } | Should -Throw "*Failed to acquire access token*"
+                { Get-AccessToken -Endpoint ([PPEndpoint]::prod) -ResourceUrl "https://api.test.com" } | Should -Throw "*Failed to acquire access token*"
             }
 
             It 'Re-authenticates and returns token when initial acquisition fails then succeeds' {
@@ -122,7 +122,7 @@ Describe 'AuthenticationOperations Tests' {
                 Mock Get-AzAccessToken { return $mockToken } -ParameterFilter { $ErrorAction -ne 'SilentlyContinue' }
                 Mock Connect-Azure { return $true }
 
-                $result = Get-AccessToken -Endpoint ([BAPEndpoint]::prod) -ResourceUrl "https://api.test.com"
+                $result = Get-AccessToken -Endpoint ([PPEndpoint]::prod) -ResourceUrl "https://api.test.com"
 
                 $result | Should -Not -BeNullOrEmpty
             }
@@ -134,19 +134,19 @@ Describe 'AuthenticationOperations Tests' {
                 Mock Get-APIResourceUrl { return "https://api.powerplatform.com" }
                 Mock Get-AzAccessToken { return $mockToken }
 
-                $result = Get-PPAPIAccessToken -Endpoint ([BAPEndpoint]::prod)
+                $result = Get-PPAPIAccessToken -Endpoint ([PPEndpoint]::prod)
 
                 $result | Should -Not -BeNullOrEmpty
             }
         }
 
-        Context 'Testing Get-BAPAccessToken' {
-            It 'Calls Get-AccessToken with BAP resource URL' {
+        Context 'Testing Get-PPAccessToken' {
+            It 'Calls Get-AccessToken with PP resource URL' {
                 $mockToken = [PSCustomObject]@{ Token = (ConvertTo-SecureString "test-token" -AsPlainText -Force) }
-                Mock Get-BAPResourceUrl { return "https://service.powerapps.com" }
+                Mock Get-PPResourceUrl { return "https://service.powerapps.com" }
                 Mock Get-AzAccessToken { return $mockToken }
 
-                $result = Get-BAPAccessToken -Endpoint ([BAPEndpoint]::prod)
+                $result = Get-PPAccessToken -Endpoint ([PPEndpoint]::prod)
 
                 $result | Should -Not -BeNullOrEmpty
             }

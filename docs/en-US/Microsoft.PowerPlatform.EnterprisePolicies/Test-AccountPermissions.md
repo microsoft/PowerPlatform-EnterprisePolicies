@@ -20,7 +20,7 @@ Validates that the account has the correct permissions to run diagnostic command
 ### __AllParameterSets
 
 ```
-Test-AccountPermissions [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [-ForceAuth]
+Test-AccountPermissions [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>] [-ForceAuth]
  [<CommonParameters>]
 ```
 
@@ -42,16 +42,16 @@ Test-AccountPermissions
 
 ### EXAMPLE 2
 
-Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
 ## PARAMETERS
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The PP endpoint to connect to. Default is 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

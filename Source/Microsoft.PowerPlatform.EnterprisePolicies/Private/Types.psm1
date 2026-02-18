@@ -117,7 +117,7 @@ enum PolicyType{
     Identity
 }
 
-enum BAPEndpoint{
+enum PPEndpoint{
     unknown # Used for defaulting to this value, not meant to be used.
     tip1
     tip2
@@ -148,7 +148,7 @@ $ExportableTypes = @(
     [VnetInformation]
     [ValidateAzureResourceIdAttribute]
     [PolicyType]
-    [BAPEndpoint]
+    [PPEndpoint]
     [LinkOperation]
     [NetworkUsage]
     [AzureEnvironment]

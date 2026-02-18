@@ -57,7 +57,7 @@ function New-EnvironmentRouteRequest
         [Parameter(Mandatory)]
         [string] $Query,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint,
+        [PPEndpoint] $Endpoint,
         [Parameter(Mandatory=$true)]
         [System.Security.SecureString] $AccessToken,
         [Parameter(Mandatory=$false)]
@@ -88,7 +88,7 @@ function New-HomeTenantRouteRequest
         [Parameter(Mandatory)]
         [string] $Query,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint,
+        [PPEndpoint] $Endpoint,
         [Parameter(Mandatory=$true)]
         [System.Security.SecureString] $AccessToken,
         [Parameter(Mandatory=$false)]
@@ -176,14 +176,14 @@ function Get-EnvironmentRouteHostName {
         [Parameter(Mandatory)]
         [string] $EnvironmentId,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     $baseUri = Get-APIResourceUrl -Endpoint $Endpoint
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $EnvironmentId = $EnvironmentId.Replace("-", "")
-    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2 -or $Endpoint -eq [BAPEndpoint]::usgovhigh) {
+    if($Endpoint -eq [PPEndpoint]::tip1 -or $Endpoint -eq [PPEndpoint]::tip2 -or $Endpoint -eq [PPEndpoint]::usgovhigh) {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 1, 1)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 1)
     }
@@ -199,14 +199,14 @@ function Get-TenantRouteHostName {
         [Parameter(Mandatory)]
         [string] $TenantId,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     $baseUri = Get-APIResourceUrl -Endpoint $Endpoint
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $TenantId = $TenantId.Replace("-", "")
-    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2 -or $Endpoint -eq [BAPEndpoint]::usgovhigh) {
+    if($Endpoint -eq [PPEndpoint]::tip1 -or $Endpoint -eq [PPEndpoint]::tip2 -or $Endpoint -eq [PPEndpoint]::usgovhigh) {
         $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
         $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
     }
@@ -217,37 +217,37 @@ function Get-TenantRouteHostName {
     return "il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
 }
 
-function Get-BAPEndpointUrl {
+function Get-PPEndpointUrl {
     param (
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     switch ($Endpoint) {
-        ([BAPEndpoint]::tip1) { return "https://tip1.api.bap.microsoft.com/" }
-        ([BAPEndpoint]::tip2) { return "https://tip2.api.bap.microsoft.com/" }
-        ([BAPEndpoint]::prod) { return "https://api.bap.microsoft.com/" }
-        ([BAPEndpoint]::usgovhigh) { return "https://high.api.bap.microsoft.us/" }
-        ([BAPEndpoint]::dod) { return "https://api.bap.appsplatform.us/" }
-        ([BAPEndpoint]::china) { return "https://api.bap.partner.microsoftonline.cn/" }
-        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+        ([PPEndpoint]::tip1) { return "https://tip1.api.bap.microsoft.com/" }
+        ([PPEndpoint]::tip2) { return "https://tip2.api.bap.microsoft.com/" }
+        ([PPEndpoint]::prod) { return "https://api.bap.microsoft.com/" }
+        ([PPEndpoint]::usgovhigh) { return "https://high.api.bap.microsoft.us/" }
+        ([PPEndpoint]::dod) { return "https://api.bap.appsplatform.us/" }
+        ([PPEndpoint]::china) { return "https://api.bap.partner.microsoftonline.cn/" }
+        Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
 
-function Get-BAPResourceUrl {
+function Get-PPResourceUrl {
     param (
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     switch ($Endpoint) {
-        ([BAPEndpoint]::tip1) { return "https://service.powerapps.com/" }
-        ([BAPEndpoint]::tip2) { return "https://service.powerapps.com/" }
-        ([BAPEndpoint]::prod) { return "https://service.powerapps.com/" }
-        ([BAPEndpoint]::usgovhigh) { return "https://high.service.powerapps.us/" }
-        ([BAPEndpoint]::dod) { return "https://service.apps.appsplatform.us/" }
-        ([BAPEndpoint]::china) { return "https://service.powerapps.cn/" }
-        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+        ([PPEndpoint]::tip1) { return "https://service.powerapps.com/" }
+        ([PPEndpoint]::tip2) { return "https://service.powerapps.com/" }
+        ([PPEndpoint]::prod) { return "https://service.powerapps.com/" }
+        ([PPEndpoint]::usgovhigh) { return "https://high.service.powerapps.us/" }
+        ([PPEndpoint]::dod) { return "https://service.apps.appsplatform.us/" }
+        ([PPEndpoint]::china) { return "https://service.powerapps.cn/" }
+        Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
 
@@ -255,17 +255,17 @@ function Get-BAPResourceUrl {
 function Get-APIResourceUrl {
     param (
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     switch ($Endpoint) {
-        ([BAPEndpoint]::tip1) { return "https://api.preprod.powerplatform.com/" }
-        ([BAPEndpoint]::tip2) { return "https://api.test.powerplatform.com/" }
-        ([BAPEndpoint]::prod) { return "https://api.powerplatform.com/" }
-        ([BAPEndpoint]::usgovhigh) { return "https://api.high.powerplatform.microsoft.us/" }
-        ([BAPEndpoint]::dod) { return "https://api.appsplatform.us/" }
-        ([BAPEndpoint]::china) { return "https://api.powerplatform.partner.microsoftonline.cn/" }
-        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+        ([PPEndpoint]::tip1) { return "https://api.preprod.powerplatform.com/" }
+        ([PPEndpoint]::tip2) { return "https://api.test.powerplatform.com/" }
+        ([PPEndpoint]::prod) { return "https://api.powerplatform.com/" }
+        ([PPEndpoint]::usgovhigh) { return "https://api.high.powerplatform.microsoft.us/" }
+        ([PPEndpoint]::dod) { return "https://api.appsplatform.us/" }
+        ([PPEndpoint]::china) { return "https://api.powerplatform.partner.microsoftonline.cn/" }
+        Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
 

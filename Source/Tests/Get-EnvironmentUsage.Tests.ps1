@@ -20,7 +20,7 @@ Describe 'Get-EnvironmentUsage Tests' {
             $resultClass.AzureRegion = "EastUs"
             $resultClass.DnsServers = @("1", "2")
             [string]$resultJsonString = ($resultClass | ConvertTo-Json)
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $region = "westus"
             $mockResult = [HttpClientResultMock]::new($resultJsonString)

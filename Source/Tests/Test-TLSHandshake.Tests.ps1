@@ -17,7 +17,7 @@ Describe 'Test-TLSHandshake Tests' {
     Context 'Testing Test-TLSHandshake' {
         It 'Returns class with the result of the test' {
             $stringResult = '{"TCPConnectivity":true,"Certificate":{"Issuer":"CN=Microsoft Azure RSA TLS Issuing CA 08, O=Microsoft Corporation, C=US","Subject":"CN=microsoft.com, O=Microsoft Corporation, L=Redmond, S=WA, C=US","SignatureAlgorithm":"sha384RSA","IsExpired":false},"SSLWithoutCRL":{"Protocols":12288,"Success":true,"SSLErrors":0,"CipherSuite":4866},"SSLWithCRL":{"Protocols":12288,"Success":true,"SSLErrors":0,"CipherSuite":null}}'
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $mockResult = [HttpClientResultMock]::new($stringResult)
             $region = "westus"

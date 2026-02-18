@@ -17,7 +17,7 @@ Describe 'Test-NetworkConnectivity Tests' {
     Context 'Testing Test-NetworkConnectivity' {
         It 'Returns string with the result of the resolution' {
             $stringResult = "Some string"
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $mockResult = [HttpClientResultMock]::new($stringResult)
             $region = "westus"
@@ -34,7 +34,7 @@ Describe 'Test-NetworkConnectivity Tests' {
 
         It 'Returns string with the json result of the resolution' {
             $stringResult = '"Some json string"'
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $mockResult = [HttpClientResultMock]::new($stringResult, "application/json")
             $region = "westus"

@@ -21,28 +21,28 @@ Retrieves Subnet Injection Enterprise Policies for Power Platform.
 
 ```
 Get-SubnetInjectionEnterprisePolicy -SubscriptionId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### ByResourceId
 
 ```
 Get-SubnetInjectionEnterprisePolicy -PolicyResourceId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### ByEnvironment
 
 ```
 Get-SubnetInjectionEnterprisePolicy -EnvironmentId <string> [-TenantId <string>]
- [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### ByResourceGroup
 
 ```
 Get-SubnetInjectionEnterprisePolicy -SubscriptionId <string> -ResourceGroupName <string>
- [-TenantId <string>] [-Endpoint <BAPEndpoint>] [-ForceAuth] [<CommonParameters>]
+ [-TenantId <string>] [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -94,10 +94,10 @@ Retrieves all Subnet Injection Enterprise Policies in the specified resource gro
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The PP endpoint to connect to
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

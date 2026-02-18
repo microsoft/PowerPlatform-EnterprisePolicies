@@ -72,8 +72,8 @@ function Get-SubnetInjectionEnterprisePolicy{
         [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth
@@ -126,7 +126,7 @@ function Get-SubnetInjectionEnterprisePolicy{
         }
         'ByEnvironment' {
             Write-Verbose "Retrieving environment information for: $EnvironmentId"
-            $environment = Get-BAPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
+            $environment = Get-PPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
 
             if ($null -eq $environment) {
                 throw "Failed to retrieve environment with ID: $EnvironmentId"
