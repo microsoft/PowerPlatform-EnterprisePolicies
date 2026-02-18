@@ -52,13 +52,13 @@ Tests TLS handshake with a SQL database on port 1433 from the environment's dele
 
 ### EXAMPLE 3
 
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint usgovhigh
 
-Tests TLS handshake with a SQL database for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
+Tests TLS handshake with a SQL database for an environment in the US Government High cloud.
 
 ### EXAMPLE 4
 
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint [PPEndpoint]::Prod -Region "westus"
 
 Tests TLS handshake with a SQL database in the westus region instead of the environment's default region.
 

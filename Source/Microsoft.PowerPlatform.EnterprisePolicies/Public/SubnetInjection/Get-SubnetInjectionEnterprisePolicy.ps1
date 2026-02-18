@@ -24,7 +24,7 @@ Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
 Returns PSResource object(s) representing the enterprise policy Azure resources. Throws an error if no policy is found.
 
 .EXAMPLE
-Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321"
+Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
 
 Retrieves a subnet injection enterprise policy by its ARM resource ID.
 
@@ -34,7 +34,7 @@ Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-0000
 Retrieves the subnet injection enterprise policy linked to the specified Power Platform environment.
 
 .EXAMPLE
-Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
 Retrieves the subnet injection enterprise policy linked to an environment in the US Government High cloud.
 

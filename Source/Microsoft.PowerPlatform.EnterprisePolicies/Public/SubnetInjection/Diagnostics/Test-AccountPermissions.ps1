@@ -24,9 +24,9 @@ Test-AccountPermissions
 Validates that the signed-in account has the Power Platform Administrator role using default settings.
 
 .EXAMPLE
-Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+Test-AccountPermissions -Endpoint usgovhigh
 
-Validates account permissions for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
+Validates account permissions for an environment in the US Government High cloud.
 #>
 
 function Test-AccountPermissions{

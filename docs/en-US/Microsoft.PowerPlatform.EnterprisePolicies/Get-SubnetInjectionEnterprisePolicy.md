@@ -62,7 +62,7 @@ The Get-SubnetInjectionEnterprisePolicy cmdlet retrieves subnet injection enterp
 
 ### EXAMPLE 1
 
-Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321"
+Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
 
 Retrieves a subnet injection enterprise policy by its ARM resource ID.
 
@@ -74,7 +74,7 @@ Retrieves the subnet injection enterprise policy linked to the specified Power P
 
 ### EXAMPLE 3
 
-Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
 Retrieves the subnet injection enterprise policy linked to an environment in the US Government High cloud.
 

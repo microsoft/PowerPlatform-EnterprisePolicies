@@ -52,7 +52,7 @@ Enables subnet injection for the environment by linking it to the specified poli
 
 ### EXAMPLE 2
 
-Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -TenantId "aaaabbbb-0000-cccc-1111-dddd2222eeee" -Endpoint usgovhigh
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -Endpoint usgovhigh
 
 Enables subnet injection for an environment in the US Government High cloud.
 

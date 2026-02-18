@@ -45,13 +45,13 @@ Tests DNS resolution for microsoft.com from the environment's delegated subnet u
 
 ### EXAMPLE 2
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -Endpoint usgovhigh
 
-Tests DNS resolution for microsoft.com for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
+Tests DNS resolution for microsoft.com for an environment in the US Government High cloud.
 
 ### EXAMPLE 3
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -Endpoint [PPEndpoint]::Prod -Region "westus"
 
 Tests DNS resolution for microsoft.com in the westus region instead of the environment's default region.
 

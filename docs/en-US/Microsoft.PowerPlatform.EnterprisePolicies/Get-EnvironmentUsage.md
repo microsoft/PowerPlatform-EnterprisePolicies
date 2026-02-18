@@ -45,13 +45,13 @@ Retrieves the current network usage for the specified environment using default 
 
 ### EXAMPLE 2
 
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
-Retrieves the current network usage for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
+Retrieves the current network usage for an environment in the US Government High cloud.
 
 ### EXAMPLE 3
 
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
 
 Retrieves the current network usage for the specified environment filtered to the westus region.
 

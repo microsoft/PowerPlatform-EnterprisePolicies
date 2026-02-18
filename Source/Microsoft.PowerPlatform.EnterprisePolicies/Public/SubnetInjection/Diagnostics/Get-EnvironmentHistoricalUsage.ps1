@@ -24,9 +24,9 @@ Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000
 Retrieves the historical network usage for the specified environment in the westus region.
 
 .EXAMPLE
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint usgovhigh -ShowDetails
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint usgovhigh -ShowDetails
 
-Retrieves the historical network usage with detailed breakdown for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
+Retrieves the historical network usage with detailed breakdown for an environment in the US Government High cloud.
 #>
 function Get-EnvironmentHistoricalUsage{
     param(

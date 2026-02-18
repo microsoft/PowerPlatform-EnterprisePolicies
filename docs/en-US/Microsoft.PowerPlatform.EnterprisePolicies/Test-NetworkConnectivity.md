@@ -53,13 +53,13 @@ Tests TCP connectivity to a SQL database on port 1433 from the environment's del
 
 ### EXAMPLE 3
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint usgovhigh
 
-Tests TCP connectivity to a SQL database for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
+Tests TCP connectivity to a SQL database for an environment in the US Government High cloud.
 
 ### EXAMPLE 4
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint [PPEndpoint]::Prod -Region "westus"
 
 Tests TCP connectivity to a SQL database in the westus region instead of the environment's default region.
 

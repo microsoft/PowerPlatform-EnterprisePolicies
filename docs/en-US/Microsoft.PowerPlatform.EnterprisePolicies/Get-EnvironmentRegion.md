@@ -44,9 +44,9 @@ Retrieves the region where the specified environment is deployed using default s
 
 ### EXAMPLE 2
 
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
-Retrieves the region where the specified environment is deployed for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
+Retrieves the region where the specified environment is deployed for an environment in the US Government High cloud.
 
 ## PARAMETERS
 

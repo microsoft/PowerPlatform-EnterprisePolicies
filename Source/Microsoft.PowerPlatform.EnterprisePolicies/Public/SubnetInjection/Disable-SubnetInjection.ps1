@@ -29,7 +29,7 @@ Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000"
 Disables subnet injection for the environment by unlinking it from its currently linked policy.
 
 .EXAMPLE
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "aaaabbbb-0000-cccc-1111-dddd2222eeee" -Endpoint usgovhigh
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
 Disables subnet injection for an environment in the US Government High cloud.
 
