@@ -36,7 +36,7 @@ Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destina
 Tests TLS handshake with a SQL database for an environment in the US Government High cloud.
 
 .EXAMPLE
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint [PPEndpoint]::Prod -Region "westus"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Region "westus"
 
 Tests TLS handshake with a SQL database in the westus region instead of the environment's default region.
 #>

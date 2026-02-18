@@ -38,7 +38,7 @@ Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -
 Tests TCP connectivity to a SQL database for an environment in the US Government High cloud.
 
 .EXAMPLE
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint [PPEndpoint]::Prod -Region "westus"
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Region "westus"
 
 Tests TCP connectivity to a SQL database in the westus region instead of the environment's default region.
 #>

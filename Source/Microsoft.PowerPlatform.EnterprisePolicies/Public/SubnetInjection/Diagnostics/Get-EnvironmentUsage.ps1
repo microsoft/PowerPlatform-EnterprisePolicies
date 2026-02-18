@@ -29,7 +29,7 @@ Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endp
 Retrieves the current network usage for an environment in the US Government High cloud.
 
 .EXAMPLE
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 Retrieves the current network usage for the specified environment filtered to the westus region.
 #>

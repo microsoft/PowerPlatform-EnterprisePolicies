@@ -45,7 +45,7 @@ Retrieves the historical network usage for the specified environment in the west
 
 ### EXAMPLE 2
 
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint usgovhigh -ShowDetails
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "usgovvirginia" -Endpoint usgovhigh -ShowDetails
 
 Retrieves the historical network usage with detailed breakdown for an environment in the US Government High cloud.
 
