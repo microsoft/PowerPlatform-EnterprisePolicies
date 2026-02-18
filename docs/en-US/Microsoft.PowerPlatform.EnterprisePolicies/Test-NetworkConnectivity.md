@@ -53,9 +53,9 @@ Tests TCP connectivity to a SQL database on port 1433 from the environment's del
 
 ### EXAMPLE 3
 
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
-Tests TCP connectivity to a SQL database, explicitly providing a tenant ID and endpoint.
+Tests TCP connectivity to a SQL database for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
 
 ### EXAMPLE 4
 

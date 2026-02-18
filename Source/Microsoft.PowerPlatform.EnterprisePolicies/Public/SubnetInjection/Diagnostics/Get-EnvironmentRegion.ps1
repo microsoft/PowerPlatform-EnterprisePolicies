@@ -24,9 +24,9 @@ Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000"
 Retrieves the region where the specified environment is deployed using default settings.
 
 .EXAMPLE
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
+Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
-Retrieves the region where the specified environment is deployed, explicitly providing a tenant ID and endpoint.
+Retrieves the region where the specified environment is deployed for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
 #>
 function Get-EnvironmentRegion{
     param(

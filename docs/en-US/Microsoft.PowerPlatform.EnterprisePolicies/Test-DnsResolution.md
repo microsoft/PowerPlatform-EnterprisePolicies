@@ -45,9 +45,9 @@ Tests DNS resolution for microsoft.com from the environment's delegated subnet u
 
 ### EXAMPLE 2
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
-Tests DNS resolution for microsoft.com, explicitly providing a tenant ID and endpoint.
+Tests DNS resolution for microsoft.com for an environment in the US Government High cloud, explicitly providing the tenant ID of the environment.
 
 ### EXAMPLE 3
 
