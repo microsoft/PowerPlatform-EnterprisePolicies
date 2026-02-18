@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/05/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Remove-SubnetInjectionEnterprisePolicy
 ---
@@ -13,7 +13,7 @@ title: Remove-SubnetInjectionEnterprisePolicy
 
 ## SYNOPSIS
 
-Removes a Subnet Injection Enterprise Policy for Power Platform.
+Removes a subnet injection enterprise policy for Power Platform.
 
 ## SYNTAX
 
@@ -48,15 +48,15 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet removes a Subnet Injection Enterprise Policy using one of three methods:
-- By Resource ID: Removes a specific policy using its Azure ARM resource ID
-- By Subscription: Lists all Subnet Injection policies in a subscription (use -PolicyResourceId to remove a specific one)
-- By Resource Group: Lists all Subnet Injection policies in a resource group (use -PolicyResourceId to remove a specific one)
+The Remove-SubnetInjectionEnterprisePolicy cmdlet removes a subnet injection enterprise policy using one of three methods:
+- By Resource ID: Removes a specific policy using its Azure Resource Manager (ARM) resource ID.
+- By Subscription: Lists all subnet injection policies in a subscription (use -PolicyResourceId to remove a specific policy).
+- By Resource Group: Lists all subnet injection policies in a resource group (use -PolicyResourceId to remove a specific policy).
 
-When using BySubscription or ByResourceGroup, if multiple policies are found, the cmdlet outputs the policy ARM IDs
-so you can specify which one to remove using -PolicyResourceId.
+When using BySubscription or ByResourceGroup, if multiple policies are found, the cmdlet outputs the policy ARM IDs.
+You can specify which policy to remove using -PolicyResourceId.
 
-Note: A policy cannot be deleted if it is associated with any Power Platform environments.
+Note: A policy can't be deleted if it's associated with any Power Platform environments.
 Unlink the policy from all environments before attempting to remove it.
 
 ## EXAMPLES
@@ -65,23 +65,23 @@ Unlink the policy from all environments before attempting to remove it.
 
 Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
 
-Removes the specified Subnet Injection Enterprise Policy by its ARM resource ID.
+Removes the specified subnet injection enterprise policy by its ARM resource ID.
 
 ### EXAMPLE 2
 
 Remove-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012"
 
-Lists all Subnet Injection Enterprise Policies in the subscription.
-If only one policy exists, it will be removed.
-If multiple policies exist, their ARM IDs are output so you can specify which one to remove.
+Lists all subnet injection enterprise policies in the subscription.
+When only one policy exists, it's removed.
+If multiple policies exist, the ARM IDs are returned as output so you can specify which one to remove.
 
 ### EXAMPLE 3
 
 Remove-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup"
 
-Lists all Subnet Injection Enterprise Policies in the resource group.
-If only one policy exists, it will be removed.
-If multiple policies exist, their ARM IDs are output so you can specify which one to remove.
+Lists all subnet injection enterprise policies in the resource group.
+When only one policy exists, it's removed.
+If multiple policies exist, their ARM IDs are returned as output so you can specify which one to remove.
 
 ### EXAMPLE 4
 

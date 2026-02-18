@@ -23,14 +23,22 @@ A class representing the result of the TLS handshake. [TLSConnectivityInformatio
 .EXAMPLE
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
+Tests TLS handshake with microsoft.com on the default port (443) from the environment's delegated subnet.
+
 .EXAMPLE
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
+
+Tests TLS handshake with a SQL database on port 1433 from the environment's delegated subnet.
 
 .EXAMPLE
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
+Tests TLS handshake with a SQL database, explicitly providing a tenant ID and endpoint.
+
 .EXAMPLE
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+
+Tests TLS handshake with a SQL database in the westus region instead of the environment's default region.
 #>
 function Test-TLSHandshake{
     param(
@@ -48,7 +56,7 @@ function Test-TLSHandshake{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to. Default is 'prod'.")]
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the handshake. Defaults to the region the environment is in.")]

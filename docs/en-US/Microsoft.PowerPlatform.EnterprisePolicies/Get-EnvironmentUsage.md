@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Get-EnvironmentUsage
 ---
@@ -31,9 +31,9 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Retrieves the current usage of the specified environment.
-Note, this is only the usage that this environment has.
-It does not include usage from other environments and it does not include any ips that might be reserved by azure.
+The Get-EnvironmentUsage cmdlet retrieves the current usage of the specified environment.
+This is only the usage that this environment has.
+It doesn't include usage from other environments and it doesn't include any IP addresses that might be reserved by Azure.
 
 ## EXAMPLES
 
@@ -41,19 +41,25 @@ It does not include usage from other environments and it does not include any ip
 
 Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
+Retrieves the current network usage for the specified environment using default settings.
+
 ### EXAMPLE 2
 
 Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
+
+Retrieves the current network usage for the specified environment, explicitly providing a tenant ID and endpoint.
 
 ### EXAMPLE 3
 
 Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
 
+Retrieves the current network usage for the specified environment filtered to the westus region.
+
 ## PARAMETERS
 
 ### -Endpoint
 
-The PP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Defaults to 'prod'.
 
 ```yaml
 Type: PPEndpoint

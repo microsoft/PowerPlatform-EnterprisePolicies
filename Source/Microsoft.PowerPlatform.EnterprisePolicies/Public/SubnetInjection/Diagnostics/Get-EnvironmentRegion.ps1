@@ -21,8 +21,12 @@ A string representing the region of the environment.
 .EXAMPLE
 Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
+Retrieves the region where the specified environment is deployed using default settings.
+
 .EXAMPLE
 Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
+
+Retrieves the region where the specified environment is deployed, explicitly providing a tenant ID and endpoint.
 #>
 function Get-EnvironmentRegion{
     param(
@@ -33,7 +37,7 @@ function Get-EnvironmentRegion{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to. Default is 'prod'.")]
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]

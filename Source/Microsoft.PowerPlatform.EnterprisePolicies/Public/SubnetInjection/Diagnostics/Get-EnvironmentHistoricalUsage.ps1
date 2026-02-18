@@ -21,8 +21,12 @@ A class representing the historical network usage of the environment. [Environme
 .EXAMPLE
 Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
+Retrieves the historical network usage for the specified environment in the westus region.
+
 .EXAMPLE
 Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [PPEndpoint]::Prod -ShowDetails
+
+Retrieves the historical network usage with detailed breakdown, explicitly providing a tenant ID and endpoint.
 #>
 function Get-EnvironmentHistoricalUsage{
     param(
@@ -36,7 +40,7 @@ function Get-EnvironmentHistoricalUsage{
         [Parameter(Mandatory, HelpMessage="The region that the environment belongs to.")]
         [string]$Region,
 
-        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to. Default is 'prod'.")]
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Switch to show detailed usage information.")]

@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Test-DnsResolution
 ---
@@ -13,7 +13,7 @@ title: Test-DnsResolution
 
 ## SYNOPSIS
 
-Tests the DNS resolution for a given hostname in a specified environment.
+Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
 
 ## SYNTAX
 
@@ -31,8 +31,8 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Tests the DNS resolution for a given hostname in a specified environment.
-This function is executed in the context of your delegated subnet in the region that you have specified.
+The Test-DnsResolution cmdlet tests the DNS resolution for a given hostname in a specified environment.
+This cmdlet is executed in the context of your delegated subnet in the region that you have specified.
 If the region is not specified, it defaults to the region of the environment.
 
 ## EXAMPLES
@@ -41,19 +41,25 @@ If the region is not specified, it defaults to the region of the environment.
 
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"
 
+Tests DNS resolution for microsoft.com from the environment's delegated subnet using default settings.
+
 ### EXAMPLE 2
 
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
+
+Tests DNS resolution for microsoft.com, explicitly providing a tenant ID and endpoint.
 
 ### EXAMPLE 3
 
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
 
+Tests DNS resolution for microsoft.com in the westus region instead of the environment's default region.
+
 ## PARAMETERS
 
 ### -Endpoint
 
-The PP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Defaults to 'prod'.
 
 ```yaml
 Type: PPEndpoint

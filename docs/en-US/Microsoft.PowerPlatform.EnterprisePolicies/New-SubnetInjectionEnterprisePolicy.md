@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/05/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: New-SubnetInjectionEnterprisePolicy
 ---
@@ -13,7 +13,7 @@ title: New-SubnetInjectionEnterprisePolicy
 
 ## SYNOPSIS
 
-Creates a new Subnet Injection Enterprise Policy for Power Platform.
+Creates a new subnet injection enterprise policy for Power Platform.
 
 ## SYNTAX
 
@@ -33,11 +33,11 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet creates a Subnet Injection Enterprise Policy that enables Power Platform environments to use delegated subnets from Azure Virtual Networks.
+The New-SubnetInjectionEnterprisePolicy cmdlet creates a subnet injection enterprise policy that enables Power Platform environments to use delegated subnets from Azure Virtual Networks.
 The policy allows Power Platform services to inject into your virtual network for secure connectivity.
 
 Some Power Platform regions require two virtual networks in paired Azure regions.
-Use the VirtualNetworkId2 and SubnetName2 parameters when deploying to these regions.
+Use the VirtualNetworkId2 and SubnetName2 parameters when you deploy to these regions.
 
 ## EXAMPLES
 
@@ -45,13 +45,13 @@ Use the VirtualNetworkId2 and SubnetName2 parameters when deploying to these reg
 
 New-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup" -PolicyName "myPolicy" -PolicyLocation "unitedstates" -VirtualNetworkId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myVnet" -SubnetName "default" -AzureEnvironment AzureCloud
 
-Creates a Subnet Injection Enterprise Policy in the United States region using a single virtual network.
+Creates a subnet injection enterprise policy in the United States region using a single virtual network.
 
 ### EXAMPLE 2
 
 New-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup" -PolicyName "myPolicy" -PolicyLocation "unitedstates" -VirtualNetworkId "/subscriptions/.../virtualNetworks/vnet1" -SubnetName "subnet1" -VirtualNetworkId2 "/subscriptions/.../virtualNetworks/vnet2" -SubnetName2 "subnet2" -TenantId "87654321-4321-4321-4321-210987654321" -AzureEnvironment AzureCloud
 
-Creates a Subnet Injection Enterprise Policy using two virtual networks in paired regions, required for certain Power Platform regions.
+Creates a subnet injection enterprise policy using two virtual networks in paired regions, which is required for certain Power Platform regions.
 
 ## PARAMETERS
 

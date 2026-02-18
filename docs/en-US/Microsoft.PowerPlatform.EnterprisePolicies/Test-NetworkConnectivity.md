@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Test-NetworkConnectivity
 ---
@@ -32,10 +32,10 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Tests the connectivity to a given service in a specified environment.
-The connectivity test will attempt to establish a TCP connection to the specified destination on the specified port.
-This function is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+The Test-NetworkConnectivity cmdlet tests the connectivity to a given service in a specified environment.
+The connectivity test attempts to establish a TCP connection to the specified destination on the specified port.
+The cmdlet is executed in the context of your delegated subnet in the region that you specify.
+If the region isn't specified, it defaults to the region of the environment.
 
 ## EXAMPLES
 
@@ -43,17 +43,25 @@ If the region is not specified, it defaults to the region of the environment.
 
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
+Tests TCP connectivity to microsoft.com on the default port (443) from the environment's delegated subnet.
+
 ### EXAMPLE 2
 
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
+
+Tests TCP connectivity to a SQL database on port 1433 from the environment's delegated subnet.
 
 ### EXAMPLE 3
 
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
+Tests TCP connectivity to a SQL database, explicitly providing a tenant ID and endpoint.
+
 ### EXAMPLE 4
 
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+
+Tests TCP connectivity to a SQL database in the westus region instead of the environment's default region.
 
 ## PARAMETERS
 
@@ -80,7 +88,7 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The PP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Defaults to 'prod'.
 
 ```yaml
 Type: PPEndpoint

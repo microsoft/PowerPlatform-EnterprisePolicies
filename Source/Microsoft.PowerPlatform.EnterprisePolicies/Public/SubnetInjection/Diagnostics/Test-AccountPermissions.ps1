@@ -21,8 +21,12 @@ Whether the account has the required permissions.
 .EXAMPLE
 Test-AccountPermissions
 
+Validates that the signed-in account has the Power Platform Administrator role using default settings.
+
 .EXAMPLE
 Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
+
+Validates account permissions for a specific tenant and endpoint.
 #>
 
 function Test-AccountPermissions{
@@ -30,7 +34,7 @@ function Test-AccountPermissions{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to. Default is 'prod'.")]
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]

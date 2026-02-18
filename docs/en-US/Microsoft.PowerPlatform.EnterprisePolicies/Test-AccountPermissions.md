@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Test-AccountPermissions
 ---
@@ -31,8 +31,8 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Tests that the generated Bearer token for the logged in account has the claim that is necessary to be able to call the diagnostic APIs.
-The necessary permission is the Power Platform Administrator role which is assigned through the Entra portal.
+The Test-AccountPermissions cmdlet tests that the generated bearer token for the signed in account has the claim that's necessary to call the diagnostic APIs.
+The necessary permission is the Power Platform administrator role, which is assigned through the Microsoft Entra ID portal.
 
 ## EXAMPLES
 
@@ -40,15 +40,19 @@ The necessary permission is the Power Platform Administrator role which is assig
 
 Test-AccountPermissions
 
+Validates that the signed-in account has the Power Platform Administrator role using default settings.
+
 ### EXAMPLE 2
 
 Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
+
+Validates account permissions for a specific tenant and endpoint.
 
 ## PARAMETERS
 
 ### -Endpoint
 
-The PP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Defaults to 'prod'.
 
 ```yaml
 Type: PPEndpoint

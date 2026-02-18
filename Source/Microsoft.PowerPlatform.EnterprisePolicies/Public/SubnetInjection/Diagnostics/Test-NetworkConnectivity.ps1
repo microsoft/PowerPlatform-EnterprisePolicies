@@ -25,14 +25,22 @@ A string representing the result of the connectivity test.
 .EXAMPLE
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
+Tests TCP connectivity to microsoft.com on the default port (443) from the environment's delegated subnet.
+
 .EXAMPLE
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
+
+Tests TCP connectivity to a SQL database on port 1433 from the environment's delegated subnet.
 
 .EXAMPLE
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
+Tests TCP connectivity to a SQL database, explicitly providing a tenant ID and endpoint.
+
 .EXAMPLE
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+
+Tests TCP connectivity to a SQL database in the westus region instead of the environment's default region.
 #>
 function Test-NetworkConnectivity{
     param(
@@ -50,7 +58,7 @@ function Test-NetworkConnectivity{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to. Default is 'prod'.")]
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the connectivity. Defaults to the region the environment is in.")]

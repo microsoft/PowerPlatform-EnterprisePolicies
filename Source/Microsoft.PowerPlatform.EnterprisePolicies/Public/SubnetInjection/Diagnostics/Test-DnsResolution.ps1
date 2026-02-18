@@ -25,11 +25,17 @@ If the resolution succeeds, it will return the IP address of the hostname.
 .EXAMPLE
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"
 
+Tests DNS resolution for microsoft.com from the environment's delegated subnet using default settings.
+
 .EXAMPLE
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
+Tests DNS resolution for microsoft.com, explicitly providing a tenant ID and endpoint.
+
 .EXAMPLE
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+
+Tests DNS resolution for microsoft.com in the westus region instead of the environment's default region.
 #>
 function Test-DnsResolution {
     param(
@@ -44,7 +50,7 @@ function Test-DnsResolution {
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
     
-        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to. Default is 'prod'.")]
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the resolution. Defaults to the region the environment is in.")]

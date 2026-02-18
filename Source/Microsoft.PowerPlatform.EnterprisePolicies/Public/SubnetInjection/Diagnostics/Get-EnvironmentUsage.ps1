@@ -21,11 +21,17 @@ A class representing the network usage of the environment. [NetworkUsage](Networ
 .EXAMPLE
 Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
+Retrieves the current network usage for the specified environment using default settings.
+
 .EXAMPLE
 Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod
 
+Retrieves the current network usage for the specified environment, explicitly providing a tenant ID and endpoint.
+
 .EXAMPLE
 Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [PPEndpoint]::Prod -Region "westus"
+
+Retrieves the current network usage for the specified environment filtered to the westus region.
 #>
 function Get-EnvironmentUsage{
     param(
@@ -36,7 +42,7 @@ function Get-EnvironmentUsage{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The PP endpoint to connect to. Default is 'prod'.")]
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region to filter the usage by. Defaults to the region the environment is in.")]
