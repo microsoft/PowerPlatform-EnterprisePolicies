@@ -204,6 +204,8 @@ Task PreBuildHelp {
 
 # Executes after the BuildHelpImpl phase of the BuildHelp task.
 Task PostBuildHelp -requiredVariables DocsRootDir, ModuleName, DefaultLocale{
+    # Revert doc files that only have trivial changes (date or line endings) to reduce PR noise
+    Undo-TrivialDocChanges -DocsDir $DocsRootDir
     
     $markdownToAppend = @"
 ## Types
@@ -218,11 +220,23 @@ The `EnvironmentNetworkUsageDocument` class represents historical network usage 
 
 The `NetworkUsage` class represents metadata about the network configuration of a Power Platform environment.
 
-### [NetworkUsageData](NetworkUsageData.md)
+#### [TLSConnectivityInformation](TLSConnectivityInformation.md)
+
+A class representing the result of the TLS handshake.
+
+#### [SSLInformation](SSLInformation.md)
+
+The `SSLInformation` class contains detailed information on the TLS handshake attempt.
+
+#### [CertificateInformation](CertificateInformation.md)
+
+The `CertificateInformation` class contains detailed information about the certificate presented during the TLS handshake.
+
+#### [NetworkUsageData](NetworkUsageData.md)
 
 The `NetworkUsageData` class represents historical network usage information about the network configuration of a Power Platform environment.
 
-### [SubnetUsageDocument](SubnetUsageDocument.md)
+#### [SubnetUsageDocument](SubnetUsageDocument.md)
 
 The `SubnetUsageDocument` class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 
@@ -232,14 +246,23 @@ The `SubnetUsageDocument` class represents historical network usage information 
 
 Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
 
-#### [BAPEndpoint](BAPEndpoint.md)
+#### [PPEndpoint](PPEndpoint.md)
 
-Represents the different BAP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+Represents the different PP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
 "@
 
     $targetFile = "$DocsRootDir\$DefaultLocale\$ModuleName\$ModuleName.md"
     Add-Content -Path $targetFile -Value $markdownToAppend
+}
 
+###############################################################################
+# Customize these tasks for performing operations before and/or after Test.
+###############################################################################
+
+# Executes after the Test task completes.
+Task PostTest {
+    # Clean up the FakeAZ module to prevent it from interfering with real Az cmdlets
+    Remove-Module FakeAZ -ErrorAction SilentlyContinue
 }
 
 ###############################################################################
@@ -266,3 +289,69 @@ Task PrePublish {
 Task PostPublish {
 }
 
+# Helper function to revert doc files that only have trivial changes (date or line endings only)
+function Undo-TrivialDocChanges {
+    param(
+        [Parameter(Mandatory)]
+        [string]$DocsDir
+    )
+
+    # Save and temporarily change ErrorActionPreference to prevent git warnings from causing exceptions
+    $originalErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+
+    try {
+        # Get repo root and compute docs path relative to repo root
+        $repoRoot = (git rev-parse --show-toplevel 2>$null) -replace '/', '\'
+        $docsFullPath = (Resolve-Path $DocsDir).Path
+        $relativeDocs = $docsFullPath.Substring($repoRoot.Length + 1) -replace '\\', '/'
+
+        # Get list of modified files using git status --porcelain
+        # This captures line-ending-only changes that git diff --name-only misses
+        $statusOutput = git -C $repoRoot status --porcelain -- $relativeDocs 2>$null
+
+        # Parse status output - format is "XY filename" where X is staged, Y is unstaged
+        # We only care about modified files (M in either position)
+        $modifiedFiles = @($statusOutput | Where-Object { $_ -match '^\s*M' } | ForEach-Object {
+            $_.Substring(3).Trim()  # Remove status prefix to get filename
+        })
+
+        if (-not $modifiedFiles -or $modifiedFiles.Count -eq 0) {
+            return
+        }
+
+        foreach ($file in $modifiedFiles) {
+            $fullPath = Join-Path $repoRoot $file
+            if (-not (Test-Path $fullPath) -or $file -notlike "*.md") {
+                continue
+            }
+
+            # Get the diff for this specific file, only changed lines (no context)
+            $diff = git -C $repoRoot diff -U0 -- $file 2>$null
+
+            # Count actual content changes (lines starting with + or - but not +++ or ---)
+            $changedLines = @($diff | Where-Object {
+                ($_ -match '^[+-]') -and ($_ -notmatch '^[+-]{3}')
+            })
+
+            # If no content changes (only line ending differences), revert
+            if ($changedLines.Count -eq 0) {
+                $null = git -C $repoRoot checkout -- $file 2>&1
+                Write-Host "Reverted line-ending-only change: $file"
+                continue
+            }
+
+            # If exactly 2 changed lines (one removal, one addition) and both are ms.date, revert
+            if ($changedLines.Count -eq 2) {
+                $isDateOnlyChange = @($changedLines | Where-Object { $_ -match '^[+-]ms\.date:' }).Count -eq 2
+                if ($isDateOnlyChange) {
+                    $null = git -C $repoRoot checkout -- $file 2>&1
+                    Write-Host "Reverted date-only change: $file"
+                }
+            }
+        }
+    }
+    finally {
+        $ErrorActionPreference = $originalErrorAction
+    }
+}

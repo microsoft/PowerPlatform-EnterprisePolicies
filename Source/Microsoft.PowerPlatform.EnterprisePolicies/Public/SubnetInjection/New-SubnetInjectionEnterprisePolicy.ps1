@@ -9,27 +9,29 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Creates a new Subnet Injection Enterprise Policy for Power Platform.
+Creates a new subnet injection enterprise policy for Power Platform.
 
 .DESCRIPTION
-This cmdlet creates a Subnet Injection Enterprise Policy that enables Power Platform environments to use delegated subnets from Azure Virtual Networks. The policy allows Power Platform services to inject into your virtual network for secure connectivity.
+The New-SubnetInjectionEnterprisePolicy cmdlet creates a subnet injection enterprise policy that enables Power Platform environments to use delegated subnets from Azure Virtual Networks.
+The policy allows Power Platform services to inject into your virtual network for secure connectivity.
 
-Some Power Platform regions require two virtual networks in paired Azure regions. Use the VirtualNetworkId2 and SubnetName2 parameters when deploying to these regions.
+Some Power Platform regions require two virtual networks in paired Azure regions.
+Use the VirtualNetworkId2 and SubnetName2 parameters when you deploy to these regions.
 
 .OUTPUTS
-System.String
+Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
 
-A JSON string representation of the created enterprise policy resource.
+Returns the PSResource object representing the created enterprise policy Azure resource.
 
 .EXAMPLE
 New-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup" -PolicyName "myPolicy" -PolicyLocation "unitedstates" -VirtualNetworkId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/myVnet" -SubnetName "default" -AzureEnvironment AzureCloud
 
-Creates a Subnet Injection Enterprise Policy in the United States region using a single virtual network.
+Creates a subnet injection enterprise policy in the United States region using a single virtual network.
 
 .EXAMPLE
 New-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup" -PolicyName "myPolicy" -PolicyLocation "unitedstates" -VirtualNetworkId "/subscriptions/.../virtualNetworks/vnet1" -SubnetName "subnet1" -VirtualNetworkId2 "/subscriptions/.../virtualNetworks/vnet2" -SubnetName2 "subnet2" -TenantId "87654321-4321-4321-4321-210987654321" -AzureEnvironment AzureCloud
 
-Creates a Subnet Injection Enterprise Policy using two virtual networks in paired regions, required for certain Power Platform regions.
+Creates a subnet injection enterprise policy using two virtual networks in paired regions, which is required for certain Power Platform regions.
 #>
 
 function New-SubnetInjectionEnterprisePolicy{
@@ -48,12 +50,14 @@ function New-SubnetInjectionEnterprisePolicy{
         [string]$PolicyLocation,
 
         [Parameter(Mandatory, HelpMessage="The full Azure resource ID of the virtual network")]
+        [ValidateAzureResourceId("Microsoft.Network/virtualNetworks")]
         [string]$VirtualNetworkId,
 
         [Parameter(Mandatory, HelpMessage="The name of the subnet within the virtual network")]
         [string]$SubnetName,
 
         [Parameter(HelpMessage="The full Azure resource ID of a second virtual network (required for regions needing paired VNets)")]
+        [ValidateAzureResourceId("Microsoft.Network/virtualNetworks")]
         [string]$VirtualNetworkId2,
 
         [Parameter(HelpMessage="The name of the subnet within the second virtual network")]
@@ -62,8 +66,8 @@ function New-SubnetInjectionEnterprisePolicy{
         [Parameter(Mandatory, HelpMessage="The Azure AD tenant ID")]
         [string]$TenantId,
 
-        [Parameter(Mandatory, HelpMessage="The Azure environment to use")]
-        [AzureEnvironment]$AzureEnvironment,
+        [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use")]
+        [AzureEnvironment]$AzureEnvironment = [AzureEnvironment]::AzureCloud,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth
@@ -105,7 +109,5 @@ function New-SubnetInjectionEnterprisePolicy{
     Write-Verbose "Subnet Injection Enterprise Policy $PolicyName created successfully."
 
     $policyArmId = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.PowerPlatform/enterprisePolicies/$PolicyName"
-    $policy = Get-EnterprisePolicy $policyArmId
-    $policyString = $policy | ConvertTo-Json -Depth 7
-    return $policyString
+    return Get-EnterprisePolicy -PolicyArmId $policyArmId
 }

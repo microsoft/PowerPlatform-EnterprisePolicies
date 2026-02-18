@@ -20,7 +20,7 @@ Describe 'Get-EnvironmentHistoricalUsage Tests' {
             $resultClass.AzureRegion = "EastUs"
             $resultClass.SubnetName = "default"
             $resultJsonString = ($resultClass | ConvertTo-Json)
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $region = "EastUs"
             $mockResult = [HttpClientResultMock]::new($resultJsonString)

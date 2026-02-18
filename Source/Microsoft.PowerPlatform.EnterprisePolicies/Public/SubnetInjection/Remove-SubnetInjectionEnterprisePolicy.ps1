@@ -1,0 +1,153 @@
+<#
+SAMPLE CODE NOTICE
+
+THIS SAMPLE CODE IS MADE AVAILABLE AS IS. MICROSOFT MAKES NO WARRANTIES, WHETHER EXPRESS OR IMPLIED,
+OF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OR CONDITIONS OF MERCHANTABILITY.
+THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.
+NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
+#>
+
+<#
+.SYNOPSIS
+Removes a subnet injection enterprise policy for Power Platform.
+
+.DESCRIPTION
+The Remove-SubnetInjectionEnterprisePolicy cmdlet removes a subnet injection enterprise policy using one of three methods:
+- By Resource ID: Removes a specific policy using its Azure Resource Manager (ARM) resource ID.
+- By Subscription: Lists all subnet injection policies in a subscription (use -PolicyResourceId to remove a specific policy).
+- By Resource Group: Lists all subnet injection policies in a resource group (use -PolicyResourceId to remove a specific policy).
+
+When using BySubscription or ByResourceGroup, if multiple policies are found, the cmdlet outputs the policy ARM IDs.
+You can specify which policy to remove using -PolicyResourceId.
+
+Note: A policy can't be deleted if it's associated with any Power Platform environments.
+Unlink the policy from all environments before attempting to remove it.
+
+.OUTPUTS
+None
+
+Returns nothing on success. Throws an error if no policy is found or removal fails.
+When multiple policies are found, outputs the policy ARM IDs.
+
+.EXAMPLE
+Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+
+Removes the specified subnet injection enterprise policy by its ARM resource ID.
+
+.EXAMPLE
+Remove-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012"
+
+Lists all subnet injection enterprise policies in the subscription. When only one policy exists, it's removed.
+If multiple policies exist, the ARM IDs are returned as output so you can specify which one to remove.
+
+.EXAMPLE
+Remove-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup"
+
+Lists all subnet injection enterprise policies in the resource group. When only one policy exists, it's removed.
+If multiple policies exist, their ARM IDs are returned as output so you can specify which one to remove.
+
+.EXAMPLE
+Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -AzureEnvironment AzureUSGovernment
+
+Removes the specified policy in the Azure US Government cloud.
+
+.EXAMPLE
+Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -Force
+
+Removes the specified policy without prompting for confirmation.
+#>
+
+function Remove-SubnetInjectionEnterprisePolicy{
+    [CmdletBinding(DefaultParameterSetName = 'ByResourceId', SupportsShouldProcess, ConfirmImpact = 'High')]
+    param(
+        [Parameter(Mandatory, ParameterSetName = 'ByResourceId', HelpMessage="The full Azure ARM resource ID of the enterprise policy")]
+        [ValidateAzureResourceId("Microsoft.PowerPlatform/enterprisePolicies")]
+        [string]$PolicyResourceId,
+
+        [Parameter(Mandatory, ParameterSetName = 'BySubscription', HelpMessage="The Azure subscription ID to search for policies")]
+        [Parameter(Mandatory, ParameterSetName = 'ByResourceGroup', HelpMessage="The Azure subscription ID containing the resource group")]
+        [ValidateNotNullOrEmpty()]
+        [string]$SubscriptionId,
+
+        [Parameter(Mandatory, ParameterSetName = 'ByResourceGroup', HelpMessage="The Azure resource group name to search for policies")]
+        [ValidateNotNullOrEmpty()]
+        [string]$ResourceGroupName,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [string]$TenantId,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure environment to connect to")]
+        [AzureEnvironment]$AzureEnvironment = [AzureEnvironment]::AzureCloud,
+
+        [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
+        [switch]$ForceAuth,
+
+        [Parameter(Mandatory=$false, HelpMessage="Remove the policy without prompting for confirmation")]
+        [switch]$Force
+    )
+
+    $ErrorActionPreference = "Stop"
+
+    if ($Force) {
+        $ConfirmPreference = 'None'
+    }
+
+    # For ByResourceId, extract subscription ID from the resource ID (format already validated by attribute)
+    if ($PSCmdlet.ParameterSetName -eq 'ByResourceId') {
+        $null = $PolicyResourceId -match "/subscriptions/([^/]+)/"
+        $SubscriptionId = $Matches[1]
+    }
+
+    # Connect to Azure
+    if (-not(Connect-Azure -AzureEnvironment $AzureEnvironment -TenantId $TenantId -Force:$ForceAuth)) {
+        throw "Failed to connect to Azure. Please check your credentials and try again."
+    }
+
+    # Set subscription context
+    Write-Verbose "Setting subscription context to $SubscriptionId"
+    $null = Set-AzContext -Subscription $SubscriptionId
+
+    # Verify subscription is initialized for Power Platform
+    if (-not(Initialize-SubscriptionForPowerPlatform -SubscriptionId $SubscriptionId)) {
+        throw "Failed to initialize subscription for Power Platform. Please ensure the subscription is registered for Microsoft.PowerPlatform, Microsoft.Network and the enterprisePoliciesPreview feature is enabled."
+    }
+
+    # Get the policies based on parameter set
+    switch ($PSCmdlet.ParameterSetName) {
+        'ByResourceId' {
+            Write-Verbose "Retrieving enterprise policy: $PolicyResourceId"
+            $policies = @(Get-EnterprisePolicy -PolicyArmId $PolicyResourceId)
+        }
+        'BySubscription' {
+            Write-Verbose "Retrieving all Subnet Injection enterprise policies in subscription: $SubscriptionId"
+            $policies = @(Get-EnterprisePolicy -Kind ([PolicyType]::NetworkInjection))
+        }
+        'ByResourceGroup' {
+            Write-Verbose "Retrieving all Subnet Injection enterprise policies in resource group: $ResourceGroupName"
+            $policies = @(Get-EnterprisePolicy -ResourceGroupName $ResourceGroupName -Kind ([PolicyType]::NetworkInjection))
+        }
+    }
+
+    if ($null -eq $policies -or $policies.Count -eq 0 -or ($policies.Count -eq 1 -and $null -eq $policies[0])) {
+        throw "No enterprise policies found."
+    }
+
+    # If multiple policies found, output their IDs and return
+    if ($policies.Count -gt 1) {
+        Write-Host "Multiple enterprise policies found. Please specify which policy to remove using -PolicyResourceId:"
+        foreach ($policy in $policies) {
+            Write-Host "  $($policy.ResourceId)"
+        }
+        return
+    }
+
+    # Single policy found - proceed with removal
+    $resourceId = $policies[0].ResourceId
+    Write-Verbose "Found enterprise policy: $resourceId"
+
+    if ($PSCmdlet.ShouldProcess($resourceId, "Remove Subnet Injection Enterprise Policy")) {
+        Write-Verbose "Removing enterprise policy: $resourceId"
+        $null = Remove-AzResource -ResourceId $resourceId -Force
+        Write-Verbose "Successfully removed enterprise policy: $resourceId"
+    }
+}

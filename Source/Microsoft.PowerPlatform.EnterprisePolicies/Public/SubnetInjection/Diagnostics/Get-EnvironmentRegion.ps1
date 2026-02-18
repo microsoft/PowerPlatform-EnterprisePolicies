@@ -9,10 +9,10 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Retrieves the region that the specified environment is deployed in.
+Retrieves the region where the specified environment is deployed.
 
 .DESCRIPTION
-Retrieves the region that the specified environment is deployed in. Note, the region is the Power Platform region, but it is aligned with an Azure region.
+The Get-EnvironmentRegion cmdlet retrieves the region where the specified environment is deployed. The region is the Power Platform region, but it's aligned with an Azure region.
 
 .OUTPUTS
 System.String
@@ -21,8 +21,12 @@ A string representing the region of the environment.
 .EXAMPLE
 Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
+Retrieves the region where the specified environment is deployed using default settings.
+
 .EXAMPLE
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+
+Retrieves the region where the specified environment is deployed for an environment in the US Government High cloud.
 #>
 function Get-EnvironmentRegion{
     param(
@@ -33,8 +37,8 @@ function Get-EnvironmentRegion{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
         [switch]$ForceAuth

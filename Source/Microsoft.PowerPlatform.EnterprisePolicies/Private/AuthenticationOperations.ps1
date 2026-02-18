@@ -11,7 +11,7 @@ function Connect-Azure {
     param(
         [Parameter(Mandatory, ParameterSetName = 'ByEndpoint')]
         [ValidateNotNullOrEmpty()]
-        [BAPEndpoint]$Endpoint,
+        [PPEndpoint]$Endpoint,
         [Parameter(Mandatory, ParameterSetName = 'ByEnvironment')]
         [ValidateNotNullOrEmpty()]
         [AzureEnvironment] $AzureEnvironment,
@@ -28,9 +28,9 @@ function Connect-Azure {
 
     if($PSCmdlet.ParameterSetName -eq 'ByEndpoint') {
         $AzureEnvironment = switch ($Endpoint) {
-            ([BAPEndpoint]::china) { "AzureChinaCloud" }
-            ([BAPEndpoint]::dod) { "AzureUSGovernment" }
-            ([BAPEndpoint]::usgovhigh) { "AzureUSGovernment" }
+            ([PPEndpoint]::china) { "AzureChinaCloud" }
+            ([PPEndpoint]::dod) { "AzureUSGovernment" }
+            ([PPEndpoint]::usgovhigh) { "AzureUSGovernment" }
             Default { "AzureCloud" }
         }
     }
@@ -93,17 +93,17 @@ function Connect-Azure {
     return $true
 }
 
-function Get-BAPAccessToken {
+function Get-PPAccessToken {
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [BAPEndpoint]$Endpoint,
+        [PPEndpoint]$Endpoint,
 
         [Parameter(Mandatory=$false)]
         [string]$TenantId = $null
     )
 
-    $resourceUrl = Get-BAPResourceUrl -Endpoint $Endpoint
+    $resourceUrl = Get-PPResourceUrl -Endpoint $Endpoint
     return Get-AccessToken -Endpoint $Endpoint -ResourceUrl $resourceUrl -TenantId $TenantId
 }
 
@@ -111,7 +111,7 @@ function Get-PPAPIAccessToken {
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [BAPEndpoint]$Endpoint,
+        [PPEndpoint]$Endpoint,
 
         [Parameter(Mandatory=$false)]
         [string]$TenantId = $null
@@ -126,7 +126,7 @@ function Get-AccessToken {
     param(
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
-        [BAPEndpoint]$Endpoint,
+        [PPEndpoint]$Endpoint,
 
         [Parameter(Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -143,13 +143,18 @@ function Get-AccessToken {
         {
             Write-Host "Failed to acquire token silently. Please log in interactively." -ForegroundColor Red
             Connect-Azure -AuthScope $resourceUrl -Endpoint $Endpoint -TenantId $TenantId
-            $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString
         }
-        else
+        elseif($null -ne $tokenError.Exception.AuthenticationErrorCode)
         {
             Write-Host "Failed to acquire access token: $($tokenError.Exception.AuthenticationErrorCode)" -ForegroundColor Red
             Connect-Azure -AuthScope $resourceUrl -Endpoint $Endpoint -TenantId $TenantId -Force
         }
+        else {
+            Write-Host "Failed to acquire access token: $($tokenError.Exception.Message)" -ForegroundColor Red
+            Connect-Azure -AuthScope $resourceUrl -Endpoint $Endpoint -TenantId $TenantId -Force
+        }
+
+        $token = Get-AzAccessToken -ResourceUrl $resourceUrl -AsSecureString
 
         if($null -eq $token) {
             throw "Failed to acquire access token. Please check your Azure login and try again."

@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/16/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: New-VnetForSubnetDelegation
 ---
@@ -41,9 +41,9 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This script creates or configures a virtual network and subnet for use with Power Platform Enterprise Policies.
-It can create a new virtual network and subnet, or work with existing resources.
-The subnet will be configured with delegation for Microsoft.PowerPlatform/enterprisePolicies.
+The New-VnetForSubnetDelegation cmdlet creates or configures a virtual network and subnet for use with Power Platform enterprise policies.
+The cmdlet can create a new virtual network and subnet, or work with existing resources.
+The subnet is configured with delegation for Microsoft.PowerPlatform/enterprisePolicies.
 
 ## EXAMPLES
 
@@ -55,11 +55,11 @@ Configures an existing virtual network and subnet with the required delegation.
 
 ### EXAMPLE 2
 
-New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "wus-vnet" -SubnetName "default" -CreateVirtualNetwork -AddressPrefix "10.0.0.0/16" -SubnetPrefix "10.0.1.0/24" -ResourceGroupName "myResourceGroup" -Region "westus" -TenantId "00000000-0000-0000-0000-000000000000"
+New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "wus-vnet" -SubnetName "default" -CreateVirtualNetwork -AddressPrefix "10.0.0.0/16" -SubnetPrefix "10.0.1.0/24" -ResourceGroupName "myResourceGroup" -Region "westus"
 
 Creates a new virtual network named "wus-vnet" with address space 10.0.0.0/16 and a subnet named "default" with address prefix 10.0.1.0/24, then adds delegation.
-If the Vnet or subnet already exist, it will just add the delegation to the existing subnet.
-If the vnet exists but the subnet does not, it will create the subnet with the delegation.
+If the Vnet or subnet already exists, it just adds the delegation to the existing subnet.
+If the vnet exists but the subnet doesn't, the cmdlet creates the subnet with the delegation.
 
 ## PARAMETERS
 

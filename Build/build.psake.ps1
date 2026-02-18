@@ -213,7 +213,7 @@ Task GenerateMarkdown -depends Build, PreBuildHelp -requiredVariables DocsRootDi
     }
     finally {
        "Removing module $ModuleName from session."
-        Remove-Module $ModuleName
+        Remove-Module $ModuleName -ErrorAction SilentlyContinue
     }
 }
 
@@ -228,6 +228,7 @@ Task BuildHelpImpl -depends GenerateMarkdown -requiredVariables DocsRootDir, Out
     }
 
     foreach ($locale in (Get-ChildItem -Path $DocsRootDir -Directory).Name) {
+        "Processing locale: $locale"
         $resolvedDir = Resolve-Path -Path "$DocsRootDir\$locale\$ModuleName"
         pushd $resolvedDir
         Get-ChildItem $resolvedDir -Recurse -Filter *.md |
@@ -237,6 +238,8 @@ Task BuildHelpImpl -depends GenerateMarkdown -requiredVariables DocsRootDir, Out
             Export-MamlCommandHelp -OutputFolder $OutDir\$locale -Force -Verbose:$VerbosePreference
         popd
     }
+
+    "Finished processing locales."
 
     Move-Item -Path $OutDir\$locale\$ModuleName\* -Destination $OutDir\$locale -Force -Verbose:$VerbosePreference
     Remove-Item -Path $OutDir\$locale\$ModuleName -Recurse -Force -Verbose:$VerbosePreference
@@ -322,6 +325,8 @@ Task Test -depends Build -requiredVariables TestRootDir, ModuleName, CodeCoverag
     finally {
         Microsoft.PowerShell.Management\Pop-Location
         Remove-Module $ModuleName -ErrorAction SilentlyContinue
+        # Invoke PostTest task for cleanup (runs regardless of test success/failure)
+        & $psake.context.Peek().tasks['PostTest'].Action
     }
 }
 

@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/16/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Test-AccountPermissions
 ---
@@ -20,7 +20,7 @@ Validates that the account has the correct permissions to run diagnostic command
 ### __AllParameterSets
 
 ```
-Test-AccountPermissions [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [-ForceAuth]
+Test-AccountPermissions [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>] [-ForceAuth]
  [<CommonParameters>]
 ```
 
@@ -31,8 +31,8 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Tests that the generated Bearer token for the logged in account has the claim that is necessary to be able to call the diagnostic APIs.
-The necessary permission is the Power Platform Administrator role which is assigned through the Entra portal.
+The Test-AccountPermissions cmdlet tests that the generated bearer token for the signed in account has the claim that's necessary to call the diagnostic APIs.
+The necessary permission is the Power Platform administrator role, which is assigned through the Microsoft Entra ID portal.
 
 ## EXAMPLES
 
@@ -40,18 +40,22 @@ The necessary permission is the Power Platform Administrator role which is assig
 
 Test-AccountPermissions
 
+Validates that the signed-in account has the Power Platform Administrator role using default settings.
+
 ### EXAMPLE 2
 
-Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-AccountPermissions -Endpoint usgovhigh
+
+Validates account permissions for an environment in the US Government High cloud.
 
 ## PARAMETERS
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Defaults to 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

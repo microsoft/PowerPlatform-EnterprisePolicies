@@ -13,28 +13,28 @@ Describe 'RESTHelpers Tests' {
         
         Context 'Testing Get-APIResourceUrl' {
             It 'Throws an error for unsupported endpoint' {
-                { Get-APIResourceUrl -Endpoint ([BAPEndpoint]::unknown) } | Should -Throw "Unsupported BAP endpoint: unknown"
+                { Get-APIResourceUrl -Endpoint ([PPEndpoint]::unknown) } | Should -Throw "Unsupported PP endpoint: unknown"
             }
     
             It 'Returns the correct resource URL for a valid endpoint' {
-                $result = Get-APIResourceUrl -Endpoint ([BAPEndpoint]::prod)
+                $result = Get-APIResourceUrl -Endpoint ([PPEndpoint]::prod)
                 $result | Should -Be "https://api.powerplatform.com/"
             }
         }
     
         Context 'Testing Get-EnvironmentRouteHostName' {
             It 'Returns the correct route for TIP1 endpoint' {
-                $result = Get-EnvironmentRouteHostName -EnvironmentId "12345678-1234-1234-1234-123456789012" -Endpoint ([BAPEndpoint]::tip1)
+                $result = Get-EnvironmentRouteHostName -EnvironmentId "12345678-1234-1234-1234-123456789012" -Endpoint ([PPEndpoint]::tip1)
                 $result | Should -Be "1234567812341234123412345678901.2.environment.api.preprod.powerplatform.com"
             }
     
             It 'Returns the correct route for PROD endpoint' {
-                $result = Get-EnvironmentRouteHostName -EnvironmentId "3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([BAPEndpoint]::prod)
+                $result = Get-EnvironmentRouteHostName -EnvironmentId "3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([PPEndpoint]::prod)
                 $result | Should -Be "3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
             }
     
             It 'Returns the correct route when EnvironmentId is not a Guid' {
-                $result = Get-EnvironmentRouteHostName -EnvironmentId "Default3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([BAPEndpoint]::prod)
+                $result = Get-EnvironmentRouteHostName -EnvironmentId "Default3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([PPEndpoint]::prod)
                 $result | Should -Be "Default3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
             }
         }
@@ -46,7 +46,7 @@ Describe 'RESTHelpers Tests' {
                 $query = "api-version=2024-10-01"
                 $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
                 $httpMethod = [System.Net.Http.HttpMethod]::Get
-                $endpoint = [BAPEndpoint]::prod
+                $endpoint = [PPEndpoint]::prod
 
                 $result = New-EnvironmentRouteRequest -EnvironmentId $envId -Path $path -Query $query -AccessToken $secureString -HttpMethod $httpMethod -Endpoint $endpoint
 
@@ -58,25 +58,24 @@ Describe 'RESTHelpers Tests' {
 
         Context 'Testing Get-HttpClient' {
             BeforeEach {
-                #This test could be flaky if other tests create HttpClient instances, ensure that doesn't happen
                 $script:httpClient = $null
             }
             AfterAll {
                 $script:httpClient = $null
             }
-            It 'Returns an HttpClient with only the User-Agent header set' {
+            It 'Returns an HttpClient with User-Agent and x-ms-useragent headers set' {
                 $client = Get-HttpClient
                 $client.DefaultRequestHeaders.UserAgent.Count | Should -Be 1
                 $client.DefaultRequestHeaders.UserAgent[0].Product.Name | Should -Be "Microsoft.PowerPlatform.EnterprisePolicies"
                 $client.DefaultRequestHeaders.UserAgent[0].Product.Version | Should -Be "1.0.0"
-                $client.DefaultRequestHeaders.Count | Should -Be 1
+                $client.DefaultRequestHeaders.Contains("x-ms-useragent") | Should -BeTrue
+                $client.DefaultRequestHeaders.GetValues("x-ms-useragent") | Should -Be "Microsoft.PowerPlatform.EnterprisePolicies/1.0.0 ($([System.Environment]::OSVersion.Platform))"
             }
 
             It 'Follows a singleton pattern'{
-                Mock New-Object -ParameterFilter { $TypeName -eq 'System.Net.Http.HttpClient' } { [System.Net.Http.HttpClient]::new() } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-                Get-HttpClient
-                Get-HttpClient
-                Should -Invoke New-Object -Times 1
+                $client1 = Get-HttpClient
+                $client2 = Get-HttpClient
+                [Object]::ReferenceEquals($client1, $client2) | Should -BeTrue
             }
         }
 
@@ -165,10 +164,10 @@ Describe 'RESTHelpers Tests' {
                 $mock429Result.StatusCode = 429
                 $mock429Result.IsSuccessStatusCode = $false
                 $mockSuccessResult = [HttpClientResultMock]::new("Success")
-                
+
                 $script:callCount = 0
                 Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-                Mock Get-AsyncResult { 
+                Mock Get-AsyncResult {
                     $script:callCount++
                     if ($script:callCount -eq 1) {
                         return $mock429Result
@@ -176,15 +175,80 @@ Describe 'RESTHelpers Tests' {
                         return $mockSuccessResult
                     }
                 } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-                
+
                 Mock Test-Result { param($Result) return $Result.IsSuccessStatusCode } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
                 Mock Start-Sleep { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
                 Mock Write-Host { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-                
+
                 $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 3 -DelaySeconds 1
 
                 $result | Should -Be $mockSuccessResult
                 Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -gt 5 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Waits 60 seconds on 502 Bad Gateway after 503 with Retry-After header' {
+                $mockClient = [HttpClientMock]::new()
+                $mock503Result = [HttpClientResultMock]::new("Service Unavailable", "text/plain", @{"Retry-After" = "2"})
+                $mock503Result.StatusCode = [System.Net.HttpStatusCode]::ServiceUnavailable
+                $mock503Result.IsSuccessStatusCode = $false
+                $mock502Result = [HttpClientResultMock]::new("Bad Gateway", "text/plain", @{})
+                $mock502Result.StatusCode = [System.Net.HttpStatusCode]::BadGateway
+                $mock502Result.IsSuccessStatusCode = $false
+                $mockSuccessResult = [HttpClientResultMock]::new("Success")
+
+                $script:callCount = 0
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult {
+                    $script:callCount++
+                    if ($script:callCount -eq 1) {
+                        return $mock503Result
+                    } elseif ($script:callCount -eq 2) {
+                        return $mock502Result
+                    } else {
+                        return $mockSuccessResult
+                    }
+                } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                Mock Test-Result { param($Result) return $Result.IsSuccessStatusCode } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Start-Sleep { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Write-Host { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 5 -DelaySeconds 1
+
+                $result | Should -Be $mockSuccessResult
+                # First sleep is 2 seconds (from Retry-After), second sleep is 60 seconds (502 after Retry-After)
+                Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 2 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 60 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Uses default delay on 502 Bad Gateway without prior Retry-After header' {
+                $mockClient = [HttpClientMock]::new()
+                $mock502Result = [HttpClientResultMock]::new("Bad Gateway", "text/plain", @{})
+                $mock502Result.StatusCode = [System.Net.HttpStatusCode]::BadGateway
+                $mock502Result.IsSuccessStatusCode = $false
+                $mockSuccessResult = [HttpClientResultMock]::new("Success")
+
+                $script:callCount = 0
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult {
+                    $script:callCount++
+                    if ($script:callCount -eq 1) {
+                        return $mock502Result
+                    } else {
+                        return $mockSuccessResult
+                    }
+                } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                Mock Test-Result { param($Result) return $Result.IsSuccessStatusCode } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Start-Sleep { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Write-Host { } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result = Send-RequestWithRetries -RequestFactory { "RequestMessage" } -MaxRetries 3 -DelaySeconds 5
+
+                $result | Should -Be $mockSuccessResult
+                # Should use default delay (5 seconds), not the 60-second extended wait
+                Should -Invoke Start-Sleep -Times 1 -ParameterFilter { $Seconds -eq 5 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Should -Invoke Start-Sleep -Times 0 -ParameterFilter { $Seconds -eq 60 } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             }
         }
 
@@ -251,6 +315,15 @@ Describe 'RESTHelpers Tests' {
                 $result.AzureRegion | Should -Be "EastUS"
                 $result.EnvironmentId | Should -BeNullOrEmpty
                 $result.VnetId | Should -BeNullOrEmpty
+            }
+
+            It 'Handles null or missing properties that are other custom classes gracefully' {
+                $json = '{"TCPConnectivity":false,"Certificate":null,"SSLWithoutCRL":null,"SSLWithCRL":null}'
+                $result = ConvertFrom-JsonToClass -Json $json -ClassType ([TLSConnectivityInformation])
+
+                $result | Should -BeOfType [TLSConnectivityInformation]
+                $result.TCPConnectivity | Should -Be $false
+                $result.Certificate | Should -Be $null
             }
 
             It 'Handles hashtable properties' {

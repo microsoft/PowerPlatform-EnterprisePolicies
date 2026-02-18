@@ -57,7 +57,7 @@ function New-EnvironmentRouteRequest
         [Parameter(Mandatory)]
         [string] $Query,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint,
+        [PPEndpoint] $Endpoint,
         [Parameter(Mandatory=$true)]
         [System.Security.SecureString] $AccessToken,
         [Parameter(Mandatory=$false)]
@@ -88,7 +88,7 @@ function New-HomeTenantRouteRequest
         [Parameter(Mandatory)]
         [string] $Query,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint,
+        [PPEndpoint] $Endpoint,
         [Parameter(Mandatory=$true)]
         [System.Security.SecureString] $AccessToken,
         [Parameter(Mandatory=$false)]
@@ -118,10 +118,16 @@ function Get-HttpClient
     if($null -eq $script:httpClient)
     {
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls13 -bor [System.Net.SecurityProtocolType]::Tls12
-    
+
         $script:httpClient = New-Object -TypeName System.Net.Http.HttpClient
         $script:httpClient.DefaultRequestHeaders.Clear()
-        $script:httpClient.DefaultRequestHeaders.UserAgent.Add([System.Net.Http.Headers.ProductInfoHeaderValue]::new("Microsoft.PowerPlatform.EnterprisePolicies", (Get-ModuleVersion)))
+
+        $moduleName = "Microsoft.PowerPlatform.EnterprisePolicies"
+        $moduleVersion = Get-ModuleVersion
+        $osPlatform = [System.Environment]::OSVersion.Platform
+
+        $script:httpClient.DefaultRequestHeaders.UserAgent.Add([System.Net.Http.Headers.ProductInfoHeaderValue]::new($moduleName, $moduleVersion))
+        $script:httpClient.DefaultRequestHeaders.Add("x-ms-useragent", "$moduleName/$moduleVersion ($osPlatform)")
     }
 
     return $script:httpClient
@@ -170,14 +176,14 @@ function Get-EnvironmentRouteHostName {
         [Parameter(Mandatory)]
         [string] $EnvironmentId,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     $baseUri = Get-APIResourceUrl -Endpoint $Endpoint
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $EnvironmentId = $EnvironmentId.Replace("-", "")
-    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2 -or $Endpoint -eq [BAPEndpoint]::usgovhigh) {
+    if($Endpoint -eq [PPEndpoint]::tip1 -or $Endpoint -eq [PPEndpoint]::tip2 -or $Endpoint -eq [PPEndpoint]::usgovhigh) {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 1, 1)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 1)
     }
@@ -193,14 +199,14 @@ function Get-TenantRouteHostName {
         [Parameter(Mandatory)]
         [string] $TenantId,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     $baseUri = Get-APIResourceUrl -Endpoint $Endpoint
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $TenantId = $TenantId.Replace("-", "")
-    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2 -or $Endpoint -eq [BAPEndpoint]::usgovhigh) {
+    if($Endpoint -eq [PPEndpoint]::tip1 -or $Endpoint -eq [PPEndpoint]::tip2 -or $Endpoint -eq [PPEndpoint]::usgovhigh) {
         $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
         $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
     }
@@ -211,37 +217,55 @@ function Get-TenantRouteHostName {
     return "il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
 }
 
-function Get-BAPResourceUrl {
+function Get-PPEndpointUrl {
     param (
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     switch ($Endpoint) {
-        ([BAPEndpoint]::tip1) { return "https://preprod.powerplatform.com/" }
-        ([BAPEndpoint]::tip2) { return "https://test.powerplatform.com/" }
-        ([BAPEndpoint]::prod) { return "https://powerplatform.com/" }
-        ([BAPEndpoint]::usgovhigh) { return "https://high.powerplatform.microsoft.us/" }
-        ([BAPEndpoint]::dod) { return "https://appsplatform.us/" }
-        ([BAPEndpoint]::china) { return "https://powerplatform.partner.microsoftonline.cn/" }
-        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+        ([PPEndpoint]::tip1) { return "https://tip1.api.bap.microsoft.com/" }
+        ([PPEndpoint]::tip2) { return "https://tip2.api.bap.microsoft.com/" }
+        ([PPEndpoint]::prod) { return "https://api.bap.microsoft.com/" }
+        ([PPEndpoint]::usgovhigh) { return "https://high.api.bap.microsoft.us/" }
+        ([PPEndpoint]::dod) { return "https://api.bap.appsplatform.us/" }
+        ([PPEndpoint]::china) { return "https://api.bap.partner.microsoftonline.cn/" }
+        Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
+
+function Get-PPResourceUrl {
+    param (
+        [Parameter(Mandatory)]
+        [PPEndpoint] $Endpoint
+    )
+
+    switch ($Endpoint) {
+        ([PPEndpoint]::tip1) { return "https://service.powerapps.com/" }
+        ([PPEndpoint]::tip2) { return "https://service.powerapps.com/" }
+        ([PPEndpoint]::prod) { return "https://service.powerapps.com/" }
+        ([PPEndpoint]::usgovhigh) { return "https://high.service.powerapps.us/" }
+        ([PPEndpoint]::dod) { return "https://service.apps.appsplatform.us/" }
+        ([PPEndpoint]::china) { return "https://service.powerapps.cn/" }
+        Default { throw "Unsupported PP endpoint: $Endpoint" }
+    }
+}
+
 
 function Get-APIResourceUrl {
     param (
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     switch ($Endpoint) {
-        ([BAPEndpoint]::tip1) { return "https://api.preprod.powerplatform.com/" }
-        ([BAPEndpoint]::tip2) { return "https://api.test.powerplatform.com/" }
-        ([BAPEndpoint]::prod) { return "https://api.powerplatform.com/" }
-        ([BAPEndpoint]::usgovhigh) { return "https://api.high.powerplatform.microsoft.us/" }
-        ([BAPEndpoint]::dod) { return "https://api.appsplatform.us/" }
-        ([BAPEndpoint]::china) { return "https://api.powerplatform.partner.microsoftonline.cn/" }
-        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+        ([PPEndpoint]::tip1) { return "https://api.preprod.powerplatform.com/" }
+        ([PPEndpoint]::tip2) { return "https://api.test.powerplatform.com/" }
+        ([PPEndpoint]::prod) { return "https://api.powerplatform.com/" }
+        ([PPEndpoint]::usgovhigh) { return "https://api.high.powerplatform.microsoft.us/" }
+        ([PPEndpoint]::dod) { return "https://api.appsplatform.us/" }
+        ([PPEndpoint]::china) { return "https://api.powerplatform.partner.microsoftonline.cn/" }
+        Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
 
@@ -257,6 +281,7 @@ function Send-RequestWithRetries {
 
     $client = Get-HttpClient
     $attempt = 0
+    $retryAfterFound = $false
     while ($attempt -lt $MaxRetries) {
         try {
             $sleepSeconds = $DelaySeconds
@@ -269,6 +294,7 @@ function Send-RequestWithRetries {
             # Check for 503 Service Unavailable or 429 Too Many Requests with Retry-After header
             if ($result.StatusCode -eq 503 -or $result.StatusCode -eq 429) {
                 if ($result.Headers.Contains("Retry-After")) {
+                    $retryAfterFound = $true
                     $retryAfterValue = $result.Headers.GetValues("Retry-After") | Select-Object -First 1
                     # Retry-After can be either seconds (integer) or HTTP date
                     if ($retryAfterValue -match '^\d+$') {
@@ -287,6 +313,11 @@ function Send-RequestWithRetries {
                     }
                     Write-Host "The service is working on the request and has requested a retry. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
                 }
+            }
+            elseif($result.StatusCode -eq 502 -and $retryAfterFound) {
+                # If we previously saw a Retry-After header, extend the wait time as the gateway might not have the route configured yet.
+                $sleepSeconds = 60
+                Write-Host "The gateway has not updated the route information yet. Waiting for $sleepSeconds seconds before retrying..." -ForegroundColor Yellow
             }
             $attempt++
         }
@@ -361,7 +392,7 @@ function ConvertFrom-JsonToClass {
     )
 
     $data = $Json | ConvertFrom-Json
-    
+
     # Handle array types directly
     if ($ClassType.IsArray) {
         $elementType = $ClassType.GetElementType()
@@ -388,19 +419,25 @@ function ConvertFrom-JsonToClass {
         return [Decimal]::Parse($data)
     }
     
+    if ($null -eq $data) {
+        return $null
+    }
     # Handle complex types
     $instance = [Activator]::CreateInstance($ClassType)
 
     foreach ($property in $ClassType.GetProperties()) {
         $name = $property.Name
         $type = Get-UnderlyingType $property.PropertyType
-        if ($data.PSObject.Properties[$name]) {
+        if ($data.PSObject.Properties -and $data.PSObject.Properties[$name]) {
             if ($type -eq [hashtable] -or $type.FullName -eq 'System.Collections.Hashtable') {
                 $instance.$name = ConvertTo-Hashtable $data.$name
             }
             elseif ($type.IsClass -and $type -ne [string]) {
                 $nestedJson = $data.$name | ConvertTo-Json -Depth 10
                 $instance.$name = ConvertFrom-JsonToClass -Json $nestedJson -ClassType $type
+            }
+            elseif ($type.IsEnum){
+                $instance.$name = [System.Enum]::Parse($type, $data.$name)
             }
             else {
                 $instance.$name = $data.$name
@@ -410,7 +447,6 @@ function ConvertFrom-JsonToClass {
 
     return $instance
 }
-
 
 function Get-UnderlyingType([type]$t) {
     if ($t.IsGenericType -and $t.GetGenericTypeDefinition().FullName -eq 'System.Nullable`1') {
