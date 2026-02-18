@@ -9,13 +9,12 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Attempts to establish a TLS handshake with the provided destination and port.
+Attempts to establish a Transport Layer Security (TLS) handshake with the provided destination and port.
 
 .DESCRIPTION
-Tests that a TLS handshake can be established against the provided destination and port.
-
-This function is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+The Test-TLSHandshake cmdlet tests that a TLS handshake can be established against the provided destination and port.
+The cmdlet is executed in the context of your delegated subnet in the region that you specify.
+If the region isn't specified, it defaults to the region of the environment.
 
 .OUTPUTS
 TLSConnectivityInformation
@@ -24,14 +23,22 @@ A class representing the result of the TLS handshake. [TLSConnectivityInformatio
 .EXAMPLE
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
+Tests TLS handshake with microsoft.com on the default port (443) from the environment's delegated subnet.
+
 .EXAMPLE
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
 
-.EXAMPLE
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Tests TLS handshake with a SQL database on port 1433 from the environment's delegated subnet.
 
 .EXAMPLE
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint usgovhigh
+
+Tests TLS handshake with a SQL database for an environment in the US Government High cloud.
+
+.EXAMPLE
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Region "westus"
+
+Tests TLS handshake with a SQL database in the westus region instead of the environment's default region.
 #>
 function Test-TLSHandshake{
     param(
@@ -49,8 +56,8 @@ function Test-TLSHandshake{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the handshake. Defaults to the region the environment is in.")]
         [string]$Region,

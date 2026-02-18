@@ -9,11 +9,11 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Tests the DNS resolution for a given hostname in a specified environment.
+Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
 
 .DESCRIPTION
-Tests the DNS resolution for a given hostname in a specified environment.
-This function is executed in the context of your delegated subnet in the region that you have specified.
+The Test-DnsResolution cmdlet tests the DNS resolution for a given hostname in a specified environment.
+This cmdlet is executed in the context of your delegated subnet in the region that you have specified.
 If the region is not specified, it defaults to the region of the environment.
 
 .OUTPUTS
@@ -25,11 +25,17 @@ If the resolution succeeds, it will return the IP address of the hostname.
 .EXAMPLE
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"
 
-.EXAMPLE
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Tests DNS resolution for microsoft.com from the environment's delegated subnet using default settings.
 
 .EXAMPLE
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -Endpoint usgovhigh
+
+Tests DNS resolution for microsoft.com for an environment in the US Government High cloud.
+
+.EXAMPLE
+Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -Region "westus"
+
+Tests DNS resolution for microsoft.com in the westus region instead of the environment's default region.
 #>
 function Test-DnsResolution {
     param(
@@ -44,8 +50,8 @@ function Test-DnsResolution {
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
     
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the resolution. Defaults to the region the environment is in.")]
         [string]$Region,

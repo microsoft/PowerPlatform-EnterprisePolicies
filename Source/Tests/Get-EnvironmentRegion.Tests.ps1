@@ -16,7 +16,7 @@ Describe 'Get-EnvironmentRegion Tests' {
     Context 'Testing Get-EnvironmentRegion' {
         It 'Returns region for a valid environment' {
             $regionString = '"Central US"'
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $mockResult = [HttpClientResultMock]::new($regionString)
             $httpClientMock = [HttpClientMock]::new()

@@ -12,8 +12,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 Retrieves the historical network usage of the specified environment.
 
 .DESCRIPTION
-Retrieves the historical usage of the specified environment.
-Note, this is only the historical usage that this environment has. It does not include usage from other environments and it does not include any ips that might be reserved by azure.
+The Get-EnvironmentHistoricalUsage cmdlet retrieves the historical usage of the specified environment. This is only the historical usage that the specified environment has. It doesn't include usage from other environments and it doesn't include any IP addresses that might be reserved by Azure.
 
 .OUTPUTS
 EnvironmentNetworkUsageDocument
@@ -22,8 +21,12 @@ A class representing the historical network usage of the environment. [Environme
 .EXAMPLE
 Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
+Retrieves the historical network usage for the specified environment in the westus region.
+
 .EXAMPLE
-Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod -ShowDetails
+Get-EnvironmentHistoricalUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "usgovvirginia" -Endpoint usgovhigh -ShowDetails
+
+Retrieves the historical network usage with detailed breakdown for an environment in the US Government High cloud.
 #>
 function Get-EnvironmentHistoricalUsage{
     param(
@@ -37,8 +40,8 @@ function Get-EnvironmentHistoricalUsage{
         [Parameter(Mandatory, HelpMessage="The region that the environment belongs to.")]
         [string]$Region,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Switch to show detailed usage information.")]
         [switch]$ShowDetails,

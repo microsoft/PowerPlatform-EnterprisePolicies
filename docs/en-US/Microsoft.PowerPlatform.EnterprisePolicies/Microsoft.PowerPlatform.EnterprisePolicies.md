@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/06/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -20,11 +20,11 @@ Microsoft PowerPlatform Enterprise policies module
 
 ### [Disable-SubnetInjection](Disable-SubnetInjection.md)
 
-Disables Subnet Injection for a Power Platform environment by unlinking it from its Enterprise Policy.
+Disables subnet injection for a Power Platform environment by unlinking it from its enterprise policy.
 
 ### [Enable-SubnetInjection](Enable-SubnetInjection.md)
 
-Enables Subnet Injection for a Power Platform environment by linking it to an Enterprise Policy.
+Enables subnet injection for a Power Platform environment by linking it to an enterprise policy.
 
 ### [Get-EnvironmentHistoricalUsage](Get-EnvironmentHistoricalUsage.md)
 
@@ -32,7 +32,7 @@ Retrieves the historical network usage of the specified environment.
 
 ### [Get-EnvironmentRegion](Get-EnvironmentRegion.md)
 
-Retrieves the region that the specified environment is deployed in.
+Retrieves the region where the specified environment is deployed.
 
 ### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
 
@@ -40,11 +40,11 @@ Retrieves the current usage of the specified environment.
 
 ### [Get-SubnetInjectionEnterprisePolicy](Get-SubnetInjectionEnterprisePolicy.md)
 
-Retrieves Subnet Injection Enterprise Policies for Power Platform.
+Retrieves subnet injection enterprise policies for Power Platform.
 
 ### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
 
-Creates a new Subnet Injection Enterprise Policy for Power Platform.
+Creates a new subnet injection enterprise policy for Power Platform.
 
 ### [New-VnetForSubnetDelegation](New-VnetForSubnetDelegation.md)
 
@@ -52,7 +52,7 @@ Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprise
 
 ### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
 
-Removes a Subnet Injection Enterprise Policy for Power Platform.
+Removes a subnet injection enterprise policy for Power Platform.
 
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
@@ -60,7 +60,7 @@ Validates that the account has the correct permissions to run diagnostic command
 
 ### [Test-DnsResolution](Test-DnsResolution.md)
 
-Tests the DNS resolution for a given hostname in a specified environment.
+Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
 
 ### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
 
@@ -68,7 +68,7 @@ Tests the connectivity to a given service in a specified environment.
 
 ### [Test-TLSHandshake](Test-TLSHandshake.md)
 
-Attempts to establish a TLS handshake with the provided destination and port.
+Attempts to establish a Transport Layer Security (TLS) handshake with the provided destination and port.
 
 ## Types
 
@@ -108,6 +108,6 @@ The SubnetUsageDocument class represents historical network usage information an
 
 Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
 
-#### [BAPEndpoint](BAPEndpoint.md)
+#### [PPEndpoint](PPEndpoint.md)
 
-Represents the different BAP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+Represents the different PP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.

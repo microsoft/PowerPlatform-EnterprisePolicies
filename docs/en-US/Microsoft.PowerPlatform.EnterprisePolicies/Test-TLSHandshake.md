@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Test-TLSHandshake
 ---
@@ -13,7 +13,7 @@ title: Test-TLSHandshake
 
 ## SYNOPSIS
 
-Attempts to establish a TLS handshake with the provided destination and port.
+Attempts to establish a Transport Layer Security (TLS) handshake with the provided destination and port.
 
 ## SYNTAX
 
@@ -21,7 +21,7 @@ Attempts to establish a TLS handshake with the provided destination and port.
 
 ```
 Test-TLSHandshake [-EnvironmentId] <string> [-Destination] <string> [[-Port] <string>]
- [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>] [[-Region] <string>] [-ForceAuth]
+ [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>] [[-Region] <string>] [-ForceAuth]
  [<CommonParameters>]
 ```
 
@@ -32,10 +32,9 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Tests that a TLS handshake can be established against the provided destination and port.
-
-This function is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+The Test-TLSHandshake cmdlet tests that a TLS handshake can be established against the provided destination and port.
+The cmdlet is executed in the context of your delegated subnet in the region that you specify.
+If the region isn't specified, it defaults to the region of the environment.
 
 ## EXAMPLES
 
@@ -43,17 +42,25 @@ If the region is not specified, it defaults to the region of the environment.
 
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
+Tests TLS handshake with microsoft.com on the default port (443) from the environment's delegated subnet.
+
 ### EXAMPLE 2
 
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
 
+Tests TLS handshake with a SQL database on port 1433 from the environment's delegated subnet.
+
 ### EXAMPLE 3
 
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint usgovhigh
+
+Tests TLS handshake with a SQL database for an environment in the US Government High cloud.
 
 ### EXAMPLE 4
 
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Region "westus"
+
+Tests TLS handshake with a SQL database in the westus region instead of the environment's default region.
 
 ## PARAMETERS
 
@@ -80,10 +87,10 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Defaults to 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

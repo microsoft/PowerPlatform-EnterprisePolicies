@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/28/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Disable-SubnetInjection
 ---
@@ -13,14 +13,14 @@ title: Disable-SubnetInjection
 
 ## SYNOPSIS
 
-Disables Subnet Injection for a Power Platform environment by unlinking it from its Enterprise Policy.
+Disables subnet injection for a Power Platform environment by unlinking it from its enterprise policy.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Disable-SubnetInjection [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
+Disable-SubnetInjection [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>]
  [[-TimeoutSeconds] <int>] [-ForceAuth] [-NoWait] [<CommonParameters>]
 ```
 
@@ -31,7 +31,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet unlinks the Subnet Injection Enterprise Policy from a Power Platform environment,
+The Disable-SubnetInjection cmdlet unlinks the subnet injection enterprise policy from a Power Platform environment,
 disabling the environment's use of delegated virtual network subnets.
 
 The operation is asynchronous.
@@ -44,13 +44,13 @@ Use -NoWait to return immediately after the operation is initiated.
 
 Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
-Disables Subnet Injection for the environment by unlinking it from its currently linked policy.
+Disables subnet injection for the environment by unlinking it from its currently linked policy.
 
 ### EXAMPLE 2
 
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
-Disables Subnet Injection for an environment in the US Government High cloud.
+Disables subnet injection for an environment in the US Government High cloud.
 
 ### EXAMPLE 3
 
@@ -62,10 +62,10 @@ Initiates the unlink operation without waiting for completion.
 
 ### -Endpoint
 
-The BAP endpoint to connect to
+The Power Platform endpoint to connect to. Defaults to 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

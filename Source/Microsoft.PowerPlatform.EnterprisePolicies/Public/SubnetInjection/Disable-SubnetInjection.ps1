@@ -9,10 +9,10 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Disables Subnet Injection for a Power Platform environment by unlinking it from its Enterprise Policy.
+Disables subnet injection for a Power Platform environment by unlinking it from its enterprise policy.
 
 .DESCRIPTION
-This cmdlet unlinks the Subnet Injection Enterprise Policy from a Power Platform environment,
+The Disable-SubnetInjection cmdlet unlinks the subnet injection enterprise policy from a Power Platform environment,
 disabling the environment's use of delegated virtual network subnets.
 
 The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
@@ -26,12 +26,12 @@ Returns $true when the operation completes successfully, or when -NoWait is spec
 .EXAMPLE
 Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
-Disables Subnet Injection for the environment by unlinking it from its currently linked policy.
+Disables subnet injection for the environment by unlinking it from its currently linked policy.
 
 .EXAMPLE
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
 
-Disables Subnet Injection for an environment in the US Government High cloud.
+Disables subnet injection for an environment in the US Government High cloud.
 
 .EXAMPLE
 Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -NoWait
@@ -49,8 +49,8 @@ function Disable-SubnetInjection {
         [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth,
@@ -71,10 +71,10 @@ function Disable-SubnetInjection {
 
     # Validate that the environment exists
     Write-Verbose "Retrieving environment: $EnvironmentId"
-    $environment = Get-BAPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
+    $environment = Get-PPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
 
     if ($null -eq $environment) {
-        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environment exists, ensure you have the necessary permissions to access it and that you are connecting to the correct BAP endpoint."
+        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environment exists, ensure you have the necessary permissions to access it and that you are connecting to the correct PP endpoint."
     }
 
     Write-Verbose "Environment retrieved successfully"
