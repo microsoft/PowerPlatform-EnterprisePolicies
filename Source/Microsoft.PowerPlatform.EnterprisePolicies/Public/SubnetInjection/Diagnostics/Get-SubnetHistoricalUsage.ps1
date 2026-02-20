@@ -20,7 +20,14 @@ SubnetUsageDocument
 A class representing the network usage of the subnet. [SubnetUsageDocument](SubnetUsageDocument.md)
 
 .EXAMPLE
-Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus" -Endpoint [BAPEndpoint]::Prod
+Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "westus"
+
+Retrieves the historical subnet usage for the specified enterprise policy in the westus region.
+
+.EXAMPLE
+Get-SubnetHistoricalUsage -EnterprisePolicyId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Region "usgovvirginia" -Endpoint usgovhigh
+
+Retrieves the historical subnet usage for an enterprise policy in the US Government High cloud.
 #>
 function Get-SubnetHistoricalUsage{
     param(
@@ -34,8 +41,8 @@ function Get-SubnetHistoricalUsage{
         [Parameter(Mandatory, HelpMessage="The region that the tenant belongs to.")]
         [string]$Region,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
         [switch]$ForceAuth
@@ -57,7 +64,14 @@ function Get-SubnetHistoricalUsage{
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if($contentString) {
-        return ConvertFrom-JsonToClass -Json $contentString -ClassType ([SubnetUsageDocument])
+        try {
+            return ConvertFrom-JsonToClass -Json $contentString -ClassType ([SubnetUsageDocument])
+        }
+        catch {
+            Write-Verbose "Failed to convert response to SubnetUsageDocument: $($_.Exception.Message)"
+            return $contentString
+        }
     } else {
         throw "Failed to retrieve the subnet usage data from response."
-    }}
+    }
+}
