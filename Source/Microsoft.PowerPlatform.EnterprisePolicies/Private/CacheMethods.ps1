@@ -11,9 +11,10 @@ $script:CachePath = Join-Path $([Environment]::GetFolderPath('LocalApplicationDa
 $script:CacheData = $null
 
 function Get-EmptyCache{
-    return @{
-        "Version" = "1.0"
-        "SubscriptionsValidated" = @()
+    return [PSCustomObject]@{
+        Version = "1.0"
+        SubscriptionsValidated = @()
+        RegionCache = [PSCustomObject]@{}
     }
 }
 
@@ -31,6 +32,9 @@ function Initialize-Cache{
         }
         else{
             $script:CacheData = $content | ConvertFrom-Json
+            if(-not($script:CacheData.PSObject.Properties.Name -contains 'RegionCache')){
+                $script:CacheData | Add-Member -NotePropertyName "RegionCache" -NotePropertyValue ([PSCustomObject]@{})
+            }
         }
     }
 }
@@ -63,4 +67,57 @@ function Add-ValidatedSubscriptionToCache{
         $script:CacheData.SubscriptionsValidated += $SubscriptionId
         Save-Cache
     }
+}
+
+function Get-EnvironmentRegionFromCache{
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$EnvironmentId,
+
+        [Parameter(Mandatory)]
+        [PPEndpoint]$Endpoint,
+
+        [Parameter(Mandatory=$false)]
+        [string]$TenantId
+    )
+
+    $cacheKey = "$EnvironmentId|$Endpoint"
+
+    # Check for cached entry
+    if($script:CacheData.RegionCache.PSObject.Properties.Name -contains $cacheKey){
+        $entry = $script:CacheData.RegionCache.$cacheKey
+        $expiry = [DateTime]::Parse($entry.Expiry).ToUniversalTime()
+        if($expiry -gt [DateTime]::UtcNow){
+            Write-Verbose "Region cache hit for $cacheKey"
+            return $entry.Region
+        }
+    }
+
+    # Cache miss or expired - call Get-EnvironmentRegion
+    Write-Verbose "Region cache miss for $cacheKey. Calling Get-EnvironmentRegion."
+    $params = @{
+        EnvironmentId = $EnvironmentId
+        Endpoint = $Endpoint
+    }
+    if(-not([string]::IsNullOrWhiteSpace($TenantId))){
+        $params["TenantId"] = $TenantId
+    }
+
+    $region = Get-EnvironmentRegion @params
+
+    # Store in cache with 1-hour expiry
+    $cacheEntry = [PSCustomObject]@{
+        Region = $region
+        Expiry = [DateTime]::UtcNow.AddHours(1).ToString("o")
+    }
+    if($script:CacheData.RegionCache.PSObject.Properties.Name -contains $cacheKey){
+        $script:CacheData.RegionCache.$cacheKey = $cacheEntry
+    }
+    else{
+        $script:CacheData.RegionCache | Add-Member -NotePropertyName $cacheKey -NotePropertyValue $cacheEntry
+    }
+
+    Save-Cache
+    return $region
 }

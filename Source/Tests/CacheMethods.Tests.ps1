@@ -154,6 +154,65 @@ Describe 'CacheMethods Tests' {
             }
         }
 
+        Context 'Get-EnvironmentRegionFromCache' {
+            BeforeEach {
+                Initialize-Cache
+                Mock Get-EnvironmentRegion { return "westus" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Calls Get-EnvironmentRegion on cache miss and caches result' {
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+
+                $result | Should -Be "westus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Returns cached value without calling Get-EnvironmentRegion' {
+                # First call populates the cache
+                Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+                # Second call should use cache
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+
+                $result | Should -Be "westus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Uses separate cache entries for different endpoints' {
+                Mock Get-EnvironmentRegion { return "westus" } -ParameterFilter { $Endpoint -eq [PPEndpoint]::Prod } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-EnvironmentRegion { return "usgovvirginia" } -ParameterFilter { $Endpoint -eq [PPEndpoint]::usgovhigh } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result1 = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+                $result2 = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::usgovhigh)
+
+                $result1 | Should -Be "westus"
+                $result2 | Should -Be "usgovvirginia"
+                Should -Invoke Get-EnvironmentRegion -Times 2 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Refreshes expired entries' {
+                # Populate cache with an expired entry
+                $cacheKey = "env-123|Prod"
+                $script:CacheData.RegionCache | Add-Member -NotePropertyName $cacheKey -NotePropertyValue ([PSCustomObject]@{
+                    Region = "oldregion"
+                    Expiry = [DateTime]::UtcNow.AddHours(-1).ToString("o")
+                })
+
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+
+                $result | Should -Be "westus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Passes TenantId through when provided' {
+                Mock Get-EnvironmentRegion { return "eastus" } -ParameterFilter { $TenantId -eq "tenant-abc" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod) -TenantId "tenant-abc"
+
+                $result | Should -Be "eastus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ParameterFilter { $TenantId -eq "tenant-abc" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+        }
+
         Context 'Add-ValidatedSubscriptionToCache' {
             BeforeEach {
                 Initialize-Cache

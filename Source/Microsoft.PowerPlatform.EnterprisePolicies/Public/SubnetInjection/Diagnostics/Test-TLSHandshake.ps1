@@ -73,11 +73,10 @@ function Test-TLSHandshake{
     }
 
     $path = "/plex/testTLSConnection"
-    $query = "api-version=2024-10-01"
-    if(-not([string]::IsNullOrWhiteSpace($Region)))
-    {
-        $query += "&region=$Region"
+    if ([string]::IsNullOrWhiteSpace($Region)) {
+        $Region = Get-EnvironmentRegionFromCache -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
     }
+    $query = "api-version=2024-10-01&region=$Region"
 
     $Body = @{
         Destination = $Destination

@@ -50,9 +50,8 @@ Describe 'RESTHelpers Tests' {
 
                 $result = New-EnvironmentRouteRequest -EnvironmentId $envId -Path $path -Query $query -AccessToken $secureString -HttpMethod $httpMethod -Endpoint $endpoint
 
-                $result.RequestUri.AbsoluteUri | Should -Be "https://primary-3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com/plex/networkUsage?api-version=2024-10-01"
+                $result.RequestUri.AbsoluteUri | Should -Be "https://3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com/plex/networkUsage?api-version=2024-10-01"
                 $result.Method | Should -Be $httpMethod
-                $result.Headers.Host | Should -Be "3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
             }
         }
 

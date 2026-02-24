@@ -67,11 +67,10 @@ function Test-DnsResolution {
     }
     
     $path = "/plex/resolveDns"
-    $query = "api-version=2024-10-01"
-    if(-not([string]::IsNullOrWhiteSpace($Region)))
-    {
-        $query += "&region=$Region"
+    if ([string]::IsNullOrWhiteSpace($Region)) {
+        $Region = Get-EnvironmentRegionFromCache -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
     }
+    $query = "api-version=2026-02-01&region=$Region"
     
     $Body = @{
         HostName = $HostName
