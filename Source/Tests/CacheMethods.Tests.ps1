@@ -34,34 +34,52 @@ Describe 'CacheMethods Tests' {
         Context 'Initialize-Cache' {
             It 'Initializes new cache when file does not exist' {
                 Initialize-Cache
-                
+
                 $script:CacheData | Should -Not -BeNullOrEmpty
-                $script:CacheData.Version | Should -Be "1.0"
+                $script:CacheData.Version | Should -Be "1.1"
                 $script:CacheData.SubscriptionsValidated.Count | Should -Be 0
+                $script:CacheData.PSObject.Properties.Name | Should -Contain "RegionCache"
             }
 
-            It 'Loads existing cache from file' {
-                # Create a cache file with test data
+            It 'Loads existing cache from file and upgrades from 1.0 to 1.1' {
+                # Create a v1.0 cache file (no RegionCache)
                 $testCache = @{
                     "Version" = "1.0"
                     "SubscriptionsValidated" = @("sub-123", "sub-456")
                 }
                 New-Item -ItemType Directory -Path (Split-Path $script:TestCachePath) -Force | Out-Null
                 $testCache | ConvertTo-Json | Out-File -FilePath $script:TestCachePath -Force
-                
+
                 Initialize-Cache
-                
+
                 $script:CacheData | Should -Not -BeNullOrEmpty
-                $script:CacheData.Version | Should -Be "1.0"
+                $script:CacheData.Version | Should -Be "1.1"
                 $script:CacheData.SubscriptionsValidated.Count | Should -Be 2
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-123"
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-456"
+                $script:CacheData.PSObject.Properties.Name | Should -Contain "RegionCache"
+            }
+
+            It 'Loads existing 1.1 cache without modification' {
+                $testCache = [PSCustomObject]@{
+                    "Version" = "1.1"
+                    "SubscriptionsValidated" = @("sub-789")
+                    "RegionCache" = [PSCustomObject]@{}
+                }
+                New-Item -ItemType Directory -Path (Split-Path $script:TestCachePath) -Force | Out-Null
+                $testCache | ConvertTo-Json | Out-File -FilePath $script:TestCachePath -Force
+
+                Initialize-Cache
+
+                $script:CacheData.Version | Should -Be "1.1"
+                $script:CacheData.SubscriptionsValidated | Should -Contain "sub-789"
+                $script:CacheData.PSObject.Properties.Name | Should -Contain "RegionCache"
             }
 
             It 'Handles empty cache file gracefully' {
                 New-Item -ItemType Directory -Path (Split-Path $script:TestCachePath) -Force | Out-Null
                 "" | Out-File -FilePath $script:TestCachePath -Force
-                
+
                 { Initialize-Cache } | Should -Not -Throw
             }
         }

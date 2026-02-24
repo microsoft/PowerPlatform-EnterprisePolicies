@@ -9,13 +9,37 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 $script:CachePath = Join-Path $([Environment]::GetFolderPath('LocalApplicationData')) 'Microsoft.PowerPlatform.EnterprisePolicies\config.json'
 $script:CacheData = $null
+$script:CurrentCacheVersion = "1.1"
 
 function Get-EmptyCache{
     return [PSCustomObject]@{
-        Version = "1.0"
+        Version = $script:CurrentCacheVersion
         SubscriptionsValidated = @()
         RegionCache = [PSCustomObject]@{}
     }
+}
+
+function Update-CacheVersion{
+    param(
+        [Parameter(Mandatory)]
+        [PSCustomObject]$Cache
+    )
+
+    while($Cache.Version -ne $script:CurrentCacheVersion){
+        switch($Cache.Version){
+            "1.0" {
+                $Cache | Add-Member -NotePropertyName "RegionCache" -NotePropertyValue ([PSCustomObject]@{})
+                $Cache.Version = "1.1"
+                Write-Verbose "Upgraded cache from 1.0 to 1.1"
+            }
+            default {
+                Write-Warning "Unknown cache version '$($Cache.Version)'. Resetting to empty cache."
+                return Get-EmptyCache
+            }
+        }
+    }
+
+    return $Cache
 }
 
 function Initialize-Cache{
@@ -32,9 +56,7 @@ function Initialize-Cache{
         }
         else{
             $script:CacheData = $content | ConvertFrom-Json
-            if(-not($script:CacheData.PSObject.Properties.Name -contains 'RegionCache')){
-                $script:CacheData | Add-Member -NotePropertyName "RegionCache" -NotePropertyValue ([PSCustomObject]@{})
-            }
+            $script:CacheData = Update-CacheVersion -Cache $script:CacheData
         }
     }
 }
