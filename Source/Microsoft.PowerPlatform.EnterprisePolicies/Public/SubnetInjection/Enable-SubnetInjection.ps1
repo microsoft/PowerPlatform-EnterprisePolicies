@@ -64,6 +64,9 @@ function Enable-SubnetInjection {
         [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
+        [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use")]
+        [AzureEnvironment]$AzureEnvironment = [AzureEnvironment]::AzureCloud,
+
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth,
 
@@ -80,7 +83,7 @@ function Enable-SubnetInjection {
     $ErrorActionPreference = "Stop"
 
     # Connect to Azure
-    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
+    if (-not(Connect-Azure -AzureEnvironment $AzureEnvironment -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
