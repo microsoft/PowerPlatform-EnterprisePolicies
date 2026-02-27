@@ -48,5 +48,21 @@ Describe 'Test-NetworkConnectivity Tests' {
 
             $result | Should -Be 'Some json string'
         }
+
+        It 'Auto-resolves region when not provided' {
+            $stringResult = "Some string"
+            $endpoint = [PPEndpoint]::prod
+            $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
+            $mockResult = [HttpClientResultMock]::new($stringResult)
+
+            Mock Send-RequestWithRetries { return $mockResult } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult { return $stringResult } -ParameterFilter { $task -eq $stringResult } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnvironmentRegionFromCache { return "westus" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            $result = Test-NetworkConnectivity -EnvironmentId $environmentId -Destination "bing.com" -Port 443 -Endpoint $endpoint
+
+            Should -Invoke Get-EnvironmentRegionFromCache -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            $result | Should -Be $stringResult
+        }
     }
 }

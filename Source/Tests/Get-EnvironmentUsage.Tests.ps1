@@ -34,5 +34,23 @@ Describe 'Get-EnvironmentUsage Tests' {
 
             $result.AzureRegion | Should -Be $resultClass.AzureRegion
         }
+
+        It 'Auto-resolves region when not provided' {
+            $resultClass = [NetworkUsage]::new()
+            $resultClass.AzureRegion = "EastUs"
+            [string]$resultJsonString = ($resultClass | ConvertTo-Json)
+            $endpoint = [PPEndpoint]::prod
+            $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
+            $mockResult = [HttpClientResultMock]::new($resultJsonString)
+
+            Mock Send-RequestWithRetries { return $mockResult } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult { return $resultJsonString } -ParameterFilter { $task -eq $resultJsonString } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnvironmentRegionFromCache { return "eastus" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            $result = Get-EnvironmentUsage -Endpoint $endpoint -EnvironmentId $environmentId
+
+            Should -Invoke Get-EnvironmentRegionFromCache -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            $result.AzureRegion | Should -Be $resultClass.AzureRegion
+        }
     }
 }

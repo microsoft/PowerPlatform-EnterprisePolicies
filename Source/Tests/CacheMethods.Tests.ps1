@@ -34,34 +34,52 @@ Describe 'CacheMethods Tests' {
         Context 'Initialize-Cache' {
             It 'Initializes new cache when file does not exist' {
                 Initialize-Cache
-                
+
                 $script:CacheData | Should -Not -BeNullOrEmpty
-                $script:CacheData.Version | Should -Be "1.0"
+                $script:CacheData.Version | Should -Be "1.1"
                 $script:CacheData.SubscriptionsValidated.Count | Should -Be 0
+                $script:CacheData.PSObject.Properties.Name | Should -Contain "RegionCache"
             }
 
-            It 'Loads existing cache from file' {
-                # Create a cache file with test data
+            It 'Loads existing cache from file and upgrades from 1.0 to 1.1' {
+                # Create a v1.0 cache file (no RegionCache)
                 $testCache = @{
                     "Version" = "1.0"
                     "SubscriptionsValidated" = @("sub-123", "sub-456")
                 }
                 New-Item -ItemType Directory -Path (Split-Path $script:TestCachePath) -Force | Out-Null
                 $testCache | ConvertTo-Json | Out-File -FilePath $script:TestCachePath -Force
-                
+
                 Initialize-Cache
-                
+
                 $script:CacheData | Should -Not -BeNullOrEmpty
-                $script:CacheData.Version | Should -Be "1.0"
+                $script:CacheData.Version | Should -Be "1.1"
                 $script:CacheData.SubscriptionsValidated.Count | Should -Be 2
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-123"
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-456"
+                $script:CacheData.PSObject.Properties.Name | Should -Contain "RegionCache"
+            }
+
+            It 'Loads existing 1.1 cache without modification' {
+                $testCache = [PSCustomObject]@{
+                    "Version" = "1.1"
+                    "SubscriptionsValidated" = @("sub-789")
+                    "RegionCache" = [PSCustomObject]@{}
+                }
+                New-Item -ItemType Directory -Path (Split-Path $script:TestCachePath) -Force | Out-Null
+                $testCache | ConvertTo-Json | Out-File -FilePath $script:TestCachePath -Force
+
+                Initialize-Cache
+
+                $script:CacheData.Version | Should -Be "1.1"
+                $script:CacheData.SubscriptionsValidated | Should -Contain "sub-789"
+                $script:CacheData.PSObject.Properties.Name | Should -Contain "RegionCache"
             }
 
             It 'Handles empty cache file gracefully' {
                 New-Item -ItemType Directory -Path (Split-Path $script:TestCachePath) -Force | Out-Null
                 "" | Out-File -FilePath $script:TestCachePath -Force
-                
+
                 { Initialize-Cache } | Should -Not -Throw
             }
         }
@@ -151,6 +169,65 @@ Describe 'CacheMethods Tests' {
             It 'Throws when SubscriptionId is null or empty' {
                 { Test-SubscriptionValidated -SubscriptionId $null } | Should -Throw
                 { Test-SubscriptionValidated -SubscriptionId "" } | Should -Throw
+            }
+        }
+
+        Context 'Get-EnvironmentRegionFromCache' {
+            BeforeEach {
+                Initialize-Cache
+                Mock Get-EnvironmentRegion { return "westus" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Calls Get-EnvironmentRegion on cache miss and caches result' {
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+
+                $result | Should -Be "westus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Returns cached value without calling Get-EnvironmentRegion' {
+                # First call populates the cache
+                Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+                # Second call should use cache
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+
+                $result | Should -Be "westus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Uses separate cache entries for different endpoints' {
+                Mock Get-EnvironmentRegion { return "westus" } -ParameterFilter { $Endpoint -eq [PPEndpoint]::Prod } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-EnvironmentRegion { return "usgovvirginia" } -ParameterFilter { $Endpoint -eq [PPEndpoint]::usgovhigh } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result1 = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+                $result2 = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::usgovhigh)
+
+                $result1 | Should -Be "westus"
+                $result2 | Should -Be "usgovvirginia"
+                Should -Invoke Get-EnvironmentRegion -Times 2 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Refreshes expired entries' {
+                # Populate cache with an expired entry
+                $cacheKey = "env-123|Prod"
+                $script:CacheData.RegionCache | Add-Member -NotePropertyName $cacheKey -NotePropertyValue ([PSCustomObject]@{
+                    Region = "oldregion"
+                    Expiry = [DateTime]::UtcNow.AddHours(-1).ToString("o")
+                })
+
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+
+                $result | Should -Be "westus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Passes TenantId through when provided' {
+                Mock Get-EnvironmentRegion { return "eastus" } -ParameterFilter { $TenantId -eq "tenant-abc" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod) -TenantId "tenant-abc"
+
+                $result | Should -Be "eastus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ParameterFilter { $TenantId -eq "tenant-abc" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             }
         }
 
