@@ -70,7 +70,7 @@ function Test-DnsResolution {
     if ([string]::IsNullOrWhiteSpace($Region)) {
         $Region = Get-EnvironmentRegionFromCache -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
     }
-    $query = "api-version=2026-02-01&region=$Region"
+    $query = "api-version=2024-10-01&region=$Region"
     
     $Body = @{
         HostName = $HostName
