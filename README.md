@@ -238,6 +238,36 @@ Sample Input :</br>
 Sample Output :</br>
 ![alt text](./ReadMeImages/RemoveCMKFromEnv2.png)</br>
 
+### CMK FAQ
+
+**Q: I created a CMK Enterprise Policy but get a 403 / Forbidden error when the service accesses my Key Vault. What do I do?**</br>
+A: After creating the CMK enterprise policy, Azure creates a managed identity for it. This identity needs **Key Vault Crypto Service Encryption User** role (or the legacy Wrap/Unwrap key permissions in vault access policy) on your Key Vault. See [Microsoft Learn: Grant access](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-encryption-key-and-grant-access). Find the managed identity Object ID in the Azure Portal under the enterprise policy resource → Identity blade, then grant access:
+```powershell
+# For RBAC (recommended):
+New-AzRoleAssignment -ObjectId <EP-managed-identity-object-id> `
+    -RoleDefinitionName "Key Vault Crypto Service Encryption User" `
+    -Scope "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.KeyVault/vaults/<vault>"
+```
+
+**Q: The scripts authenticate to the wrong Azure subscription. How do I fix this?**</br>
+A: The scripts call `Connect-AzAccount` which defaults to your last-used subscription. Use one of these approaches:
+```powershell
+# Option 1 — Set default subscription before running scripts:
+Update-AzConfig -DefaultSubscriptionForLogin <your-subscription-id>
+
+# Option 2 — Pre-authenticate with a specific subscription:
+Connect-AzAccount -Subscription <your-subscription-id>
+```
+
+**Q: I get a "file is not digitally signed" error running the scripts. What should I do?**</br>
+A: After downloading or cloning the repository, Windows may block the files. Right-click each .ps1 file → Properties → check "Unblock", or run:
+```powershell
+Get-ChildItem -Path . -Recurse -Filter *.ps1 | Unblock-File
+```
+
+**Q: The "Validate Key Vault" step fails even though my Key Vault exists. What went wrong?**</br>
+A: Common causes include: (1) the Key Vault key is not enabled or has expired, (2) soft-delete and purge-protection are not enabled on the Key Vault, (3) the managed identity does not have the correct permissions (see first FAQ above). Verify all requirements at [Microsoft Learn: CMK prerequisites](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-encryption-key-and-grant-access).
+
 ## Development
 
 To get started with development, clone the repository and open it in VSCode. The scripts are written in PowerShell and follow standard PowerShell conventions.
