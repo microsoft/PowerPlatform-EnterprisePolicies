@@ -71,9 +71,15 @@ This will prompt you to re-authenticate, allowing you to select or enter the cre
 
 1. Download the "Source code" `.zip` or `.tar.gz` file from the [Releases page](https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases).
 2. Extract the files from the `.zip` or `.tar.gz` file.
-3. Open PowerShell and `cd` to the extracted folder. For example: `cd ~/Downloads/PowerPlatform-EnterprisePolicies-0.5.10`.
-4. Install required PowerShell modules by running `.\Source\InstallPowerAppsCmdlets.ps1`.
-5. Run any of the scripts in this repository to manage your Power Platform enterprise policies. See below for more information on each of the scripts.
+3. **Unblock the downloaded files** to prevent security warnings that can interrupt script execution and cause parameters to be ignored:</br>
+   **Recommended**: Right-click the `.zip` file _before_ extracting → Properties → check "Unblock" → Apply. Extracted files will inherit the unblocked state.</br>
+   **Alternative**: If you already extracted, run the following in the extracted folder:
+   ```powershell
+   Get-ChildItem -Path . -Recurse | Unblock-File
+   ```
+4. Open PowerShell and `cd` to the extracted folder. For example: `cd ~/Downloads/PowerPlatform-EnterprisePolicies-0.5.10`.
+5. Install required PowerShell modules by running `.\Source\InstallPowerAppsCmdlets.ps1`.
+6. Run any of the scripts in this repository to manage your Power Platform enterprise policies. See below for more information on each of the scripts.
 
 ### How to run the Azure subscription setup script
 
