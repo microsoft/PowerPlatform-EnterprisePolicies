@@ -206,6 +206,14 @@ Input parameters :
     - environmentId : The Power Platform environment ID
     - policyArmId : The ARM ID of the CMK Enterprise Policy
 
+> **Prerequisites for Power Platform Admin Center users**:</br>
+> Before adding an environment to a CMK enterprise policy via the Power Platform Admin Center:</br>
+> 1. The environment must be enabled as a [Managed Environment](https://learn.microsoft.com/power-platform/admin/managed-environment-enable).</br>
+> 2. The Power Platform / Dynamics 365 admin must have the **Reader** role on the enterprise policy Azure resource:</br>
+>    `New-AzRoleAssignment -ObjectId <PP-admin-object-id> -RoleDefinitionName Reader -Scope <EP-ARM-resource-id>`</br>
+>    To find the admin's Object ID: Azure Portal → Microsoft Entra ID → Users → select user → copy Object ID.</br>
+> See [Microsoft Learn: CMK prerequisites](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-encryption-key-and-grant-access) for details.
+
 Sample Input :</br>
 ![alt text](./ReadMeImages/AddCMKToEnv1.png)</br>
 
