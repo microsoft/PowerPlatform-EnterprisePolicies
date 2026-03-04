@@ -238,6 +238,77 @@ Sample Input :</br>
 Sample Output :</br>
 ![alt text](./ReadMeImages/RemoveCMKFromEnv2.png)</br>
 
+### How to run Identity scripts
+
+The Identity scripts are present in folder [Identity](./Source/Identity/) at current location.
+
+> **Note**: These scripts are legacy scripts that may be replaced by the Microsoft.PowerPlatform.EnterprisePolicies module in the future. Use module cmdlets when available.
+
+#### Create Identity Enterprise Policy
+1. **Create Identity Enterprise Policy** : This script creates an Identity enterprise policy.</br>
+Script name : [CreateIdentityEnterprisePolicy.ps1](./Source/Identity/CreateIdentityEnterprisePolicy.ps1)</br>
+Input parameters :
+    - subscriptionId : The subscriptionId where Identity enterprise policy needs to be created
+    - resourceGroup : The resource group where Identity enterprise policy needs to be created
+    - enterprisePolicyName : The name of the Identity enterprise policy resource
+    - enterprisePolicyLocation : The Azure geo where Identity enterprise policy needs to be created
+
+#### Get Identity Enterprise Policy by ResourceId
+2. **Get Identity Enterprise Policy by ResourceId** : The script gets an Identity enterprise policy by ARM resourceId.</br>
+Script name : [GetIdentityEnterprisePolicyByResourceId.ps1](./Source/Identity/GetIdentityEnterprisePolicyByResourceId.ps1)</br>
+Input parameter :
+    - enterprisePolicyArmId : The ARM resource ID of the Identity Enterprise Policy
+
+#### Get Identity Enterprise Policies in Subscription
+3. **Get Identity Enterprise Policies in Subscription** : The script gets all Identity enterprise policies in an Azure subscription.</br>
+Script name : [GetIdentityEnterprisePoliciesInSubscription.ps1](./Source/Identity/GetIdentityEnterprisePoliciesInSubscription.ps1)</br>
+Input parameter :
+    - subscriptionId : The Azure subscription Id
+
+#### Get Identity Enterprise Policies in Resource Group
+4. **Get Identity Enterprise Policies in Resource Group** : The script gets all Identity enterprise policies in an Azure resource group.</br>
+Script name : [GetIdentityEnterprisePoliciesInResourceGroup.ps1](./Source/Identity/GetIdentityEnterprisePoliciesInResourceGroup.ps1)</br>
+Input parameters :
+    - subscriptionId : The Azure subscription Id
+    - resourceGroup : The Azure resource group
+
+#### Assign Identity to an environment
+5. **Assign Identity to an environment** : This script assigns an Identity enterprise policy to a Power Platform environment.</br>
+Script name : [NewIdentity.ps1](./Source/Identity/NewIdentity.ps1)</br>
+Input parameters :
+    - environmentId : The Power Platform environment ID
+    - policyArmId : The ARM ID of the Identity Enterprise Policy
+    - endpoint _(optional)_ : The BAP endpoint (default: prod). Valid values: tip1, tip2, prod, usgovhigh, dod, china
+
+#### Get Identity Enterprise Policy for an environment
+6. **Get Identity Enterprise Policy for an environment** : This script returns the Identity enterprise policy if applied to a given Power Platform environment.</br>
+Script name : [GetIdentityEnterprisePolicyForEnvironment.ps1](./Source/Identity/GetIdentityEnterprisePolicyForEnvironment.ps1)</br>
+Input parameters :
+    - environmentId : The Power Platform environment ID
+    - endpoint _(optional)_ : The BAP endpoint (default: prod)
+
+#### Swap Identity for an environment
+7. **Swap Identity for an environment** : This script swaps the Identity enterprise policy on a given Power Platform environment.</br>
+Script name : [SwapIdentity.ps1](./Source/Identity/SwapIdentity.ps1)</br>
+Input parameters :
+    - environmentId : The Power Platform environment ID
+    - newPolicyArmId : The ARM ID of the new Identity Enterprise Policy
+    - endpoint _(optional)_ : The BAP endpoint (default: prod)
+
+#### Remove Identity from an environment
+8. **Remove Identity from an environment** : This script removes the Identity enterprise policy from a Power Platform environment.</br>
+Script name : [RevertIdentity.ps1](./Source/Identity/RevertIdentity.ps1)</br>
+Input parameters :
+    - environmentId : The Power Platform environment ID
+    - policyArmId : The ARM ID of the Identity Enterprise Policy
+    - endpoint _(optional)_ : The BAP endpoint (default: prod)
+
+#### Delete Identity Enterprise Policy
+9. **Delete Identity Enterprise Policy** : This script deletes an Identity Enterprise Policy.</br>
+Script name : [RemoveIdentityEnterprisePolicy.ps1](./Source/Identity/RemoveIdentityEnterprisePolicy.ps1)</br>
+Input parameter :
+    - policyArmId : The ARM ID of the Identity enterprise policy to be deleted
+
 ## Development
 
 To get started with development, clone the repository and open it in VSCode. The scripts are written in PowerShell and follow standard PowerShell conventions.
