@@ -53,7 +53,7 @@ Once your module has been imported into your PowerShell session, you can now run
 Get-EnvironmentUsage -EnvironmentId "your-environment-id"
 ```
 
-For a full list of available functions and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/EnterprisePolicies) folder.
+For a full list of available functions and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies) folder.
 
 ### Forcing re-authentication
 
@@ -170,7 +170,7 @@ Sample Output :</br>
 6. **Update CMK Enterprise Policy** : This script updates a CMK Enterprise Policy. The updates allowed are for keyVaultId, keyName, keyVersion.</br>
 If you are changing only some of the allowed parameter values, provide “N/A” when prompted for the parameters that you don’t want to change.</br>
  **If the enterprise policy is associated with one or more environments, the update operation will fail, and the script will return an error.**</br>
-Script name : [UpdateCMKEnterprisePolicy.ps1](./Cmk/UpdateCMKEnterprisePolicy.ps1)</br>
+Script name : [UpdateCMKEnterprisePolicy.ps1](./Source/Cmk/UpdateCMKEnterprisePolicy.ps1)</br>
 Input parameters :
     - subscriptionId : The Azure subscription Id of the CMK Enterprise Policy
     - resourceGroup : The Azure resource group of the CMK Enterprise Policy
@@ -201,7 +201,7 @@ Sample Output :</br>
 #### Set CMK for an environment
 8. **Set CMK for an environment** : This script applies a CMK enterprise policy to a given Power Platform environment.</br>
 The script adds the environment to the enterprise policy and optionally polls for the operation outcome.</br>
-Script name : [AddCustomerManagedKeyToEnvironment.ps1](./Cmk/AddCustomerManagedKeyToEnvironment.ps1)</br>
+Script name : [AddCustomerManagedKeyToEnvironment.ps1](./Source/Cmk/AddCustomerManagedKeyToEnvironment.ps1)</br>
 Input parameters :
     - environmentId : The Power Platform environment ID
     - policyArmId : The ARM ID of the CMK Enterprise Policy
