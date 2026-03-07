@@ -238,6 +238,34 @@ Sample Input :</br>
 Sample Output :</br>
 ![alt text](./ReadMeImages/RemoveCMKFromEnv2.png)</br>
 
+#### Swap CMK for an environment
+11. **Swap CMK for an environment** : This script swaps the CMK enterprise policy on a given Power Platform environment (e.g., for key rotation scenarios). Unlike [UpdateCMKEnterprisePolicy.ps1](#update-cmk-enterprise-policy), this script works when the enterprise policy is already associated with environments.</br>
+Script name : [SwapCustomerManagedKeyForEnvironment.ps1](./Source/Cmk/SwapCustomerManagedKeyForEnvironment.ps1)</br>
+Input parameters :
+    - environmentId : The Power Platform environment ID
+    - newPolicyArmId : The ARM ID of the new CMK Enterprise Policy to swap to
+    - endpoint _(optional)_ : The BAP endpoint (default: prod). Valid values: tip1, tip2, prod, usgovhigh, dod, china
+
+#### Apply CMK to Platform Apps Data
+12. **Apply CMK to Platform Apps Data** : This script applies a CMK enterprise policy to Platform Apps data (separate from environment-level CMK).</br>
+Script name : [AddCustomerManagedKeyToPlatformAppsData.ps1](./Source/Cmk/AddCustomerManagedKeyToPlatformAppsData.ps1)</br>
+Input parameters :
+    - policyArmId : The ARM ID of the CMK Enterprise Policy
+    - endpoint _(optional)_ : The BAP endpoint. Valid values: tip1, tip2, prod, usgovhigh, dod, china
+
+> **Important**: This script defaults to `endpoint = "tip1"`. For production use, always specify `-endpoint prod` explicitly.
+
+#### Remove CMK from Platform Apps Data
+13. **Remove CMK from Platform Apps Data** : This script removes the CMK enterprise policy from Platform Apps data, reverting to Microsoft managed encryption.</br>
+Script name : [RemoveCustomerManagedKeyFromPlatformAppsData.ps1](./Source/Cmk/RemoveCustomerManagedKeyFromPlatformAppsData.ps1)</br>
+Input parameters :
+    - policyArmId : The ARM ID of the CMK Enterprise Policy
+    - endpoint _(optional)_ : The BAP endpoint. Valid values: tip1, tip2, prod, usgovhigh, dod, china
+
+> **Important**: This script defaults to `endpoint = "tip1"`. For production use, always specify `-endpoint prod` explicitly.
+
+> **Note**: The CMK scripts in `Source/Cmk/` are legacy scripts that may be replaced by the Microsoft.PowerPlatform.EnterprisePolicies module in the future. Use module cmdlets when available.
+
 ## Development
 
 To get started with development, clone the repository and open it in VSCode. The scripts are written in PowerShell and follow standard PowerShell conventions.
