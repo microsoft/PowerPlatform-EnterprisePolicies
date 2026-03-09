@@ -170,7 +170,7 @@ Sample Output :</br>
 6. **Update CMK Enterprise Policy** : This script updates a CMK Enterprise Policy. The updates allowed are for keyVaultId, keyName, keyVersion.</br>
 If you are changing only some of the allowed parameter values, provide “N/A” when prompted for the parameters that you don’t want to change.</br>
  **If the enterprise policy is associated with one or more environments, the update operation will fail, and the script will return an error.**</br>
-Script name : [UpdateCMKEnterprisePolicy.ps1](./Cmk/UpdateCMKEnterprisePolicy.ps1)</br>
+Script name : [UpdateCMKEnterprisePolicy.ps1](./Source/Cmk/UpdateCMKEnterprisePolicy.ps1)</br>
 Input parameters :
     - subscriptionId : The Azure subscription Id of the CMK Enterprise Policy
     - resourceGroup : The Azure resource group of the CMK Enterprise Policy
@@ -201,7 +201,7 @@ Sample Output :</br>
 #### Set CMK for an environment
 8. **Set CMK for an environment** : This script applies a CMK enterprise policy to a given Power Platform environment.</br>
 The script adds the environment to the enterprise policy and optionally polls for the operation outcome.</br>
-Script name : [AddCustomerManagedKeyToEnvironment.ps1](./Cmk/AddCustomerManagedKeyToEnvironment.ps1)</br>
+Script name : [AddCustomerManagedKeyToEnvironment.ps1](./Source/Cmk/AddCustomerManagedKeyToEnvironment.ps1)</br>
 Input parameters :
     - environmentId : The Power Platform environment ID
     - policyArmId : The ARM ID of the CMK Enterprise Policy
@@ -239,7 +239,7 @@ Sample Output :</br>
 ![alt text](./ReadMeImages/RemoveCMKFromEnv2.png)</br>
 
 #### Swap CMK for an environment
-11. **Swap CMK for an environment** : This script swaps the CMK enterprise policy on a given Power Platform environment (e.g., for key rotation scenarios). Unlike [UpdateCMKEnterprisePolicy.ps1](#update-cmk-enterprise-policy), this script works when the enterprise policy is already associated with environments.</br>
+11. **Swap CMK for an environment** : This script swaps the CMK enterprise policy on a given Power Platform environment (e.g., for key rotation scenarios). Unlike [UpdateCMKEnterprisePolicy.ps1](./Source/Cmk/UpdateCMKEnterprisePolicy.ps1), this script works when the enterprise policy is already associated with environments.</br>
 Script name : [SwapCustomerManagedKeyForEnvironment.ps1](./Source/Cmk/SwapCustomerManagedKeyForEnvironment.ps1)</br>
 Input parameters :
     - environmentId : The Power Platform environment ID
@@ -253,7 +253,8 @@ Input parameters :
     - policyArmId : The ARM ID of the CMK Enterprise Policy
     - endpoint _(optional)_ : The BAP endpoint. Valid values: tip1, tip2, prod, usgovhigh, dod, china
 
-> **Important**: This script defaults to `endpoint = "tip1"`. For production use, always specify `-endpoint prod` explicitly.
+> [!IMPORTANT]
+> This script defaults to `endpoint = "tip1"`. For production use, always specify `-endpoint prod` explicitly.
 
 #### Remove CMK from Platform Apps Data
 13. **Remove CMK from Platform Apps Data** : This script removes the CMK enterprise policy from Platform Apps data, reverting to Microsoft managed encryption.</br>
@@ -262,9 +263,11 @@ Input parameters :
     - policyArmId : The ARM ID of the CMK Enterprise Policy
     - endpoint _(optional)_ : The BAP endpoint. Valid values: tip1, tip2, prod, usgovhigh, dod, china
 
-> **Important**: This script defaults to `endpoint = "tip1"`. For production use, always specify `-endpoint prod` explicitly.
+> [!IMPORTANT]
+> This script defaults to `endpoint = "tip1"`. For production use, always specify `-endpoint prod` explicitly.
 
-> **Note**: The CMK scripts in `Source/Cmk/` are legacy scripts that may be replaced by the Microsoft.PowerPlatform.EnterprisePolicies module in the future. Use module cmdlets when available.
+> [!NOTE]
+> The CMK scripts in `Source/Cmk/` are legacy scripts that may be replaced by the Microsoft.PowerPlatform.EnterprisePolicies module in the future. Use module cmdlets when available.
 
 ## Development
 
