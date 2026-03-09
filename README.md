@@ -106,7 +106,7 @@ Sample Output : </br>
 ![alt text](./ReadMeImages/CreateCMKEP2.png)</br>
 
 #### Grant enterprise policy permissions to access key vault
-1b. **Grant enterprise policy permissions to access key vault** : After creating the enterprise policy, you must grant its managed identity access to the key vault. The enterprise policy's managed identity Object ID can be found in the `CreateCMKEnterprisePolicy.ps1` output under `Identity.PrincipalId`, or via the Azure Portal (navigate to the enterprise policy resource → Identity tab).</br>
+2. **Grant enterprise policy permissions to access key vault** : After creating the enterprise policy, you must grant its managed identity access to the key vault. The enterprise policy's managed identity Object ID can be found in the `CreateCMKEnterprisePolicy.ps1` output under `Identity.PrincipalId`, or via the Azure Portal (navigate to the enterprise policy resource → Identity tab).</br>
 
 **If your key vault uses Azure role-based access control (recommended)**:</br>
 Assign the **Key Vault Crypto Service Encryption User** role to the enterprise policy's managed identity:
