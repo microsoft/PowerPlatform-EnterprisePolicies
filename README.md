@@ -105,6 +105,32 @@ Sample Input :</br>
 Sample Output : </br>
 ![alt text](./ReadMeImages/CreateCMKEP2.png)</br>
 
+#### Grant enterprise policy permissions to access key vault
+2. **Grant enterprise policy permissions to access key vault** : After creating the enterprise policy, you must grant its managed identity access to the key vault. The enterprise policy's managed identity Object ID can be found in the `CreateCMKEnterprisePolicy.ps1` output under `Identity.PrincipalId`, or via the Azure Portal (navigate to the enterprise policy resource → Identity tab).</br>
+
+**If your key vault uses Azure role-based access control (recommended)**:</br>
+Assign the **Key Vault Crypto Service Encryption User** role to the enterprise policy's managed identity:
+```powershell
+New-AzRoleAssignment `
+  -ObjectId "<enterprise-policy-PrincipalId>" `
+  -RoleDefinitionName "Key Vault Crypto Service Encryption User" `
+  -Scope "<key-vault-ARM-resource-id>"
+```
+Alternatively, in the Azure Portal: Key vaults → select your vault → Access control (IAM) → Add role assignment → search "Key Vault Crypto Service Encryption User" → select the enterprise policy → Review + assign.</br>
+
+**If your key vault uses vault access policy**:</br>
+Add an access policy with Get (Key Management Operations), WrapKey and UnwrapKey (Cryptographic Operations):
+```powershell
+Set-AzKeyVaultAccessPolicy `
+  -VaultName "<key-vault-name>" `
+  -ObjectId "<enterprise-policy-PrincipalId>" `
+  -PermissionsToKeys Get, WrapKey, UnwrapKey
+```
+
+> **Note**: RBAC role assignments can take up to 5 minutes to propagate. If you run `ValidateKeyVaultForCMK.ps1` immediately after granting the role, it may report a false failure. Wait a few minutes and retry.</br>
+
+For more details, see [Grant enterprise policy permissions to access key vault](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-enterprise-policy).</br>
+
 #### Get CMK Enterprise Policy By ResourceId
 2. **Get CMK Enterprise Policy By ResourceId** : The script gets a CMK enterprise policy by ARM resourceId</br>
 Script name : [GetCMKEnterprisePolicyByResourceId.ps1](./Source/Cmk/GetCMKEnterprisePolicyByResourceId.ps1)</br>
@@ -152,6 +178,8 @@ Sample Output :</br>
 	- "Key Vault Crypto Service Encryption User" role assignment is present for the given enterprise policy if key vault permission model is Azure role based access control.</br>
     - Access policies of GET, UNWRAPKEY, WRAPKEY are added to the key vault for the given enterprise policy if key vault permission model is vault access policy.</br>
 	- Key configured for the given enterprise policy is present, enabled, activated and not expired.</br>
+
+> **Tip**: If validation fails on the key vault access policy checks, follow the [Grant enterprise policy permissions to access key vault](#grant-enterprise-policy-permissions-to-access-key-vault) step above to fix the permissions, then re-run this script.</br>
 	 
 
 Script name : [ValidateKeyVaultForCMK.ps1](./Source/Cmk/ValidateKeyVaultForCMK.ps1)</br>
