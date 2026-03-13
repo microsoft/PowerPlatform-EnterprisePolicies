@@ -31,6 +31,7 @@ $SupportedVnetLocations.Add("singapore", "southeastasia")
 $SupportedVnetLocations.Add("sweden", "swedencentral")
 $SupportedVnetLocations.Add("italy", "italynorth")
 $SupportedVnetLocations.Add("usgov", "usgovtexas|usgovvirginia")
+$SupportedVnetLocations.Add("usdod", "usdodeast|usdodcentral")
 
 <#
 .SYNOPSIS
