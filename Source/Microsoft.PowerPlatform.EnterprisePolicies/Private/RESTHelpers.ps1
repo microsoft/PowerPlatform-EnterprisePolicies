@@ -182,7 +182,7 @@ function Get-EnvironmentRouteHostName {
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $EnvironmentId = $EnvironmentId.Replace("-", "")
-    if($Endpoint -eq [PPEndpoint]::tip1 -or $Endpoint -eq [PPEndpoint]::tip2 -or $Endpoint -eq [PPEndpoint]::usgovhigh -or $Endpoint -eq [PPEndpoint]::dod) {
+    if(Test-IsSingleCharEndpoint -Endpoint $Endpoint) {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 1, 1)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 1)
     }
@@ -205,7 +205,7 @@ function Get-TenantRouteHostName {
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $TenantId = $TenantId.Replace("-", "")
-    if($Endpoint -eq [PPEndpoint]::tip1 -or $Endpoint -eq [PPEndpoint]::tip2 -or $Endpoint -eq [PPEndpoint]::usgovhigh -or $Endpoint -eq [PPEndpoint]::dod) {
+    if(Test-IsSingleCharEndpoint -Endpoint $Endpoint) {
         $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
         $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
     }
@@ -464,3 +464,16 @@ function ConvertTo-Hashtable($obj) {
     }
     return $hash
 }
+
+ function Test-IsSingleCharEndpoint {
+     param (
+         [Parameter(Mandatory)]
+         [PPEndpoint] $Endpoint
+     )
+     return $Endpoint -in @(
+         [PPEndpoint]::tip1,
+         [PPEndpoint]::tip2,
+         [PPEndpoint]::usgovhigh,
+         [PPEndpoint]::dod
+     )
+ }
