@@ -31,7 +31,7 @@ function CreateIdentityEnterprisePolicy
     )
 
     Write-Host "Logging In..." -ForegroundColor Green
-    $connect = AzureLogin
+    $connect = AzureLogin -subscriptionId $subscriptionId
     if ($false -eq $connect)
     {
         Write-Host "Error Logging In..." -ForegroundColor Red
@@ -52,7 +52,7 @@ function CreateIdentityEnterprisePolicy
     Write-Host "Identity Enterprise policy created" -ForegroundColor Green 
 
     $policyArmId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/$enterprisePolicyName"
-    $policy = GetEnterprisePolicy $policyArmId
+    $policy = Get-AzResource -ResourceId $policyArmId -ExpandProperties
     $policyString = $policy | ConvertTo-Json -Depth 7
     Write-Host "Policy created"
     Write-Host $policyString
