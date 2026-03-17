@@ -31,7 +31,7 @@ function CreateIdentityEnterprisePolicy
     )
 
     Write-Host "Logging In..." -ForegroundColor Green
-    $connect = AzureLogin
+    $connect = AzureLogin -subscriptionId $subscriptionId
     if ($false -eq $connect)
     {
         Write-Host "Error Logging In..." -ForegroundColor Red

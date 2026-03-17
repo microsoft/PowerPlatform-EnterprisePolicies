@@ -2,7 +2,10 @@
     param(
         [Parameter(Mandatory=$false)]
         [ValidateSet("tip1", "tip2", "prod", "usgovhigh", "dod", "china")]
-        [String]$endpoint
+        [String]$endpoint,
+
+        [Parameter(Mandatory=$false)]
+        [String]$subscriptionId
     )    
 
     $environment = "AzureCloud"
@@ -12,7 +15,11 @@
     elseif ($endpoint -eq "china") {
         $environment = "AzureChinaCloud"
     }
-    $connect = Connect-AzAccount -Environment $environment
+    $params = @{ Environment = $environment }
+    if (-not [string]::IsNullOrWhiteSpace($subscriptionId)) {
+        $params["SubscriptionId"] = $subscriptionId
+    }
+    $connect = Connect-AzAccount @params
 
     if ($null -eq $connect)
     {
