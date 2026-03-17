@@ -17,7 +17,7 @@
     }
     $params = @{ Environment = $environment }
     if (-not [string]::IsNullOrWhiteSpace($subscriptionId)) {
-        $params["SubscriptionId"] = $subscriptionId
+        $params["Subscription"] = $subscriptionId
     }
     $connect = Connect-AzAccount @params
 

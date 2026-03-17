@@ -182,7 +182,7 @@ function ValidateKeyVaultForCMK
     )
     
     Write-Host "Logging In..." -ForegroundColor Green
-    $logged = AzureLogin
+    $logged = AzureLogin -subscriptionId $subscriptionId
     if ($logged -eq $false)
     {
         Write-Host "Login failed" -ForegroundColor Red
