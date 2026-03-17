@@ -41,8 +41,8 @@ function PutEnterprisePolicy($subscriptionId, $resourceGroup, $body)
 
     $tmp = New-TemporaryFile
     $body | ConvertTo-Json -Depth 7 | Out-File $tmp.FullName
-    $null = Set-AzContext -Subscription $subscriptionId
     try {
+        $null = Set-AzContext -Subscription $subscriptionId -ErrorAction Stop
         $policy = New-AzResourceGroupDeployment -DeploymentName "EPDeployment" -ResourceGroupName $resourceGroup -TemplateFile $tmp.FullName
     }
     catch {
