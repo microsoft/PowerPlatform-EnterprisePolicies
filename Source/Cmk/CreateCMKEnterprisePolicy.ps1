@@ -49,7 +49,7 @@ function CreateCMKEnterprisePolicy
     )
 
     Write-Host "Logging In..." -ForegroundColor Green
-    $connect = AzureLogin
+    $connect = AzureLogin -subscriptionId $subscriptionId
     if ($false -eq $connect)
     {
         return

@@ -11,7 +11,7 @@ function SetupSubscriptionForPowerPlatform
     )
     
     Write-Host "Logging In..." -ForegroundColor Green
-    $connect = AzureLogin
+    $connect = AzureLogin -subscriptionId $subscriptionId
     Write-Host "Logged In" -ForegroundColor Green
     Set-AzContext -Subscription $subscriptionId
 
