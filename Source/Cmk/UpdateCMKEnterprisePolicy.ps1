@@ -58,7 +58,7 @@ function UpdateCMKEnterprisePolicy
     Write-Host "Logged In..." -ForegroundColor Green
 
     $policyArmId = "/subscriptions/$subscriptionId/resourceGroups/$resourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/$enterprisePolicyName"
-    $policy = GetEnterprisePolicy $policyArmId
+    $policy = Get-AzResource -ResourceId $policyArmId -ExpandProperties
     if ($policy -eq $null)
     {
          Write-Host "CMK Enterprise Policy not found for $policyArmId" -ForegroundColor Red 
@@ -110,7 +110,7 @@ function UpdateCMKEnterprisePolicy
 
     Write-Host "CMK Enterprise policy updated" -ForegroundColor Green 
 
-    $policy = GetEnterprisePolicy $policyArmId
+    $policy = Get-AzResource -ResourceId $policyArmId -ExpandProperties
     $policyString = $policy | ConvertTo-Json -Depth 7
     Write-Host "The updated policy"
     Write-Host $policyString
