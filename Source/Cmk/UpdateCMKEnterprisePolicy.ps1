@@ -103,7 +103,7 @@ function UpdateCMKEnterprisePolicy
     $body.resources.identity.Add("tenantId", $policy.Identity.TenantId)
 
     $result = PutEnterprisePolicy $subscriptionId $resourceGroup $body
-    if ($result -eq $false)
+    if ($result -ne $true)
     {
        return
     }

@@ -41,11 +41,18 @@ function PutEnterprisePolicy($subscriptionId, $resourceGroup, $body)
 
     $tmp = New-TemporaryFile
     $body | ConvertTo-Json -Depth 7 | Out-File $tmp.FullName
-    Set-AzContext -Subscription $subscriptionId
-    $policy = New-AzResourceGroupDeployment -DeploymentName "EPDeployment" -ResourceGroupName $resourceGroup -TemplateFile $tmp.FullName
-
-    Remove-Item $tmp.FullName
-    if ($policy.ProvisioningState.Equals("Succeeded"))
+    $null = Set-AzContext -Subscription $subscriptionId
+    try {
+        $policy = New-AzResourceGroupDeployment -DeploymentName "EPDeployment" -ResourceGroupName $resourceGroup -TemplateFile $tmp.FullName
+    }
+    catch {
+        Write-Host "Error creating/updating Enterprise policy: $_ `n" -ForegroundColor Red
+        return $false
+    }
+    finally {
+        Remove-Item $tmp.FullName
+    }
+    if ($policy.ProvisioningState -eq "Succeeded")
     {
         return $true
     }

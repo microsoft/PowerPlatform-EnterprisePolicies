@@ -44,7 +44,7 @@ function CreateIdentityEnterprisePolicy
     $body = GenerateEnterprisePolicyBody -policyType "identity" -policyLocation $enterprisePolicyLocation -policyName $enterprisePolicyName
 
     $result = PutEnterprisePolicy $subscriptionId $resourceGroup $body
-    if ($result -eq $false)
+    if ($result -ne $true)
     {
        Write-Host "Identity Enterprise policy not created" -ForegroundColor Red
        return
