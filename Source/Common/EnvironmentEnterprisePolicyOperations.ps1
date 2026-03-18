@@ -4,6 +4,14 @@
 # Load the environment script
 . "$PSScriptRoot\EnterprisePolicyOperations.ps1"
 
+function ExtractSubscriptionId($policyArmId) {
+    if ($policyArmId -match '/subscriptions/([^/]+)/') {
+        return $matches[1]
+    }
+    Write-Host "Invalid policy ARM ID format: $policyArmId. Expected format: /subscriptions/{subscriptionId}/resourceGroups/..." -ForegroundColor Red
+    return $null
+}
+
 function Login($endpoint, $subscriptionId) {
 
     $logIn = $false
@@ -28,23 +36,9 @@ function Login($endpoint, $subscriptionId) {
         echo $result
     }
 
-    $environment = "AzureCloud"
-    if (($endpoint -eq "usgovhigh") -or ($endpoint -eq "dod")) {
-        $environment = "AzureUSGovernment"
-    }
-    elseif ($endpoint -eq "china") {
-        $environment = "AzureChinaCloud"
-    }
-    $params = @{ Environment = $environment }
+    # Only connect to Azure when a subscription is provided (i.e., ARM operations are needed)
     if (-not [string]::IsNullOrWhiteSpace($subscriptionId)) {
-        $params["Subscription"] = $subscriptionId
-    }
-    $connect = Connect-AzAccount @params
-
-    if ($null -eq $connect)
-    {
-        Write-Host "Error connecting to Azure Account `n" -ForegroundColor Red
-        return $false
+        return AzureLogin -endpoint $endpoint -subscriptionId $subscriptionId
     }
     return $true
 }
@@ -75,8 +69,8 @@ function LinkPolicyToEnv
         $endpoint = "prod"
     }
 
-    # Extract subscription ID from the policy ARM ID
-    $subscriptionId = ($policyArmId -split '/')[2]
+    $subscriptionId = ExtractSubscriptionId $policyArmId
+    if ($null -eq $subscriptionId) { return }
 
     Write-Host "Logging In..." -ForegroundColor Green
     $connect = Login $endpoint $subscriptionId
@@ -168,8 +162,8 @@ function UnLinkPolicyFromEnv
         $endpoint = "prod"
     }
 
-    # Extract subscription ID from the policy ARM ID
-    $subscriptionId = ($policyArmId -split '/')[2]
+    $subscriptionId = ExtractSubscriptionId $policyArmId
+    if ($null -eq $subscriptionId) { return }
 
     Write-Host "Logging In..." -ForegroundColor Green
     $connect = Login $endpoint $subscriptionId
@@ -282,8 +276,8 @@ function SwapPolicyForEnv
         $endpoint = "prod"
     }
 
-    # Extract subscription ID from the policy ARM ID
-    $subscriptionId = ($policyArmId -split '/')[2]
+    $subscriptionId = ExtractSubscriptionId $policyArmId
+    if ($null -eq $subscriptionId) { return }
 
     Write-Host "Logging In..." -ForegroundColor Green
     $connect = Login $endpoint $subscriptionId
@@ -446,8 +440,8 @@ function LinkPolicyToPlatformAppsData
         $endpoint = "prod"
     }
 
-    # Extract subscription ID from the policy ARM ID
-    $subscriptionId = ($policyArmId -split '/')[2]
+    $subscriptionId = ExtractSubscriptionId $policyArmId
+    if ($null -eq $subscriptionId) { return }
 
     Write-Host "Logging In..." -ForegroundColor Green
     $connect = Login $endpoint $subscriptionId
@@ -514,8 +508,8 @@ function UnLinkPolicyFromPlatformAppsData
         $endpoint = "prod"
     }
 
-    # Extract subscription ID from the policy ARM ID
-    $subscriptionId = ($policyArmId -split '/')[2]
+    $subscriptionId = ExtractSubscriptionId $policyArmId
+    if ($null -eq $subscriptionId) { return }
 
     Write-Host "Logging In..." -ForegroundColor Green
     $connect = Login $endpoint $subscriptionId
