@@ -4,7 +4,7 @@
 # Load the environment script
 . "$PSScriptRoot\EnterprisePolicyOperations.ps1"
 
-function Login($endpoint) {
+function Login($endpoint, $subscriptionId) {
 
     $logIn = $false
 
@@ -35,7 +35,11 @@ function Login($endpoint) {
     elseif ($endpoint -eq "china") {
         $environment = "AzureChinaCloud"
     }
-    $connect = Connect-AzAccount -Environment $environment
+    $params = @{ Environment = $environment }
+    if (-not [string]::IsNullOrWhiteSpace($subscriptionId)) {
+        $params["Subscription"] = $subscriptionId
+    }
+    $connect = Connect-AzAccount @params
 
     if ($null -eq $connect)
     {
@@ -71,8 +75,11 @@ function LinkPolicyToEnv
         $endpoint = "prod"
     }
 
+    # Extract subscription ID from the policy ARM ID
+    $subscriptionId = ($policyArmId -split '/')[2]
+
     Write-Host "Logging In..." -ForegroundColor Green
-    $connect = Login $endpoint
+    $connect = Login $endpoint $subscriptionId
     if ($false -eq $connect)
     {
         return
@@ -161,8 +168,11 @@ function UnLinkPolicyFromEnv
         $endpoint = "prod"
     }
 
+    # Extract subscription ID from the policy ARM ID
+    $subscriptionId = ($policyArmId -split '/')[2]
+
     Write-Host "Logging In..." -ForegroundColor Green
-    $connect = Login $endpoint
+    $connect = Login $endpoint $subscriptionId
     if ($false -eq $connect)
     {
         return
@@ -272,8 +282,11 @@ function SwapPolicyForEnv
         $endpoint = "prod"
     }
 
+    # Extract subscription ID from the policy ARM ID
+    $subscriptionId = ($policyArmId -split '/')[2]
+
     Write-Host "Logging In..." -ForegroundColor Green
-    $connect = Login $endpoint
+    $connect = Login $endpoint $subscriptionId
     if ($false -eq $connect)
     {
         return
@@ -385,9 +398,9 @@ function GetEnterprisePolicyForEnvironment
     Write-Host "Logged In..." -ForegroundColor Green
 
     #Validate Environment
-    $env = GetEnvironment $environmentId
+    $envResult = GetEnvironment $environmentId
 
-    if ($env -eq $null) 
+    if ($envResult -eq $null) 
     {
         return
     }
@@ -400,14 +413,14 @@ function GetEnterprisePolicyForEnvironment
         "identity" {"Identity"}
     }
     
-    if ($null -eq $env.properties.enterprisePolicies -or $null -eq $env.properties.enterprisePolicies.$epPropertyName)
+    if ($null -eq $envResult.properties.enterprisePolicies -or $null -eq $envResult.properties.enterprisePolicies.$epPropertyName)
     {
         Write-Host "No enterprise policy present of $policyType in environement $environmentId"
         return
     }
 
     Write-Host "Enterprise Policy of type $policyType reterived for environment $environmentId `n" -ForegroundColor Green
-    $policyArmId = $env.properties.enterprisePolicies.$epPropertyName.id
+    $policyArmId = $envResult.properties.enterprisePolicies.$epPropertyName.id
     Write-Host "Enterprise Policy Arm Id $policyArmId"
 }
 
@@ -433,8 +446,11 @@ function LinkPolicyToPlatformAppsData
         $endpoint = "prod"
     }
 
+    # Extract subscription ID from the policy ARM ID
+    $subscriptionId = ($policyArmId -split '/')[2]
+
     Write-Host "Logging In..." -ForegroundColor Green
-    $connect = Login $endpoint
+    $connect = Login $endpoint $subscriptionId
     if ($false -eq $connect)
     {
         return
@@ -498,8 +514,11 @@ function UnLinkPolicyFromPlatformAppsData
         $endpoint = "prod"
     }
 
+    # Extract subscription ID from the policy ARM ID
+    $subscriptionId = ($policyArmId -split '/')[2]
+
     Write-Host "Logging In..." -ForegroundColor Green
-    $connect = Login $endpoint
+    $connect = Login $endpoint $subscriptionId
     if ($false -eq $connect)
     {
         return
