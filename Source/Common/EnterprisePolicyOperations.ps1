@@ -7,7 +7,7 @@
         [Parameter(Mandatory=$false)]
         [String]$subscriptionId
     )    
-
+ 
     $environment = "AzureCloud"
     if (($endpoint -eq "usgovhigh") -or ($endpoint -eq "dod")) {
         $environment = "AzureUSGovernment"
