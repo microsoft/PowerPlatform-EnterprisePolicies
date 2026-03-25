@@ -57,6 +57,12 @@ function Initialize-Cache{
         else{
             $script:CacheData = $content | ConvertFrom-Json
             $script:CacheData = Update-CacheVersion -Cache $script:CacheData
+            foreach($key in $script:CacheData.RegionCache.PSObject.Properties.Name){
+                $entry = $script:CacheData.RegionCache.$key
+                if($entry.Expiry -is [string]){
+                    $entry.Expiry = [DateTime]::Parse($entry.Expiry).ToUniversalTime()
+                }
+            }
         }
     }
 }
@@ -108,15 +114,16 @@ function Get-EnvironmentRegionFromCache{
 
     # Check for cached entry
     if($script:CacheData.RegionCache.PSObject.Properties.Name -contains $cacheKey){
+        $now = [DateTime]::UtcNow
         $entry = $script:CacheData.RegionCache.$cacheKey
         $expiry = if($entry.Expiry -is [DateTime]){
                 $entry.Expiry.ToUniversalTime()
             }
             else{
-                [DateTime]::Parse($entry.Expiry).ToUniversalTime()
+                $entry.Expiry = $now
             }
-        if($expiry -gt [DateTime]::UtcNow){
-            $remainingMinutes = [math]::Round(($expiry - [DateTime]::UtcNow).TotalMinutes, 1)
+        if($expiry -gt $now){
+            $remainingMinutes = [math]::Round(($expiry - $now).TotalMinutes, 1)
             Write-Verbose "Region cache hit for $cacheKey. Region: $($entry.Region). Cache valid for $remainingMinutes more minutes."
             return $entry.Region
         }
@@ -138,7 +145,7 @@ function Get-EnvironmentRegionFromCache{
     # Store in cache with 1-hour expiry
     $cacheEntry = [PSCustomObject]@{
         Region = $region
-        Expiry = [DateTime]::UtcNow.AddHours(1).ToString("o")
+        Expiry = [DateTime]::UtcNow.AddHours(1)
     }
     if($script:CacheData.RegionCache.PSObject.Properties.Name -contains $cacheKey){
         $script:CacheData.RegionCache.$cacheKey = $cacheEntry
