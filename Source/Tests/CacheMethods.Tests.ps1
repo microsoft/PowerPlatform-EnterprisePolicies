@@ -221,6 +221,38 @@ Describe 'CacheMethods Tests' {
                 Should -Invoke Get-EnvironmentRegion -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             }
 
+            It 'Refreshes expired entries after disk roundtrip' {
+                # Populate cache with an expired entry and save to disk
+                $cacheKey = "env-123|prod"
+                $script:CacheData.RegionCache | Add-Member -NotePropertyName $cacheKey -NotePropertyValue ([PSCustomObject]@{
+                    Region = "oldregion"
+                    Expiry = [DateTime]::UtcNow.AddHours(-1).ToString("o")
+                })
+                Save-Cache
+
+                # Reload from disk (ConvertFrom-Json in PS Core converts date strings to DateTime)
+                Initialize-Cache
+
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+
+                $result | Should -Be "westus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
+            It 'Returns cached value after disk roundtrip when not expired' {
+                # First call populates the cache
+                Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+                # Save and reload from disk
+                Save-Cache
+                Initialize-Cache
+
+                # Second call should use cache loaded from disk
+                $result = Get-EnvironmentRegionFromCache -EnvironmentId "env-123" -Endpoint ([PPEndpoint]::Prod)
+
+                $result | Should -Be "westus"
+                Should -Invoke Get-EnvironmentRegion -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            }
+
             It 'Passes TenantId through when provided' {
                 Mock Get-EnvironmentRegion { return "eastus" } -ParameterFilter { $TenantId -eq "tenant-abc" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
