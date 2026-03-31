@@ -104,7 +104,7 @@ function Enable-Identity {
         $existingPolicyId = $environment.properties.enterprisePolicies.identity.id
         if ($existingPolicyId -ieq $PolicyArmId) {
             Write-Host "Identity is already enabled with this policy." -ForegroundColor Yellow
-            return
+            return $true
         }
         # Different policy is linked
         if (-not $Swap) {
