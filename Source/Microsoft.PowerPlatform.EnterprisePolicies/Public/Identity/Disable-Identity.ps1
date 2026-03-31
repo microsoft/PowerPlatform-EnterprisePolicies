@@ -140,7 +140,12 @@ function Disable-Identity {
 
     $operationResult = Wait-EnterprisePolicyOperation -OperationUrl $operationUrl -Endpoint $Endpoint -TenantId $TenantId -TimeoutSeconds $TimeoutSeconds
 
-    Write-Host "Identity disabled successfully for environment $EnvironmentId" -ForegroundColor Green
+    if ($operationResult -eq "Succeeded") {
+        Write-Host "Identity disabled successfully for environment $EnvironmentId" -ForegroundColor Green
+    }
+    else {
+        Write-Warning "Identity disable operation did not complete successfully for environment $EnvironmentId. Final status: $operationResult"
+    }
 
     return $operationResult -eq "Succeeded"
 }
