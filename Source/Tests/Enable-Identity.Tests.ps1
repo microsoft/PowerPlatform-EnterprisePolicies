@@ -139,10 +139,11 @@ Describe 'Enable-Identity Tests' {
         }
 
         It 'Should return early without calling link API' {
-            Enable-Identity `
+            $result = Enable-Identity `
                 -EnvironmentId $script:testEnvironmentId `
                 -PolicyArmId $script:testPolicyArmId
 
+            $result | Should -Be $true
             Should -Invoke Set-EnvironmentEnterprisePolicy -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
     }
