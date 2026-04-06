@@ -343,21 +343,23 @@ function Test-Result {
         $Result
     )
 
+    $correlationId = $Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
     if (-not($Result.IsSuccessStatusCode))
     {
         $contentString = Get-AsyncResult -Task $Result.Content.ReadAsStringAsync()
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $correlationId"
             return $false
         }
         else
         {
-            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $correlationId"
             return $false
         }
     }
+    Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode). Correlation ID: $correlationId"
     return $true
 }
 
