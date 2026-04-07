@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/23/2026
+ms.date: 04/07/2026
 PlatyPS schema version: 2024-05-01
 title: Enable-SubnetInjection
 ---
@@ -219,7 +219,7 @@ HelpMessage: ''
 
 ### -TenantId
 
-The Azure AD tenant ID
+The Entra tenant ID
 
 ```yaml
 Type: System.String

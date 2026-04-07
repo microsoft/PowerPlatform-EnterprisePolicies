@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/17/2026
+ms.date: 04/07/2026
 PlatyPS schema version: 2024-05-01
 title: Remove-SubnetInjectionEnterprisePolicy
 ---
@@ -253,7 +253,7 @@ HelpMessage: ''
 
 ### -TenantId
 
-The Azure AD tenant ID
+The Entra tenant ID
 
 ```yaml
 Type: System.String
@@ -305,9 +305,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### None
-
-Returns nothing on success. Throws an error if no policy is found or removal fails.
+### Returns nothing on success. Throws an error if no policy is found or removal fails.
 When multiple policies are found
 
 {{ Fill in the Description }}
