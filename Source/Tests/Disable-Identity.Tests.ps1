@@ -104,10 +104,8 @@ Describe 'Disable-Identity Tests' {
             Mock Get-PPEnvironment { return $script:mockEnvironmentWithoutPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should return false when identity is not enabled' {
-            $result = Disable-Identity -EnvironmentId $script:testEnvironmentId
-
-            $result | Should -Be $false
+        It 'Should throw when identity is not enabled' {
+            { Disable-Identity -EnvironmentId $script:testEnvironmentId } | Should -Throw "*Identity is not enabled*"
         }
     }
 

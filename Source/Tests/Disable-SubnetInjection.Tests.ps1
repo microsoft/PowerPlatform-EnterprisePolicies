@@ -107,10 +107,8 @@ Describe 'Disable-SubnetInjection Tests' {
             Mock Set-EnvironmentEnterprisePolicy { return $script:mockUnlinkResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should return false without calling unlink API' {
-            $result = Disable-SubnetInjection -EnvironmentId $script:testEnvironmentId
-
-            $result | Should -Be $false
+        It 'Should throw without calling unlink API' {
+            { Disable-SubnetInjection -EnvironmentId $script:testEnvironmentId } | Should -Throw "*Subnet Injection is not enabled*"
             Should -Invoke Set-EnvironmentEnterprisePolicy -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
     }
