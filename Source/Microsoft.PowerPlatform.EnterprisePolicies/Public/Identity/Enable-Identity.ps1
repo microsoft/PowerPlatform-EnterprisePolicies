@@ -104,7 +104,7 @@ function Enable-Identity {
         $existingPolicyId = $environment.properties.enterprisePolicies.identity.id
         if ($existingPolicyId -ieq $PolicyArmId) {
             Write-Host "Identity is already enabled with this policy." -ForegroundColor Yellow
-            return
+            return $true
         }
         # Different policy is linked
         if (-not $Swap) {
@@ -167,7 +167,11 @@ function Enable-Identity {
 
     $operationResult = Wait-EnterprisePolicyOperation -OperationUrl $operationUrl -Endpoint $Endpoint -TenantId $TenantId -TimeoutSeconds $TimeoutSeconds
 
-    Write-Host "Identity enabled successfully for environment $EnvironmentId" -ForegroundColor Green
+    if ($operationResult -eq "Succeeded") {
+        Write-Host "Identity enabled successfully for environment $EnvironmentId" -ForegroundColor Green
+        return $true
+    }
 
-    return $operationResult -eq "Succeeded"
+    Write-Warning "Identity enable operation for environment $EnvironmentId did not complete successfully. Final status: $operationResult"
+    return $false
 }
