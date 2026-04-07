@@ -9,13 +9,13 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Enables subnet injection for a Power Platform environment by linking it to an enterprise policy.
+Enables identity for a Power Platform environment by linking it to an enterprise policy.
 
 .DESCRIPTION
-The Enable-SubnetInjection cmdlet links an existing subnet injection enterprise policy to a Power Platform environment,
-enabling the environment to use the delegated virtual network subnets configured in the policy.
+The Enable-Identity cmdlet links an existing identity enterprise policy to a Power Platform environment,
+enabling the environment to use the system-assigned managed identity configured in the policy.
 
-If the environment already has a different policy linked, use the -Swap switch to replace it.
+If the environment already has a different identity policy linked, use the -Swap switch to replace it.
 Without -Swap, the cmdlet returns an error to prevent accidental policy replacement.
 
 The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
@@ -27,34 +27,34 @@ System.Boolean
 Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated.
 
 .EXAMPLE
-Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+Enable-Identity -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
 
-Enables subnet injection for the environment by linking it to the specified policy.
-
-.EXAMPLE
-Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -Endpoint usgovhigh
-
-Enables subnet injection for an environment in the US Government High cloud.
+Enables identity for the environment by linking it to the specified policy.
 
 .EXAMPLE
-Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/newPolicy" -Swap
+Enable-Identity -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -Endpoint usgovhigh
 
-Replaces the existing subnet injection policy with a new one.
+Enables identity for an environment in the US Government High cloud.
 
 .EXAMPLE
-Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait
+Enable-Identity -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/newPolicy" -Swap
+
+Replaces the existing identity policy with a new one.
+
+.EXAMPLE
+Enable-Identity -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait
 
 Initiates the link operation without waiting for completion.
 #>
 
-function Enable-SubnetInjection {
+function Enable-Identity {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, HelpMessage="The Power Platform environment ID")]
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
 
-        [Parameter(Mandatory, HelpMessage="The full Azure ARM resource ID of the Subnet Injection Enterprise Policy")]
+        [Parameter(Mandatory, HelpMessage="The full Azure ARM resource ID of the Identity Enterprise Policy")]
         [ValidateAzureResourceId("Microsoft.PowerPlatform/enterprisePolicies")]
         [string]$PolicyArmId,
 
@@ -92,28 +92,28 @@ function Enable-SubnetInjection {
     $environment = Get-PPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
 
     if ($null -eq $environment) {
-        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environement exists, ensure you have the necessary permissions to access it and that you are connecting to the correct PP endpoint."
+        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environment exists, ensure you have the necessary permissions to access it and that you are connecting to the correct PP endpoint."
     }
 
     Write-Verbose "Environment retrieved successfully"
 
-    # Check if environment already has a linked Subnet Injection policy
-    $hasExistingPolicy = $null -ne $environment.properties.enterprisePolicies -and $null -ne $environment.properties.enterprisePolicies.VNets
+    # Check if environment already has a linked Identity policy
+    $hasExistingPolicy = $null -ne $environment.properties.enterprisePolicies -and $null -ne $environment.properties.enterprisePolicies.identity
 
     if ($hasExistingPolicy) {
-        $existingPolicyId = $environment.properties.enterprisePolicies.VNets.id
+        $existingPolicyId = $environment.properties.enterprisePolicies.identity.id
         if ($existingPolicyId -ieq $PolicyArmId) {
-            Write-Host "Subnet Injection is already enabled with this policy." -ForegroundColor Yellow
-            return
+            Write-Host "Identity is already enabled with this policy." -ForegroundColor Yellow
+            return $true
         }
         # Different policy is linked
         if (-not $Swap) {
-            throw "Environment already has Subnet Injection enabled with a different policy: $existingPolicyId. Use the -Swap parameter to replace it."
+            throw "Environment already has Identity enabled with a different policy: $existingPolicyId. Use the -Swap parameter to replace it."
         }
         Write-Host "Swapping existing policy with the new one..." -ForegroundColor Yellow
     }
     elseif ($Swap) {
-        throw "Cannot use -Swap when no Subnet Injection policy is currently linked to the environment. Remove the -Swap parameter to enable Subnet Injection."
+        throw "Cannot use -Swap when no Identity policy is currently linked to the environment. Remove the -Swap parameter to enable Identity."
     }
 
     # Extract subscription ID from policy ARM ID and set context (format validated by attribute)
@@ -127,11 +127,11 @@ function Enable-SubnetInjection {
     $policy = Get-EnterprisePolicy -PolicyArmId $PolicyArmId
 
     if ($null -eq $policy) {
-        throw "Failed to retrieve enterprise policy with ARM ID: $PolicyArmId. Ensure the policy exists, you have access to it, and its of type 'NetworkInjection'."
+        throw "Failed to retrieve enterprise policy with ARM ID: $PolicyArmId. Ensure the policy exists, you have access to it, and its of type 'Identity'."
     }
 
-    if ($policy.Kind -ne "NetworkInjection") {
-        throw "The specified policy is not a Subnet Injection (NetworkInjection) policy. Policy kind: $($policy.Kind)"
+    if ($policy.Kind -ne "Identity") {
+        throw "The specified policy is not an Identity policy. Policy kind: $($policy.Kind)"
     }
 
     $policySystemId = $policy.Properties.systemId
@@ -141,25 +141,9 @@ function Enable-SubnetInjection {
 
     Write-Verbose "Enterprise policy SystemId: $policySystemId"
 
-    # Validate that the environment location matches the policy location
-    $environmentLocation = $environment.location
-    $policyLocation = $policy.Location
-
-    if ($environmentLocation -ine $policyLocation) {
-        if( ($environmentLocation -eq "unitedstates" -and $policyLocation -eq "unitedstateseuap") -or
-            ($environmentLocation -eq "unitedkingdom" -and $policyLocation -eq "uk") ) {
-            Write-Verbose "Environment is in '$environmentLocation' and policy is in '$policyLocation'. Treating locations as compatible."
-        }
-        else {
-            throw "Environment location '$environmentLocation' does not match the enterprise policy location '$policyLocation'. The environment and policy must be in the same location."
-        }
-    }
-
-    Write-Verbose "Environment location '$environmentLocation' matches policy location '$policyLocation'"
-
     # Link the policy to the environment
-    Write-Verbose "Enabling Subnet Injection for environment..."
-    $linkResult = Set-EnvironmentEnterprisePolicy -EnvironmentId $EnvironmentId -PolicyType ([PolicyType]::NetworkInjection) -PolicySystemId $policySystemId -Operation ([LinkOperation]::link) -Endpoint $Endpoint -TenantId $TenantId
+    Write-Verbose "Enabling Identity for environment..."
+    $linkResult = Set-EnvironmentEnterprisePolicy -EnvironmentId $EnvironmentId -PolicyType ([PolicyType]::Identity) -PolicySystemId $policySystemId -Operation ([LinkOperation]::link) -Endpoint $Endpoint -TenantId $TenantId
 
     if ($linkResult.StatusCode -ne 202) {
         $contentString = Get-AsyncResult -Task $linkResult.Content.ReadAsStringAsync()
@@ -183,7 +167,11 @@ function Enable-SubnetInjection {
 
     $operationResult = Wait-EnterprisePolicyOperation -OperationUrl $operationUrl -Endpoint $Endpoint -TenantId $TenantId -TimeoutSeconds $TimeoutSeconds
 
-    Write-Host "Subnet Injection enabled successfully for environment $EnvironmentId" -ForegroundColor Green
+    if ($operationResult -eq "Succeeded") {
+        Write-Host "Identity enabled successfully for environment $EnvironmentId" -ForegroundColor Green
+        return $true
+    }
 
-    return $operationResult -eq "Succeeded"
+    Write-Warning "Identity enable operation for environment $EnvironmentId did not complete successfully. Final status: $operationResult"
+    return $false
 }

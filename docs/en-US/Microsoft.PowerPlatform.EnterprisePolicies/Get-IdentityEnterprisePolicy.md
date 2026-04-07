@@ -6,42 +6,42 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 04/07/2026
 PlatyPS schema version: 2024-05-01
-title: Get-SubnetInjectionEnterprisePolicy
+title: Get-IdentityEnterprisePolicy
 ---
 
-# Get-SubnetInjectionEnterprisePolicy
+# Get-IdentityEnterprisePolicy
 
 ## SYNOPSIS
 
-Retrieves subnet injection enterprise policies for Power Platform.
+Retrieves identity enterprise policies for Power Platform.
 
 ## SYNTAX
 
 ### BySubscription (Default)
 
 ```
-Get-SubnetInjectionEnterprisePolicy -SubscriptionId <string> [-TenantId <string>]
- [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
+Get-IdentityEnterprisePolicy -SubscriptionId <string> [-TenantId <string>] [-Endpoint <PPEndpoint>]
+ [-ForceAuth] [<CommonParameters>]
 ```
 
 ### ByResourceId
 
 ```
-Get-SubnetInjectionEnterprisePolicy -PolicyResourceId <string> [-TenantId <string>]
+Get-IdentityEnterprisePolicy -PolicyResourceId <string> [-TenantId <string>]
  [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### ByEnvironment
 
 ```
-Get-SubnetInjectionEnterprisePolicy -EnvironmentId <string> [-TenantId <string>]
- [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
+Get-IdentityEnterprisePolicy -EnvironmentId <string> [-TenantId <string>] [-Endpoint <PPEndpoint>]
+ [-ForceAuth] [<CommonParameters>]
 ```
 
 ### ByResourceGroup
 
 ```
-Get-SubnetInjectionEnterprisePolicy -SubscriptionId <string> -ResourceGroupName <string>
+Get-IdentityEnterprisePolicy -SubscriptionId <string> -ResourceGroupName <string>
  [-TenantId <string>] [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
@@ -52,43 +52,37 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-The Get-SubnetInjectionEnterprisePolicy cmdlet retrieves subnet injection enterprise policies using one of four methods:
+The Get-IdentityEnterprisePolicy cmdlet retrieves identity enterprise policies using one of four methods:
 - By Resource ID: Retrieves a specific policy using its Azure Resource Manager (ARM) resource ID
 - By Environment: Retrieves the policy linked to a specific Power Platform environment
-- By Subscription: Retrieves all Subnet Injection policies in the current subscription
-- By Resource Group: Retrieves all Subnet Injection policies in a specific resource group
+- By Subscription: Retrieves all Identity policies in the current subscription
+- By Resource Group: Retrieves all Identity policies in a specific resource group
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+Get-IdentityEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
 
-Retrieves a subnet injection enterprise policy by its ARM resource ID.
+Retrieves an identity enterprise policy by its ARM resource ID.
 
 ### EXAMPLE 2
 
-Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint Prod
+Get-IdentityEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint Prod
 
-Retrieves the subnet injection enterprise policy linked to the specified Power Platform environment.
+Retrieves the identity enterprise policy linked to the specified Power Platform environment.
 
 ### EXAMPLE 3
 
-Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+Get-IdentityEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee"
 
-Retrieves the subnet injection enterprise policy linked to an environment in the US Government High cloud.
+Retrieves all identity enterprise policies in the specified subscription.
 
 ### EXAMPLE 4
 
-Get-SubnetInjectionEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee"
+Get-IdentityEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee" -ResourceGroupName "myResourceGroup"
 
-Retrieves all subnet injection enterprise policies in the specified subscription.
-
-### EXAMPLE 5
-
-Get-SubnetInjectionEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee" -ResourceGroupName "myResourceGroup"
-
-Retrieves all subnet injection enterprise policies in the specified resource group.
+Retrieves all identity enterprise policies in the specified resource group.
 
 ## PARAMETERS
 

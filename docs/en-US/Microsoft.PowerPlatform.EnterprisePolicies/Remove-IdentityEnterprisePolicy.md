@@ -6,21 +6,21 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 04/07/2026
 PlatyPS schema version: 2024-05-01
-title: Remove-SubnetInjectionEnterprisePolicy
+title: Remove-IdentityEnterprisePolicy
 ---
 
-# Remove-SubnetInjectionEnterprisePolicy
+# Remove-IdentityEnterprisePolicy
 
 ## SYNOPSIS
 
-Removes a subnet injection enterprise policy for Power Platform.
+Removes an identity enterprise policy for Power Platform.
 
 ## SYNTAX
 
 ### ByResourceId (Default)
 
 ```
-Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId <string> [-TenantId <string>]
+Remove-IdentityEnterprisePolicy -PolicyResourceId <string> [-TenantId <string>]
  [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
@@ -28,7 +28,7 @@ Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId <string> [-TenantId <st
 ### ByResourceGroup
 
 ```
-Remove-SubnetInjectionEnterprisePolicy -SubscriptionId <string> -ResourceGroupName <string>
+Remove-IdentityEnterprisePolicy -SubscriptionId <string> -ResourceGroupName <string>
  [-TenantId <string>] [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-Force] [-WhatIf]
  [-Confirm] [<CommonParameters>]
 ```
@@ -36,7 +36,7 @@ Remove-SubnetInjectionEnterprisePolicy -SubscriptionId <string> -ResourceGroupNa
 ### BySubscription
 
 ```
-Remove-SubnetInjectionEnterprisePolicy -SubscriptionId <string> [-TenantId <string>]
+Remove-IdentityEnterprisePolicy -SubscriptionId <string> [-TenantId <string>]
  [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
@@ -48,10 +48,10 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-The Remove-SubnetInjectionEnterprisePolicy cmdlet removes a subnet injection enterprise policy using one of three methods:
+The Remove-IdentityEnterprisePolicy cmdlet removes an identity enterprise policy using one of three methods:
 - By Resource ID: Removes a specific policy using its Azure Resource Manager (ARM) resource ID.
-- By Subscription: Lists all subnet injection policies in a subscription (use -PolicyResourceId to remove a specific policy).
-- By Resource Group: Lists all subnet injection policies in a resource group (use -PolicyResourceId to remove a specific policy).
+- By Subscription: Lists all identity policies in a subscription (use -PolicyResourceId to remove a specific policy).
+- By Resource Group: Lists all identity policies in a resource group (use -PolicyResourceId to remove a specific policy).
 
 When using BySubscription or ByResourceGroup, if multiple policies are found, the cmdlet outputs the policy ARM IDs.
 You can specify which policy to remove using -PolicyResourceId.
@@ -63,35 +63,35 @@ Unlink the policy from all environments before attempting to remove it.
 
 ### EXAMPLE 1
 
-Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+Remove-IdentityEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
 
-Removes the specified subnet injection enterprise policy by its ARM resource ID.
+Removes the specified identity enterprise policy by its ARM resource ID.
 
 ### EXAMPLE 2
 
-Remove-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012"
+Remove-IdentityEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012"
 
-Lists all subnet injection enterprise policies in the subscription.
+Lists all identity enterprise policies in the subscription.
 When only one policy exists, it's removed.
 If multiple policies exist, the ARM IDs are returned as output so you can specify which one to remove.
 
 ### EXAMPLE 3
 
-Remove-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup"
+Remove-IdentityEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup"
 
-Lists all subnet injection enterprise policies in the resource group.
+Lists all identity enterprise policies in the resource group.
 When only one policy exists, it's removed.
 If multiple policies exist, their ARM IDs are returned as output so you can specify which one to remove.
 
 ### EXAMPLE 4
 
-Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -AzureEnvironment AzureUSGovernment
+Remove-IdentityEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -AzureEnvironment AzureUSGovernment
 
 Removes the specified policy in the Azure US Government cloud.
 
 ### EXAMPLE 5
 
-Remove-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -Force
+Remove-IdentityEnterprisePolicy -PolicyResourceId "/subscriptions/.../enterprisePolicies/myPolicy" -Force
 
 Removes the specified policy without prompting for confirmation.
 

@@ -9,14 +9,14 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Retrieves subnet injection enterprise policies for Power Platform.
+Retrieves identity enterprise policies for Power Platform.
 
 .DESCRIPTION
-The Get-SubnetInjectionEnterprisePolicy cmdlet retrieves subnet injection enterprise policies using one of four methods:
+The Get-IdentityEnterprisePolicy cmdlet retrieves identity enterprise policies using one of four methods:
 - By Resource ID: Retrieves a specific policy using its Azure Resource Manager (ARM) resource ID
 - By Environment: Retrieves the policy linked to a specific Power Platform environment
-- By Subscription: Retrieves all Subnet Injection policies in the current subscription
-- By Resource Group: Retrieves all Subnet Injection policies in a specific resource group
+- By Subscription: Retrieves all Identity policies in the current subscription
+- By Resource Group: Retrieves all Identity policies in a specific resource group
 
 .OUTPUTS
 Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
@@ -24,32 +24,27 @@ Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
 Returns PSResource object(s) representing the enterprise policy Azure resources. Throws an error if no policy is found.
 
 .EXAMPLE
-Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+Get-IdentityEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
 
-Retrieves a subnet injection enterprise policy by its ARM resource ID.
-
-.EXAMPLE
-Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint Prod
-
-Retrieves the subnet injection enterprise policy linked to the specified Power Platform environment.
+Retrieves an identity enterprise policy by its ARM resource ID.
 
 .EXAMPLE
-Get-SubnetInjectionEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+Get-IdentityEnterprisePolicy -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint Prod
 
-Retrieves the subnet injection enterprise policy linked to an environment in the US Government High cloud.
-
-.EXAMPLE
-Get-SubnetInjectionEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee"
-
-Retrieves all subnet injection enterprise policies in the specified subscription.
+Retrieves the identity enterprise policy linked to the specified Power Platform environment.
 
 .EXAMPLE
-Get-SubnetInjectionEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee" -ResourceGroupName "myResourceGroup"
+Get-IdentityEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee"
 
-Retrieves all subnet injection enterprise policies in the specified resource group.
+Retrieves all identity enterprise policies in the specified subscription.
+
+.EXAMPLE
+Get-IdentityEnterprisePolicy -SubscriptionId "aaaabbbb-0000-cccc-1111-dddd2222eeee" -ResourceGroupName "myResourceGroup"
+
+Retrieves all identity enterprise policies in the specified resource group.
 #>
 
-function Get-SubnetInjectionEnterprisePolicy{
+function Get-IdentityEnterprisePolicy {
     [CmdletBinding(DefaultParameterSetName = 'BySubscription')]
     param(
         [Parameter(Mandatory, ParameterSetName = 'ByResourceId', HelpMessage="The full Azure ARM resource ID of the enterprise policy")]
@@ -101,18 +96,18 @@ function Get-SubnetInjectionEnterprisePolicy{
     # Retrieve policies based on parameter set
     switch ($PSCmdlet.ParameterSetName) {
         'BySubscription' {
-            Write-Verbose "Retrieving all Subnet Injection enterprise policies in subscription: $SubscriptionId"
-            $policies = Get-EnterprisePolicy -Kind ([PolicyType]::NetworkInjection)
+            Write-Verbose "Retrieving all Identity enterprise policies in subscription: $SubscriptionId"
+            $policies = Get-EnterprisePolicy -Kind ([PolicyType]::Identity)
             if ($null -eq $policies -or @($policies).Count -eq 0) {
-                throw "No Subnet Injection Enterprise Policies found in subscription: $SubscriptionId"
+                throw "No Identity Enterprise Policies found in subscription: $SubscriptionId"
             }
             return $policies
         }
         'ByResourceGroup' {
-            Write-Verbose "Retrieving all Subnet Injection enterprise policies in resource group: $ResourceGroupName"
-            $policies = Get-EnterprisePolicy -ResourceGroupName $ResourceGroupName -Kind ([PolicyType]::NetworkInjection)
+            Write-Verbose "Retrieving all Identity enterprise policies in resource group: $ResourceGroupName"
+            $policies = Get-EnterprisePolicy -ResourceGroupName $ResourceGroupName -Kind ([PolicyType]::Identity)
             if ($null -eq $policies -or @($policies).Count -eq 0) {
-                throw "No Subnet Injection Enterprise Policies found in resource group: $ResourceGroupName"
+                throw "No Identity Enterprise Policies found in resource group: $ResourceGroupName"
             }
             return $policies
         }
@@ -134,12 +129,12 @@ function Get-SubnetInjectionEnterprisePolicy{
 
             Write-Verbose "Environment retrieved successfully"
 
-            if ($null -eq $environment.properties.enterprisePolicies -or $null -eq $environment.properties.enterprisePolicies.VNets) {
-                throw "No Subnet Injection Enterprise Policy is linked to environment: $EnvironmentId"
+            if ($null -eq $environment.properties.enterprisePolicies -or $null -eq $environment.properties.enterprisePolicies.identity) {
+                throw "No Identity Enterprise Policy is linked to environment: $EnvironmentId"
             }
 
-            $policyArmId = $environment.properties.enterprisePolicies.VNets.id
-            Write-Verbose "Found linked Subnet Injection Enterprise Policy: $policyArmId"
+            $policyArmId = $environment.properties.enterprisePolicies.identity.id
+            Write-Verbose "Found linked Identity Enterprise Policy: $policyArmId"
 
             # Set subscription context from the policy ARM ID
             if ($policyArmId -match "/subscriptions/([^/]+)/") {
