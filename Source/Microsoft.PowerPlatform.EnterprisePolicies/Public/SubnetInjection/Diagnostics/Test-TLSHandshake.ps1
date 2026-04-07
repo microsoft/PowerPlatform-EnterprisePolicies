@@ -90,7 +90,21 @@ function Test-TLSHandshake{
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
     if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
         try{
-            return ConvertFrom-JsonToClass -Json $contentString -ClassType ([TLSConnectivityInformation])
+            $information = ConvertFrom-JsonToClass -Json $contentString -ClassType ([TLSConnectivityInformation])
+            if(-not($information.TCPConnectivity)){
+                Write-Warning "TCP connectivity could not be established to $Destination on port $Port. TLS handshake cannot be performed."
+                return $information
+            }
+
+            if(-not($information.SSLWithoutCRL.Success)){
+                Write-Warning "TLS handshake failed to $Destination on port $Port. This could indicate that the destination is not configured to accept TLS connections on that port, or there is a network device blocking or interfering with the TLS handshake."
+            }
+
+            if($information.SSLWithoutCRL.Success -and -not($information.SSLWithCRL.Success)){
+                Write-Warning "TLS handshake was successful when not checking the Certificate Revocation List (CRL), but failed when checking the CRL. This could indicate that the destination's certificate has been revoked or there is an issue with accessing the CRL distribution points."
+            }
+
+            return $information
         } catch {
             Write-Verbose "Failed to convert response to TLSConnectivityInformation: $($_.Exception.Message)"
             # If JSON conversion fails, return the raw string
