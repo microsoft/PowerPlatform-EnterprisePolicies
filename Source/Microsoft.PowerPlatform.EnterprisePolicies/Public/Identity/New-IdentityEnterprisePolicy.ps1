@@ -51,7 +51,7 @@ function New-IdentityEnterprisePolicy {
         [ValidateNotNullOrEmpty()]
         [string]$PolicyLocation,
 
-        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [Parameter(Mandatory=$false, HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use")]

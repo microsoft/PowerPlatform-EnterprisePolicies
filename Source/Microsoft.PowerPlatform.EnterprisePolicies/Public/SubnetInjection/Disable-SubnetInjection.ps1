@@ -46,7 +46,7 @@ function Disable-SubnetInjection {
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [Parameter(Mandatory=$false, HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
@@ -81,8 +81,7 @@ function Disable-SubnetInjection {
 
     # Check if environment has Subnet Injection enabled
     if ($null -eq $environment.properties.enterprisePolicies -or $null -eq $environment.properties.enterprisePolicies.VNets) {
-        Write-Host "Subnet Injection is not enabled for this environment." -ForegroundColor Yellow
-        return $false
+        throw "Subnet Injection is not enabled for this environment."
     }
 
     # Get the linked policy ARM ID from the environment

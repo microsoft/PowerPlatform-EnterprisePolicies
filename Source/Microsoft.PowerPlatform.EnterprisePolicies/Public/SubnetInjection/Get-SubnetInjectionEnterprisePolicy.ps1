@@ -69,7 +69,7 @@ function Get-SubnetInjectionEnterprisePolicy{
         [ValidateNotNullOrEmpty()]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [Parameter(Mandatory=$false, HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]

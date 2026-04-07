@@ -24,8 +24,6 @@ Note: A policy can't be deleted if it's associated with any Power Platform envir
 Unlink the policy from all environments before attempting to remove it.
 
 .OUTPUTS
-None
-
 Returns nothing on success. Throws an error if no policy is found or removal fails.
 When multiple policies are found, outputs the policy ARM IDs.
 
@@ -73,7 +71,7 @@ function Remove-IdentityEnterprisePolicy {
         [ValidateNotNullOrEmpty()]
         [string]$ResourceGroupName,
 
-        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [Parameter(Mandatory=$false, HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure environment to connect to")]
@@ -138,7 +136,7 @@ function Remove-IdentityEnterprisePolicy {
         foreach ($policy in $policies) {
             Write-Host "  $($policy.ResourceId)"
         }
-        return
+        return $policies | Select-Object -ExpandProperty ResourceId
     }
 
     # Single policy found - proceed with removal

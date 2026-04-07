@@ -46,7 +46,7 @@ function Disable-Identity {
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [Parameter(Mandatory=$false, HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
@@ -81,8 +81,7 @@ function Disable-Identity {
 
     # Check if environment has Identity enabled
     if ($null -eq $environment.properties.enterprisePolicies -or $null -eq $environment.properties.enterprisePolicies.identity) {
-        Write-Host "Identity is not enabled for this environment." -ForegroundColor Yellow
-        return $false
+        throw "Identity is not enabled for this environment."
     }
 
     # Get the linked policy ARM ID from the environment
