@@ -115,6 +115,73 @@ Describe 'New-SubnetInjectionEnterprisePolicy Tests' {
                 -SubnetName2 $script:testSubnetName2 `
                 -TenantId $script:testTenantId } | Should -Throw "*not a supported pair*"
         }
+
+        It 'Should throw when paired region receives only a single VNet without the acknowledgement switch' {
+            { New-SubnetInjectionEnterprisePolicy `
+                -SubscriptionId $script:testSubscriptionId `
+                -ResourceGroupName $script:testResourceGroup `
+                -PolicyName $script:testPolicyName `
+                -PolicyLocation $script:testPolicyLocation `
+                -VirtualNetworkId $script:testVnetId `
+                -SubnetName $script:testSubnetName `
+                -TenantId $script:testTenantId } | Should -Throw "*IAcceptLimitationsOfSingleRegionVnet*"
+        }
+
+        It 'Should create policy with single VNet when -IAcceptLimitationsOfSingleRegionVnet is specified' {
+            $result = New-SubnetInjectionEnterprisePolicy `
+                -SubscriptionId $script:testSubscriptionId `
+                -ResourceGroupName $script:testResourceGroup `
+                -PolicyName $script:testPolicyName `
+                -PolicyLocation $script:testPolicyLocation `
+                -VirtualNetworkId $script:testVnetId `
+                -SubnetName $script:testSubnetName `
+                -TenantId $script:testTenantId `
+                -IAcceptLimitationsOfSingleRegionVnet `
+                -WarningAction SilentlyContinue
+
+            $result | Should -Not -BeNullOrEmpty
+            Should -Invoke Assert-RegionPairing -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+    }
+
+    Context 'Single-region policy location' {
+        BeforeAll {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Initialize-SubscriptionForPowerPlatform { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Test-PowerPlatformRegionRequiresPair { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-VirtualNetwork { return $script:mockVnetResource } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock New-EnterprisePolicyBody { return $script:mockBody } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-EnterprisePolicy { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Should throw when two VNets are passed but the region only supports a single VNet' {
+            { New-SubnetInjectionEnterprisePolicy `
+                -SubscriptionId $script:testSubscriptionId `
+                -ResourceGroupName $script:testResourceGroup `
+                -PolicyName $script:testPolicyName `
+                -PolicyLocation $script:testPolicyLocation `
+                -VirtualNetworkId $script:testVnetId `
+                -SubnetName $script:testSubnetName `
+                -VirtualNetworkId2 $script:testVnetId2 `
+                -SubnetName2 $script:testSubnetName2 `
+                -TenantId $script:testTenantId } | Should -Throw "*only supports a single virtual network*"
+        }
+
+        It 'Should ignore -IAcceptLimitationsOfSingleRegionVnet when the region does not support pairing' {
+            $result = New-SubnetInjectionEnterprisePolicy `
+                -SubscriptionId $script:testSubscriptionId `
+                -ResourceGroupName $script:testResourceGroup `
+                -PolicyName $script:testPolicyName `
+                -PolicyLocation $script:testPolicyLocation `
+                -VirtualNetworkId $script:testVnetId `
+                -SubnetName $script:testSubnetName `
+                -TenantId $script:testTenantId `
+                -IAcceptLimitationsOfSingleRegionVnet `
+                -WarningAction SilentlyContinue
+
+            $result | Should -Not -BeNullOrEmpty
+        }
     }
 
     Context 'Error handling' {

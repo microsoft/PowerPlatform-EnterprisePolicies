@@ -15,8 +15,11 @@ Creates a new subnet injection enterprise policy for Power Platform.
 The New-SubnetInjectionEnterprisePolicy cmdlet creates a subnet injection enterprise policy that enables Power Platform environments to use delegated subnets from Azure Virtual Networks.
 The policy allows Power Platform services to inject into your virtual network for secure connectivity.
 
-Some Power Platform regions require two virtual networks in paired Azure regions.
+Some Power Platform regions support two virtual networks in paired Azure regions.
 Use the VirtualNetworkId2 and SubnetName2 parameters when you deploy to these regions.
+
+If you want to deploy to a paired-region geo with only a single virtual network, pass the
+IAcceptLimitationsOfSingleRegionVnet switch to acknowledge the reduced regional redundancy.
 
 .OUTPUTS
 Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
@@ -31,11 +34,16 @@ Creates a subnet injection enterprise policy in the United States region using a
 .EXAMPLE
 New-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup" -PolicyName "myPolicy" -PolicyLocation "unitedstates" -VirtualNetworkId "/subscriptions/.../virtualNetworks/vnet1" -SubnetName "subnet1" -VirtualNetworkId2 "/subscriptions/.../virtualNetworks/vnet2" -SubnetName2 "subnet2" -TenantId "87654321-4321-4321-4321-210987654321" -AzureEnvironment AzureCloud
 
-Creates a subnet injection enterprise policy using two virtual networks in paired regions, which is required for certain Power Platform regions.
+Creates a subnet injection enterprise policy using two virtual networks in paired regions, which is recommended for Power Platform regions that support paired VNets.
+
+.EXAMPLE
+New-SubnetInjectionEnterprisePolicy -SubscriptionId "12345678-1234-1234-1234-123456789012" -ResourceGroupName "myResourceGroup" -PolicyName "myPolicy" -PolicyLocation "unitedstates" -VirtualNetworkId "/subscriptions/.../virtualNetworks/vnet1" -SubnetName "subnet1" -TenantId "87654321-4321-4321-4321-210987654321" -IAcceptLimitationsOfSingleRegionVnet
+
+Creates a subnet injection enterprise policy with a single virtual network in a region that supports paired VNets. The IAcceptLimitationsOfSingleRegionVnet switch acknowledges that this configuration does not provide paired-region redundancy.
 #>
 
 function New-SubnetInjectionEnterprisePolicy{
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = "SingleVnet")]
     param(
         [Parameter(Mandatory, HelpMessage="The Azure subscription ID where the enterprise policy will be created")]
         [string]$SubscriptionId,
@@ -56,12 +64,15 @@ function New-SubnetInjectionEnterprisePolicy{
         [Parameter(Mandatory, HelpMessage="The name of the subnet within the virtual network")]
         [string]$SubnetName,
 
-        [Parameter(HelpMessage="The full Azure resource ID of a second virtual network (required for regions needing paired VNets)")]
+        [Parameter(Mandatory, ParameterSetName="PairedVnet", HelpMessage="The full Azure resource ID of the second virtual network in the paired Azure region")]
         [ValidateAzureResourceId("Microsoft.Network/virtualNetworks")]
         [string]$VirtualNetworkId2,
 
-        [Parameter(HelpMessage="The name of the subnet within the second virtual network")]
+        [Parameter(Mandatory, ParameterSetName="PairedVnet", HelpMessage="The name of the subnet within the second virtual network")]
         [string]$SubnetName2,
+
+        [Parameter(Mandatory, ParameterSetName="AcknowledgedSingleVnet", HelpMessage="Acknowledge creating a policy with a single virtual network in a Power Platform region that supports paired virtual networks. This configuration does not provide paired-region redundancy.")]
+        [switch]$IAcceptLimitationsOfSingleRegionVnet,
 
         [Parameter(Mandatory, HelpMessage="The Azure AD tenant ID")]
         [string]$TenantId,
@@ -74,7 +85,7 @@ function New-SubnetInjectionEnterprisePolicy{
     )
 
     $ErrorActionPreference = "Stop"
-    
+
     if (-not(Connect-Azure -AzureEnvironment $AzureEnvironment -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
@@ -89,15 +100,28 @@ function New-SubnetInjectionEnterprisePolicy{
     $vnets = @()
     $vnets += [VnetInformation]::new((Get-VirtualNetwork -VirtualNetworkId $VirtualNetworkId -EnterprisePolicyLocation $PolicyLocation), $SubnetName)
 
-    if(Test-PowerPlatformRegionRequiresPair -PowerPlatformRegion $PolicyLocation) {
-        if ([string]::IsNullOrWhiteSpace($VirtualNetworkId2) -or [string]::IsNullOrWhiteSpace($SubnetName2)) {
-	            throw "A second virtual network ID and subnet name must be provided when the selected Power Platform region requires 2 delegated subnets."
-	    }
-        $vnets += [VnetInformation]::new((Get-VirtualNetwork -VirtualNetworkId $VirtualNetworkId2 -EnterprisePolicyLocation $PolicyLocation), $SubnetName2)
-        Assert-RegionPairing -VnetInformation $vnets -PowerPlatformRegion $PolicyLocation
-    }
-    elseif (-not [string]::IsNullOrWhiteSpace($VirtualNetworkId2) -or -not [string]::IsNullOrWhiteSpace($SubnetName2)) {
-        Write-Warning "VirtualNetworkId2 and SubnetName2 parameters are ignored because the region '$PolicyLocation' does not require paired virtual networks."
+    $regionRequiresPair = Test-PowerPlatformRegionRequiresPair -PowerPlatformRegion $PolicyLocation
+
+    switch ($PSCmdlet.ParameterSetName) {
+        "PairedVnet" {
+            if (-not $regionRequiresPair) {
+                throw "Two virtual networks were provided but the region '$PolicyLocation' only supports a single virtual network. Remove VirtualNetworkId2 and SubnetName2, or choose a different PolicyLocation."
+            }
+            $vnets += [VnetInformation]::new((Get-VirtualNetwork -VirtualNetworkId $VirtualNetworkId2 -EnterprisePolicyLocation $PolicyLocation), $SubnetName2)
+            Assert-RegionPairing -VnetInformation $vnets -PowerPlatformRegion $PolicyLocation
+        }
+        "AcknowledgedSingleVnet" {
+            if (-not $regionRequiresPair) {
+                Write-Warning "The -IAcceptLimitationsOfSingleRegionVnet switch is ignored because the region '$PolicyLocation' does not support paired virtual networks."
+                break
+            }
+            Write-Warning "Creating a subnet injection enterprise policy with a single virtual network in region '$PolicyLocation', which supports paired virtual networks. This configuration does not provide paired-region redundancy."
+        }
+        "SingleVnet" {
+            if ($regionRequiresPair) {
+                throw "The enterprise policy region '$PolicyLocation' supports paired virtual networks in two Azure regions. Either provide VirtualNetworkId2 and SubnetName2 for a second virtual network, or pass -IAcceptLimitationsOfSingleRegionVnet to proceed with a single virtual network."
+            }
+        }
     }
 
     $body = New-EnterprisePolicyBody -PolicyType ([PolicyType]::NetworkInjection) -PolicyLocation $PolicyLocation -PolicyName $PolicyName -VnetInformation $vnets
