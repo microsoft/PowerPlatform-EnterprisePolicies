@@ -9,11 +9,11 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Disables subnet injection for a Power Platform environment by unlinking it from its enterprise policy.
+Disables identity for a Power Platform environment by unlinking it from its enterprise policy.
 
 .DESCRIPTION
-The Disable-SubnetInjection cmdlet unlinks the subnet injection enterprise policy from a Power Platform environment,
-disabling the environment's use of delegated virtual network subnets.
+The Disable-Identity cmdlet unlinks the identity enterprise policy from a Power Platform environment,
+disabling the environment's use of the system-assigned managed identity.
 
 The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
 Use -NoWait to return immediately after the operation is initiated.
@@ -21,25 +21,25 @@ Use -NoWait to return immediately after the operation is initiated.
 .OUTPUTS
 System.Boolean
 
-Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated. Throws if the environment doesn't have subnet injection enabled.
+Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated. Throws if the environment doesn't have identity enabled.
 
 .EXAMPLE
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000"
+Disable-Identity -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
-Disables subnet injection for the environment by unlinking it from its currently linked policy.
-
-.EXAMPLE
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
-
-Disables subnet injection for an environment in the US Government High cloud.
+Disables identity for the environment by unlinking it from its currently linked policy.
 
 .EXAMPLE
-Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -NoWait
+Disable-Identity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+
+Disables identity for an environment in the US Government High cloud.
+
+.EXAMPLE
+Disable-Identity -EnvironmentId "00000000-0000-0000-0000-000000000000" -NoWait
 
 Initiates the unlink operation without waiting for completion.
 #>
 
-function Disable-SubnetInjection {
+function Disable-Identity {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, HelpMessage="The Power Platform environment ID")]
@@ -79,13 +79,13 @@ function Disable-SubnetInjection {
 
     Write-Verbose "Environment retrieved successfully"
 
-    # Check if environment has Subnet Injection enabled
-    if ($null -eq $environment.properties.enterprisePolicies -or $null -eq $environment.properties.enterprisePolicies.VNets) {
-        throw "Subnet Injection is not enabled for this environment."
+    # Check if environment has Identity enabled
+    if ($null -eq $environment.properties.enterprisePolicies -or $null -eq $environment.properties.enterprisePolicies.identity) {
+        throw "Identity is not enabled for this environment."
     }
 
     # Get the linked policy ARM ID from the environment
-    $linkedPolicyArmId = $environment.properties.enterprisePolicies.VNets.id
+    $linkedPolicyArmId = $environment.properties.enterprisePolicies.identity.id
     Write-Verbose "Environment is linked to policy: $linkedPolicyArmId"
 
     # Extract subscription ID from policy ARM ID and set context
@@ -114,8 +114,8 @@ function Disable-SubnetInjection {
     Write-Verbose "Enterprise policy SystemId: $policySystemId"
 
     # Unlink the policy from the environment
-    Write-Verbose "Disabling Subnet Injection for environment..."
-    $unlinkResult = Set-EnvironmentEnterprisePolicy -EnvironmentId $EnvironmentId -PolicyType ([PolicyType]::NetworkInjection) -PolicySystemId $policySystemId -Operation ([LinkOperation]::unlink) -Endpoint $Endpoint -TenantId $TenantId
+    Write-Verbose "Disabling Identity for environment..."
+    $unlinkResult = Set-EnvironmentEnterprisePolicy -EnvironmentId $EnvironmentId -PolicyType ([PolicyType]::Identity) -PolicySystemId $policySystemId -Operation ([LinkOperation]::unlink) -Endpoint $Endpoint -TenantId $TenantId
 
     if ($unlinkResult.StatusCode -ne 202) {
         $contentString = Get-AsyncResult -Task $unlinkResult.Content.ReadAsStringAsync()
@@ -139,7 +139,12 @@ function Disable-SubnetInjection {
 
     $operationResult = Wait-EnterprisePolicyOperation -OperationUrl $operationUrl -Endpoint $Endpoint -TenantId $TenantId -TimeoutSeconds $TimeoutSeconds
 
-    Write-Host "Subnet Injection disabled successfully for environment $EnvironmentId" -ForegroundColor Green
+    if ($operationResult -eq "Succeeded") {
+        Write-Host "Identity disabled successfully for environment $EnvironmentId" -ForegroundColor Green
+    }
+    else {
+        Write-Warning "Identity disable operation did not complete successfully for environment $EnvironmentId. Final status: $operationResult"
+    }
 
     return $operationResult -eq "Succeeded"
 }

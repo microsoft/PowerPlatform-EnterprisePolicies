@@ -61,7 +61,7 @@ function Set-EnvironmentEnterprisePolicy {
     The PP endpoint to use.
 
     .PARAMETER TenantId
-    Optional Azure AD tenant ID.
+    Optional Entra tenant ID.
     #>
     param(
         [Parameter(Mandatory)]
@@ -111,7 +111,7 @@ function Wait-EnterprisePolicyOperation {
     The PP endpoint to use.
 
     .PARAMETER TenantId
-    Optional Azure AD tenant ID.
+    Optional Entra tenant ID.
 
     .PARAMETER TimeoutSeconds
     Maximum time to wait for the operation to complete. Default is 600 seconds (10 minutes).

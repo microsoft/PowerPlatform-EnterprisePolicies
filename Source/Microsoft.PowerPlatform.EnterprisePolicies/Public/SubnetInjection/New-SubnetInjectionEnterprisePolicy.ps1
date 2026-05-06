@@ -63,7 +63,7 @@ function New-SubnetInjectionEnterprisePolicy{
         [Parameter(HelpMessage="The name of the subnet within the second virtual network")]
         [string]$SubnetName2,
 
-        [Parameter(Mandatory, HelpMessage="The Azure AD tenant ID")]
+        [Parameter(Mandatory, HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use")]
