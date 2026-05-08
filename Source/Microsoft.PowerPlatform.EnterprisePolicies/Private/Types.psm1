@@ -6,11 +6,13 @@ OF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, O
 THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
+
 class CertificateInformation{
     [string] $Issuer
     [string] $Subject
     [string] $SignatureAlgorithm
     [bool] $IsExpired
+    [bool] $IsSelfSigned
 }
 
 class SSLInformation{
@@ -18,6 +20,24 @@ class SSLInformation{
     [bool] $Success
     [string] $SslErrors
     [string] $CipherSuite
+    [string] $ExceptionMessage
+}
+
+class ConnectivityInformation{
+    [bool] $TCPSuccess
+    [string] $TCPErrorMessage
+    [string] $Destination
+    [int] $Port
+    [string] $ContainerIpAddress
+}
+
+class HostResolutionInformation{
+    [bool] $Success
+    [string] $HostName
+    [string[]] $IPAddresses
+    [string[]] $DnsServers
+    [string] $ErrorMessage
+    [string] $ContainerIpAddress
 }
 
 class TLSConnectivityInformation{
@@ -25,6 +45,7 @@ class TLSConnectivityInformation{
     [CertificateInformation] $Certificate
     [SSLInformation] $SSLWithoutCRL
     [SSLInformation] $SSLWithCRL
+    [string] $ContainerIpAddress
 }
 
 class VnetInformation{
@@ -142,6 +163,8 @@ enum AzureEnvironment{
 
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
+    [ConnectivityInformation]
+    [HostResolutionInformation]
     [TLSConnectivityInformation]
     [SSLInformation]
     [CertificateInformation]

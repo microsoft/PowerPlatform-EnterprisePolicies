@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/17/2026
+ms.date: 05/07/2026
 PlatyPS schema version: 2024-05-01
 title: Test-NetworkConnectivity
 ---
@@ -223,9 +223,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.String
-
-A string representing the result of the connectivity test.
+### ConnectivityInformation
+A class representing the result of the TCP connectivity test. [ConnectivityInformation](ConnectivityInformation.md)
 
 {{ Fill in the Description }}
 

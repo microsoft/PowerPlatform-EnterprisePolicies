@@ -232,6 +232,14 @@ The `SSLInformation` class contains detailed information on the TLS handshake at
 
 The `CertificateInformation` class contains detailed information about the certificate presented during the TLS handshake.
 
+#### [ConnectivityInformation](ConnectivityInformation.md)
+
+The `ConnectivityInformation` class represents the result of a TCP connectivity test from your delegated subnet to a destination on a specified port.
+
+#### [HostResolutionInformation](HostResolutionInformation.md)
+
+The `HostResolutionInformation` class represents the result of a DNS resolution performed from your delegated subnet against a hostname.
+
 #### [NetworkUsageData](NetworkUsageData.md)
 
 The `NetworkUsageData` class represents historical network usage information about the network configuration of a Power Platform environment.
