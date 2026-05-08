@@ -58,6 +58,10 @@ Removes a subnet injection enterprise policy for Power Platform.
 
 Validates that the account has the correct permissions to run diagnostic commands.
 
+### [Test-AppInsightsConnection](Test-AppInsightsConnection.md)
+
+Tests connectivity to Application Insights by sending a test telemetry event from a specified environment.
+
 ### [Test-DnsResolution](Test-DnsResolution.md)
 
 Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
@@ -101,6 +105,10 @@ The ConnectivityInformation class represents the result of a TCP connectivity te
 #### [HostResolutionInformation](HostResolutionInformation.md)
 
 The HostResolutionInformation class represents the result of a DNS resolution performed from your delegated subnet against a hostname.
+
+#### [ApplicationInsightsInformation](ApplicationInsightsInformation.md)
+
+The ApplicationInsightsInformation class represents the result of an Application Insights connection test performed from your delegated subnet.
 
 #### [NetworkUsageData](NetworkUsageData.md)
 

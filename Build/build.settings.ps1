@@ -240,6 +240,10 @@ The `ConnectivityInformation` class represents the result of a TCP connectivity 
 
 The `HostResolutionInformation` class represents the result of a DNS resolution performed from your delegated subnet against a hostname.
 
+#### [ApplicationInsightsInformation](ApplicationInsightsInformation.md)
+
+The `ApplicationInsightsInformation` class represents the result of an Application Insights connection test performed from your delegated subnet.
+
 #### [NetworkUsageData](NetworkUsageData.md)
 
 The `NetworkUsageData` class represents historical network usage information about the network configuration of a Power Platform environment.

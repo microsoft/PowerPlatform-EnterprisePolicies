@@ -31,6 +31,13 @@ class ConnectivityInformation{
     [string] $ContainerIpAddress
 }
 
+class ApplicationInsightsInformation{
+    [bool] $ConnectionStringValid
+    [bool] $TestMessageSent
+    [string] $ErrorMessage
+    [string] $ContainerIpAddress
+}
+
 class HostResolutionInformation{
     [bool] $Success
     [string] $HostName
@@ -163,6 +170,7 @@ enum AzureEnvironment{
 
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
+    [ApplicationInsightsInformation]
     [ConnectivityInformation]
     [HostResolutionInformation]
     [TLSConnectivityInformation]
