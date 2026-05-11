@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/17/2026
+ms.date: 04/07/2026
 PlatyPS schema version: 2024-05-01
 title: Enable-SubnetInjection
 ---
@@ -21,8 +21,8 @@ Enables subnet injection for a Power Platform environment by linking it to an en
 
 ```
 Enable-SubnetInjection [-EnvironmentId] <string> [-PolicyArmId] <string> [[-TenantId] <string>]
- [[-Endpoint] <PPEndpoint>] [[-TimeoutSeconds] <int>] [-ForceAuth] [-Swap] [-NoWait]
- [<CommonParameters>]
+ [[-Endpoint] <PPEndpoint>] [[-AzureEnvironment] <AzureEnvironment>] [[-TimeoutSeconds] <int>]
+ [-ForceAuth] [-Swap] [-NoWait] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -69,6 +69,27 @@ Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -Po
 Initiates the link operation without waiting for completion.
 
 ## PARAMETERS
+
+### -AzureEnvironment
+
+The Azure environment to use
+
+```yaml
+Type: AzureEnvironment
+DefaultValue: AzureCloud
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 4
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
 
 ### -Endpoint
 
@@ -198,7 +219,7 @@ HelpMessage: ''
 
 ### -TenantId
 
-The Azure AD tenant ID
+The Entra tenant ID
 
 ```yaml
 Type: System.String
@@ -228,7 +249,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: 5
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false

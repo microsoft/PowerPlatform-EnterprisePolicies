@@ -18,9 +18,8 @@ The cmdlet is executed in the context of your delegated subnet in the region tha
 If the region isn't specified, it defaults to the region of the environment.
 
 .OUTPUTS
-System.String
-
-A string representing the result of the connectivity test.
+ConnectivityInformation
+A class representing the result of the TCP connectivity test. [ConnectivityInformation](ConnectivityInformation.md)
 
 .EXAMPLE
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
@@ -75,11 +74,10 @@ function Test-NetworkConnectivity{
     }
 
     $path = "/plex/testConnection"
-    $query = "api-version=2024-10-01"
-    if(-not([string]::IsNullOrWhiteSpace($Region)))
-    {
-        $query += "&region=$Region"
+    if ([string]::IsNullOrWhiteSpace($Region)) {
+        $Region = Get-EnvironmentRegionFromCache -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
     }
+    $query = "api-version=2026-02-01&region=$Region"
 
     $Body = @{
         Destination = $Destination
@@ -92,16 +90,18 @@ function Test-NetworkConnectivity{
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
     
-    if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
-        try{
-            return ConvertFrom-Json -InputObject $contentString
-        } catch {
-            Write-Verbose "Failed to convert response to JSON: $($_.Exception.Message)"
-            # If JSON conversion fails, return the raw string
-            return $contentString
+    try{
+        $information = ConvertFrom-JsonToClass -Json $contentString -ClassType ([ConnectivityInformation])
+        if($information.TCPSuccess){
+            Write-Host "TCP connectivity succeeded. Successfully connected to [$($information.Destination):$($information.Port)]"
         }
-    }
-    else {
+        else {
+            Write-Warning "TCP connectivity failed. A connection to [$($information.Destination):$($information.Port)] from [$($information.ContainerIpAddress)] because : $($information.TCPErrorMessage)"
+        }
+        return $information
+    } catch {
+        Write-Verbose "Failed to convert response to JSON: $($_.Exception.Message)"
+        # If JSON conversion fails, return the raw string
         return $contentString
     }
 }

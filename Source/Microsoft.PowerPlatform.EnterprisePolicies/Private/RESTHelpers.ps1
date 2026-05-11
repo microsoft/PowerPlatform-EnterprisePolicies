@@ -69,12 +69,11 @@ function New-EnvironmentRouteRequest
     $hostName = Get-EnvironmentRouteHostName -Endpoint $Endpoint -EnvironmentId $EnvironmentId
     $uriBuilder = [System.UriBuilder]::new()
     $uriBuilder.Scheme = "https"
-    $uriBuilder.Host = "primary-$hostName"
+    $uriBuilder.Host = $hostName
     $uriBuilder.Path = $Path
     $uriBuilder.Query = $Query
 
     $request = New-JsonRequestMessage -Uri $uriBuilder.Uri.ToString() -AccessToken $AccessToken -Content $Content -HttpMethod $HttpMethod
-    $request.Headers.Host = $hostName
     return $request
 }
 
@@ -183,7 +182,7 @@ function Get-EnvironmentRouteHostName {
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $EnvironmentId = $EnvironmentId.Replace("-", "")
-    if($Endpoint -eq [PPEndpoint]::tip1 -or $Endpoint -eq [PPEndpoint]::tip2 -or $Endpoint -eq [PPEndpoint]::usgovhigh) {
+    if(Test-IsSingleCharEndpoint -Endpoint $Endpoint) {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 1, 1)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 1)
     }
@@ -206,7 +205,7 @@ function Get-TenantRouteHostName {
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $TenantId = $TenantId.Replace("-", "")
-    if($Endpoint -eq [PPEndpoint]::tip1 -or $Endpoint -eq [PPEndpoint]::tip2 -or $Endpoint -eq [PPEndpoint]::usgovhigh) {
+    if(Test-IsSingleCharEndpoint -Endpoint $Endpoint) {
         $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
         $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
     }
@@ -344,21 +343,23 @@ function Test-Result {
         $Result
     )
 
+    $correlationId = $Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
     if (-not($Result.IsSuccessStatusCode))
     {
         $contentString = Get-AsyncResult -Task $Result.Content.ReadAsStringAsync()
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $correlationId"
             return $false
         }
         else
         {
-            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $correlationId"
             return $false
         }
     }
+    Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode). Correlation ID: $correlationId"
     return $true
 }
 
@@ -465,3 +466,16 @@ function ConvertTo-Hashtable($obj) {
     }
     return $hash
 }
+
+ function Test-IsSingleCharEndpoint {
+     param (
+         [Parameter(Mandatory)]
+         [PPEndpoint] $Endpoint
+     )
+     return $Endpoint -in @(
+         [PPEndpoint]::tip1,
+         [PPEndpoint]::tip2,
+         [PPEndpoint]::usgovhigh,
+         [PPEndpoint]::dod
+     )
+ }

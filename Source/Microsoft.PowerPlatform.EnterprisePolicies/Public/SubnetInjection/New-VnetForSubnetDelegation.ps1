@@ -74,8 +74,8 @@ function New-VnetForSubnetDelegation {
         [Parameter(Mandatory=$false, ParameterSetName='CreateVNet', HelpMessage="The Azure environment")]
         [AzureEnvironment]$AzureEnvironment = [AzureEnvironment]::AzureCloud,
 
-        [Parameter(Mandatory=$false, ParameterSetName='ExistingVNet', HelpMessage="The Azure AD tenant ID")]
-        [Parameter(Mandatory=$false, ParameterSetName='CreateVNet', HelpMessage="The Azure AD tenant ID")]
+        [Parameter(Mandatory=$false, ParameterSetName='ExistingVNet', HelpMessage="The Entra tenant ID")]
+        [Parameter(Mandatory=$false, ParameterSetName='CreateVNet', HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, ParameterSetName='ExistingVNet', HelpMessage="Force re-authentication to Azure")]

@@ -58,11 +58,14 @@ function Enable-SubnetInjection {
         [ValidateAzureResourceId("Microsoft.PowerPlatform/enterprisePolicies")]
         [string]$PolicyArmId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [Parameter(Mandatory=$false, HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use")]
+        [AzureEnvironment]$AzureEnvironment = [AzureEnvironment]::AzureCloud,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth,
@@ -80,7 +83,7 @@ function Enable-SubnetInjection {
     $ErrorActionPreference = "Stop"
 
     # Connect to Azure
-    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
+    if (-not(Connect-Azure -AzureEnvironment $AzureEnvironment -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
@@ -143,8 +146,9 @@ function Enable-SubnetInjection {
     $policyLocation = $policy.Location
 
     if ($environmentLocation -ine $policyLocation) {
-        if($environmentLocation -eq "unitedstates" -and $policyLocation -eq "unitedstateseuap") {
-            Write-Verbose "Environment is in 'unitedstates' and policy is in 'unitedstateseuap'. Treating locations as compatible."
+        if( ($environmentLocation -eq "unitedstates" -and $policyLocation -eq "unitedstateseuap") -or
+            ($environmentLocation -eq "unitedkingdom" -and $policyLocation -eq "uk") ) {
+            Write-Verbose "Environment is in '$environmentLocation' and policy is in '$policyLocation'. Treating locations as compatible."
         }
         else {
             throw "Environment location '$environmentLocation' does not match the enterprise policy location '$policyLocation'. The environment and policy must be in the same location."

@@ -53,7 +53,7 @@ Once your module has been imported into your PowerShell session, you can now run
 Get-EnvironmentUsage -EnvironmentId "your-environment-id"
 ```
 
-For a full list of available functions and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/EnterprisePolicies) folder.
+For a full list of available functions and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies) folder.
 
 ### Forcing re-authentication
 
@@ -71,9 +71,17 @@ This will prompt you to re-authenticate, allowing you to select or enter the cre
 
 1. Download the "Source code" `.zip` or `.tar.gz` file from the [Releases page](https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases).
 2. Extract the files from the `.zip` or `.tar.gz` file.
-3. Open PowerShell and `cd` to the extracted folder. For example: `cd ~/Downloads/PowerPlatform-EnterprisePolicies-0.5.10`.
-4. Install required PowerShell modules by running `.\Source\InstallPowerAppsCmdlets.ps1`.
-5. Run any of the scripts in this repository to manage your Power Platform enterprise policies. See below for more information on each of the scripts.
+3. **(Windows only)** **Unblock the downloaded files** to prevent security warnings that can interrupt script execution and cause parameters to be ignored:</br>
+   These unblocking steps apply only on Windows, where downloaded files may be marked as coming from the internet.</br>
+   **Recommended (Windows Explorer)**: Right-click the downloaded archive file _before_ extracting → Properties → check "Unblock" → Apply. Extracted files will inherit the unblocked state.</br>
+   **Alternative (PowerShell on Windows)**: If you already extracted, run the following in the extracted folder:
+   ```powershell
+   Get-ChildItem -Path . -Recurse -File | Unblock-File
+   ```
+   On macOS and Linux, file unblocking is not required, and you can skip this step.</br>
+4. Open PowerShell and `cd` to the extracted folder. For example: `cd ~/Downloads/PowerPlatform-EnterprisePolicies-0.5.10`.
+5. Install required PowerShell modules by running `.\Source\InstallPowerAppsCmdlets.ps1`.
+6. Run any of the scripts in this repository to manage your Power Platform enterprise policies. See below for more information on each of the scripts.
 
 ### How to run the Azure subscription setup script
 
@@ -104,6 +112,32 @@ Sample Input :</br>
 
 Sample Output : </br>
 ![alt text](./ReadMeImages/CreateCMKEP2.png)</br>
+
+#### Grant enterprise policy permissions to access key vault
+2. **Grant enterprise policy permissions to access key vault** : After creating the enterprise policy, you must grant its managed identity access to the key vault. The enterprise policy's managed identity Object ID can be found in the `CreateCMKEnterprisePolicy.ps1` output under `Identity.PrincipalId`, or via the Azure Portal (navigate to the enterprise policy resource → Identity tab).</br>
+
+**If your key vault uses Azure role-based access control (recommended)**:</br>
+Assign the **Key Vault Crypto Service Encryption User** role to the enterprise policy's managed identity:
+```powershell
+New-AzRoleAssignment `
+  -ObjectId "<enterprise-policy-PrincipalId>" `
+  -RoleDefinitionName "Key Vault Crypto Service Encryption User" `
+  -Scope "<key-vault-ARM-resource-id>"
+```
+Alternatively, in the Azure Portal: Key vaults → select your vault → Access control (IAM) → Add role assignment → search "Key Vault Crypto Service Encryption User" → select the enterprise policy → Review + assign.</br>
+
+**If your key vault uses vault access policy**:</br>
+Add an access policy with Get (Key Management Operations), WrapKey and UnwrapKey (Cryptographic Operations):
+```powershell
+Set-AzKeyVaultAccessPolicy `
+  -VaultName "<key-vault-name>" `
+  -ObjectId "<enterprise-policy-PrincipalId>" `
+  -PermissionsToKeys Get, WrapKey, UnwrapKey
+```
+
+> **Note**: RBAC role assignments can take up to 5 minutes to propagate. If you run `ValidateKeyVaultForCMK.ps1` immediately after granting the role, it may report a false failure. Wait a few minutes and retry.</br>
+
+For more details, see [Grant enterprise policy permissions to access key vault](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-enterprise-policy).</br>
 
 #### Get CMK Enterprise Policy By ResourceId
 2. **Get CMK Enterprise Policy By ResourceId** : The script gets a CMK enterprise policy by ARM resourceId</br>
@@ -152,6 +186,8 @@ Sample Output :</br>
 	- "Key Vault Crypto Service Encryption User" role assignment is present for the given enterprise policy if key vault permission model is Azure role based access control.</br>
     - Access policies of GET, UNWRAPKEY, WRAPKEY are added to the key vault for the given enterprise policy if key vault permission model is vault access policy.</br>
 	- Key configured for the given enterprise policy is present, enabled, activated and not expired.</br>
+
+> **Tip**: If validation fails on the key vault access policy checks, follow the [Grant enterprise policy permissions to access key vault](#grant-enterprise-policy-permissions-to-access-key-vault) step above to fix the permissions, then re-run this script.</br>
 	 
 
 Script name : [ValidateKeyVaultForCMK.ps1](./Source/Cmk/ValidateKeyVaultForCMK.ps1)</br>
@@ -170,7 +206,7 @@ Sample Output :</br>
 6. **Update CMK Enterprise Policy** : This script updates a CMK Enterprise Policy. The updates allowed are for keyVaultId, keyName, keyVersion.</br>
 If you are changing only some of the allowed parameter values, provide “N/A” when prompted for the parameters that you don’t want to change.</br>
  **If the enterprise policy is associated with one or more environments, the update operation will fail, and the script will return an error.**</br>
-Script name : [UpdateCMKEnterprisePolicy.ps1](./Cmk/UpdateCMKEnterprisePolicy.ps1)</br>
+Script name : [UpdateCMKEnterprisePolicy.ps1](./Source/Cmk/UpdateCMKEnterprisePolicy.ps1)</br>
 Input parameters :
     - subscriptionId : The Azure subscription Id of the CMK Enterprise Policy
     - resourceGroup : The Azure resource group of the CMK Enterprise Policy
@@ -201,10 +237,18 @@ Sample Output :</br>
 #### Set CMK for an environment
 8. **Set CMK for an environment** : This script applies a CMK enterprise policy to a given Power Platform environment.</br>
 The script adds the environment to the enterprise policy and optionally polls for the operation outcome.</br>
-Script name : [AddCustomerManagedKeyToEnvironment.ps1](./Cmk/AddCustomerManagedKeyToEnvironment.ps1)</br>
+Script name : [AddCustomerManagedKeyToEnvironment.ps1](./Source/Cmk/AddCustomerManagedKeyToEnvironment.ps1)</br>
 Input parameters :
     - environmentId : The Power Platform environment ID
     - policyArmId : The ARM ID of the CMK Enterprise Policy
+
+> **Prerequisites for Power Platform Admin Center users**:</br>
+> Before adding an environment to a CMK enterprise policy via the Power Platform Admin Center:</br>
+> 1. The environment must be enabled as a [Managed Environment](https://learn.microsoft.com/power-platform/admin/managed-environment-enable).</br>
+> 2. The Power Platform / Dynamics 365 admin must have the **Reader** role on the enterprise policy Azure resource:</br>
+>    `New-AzRoleAssignment -ObjectId <PP-admin-object-id> -RoleDefinitionName Reader -Scope <EP-ARM-resource-id>`</br>
+>    To find the admin's Object ID: Azure Portal → Microsoft Entra ID → Users → select user → copy Object ID.</br>
+> See [Microsoft Learn: CMK prerequisites](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-encryption-key-and-grant-access) for details.
 
 Sample Input :</br>
 ![alt text](./ReadMeImages/AddCMKToEnv1.png)</br>
@@ -237,6 +281,77 @@ Sample Input :</br>
 
 Sample Output :</br>
 ![alt text](./ReadMeImages/RemoveCMKFromEnv2.png)</br>
+
+### How to run Identity scripts
+
+The Identity scripts are present in folder [Identity](./Source/Identity/) at current location.
+
+> **Note**: These scripts are legacy scripts that may be replaced by the Microsoft.PowerPlatform.EnterprisePolicies module in the future. Use module cmdlets when available.
+
+#### Create Identity Enterprise Policy
+1. **Create Identity Enterprise Policy** : This script creates an Identity enterprise policy.</br>
+Script name : [CreateIdentityEnterprisePolicy.ps1](./Source/Identity/CreateIdentityEnterprisePolicy.ps1)</br>
+Input parameters :
+    - subscriptionId : The subscriptionId where Identity enterprise policy needs to be created
+    - resourceGroup : The resource group where Identity enterprise policy needs to be created
+    - enterprisePolicyName : The name of the Identity enterprise policy resource
+    - enterprisePolicyLocation : The Azure geo where Identity enterprise policy needs to be created
+
+#### Get Identity Enterprise Policy by ResourceId
+2. **Get Identity Enterprise Policy by ResourceId** : The script gets an Identity enterprise policy by ARM resourceId.</br>
+Script name : [GetIdentityEnterprisePolicyByResourceId.ps1](./Source/Identity/GetIdentityEnterprisePolicyByResourceId.ps1)</br>
+Input parameter :
+    - enterprisePolicyArmId : The ARM resource ID of the Identity Enterprise Policy
+
+#### Get Identity Enterprise Policies in Subscription
+3. **Get Identity Enterprise Policies in Subscription** : The script gets all Identity enterprise policies in an Azure subscription.</br>
+Script name : [GetIdentityEnterprisePoliciesInSubscription.ps1](./Source/Identity/GetIdentityEnterprisePoliciesInSubscription.ps1)</br>
+Input parameter :
+    - subscriptionId : The Azure subscription Id
+
+#### Get Identity Enterprise Policies in Resource Group
+4. **Get Identity Enterprise Policies in Resource Group** : The script gets all Identity enterprise policies in an Azure resource group.</br>
+Script name : [GetIdentityEnterprisePoliciesInResourceGroup.ps1](./Source/Identity/GetIdentityEnterprisePoliciesInResourceGroup.ps1)</br>
+Input parameters :
+    - subscriptionId : The Azure subscription Id
+    - resourceGroup : The Azure resource group
+
+#### Assign Identity to an environment
+5. **Assign Identity to an environment** : This script assigns an Identity enterprise policy to a Power Platform environment.</br>
+Script name : [NewIdentity.ps1](./Source/Identity/NewIdentity.ps1)</br>
+Input parameters :
+    - environmentId : The Power Platform environment ID
+    - policyArmId : The ARM ID of the Identity Enterprise Policy
+    - endpoint _(optional)_ : The BAP endpoint (default: prod). Valid values: tip1, tip2, prod, usgovhigh, dod, china
+
+#### Get Identity Enterprise Policy for an environment
+6. **Get Identity Enterprise Policy for an environment** : This script returns the Identity enterprise policy if applied to a given Power Platform environment.</br>
+Script name : [GetIdentityEnterprisePolicyForEnvironment.ps1](./Source/Identity/GetIdentityEnterprisePolicyForEnvironment.ps1)</br>
+Input parameters :
+    - environmentId : The Power Platform environment ID
+    - endpoint _(optional)_ : The BAP endpoint (default: prod)
+
+#### Swap Identity for an environment
+7. **Swap Identity for an environment** : This script swaps the Identity enterprise policy on a given Power Platform environment.</br>
+Script name : [SwapIdentity.ps1](./Source/Identity/SwapIdentity.ps1)</br>
+Input parameters :
+    - environmentId : The Power Platform environment ID
+    - newPolicyArmId : The ARM ID of the new Identity Enterprise Policy
+    - endpoint _(optional)_ : The BAP endpoint (default: prod)
+
+#### Remove Identity from an environment
+8. **Remove Identity from an environment** : This script removes the Identity enterprise policy from a Power Platform environment.</br>
+Script name : [RevertIdentity.ps1](./Source/Identity/RevertIdentity.ps1)</br>
+Input parameters :
+    - environmentId : The Power Platform environment ID
+    - policyArmId : The ARM ID of the Identity Enterprise Policy
+    - endpoint _(optional)_ : The BAP endpoint (default: prod)
+
+#### Delete Identity Enterprise Policy
+9. **Delete Identity Enterprise Policy** : This script deletes an Identity Enterprise Policy.</br>
+Script name : [RemoveIdentityEnterprisePolicy.ps1](./Source/Identity/RemoveIdentityEnterprisePolicy.ps1)</br>
+Input parameter :
+    - policyArmId : The ARM ID of the Identity enterprise policy to be deleted
 
 ## Development
 
@@ -274,3 +389,33 @@ Then, you can enable running the tests by going to the Run and Debug view in VSC
 * ErrorCode: `InUseSubnetCannotBeDeleted` or `SubnetMissingRequiredDelegation`
 * ErrorMessage contains: *.../serviceAssociationLinks/PowerPlatformServiceLink...*
 * **Solution**: delete the Subnet Injection enterprise policy firs with [Remove-SubnetInjectionEnterprisePolicy](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Remove-SubnetInjectionEnterprisePolicy.md)
+
+### CMK FAQ
+
+**Q: I created a CMK Enterprise Policy but get a 403 / Forbidden error when the service accesses my Key Vault. What do I do?**</br>
+A: After creating the CMK enterprise policy, Azure creates a managed identity for it. This identity needs **Key Vault Crypto Service Encryption User** role (or the legacy Wrap/Unwrap key permissions in vault access policy) on your Key Vault. See [Microsoft Learn: Grant access](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-encryption-key-and-grant-access). Find the managed identity Object ID in the Azure Portal under the enterprise policy resource → Identity blade, then grant access:
+```powershell
+# For RBAC (recommended):
+New-AzRoleAssignment -ObjectId <EP-managed-identity-object-id> `
+    -RoleDefinitionName "Key Vault Crypto Service Encryption User" `
+    -Scope "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.KeyVault/vaults/<vault>"
+```
+
+**Q: The scripts authenticate to the wrong Azure subscription. How do I fix this?**</br>
+A: The scripts call `Connect-AzAccount` which defaults to your last-used subscription. Use one of these approaches:
+```powershell
+# Option 1 — Set default subscription before running scripts:
+Update-AzConfig -DefaultSubscriptionForLogin <your-subscription-id>
+
+# Option 2 — Pre-authenticate with a specific subscription:
+Connect-AzAccount -Subscription <your-subscription-id>
+```
+
+**Q: I get a "file is not digitally signed" error running the scripts. What should I do?**</br>
+A: After downloading or cloning the repository, Windows may block the files. Right-click each .ps1 file → Properties → check "Unblock", or run:
+```powershell
+Get-ChildItem -Path . -Recurse -Filter *.ps1 | Unblock-File
+```
+
+**Q: The "Validate Key Vault" step fails even though my Key Vault exists. What went wrong?**</br>
+A: Common causes include: (1) the Key Vault key is not enabled or has expired, (2) soft-delete and purge-protection are not enabled on the Key Vault, (3) the managed identity does not have the correct permissions (see first FAQ above). Verify all requirements at [Microsoft Learn: Create encryption key and grant access](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-encryption-key-and-grant-access).

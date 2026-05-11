@@ -33,7 +33,7 @@ function GetAndValidateKeyVaultProperties($keyVaultName)
 function GetAndValidateEnterprisePolicyForKeyVault($enterprisePolicyArmId, $keyVault)
 {
     Write-Host "Getting CMK enterprise policy" -ForegroundColor Green `n
-    $cmkPolicy = GetEnterprisePolicy $enterprisePolicyArmId
+    $cmkPolicy = Get-AzResource -ResourceId $enterprisePolicyArmId -ExpandProperties
     $cmkPolicyString = $cmkPolicy | ConvertTo-Json
     if ($cmkPolicy.ResourceId -eq $null)
     {
@@ -182,7 +182,7 @@ function ValidateKeyVaultForCMK
     )
     
     Write-Host "Logging In..." -ForegroundColor Green
-    $logged = AzureLogin
+    $logged = AzureLogin -subscriptionId $subscriptionId
     if ($logged -eq $false)
     {
         Write-Host "Login failed" -ForegroundColor Red

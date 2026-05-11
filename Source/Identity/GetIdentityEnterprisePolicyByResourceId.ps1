@@ -20,7 +20,7 @@ function GetIdentityEnterprisePolicyByResourceId
 
     Write-Host "Logged In..." -ForegroundColor Green
 
-    $policy = GetEnterprisePolicy $enterprisePolicyArmId
+    $policy = Get-AzResource -ResourceId $enterprisePolicyArmId -ExpandProperties
     $policyString = $policy | ConvertTo-Json -Depth 7
     Write-Host $policyString
 

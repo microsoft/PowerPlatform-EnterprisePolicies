@@ -17,10 +17,8 @@ This cmdlet is executed in the context of your delegated subnet in the region th
 If the region is not specified, it defaults to the region of the environment.
 
 .OUTPUTS
-System.String
-
-A string representing the result of the DNS resolution. Whether it is successful or not, the result will return the DNS server that was used for the resolution.
-If the resolution succeeds, it will return the IP address of the hostname.
+HostResolutionInformation
+A class representing the result of the DNS resolution. [HostResolutionInformation](HostResolutionInformation.md)
 
 .EXAMPLE
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"
@@ -67,11 +65,10 @@ function Test-DnsResolution {
     }
     
     $path = "/plex/resolveDns"
-    $query = "api-version=2026-02-01"
-    if(-not([string]::IsNullOrWhiteSpace($Region)))
-    {
-        $query += "&region=$Region"
+    if ([string]::IsNullOrWhiteSpace($Region)) {
+        $Region = Get-EnvironmentRegionFromCache -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
     }
+    $query = "api-version=2026-02-01&region=$Region"
     
     $Body = @{
         HostName = $HostName
@@ -82,16 +79,18 @@ function Test-DnsResolution {
     }
     
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-    if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
-        try {
-            return ConvertFrom-Json -InputObject $contentString
-        } catch {
-            Write-Verbose "Failed to convert response to JSON: $($_.Exception.Message)"
-            # If JSON conversion fails, return the raw string
-            return $contentString
+    try {
+        $information = ConvertFrom-JsonToClass -Json $contentString -ClassType ([HostResolutionInformation])
+        if($information.Success){
+            Write-Host "DNS resolution succeeded. [$($information.HostName)] was resolved to [$($information.IPAddresses -join ",")] using DNS servers [$($information.DNSServers)]"
         }
-    }
-    else {
+        else {
+            Write-Warning "DNS resolution failed. [$($information.HostName)] could not be resolved because: $($information.ErrorMessage)"
+        }
+        return $information
+    } catch {
+        Write-Verbose "Failed to convert response to JSON: $($_.Exception.Message)"
+        # If JSON conversion fails, return the raw string
         return $contentString
     }
 }

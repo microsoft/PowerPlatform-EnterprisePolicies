@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/17/2026
+ms.date: 05/07/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -18,9 +18,17 @@ Microsoft PowerPlatform Enterprise policies module
 
 ## Microsoft.PowerPlatform.EnterprisePolicies
 
+### [Disable-Identity](Disable-Identity.md)
+
+Disables identity for a Power Platform environment by unlinking it from its enterprise policy.
+
 ### [Disable-SubnetInjection](Disable-SubnetInjection.md)
 
 Disables subnet injection for a Power Platform environment by unlinking it from its enterprise policy.
+
+### [Enable-Identity](Enable-Identity.md)
+
+Enables identity for a Power Platform environment by linking it to an enterprise policy.
 
 ### [Enable-SubnetInjection](Enable-SubnetInjection.md)
 
@@ -38,9 +46,17 @@ Retrieves the region where the specified environment is deployed.
 
 Retrieves the current usage of the specified environment.
 
+### [Get-IdentityEnterprisePolicy](Get-IdentityEnterprisePolicy.md)
+
+Retrieves identity enterprise policies for Power Platform.
+
 ### [Get-SubnetInjectionEnterprisePolicy](Get-SubnetInjectionEnterprisePolicy.md)
 
 Retrieves subnet injection enterprise policies for Power Platform.
+
+### [New-IdentityEnterprisePolicy](New-IdentityEnterprisePolicy.md)
+
+Creates a new identity enterprise policy for Power Platform.
 
 ### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
 
@@ -50,6 +66,10 @@ Creates a new subnet injection enterprise policy for Power Platform.
 
 Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprisePolicies delegation, or configures an existing VNet/subnet.
 
+### [Remove-IdentityEnterprisePolicy](Remove-IdentityEnterprisePolicy.md)
+
+Removes an identity enterprise policy for Power Platform.
+
 ### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
 
 Removes a subnet injection enterprise policy for Power Platform.
@@ -57,6 +77,10 @@ Removes a subnet injection enterprise policy for Power Platform.
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
 Validates that the account has the correct permissions to run diagnostic commands.
+
+### [Test-AppInsightsConnection](Test-AppInsightsConnection.md)
+
+Tests connectivity to Application Insights by sending a test telemetry event from a specified environment.
 
 ### [Test-DnsResolution](Test-DnsResolution.md)
 
@@ -93,6 +117,18 @@ The SSLInformation class contains detailed information on the TLS handshake atte
 #### [CertificateInformation](CertificateInformation.md)
 
 The CertificateInformation class contains detailed information about the certificate presented during the TLS handshake.
+
+#### [ConnectivityInformation](ConnectivityInformation.md)
+
+The ConnectivityInformation class represents the result of a TCP connectivity test from your delegated subnet to a destination on a specified port.
+
+#### [HostResolutionInformation](HostResolutionInformation.md)
+
+The HostResolutionInformation class represents the result of a DNS resolution performed from your delegated subnet against a hostname.
+
+#### [ApplicationInsightsInformation](ApplicationInsightsInformation.md)
+
+The ApplicationInsightsInformation class represents the result of an Application Insights connection test performed from your delegated subnet.
 
 #### [NetworkUsageData](NetworkUsageData.md)
 
