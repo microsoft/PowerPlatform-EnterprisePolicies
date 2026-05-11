@@ -21,7 +21,7 @@ Use -NoWait to return immediately after the operation is initiated.
 .OUTPUTS
 System.Boolean
 
-Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated. Throws if the environment doesn't have identity enabled.
+Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated. Logs a warning and returns $false if the environment doesn't have identity enabled.
 
 .EXAMPLE
 Disable-Identity -EnvironmentId "00000000-0000-0000-0000-000000000000"
