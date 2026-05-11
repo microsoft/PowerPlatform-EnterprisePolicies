@@ -21,7 +21,7 @@ Use -NoWait to return immediately after the operation is initiated.
 .OUTPUTS
 System.Boolean
 
-Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated. Throws if the environment doesn't have subnet injection enabled.
+Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated. Returns error message if the environment doesn't have subnet injection enabled.
 
 .EXAMPLE
 Disable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000"

@@ -14,13 +14,13 @@ Tests the Domain Name System (DNS) resolution for a given hostname in a specifie
 .DESCRIPTION
 The Test-DnsResolution cmdlet tests the DNS resolution for a given hostname in a specified environment.
 This cmdlet is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+If the region isn't specified, it defaults to the region of the environment.
 
 .OUTPUTS
 System.String
 
-A string representing the result of the DNS resolution. Whether it is successful or not, the result will return the DNS server that was used for the resolution.
-If the resolution succeeds, it will return the IP address of the hostname.
+A string representing the result of the DNS resolution. Whether it is successful or not, the result returns the DNS server that is used for the resolution.
+If the resolution succeeds, it returns the IP address of the hostname.
 
 .EXAMPLE
 Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"

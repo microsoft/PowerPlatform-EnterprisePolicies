@@ -20,10 +20,9 @@ The Remove-IdentityEnterprisePolicy cmdlet removes an identity enterprise policy
 When using BySubscription or ByResourceGroup, if multiple policies are found, the cmdlet outputs the policy ARM IDs.
 You can specify which policy to remove using -PolicyResourceId.
 
-> [!NOTE]
->
-> - A policy can't be deleted if it's associated with any Power Platform environments.
-> - Unlink the policy from all environments before attempting to remove it.
+Note:
+- A policy can't be deleted if it's associated with any Power Platform environments.
+- Unlink the policy from all environments before attempting to remove it.
 
 .OUTPUTS
 Returns nothing on success. Throws an error if no policy is found or removal fails.

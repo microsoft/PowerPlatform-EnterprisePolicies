@@ -24,7 +24,7 @@ Note: A policy can't be deleted if it's associated with any Power Platform envir
 Unlink the policy from all environments before attempting to remove it.
 
 .OUTPUTS
-Returns nothing on success. Throws an error if no policy is found or removal fails.
+Returns nothing on success. Returns an error if no policy is found or removal fails.
 When multiple policies are found, outputs the policy ARM IDs.
 
 .EXAMPLE

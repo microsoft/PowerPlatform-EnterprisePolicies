@@ -13,15 +13,15 @@ Retrieves subnet injection enterprise policies for Power Platform.
 
 .DESCRIPTION
 The Get-SubnetInjectionEnterprisePolicy cmdlet retrieves subnet injection enterprise policies using one of four methods:
-- By Resource ID: Retrieves a specific policy using its Azure Resource Manager (ARM) resource ID
-- By Environment: Retrieves the policy linked to a specific Power Platform environment
-- By Subscription: Retrieves all Subnet Injection policies in the current subscription
-- By Resource Group: Retrieves all Subnet Injection policies in a specific resource group
+- By Resource ID: Retrieves a specific policy using its Azure Resource Manager (ARM) resource ID.
+- By Environment: Retrieves the policy linked to a specific Power Platform environment.
+- By Subscription: Retrieves all subnet injection policies in the current subscription.
+- By Resource Group: Retrieves all subnet injection policies in a specific resource group.
 
 .OUTPUTS
 Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels.PSResource
 
-Returns PSResource object(s) representing the enterprise policy Azure resources. Throws an error if no policy is found.
+Returns PSResource object(s) representing the enterprise policy Azure resources. Returns an error if no policy is found.
 
 .EXAMPLE
 Get-SubnetInjectionEnterprisePolicy -PolicyResourceId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
