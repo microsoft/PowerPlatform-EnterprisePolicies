@@ -51,7 +51,7 @@ function Get-EnvironmentRegion{
     }
 
     $path = "/plex/environmentRegion"
-    $query = "api-version=2024-10-01"
+    $query = "api-version=2026-02-01"
     $client = Get-HttpClient
     $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
     $result = Get-AsyncResult -Task $client.SendAsync($request)
