@@ -290,7 +290,7 @@ function Send-Request {
 
     if (-not $result.IsSuccessStatusCode) {
         $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-        throw "$(Get-LogDate): Request failed: $($contentString.Tim(".")). Status code: $($result.StatusCode). Correlation ID: $correlationId."
+        throw "$(Get-LogDate): Request failed: $($contentString.Trim(".")). Status code: $($result.StatusCode). Correlation ID: $correlationId."
     }
 
     Write-Verbose "$(Get-LogDate): API Call returned $($result.StatusCode). Correlation ID: $correlationId"
