@@ -15,7 +15,7 @@ Retrieves identity enterprise policies for Power Platform.
 The Get-IdentityEnterprisePolicy cmdlet retrieves identity enterprise policies using one of four methods:
 - By Resource ID: Retrieves a specific policy using its Azure Resource Manager (ARM) resource ID.
 - By Environment: Retrieves the policy linked to a specific Power Platform environment.
-- By Subscription: Retrieves all Identity policies in the current subscription.
+- By Subscription: Retrieves all identity policies in the current subscription.
 - By Resource Group: Retrieves all identity policies in a specific resource group.
 
 .OUTPUTS
