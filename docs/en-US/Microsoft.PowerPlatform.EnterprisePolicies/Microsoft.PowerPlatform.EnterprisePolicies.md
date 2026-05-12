@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 04/07/2026
+ms.date: 05/07/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -78,6 +78,10 @@ Removes a subnet injection enterprise policy for Power Platform.
 
 Validates that the account has the correct permissions to run diagnostic commands.
 
+### [Test-AppInsightsConnection](Test-AppInsightsConnection.md)
+
+Tests connectivity to Application Insights by sending a test telemetry event from a specified environment.
+
 ### [Test-DnsResolution](Test-DnsResolution.md)
 
 Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
@@ -113,6 +117,18 @@ The SSLInformation class contains detailed information on the TLS handshake atte
 #### [CertificateInformation](CertificateInformation.md)
 
 The CertificateInformation class contains detailed information about the certificate presented during the TLS handshake.
+
+#### [ConnectivityInformation](ConnectivityInformation.md)
+
+The ConnectivityInformation class represents the result of a TCP connectivity test from your delegated subnet to a destination on a specified port.
+
+#### [HostResolutionInformation](HostResolutionInformation.md)
+
+The HostResolutionInformation class represents the result of a DNS resolution performed from your delegated subnet against a hostname.
+
+#### [ApplicationInsightsInformation](ApplicationInsightsInformation.md)
+
+The ApplicationInsightsInformation class represents the result of an Application Insights connection test performed from your delegated subnet.
 
 #### [NetworkUsageData](NetworkUsageData.md)
 
