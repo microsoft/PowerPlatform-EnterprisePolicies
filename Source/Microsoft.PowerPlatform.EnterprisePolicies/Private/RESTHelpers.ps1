@@ -268,6 +268,38 @@ function Get-APIResourceUrl {
     }
 }
 
+function Send-Request {
+    <#
+    .SYNOPSIS
+    Sends an HTTP request once and throws on a non-success status code.
+
+    .DESCRIPTION
+    Wraps the common request boilerplate: get the singleton HttpClient, send the request,
+    extract the x-ms-correlation-id header, and verbose-log the result. On a non-success
+    status code, throws an exception that includes the status code, correlation ID, and
+    response body. Does not retry — use Send-RequestWithRetries for that.
+    #>
+    param (
+        [Parameter(Mandatory)]
+        $Request,
+
+        [Parameter(Mandatory)]
+        [string] $OperationName
+    )
+
+    $client = Get-HttpClient
+    $result = Get-AsyncResult -Task $client.SendAsync($Request)
+    $correlationId = $result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
+
+    if (-not $result.IsSuccessStatusCode) {
+        $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+        throw "Failed to $OperationName. Status code: $($result.StatusCode). Correlation ID: $correlationId. $contentString"
+    }
+
+    Write-Verbose "$(Get-LogDate): API Call returned $($result.StatusCode). Correlation ID: $correlationId"
+    return $result
+}
+
 function Send-RequestWithRetries {
     param (
         [Parameter(Mandatory)]

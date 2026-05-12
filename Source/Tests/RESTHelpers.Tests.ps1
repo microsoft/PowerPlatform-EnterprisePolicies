@@ -78,6 +78,31 @@ Describe 'RESTHelpers Tests' {
             }
         }
 
+        Context 'Testing Send-Request' {
+            It 'Returns the response on a success status' {
+                $mockClient = [HttpClientMock]::new()
+                $mockResult = [HttpClientResultMock]::new("ok")
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result = Send-Request -Request "req" -OperationName "do the thing"
+
+                $result | Should -Be $mockResult
+            }
+
+            It 'Throws with status code and correlation ID on a failure status' {
+                $mockClient = [HttpClientMock]::new()
+                $mockResult = [HttpClientResultMock]::new("server says no", "text/plain", @{"x-ms-correlation-id" = "abc-123"})
+                $mockResult.StatusCode = 500
+                $mockResult.IsSuccessStatusCode = $false
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return "server says no" } -ParameterFilter { $task -ne "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                { Send-Request -Request "req" -OperationName "do the thing" } | Should -Throw "*Failed to do the thing*500*abc-123*server says no*"
+            }
+        }
+
         Context 'Testing Send-RequestWithRetries' {
             It 'Returns the result of a successful request' {
                 $mockClient = [HttpClientMock]::new()

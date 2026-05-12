@@ -50,6 +50,7 @@ Describe 'Get-SubnetHistoricalUsage Tests' {
         $script:expectedResult = $resultClass
         $script:resultJsonString = ($resultClass | ConvertTo-Json)
         $script:mockHttpResult = [HttpClientResultMock]::new($script:resultJsonString)
+        $script:httpClientMock = [HttpClientMock]::new()
 
         Mock Get-PPAPIAccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Write-Host {}
@@ -57,12 +58,9 @@ Describe 'Get-SubnetHistoricalUsage Tests' {
         Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Set-AzContext {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-        # Invoke the RequestFactory so we can assert on the query string passed to New-HomeTenantRouteRequest.
-        Mock Send-RequestWithRetries {
-            $null = & $RequestFactory
-            return $script:mockHttpResult
-        } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-        Mock Get-AsyncResult { return $script:resultJsonString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Get-HttpClient { return $script:httpClientMock } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Get-AsyncResult -ParameterFilter { $task -eq "SendAsyncResult" } { return $script:mockHttpResult } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Get-AsyncResult -ParameterFilter { $task -ne "SendAsyncResult" } { return $script:resultJsonString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
     Context 'BySystemId' {
@@ -135,7 +133,7 @@ Describe 'Get-SubnetHistoricalUsage Tests' {
 
         It 'Emits nothing when peak usage is below 75%' {
             $json = @{ SubnetSize = 32; NetworkUsageDataByWorkload = @(@{ TotalIpUsage = 23 }) } | ConvertTo-Json -Depth 10  # 71.9%
-            Mock Get-AsyncResult { return $json } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult -ParameterFilter { $task -ne "SendAsyncResult" } { return $json } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             $null = Get-SubnetHistoricalUsage -SystemId $script:testSystemIdGuid -TenantId $script:testTenantId -Region $script:testRegion
 
@@ -145,7 +143,7 @@ Describe 'Get-SubnetHistoricalUsage Tests' {
 
         It 'Emits Write-Warning at the 75% threshold' {
             $json = @{ SubnetSize = 32; NetworkUsageDataByWorkload = @(@{ TotalIpUsage = 24 }) } | ConvertTo-Json -Depth 10  # 75%
-            Mock Get-AsyncResult { return $json } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult -ParameterFilter { $task -ne "SendAsyncResult" } { return $json } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             $null = Get-SubnetHistoricalUsage -SystemId $script:testSystemIdGuid -TenantId $script:testTenantId -Region $script:testRegion
 
@@ -155,7 +153,7 @@ Describe 'Get-SubnetHistoricalUsage Tests' {
 
         It 'Emits Write-Error close-to-full at 90%' {
             $json = @{ SubnetSize = 32; NetworkUsageDataByWorkload = @(@{ TotalIpUsage = 29 }) } | ConvertTo-Json -Depth 10  # 90.6%
-            Mock Get-AsyncResult { return $json } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult -ParameterFilter { $task -ne "SendAsyncResult" } { return $json } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             $null = Get-SubnetHistoricalUsage -SystemId $script:testSystemIdGuid -TenantId $script:testTenantId -Region $script:testRegion
 
@@ -165,7 +163,7 @@ Describe 'Get-SubnetHistoricalUsage Tests' {
 
         It 'Emits Write-Error subnet-is-full at 100%' {
             $json = @{ SubnetSize = 32; NetworkUsageDataByWorkload = @(@{ TotalIpUsage = 32 }) } | ConvertTo-Json -Depth 10  # 100%
-            Mock Get-AsyncResult { return $json } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult -ParameterFilter { $task -ne "SendAsyncResult" } { return $json } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             $null = Get-SubnetHistoricalUsage -SystemId $script:testSystemIdGuid -TenantId $script:testTenantId -Region $script:testRegion
 
