@@ -12,7 +12,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 Retrieves the historical network usage of the specified environment.
 
 .DESCRIPTION
-The Get-EnvironmentHistoricalUsage cmdlet retrieves the historical usage of the specified environment. This is only the historical usage that the specified environment has. It doesn't include usage from other environments and it doesn't include any IP addresses that might be reserved by Azure.
+The Get-EnvironmentHistoricalUsage cmdlet retrieves the historical usage of the specified environment. This cmdlet only includes the historical usage for the specified environment. It doesn't include usage from other environments and it doesn't include any IP addresses that might be reserved by Azure.
 
 .OUTPUTS
 EnvironmentNetworkUsageDocument

@@ -14,7 +14,7 @@ Tests the Domain Name System (DNS) resolution for a given hostname in a specifie
 .DESCRIPTION
 The Test-DnsResolution cmdlet tests the DNS resolution for a given hostname in a specified environment.
 This cmdlet is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+If the region isn't specified, it defaults to the region of the environment.
 
 .OUTPUTS
 HostResolutionInformation

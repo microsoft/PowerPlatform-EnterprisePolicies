@@ -9,10 +9,10 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Tests the connectivity to a given service in a specified environment.
+Tests the connectivity to a given service in the specified environment.
 
 .DESCRIPTION
-The Test-NetworkConnectivity cmdlet tests the connectivity to a given service in a specified environment.
+The Test-NetworkConnectivity cmdlet tests the connectivity to a given service in the specified environment.
 The connectivity test attempts to establish a TCP connection to the specified destination on the specified port.
 The cmdlet is executed in the context of your delegated subnet in the region that you specify.
 If the region isn't specified, it defaults to the region of the environment.
