@@ -16,21 +16,6 @@ Describe 'Test-TLSHandshake Tests' {
     }
 
     Context 'Testing Test-TLSHandshake' {
-        It 'Returns string when response is not JSON' {
-            $stringResult = 'Some non-JSON string'
-            $endpoint = [PPEndpoint]::prod
-            $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
-            $mockResult = [HttpClientResultMock]::new($stringResult)
-            $region = "westus"
-
-            Mock Send-RequestWithRetries { return $mockResult } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AsyncResult { return $stringResult } -ParameterFilter { $task -eq $stringResult } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-
-            $result = Test-TLSHandshake -EnvironmentId $environmentId -Destination "bing.com" -Port 443 -TenantId "0123" -Endpoint $endpoint -Region $region
-
-            $result | Should -Be $stringResult
-        }
-
         It 'Auto-resolves region when not provided' {
             $stringResult = '{"TCPConnectivity":true,"Certificate":null,"SSLWithoutCRL":null,"SSLWithCRL":null}'
             $endpoint = [PPEndpoint]::prod

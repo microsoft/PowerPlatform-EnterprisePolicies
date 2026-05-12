@@ -6,22 +6,23 @@ Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
 ms.date: 05/07/2026
 PlatyPS schema version: 2024-05-01
-title: Test-DnsResolution
+title: Test-AppInsightsConnection
 ---
 
-# Test-DnsResolution
+# Test-AppInsightsConnection
 
 ## SYNOPSIS
 
-Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
+Tests connectivity to Application Insights by sending a test telemetry event from a specified environment.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Test-DnsResolution [-EnvironmentId] <string> [-HostName] <string> [[-TenantId] <string>]
- [[-Endpoint] <PPEndpoint>] [[-Region] <string>] [-ForceAuth] [<CommonParameters>]
+Test-AppInsightsConnection [-EnvironmentId] <string> [-ConnectionString] <string>
+ [-Message] <string> [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>] [[-Region] <string>]
+ [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -31,31 +32,52 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-The Test-DnsResolution cmdlet tests the DNS resolution for a given hostname in a specified environment.
-This cmdlet is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+The Test-AppInsightsConnection cmdlet validates an Application Insights connection string and sends a test telemetry event to the configured Application Insights resource.
+The test is executed in the context of your delegated subnet in the region that you specify.
+If the region isn't specified, it defaults to the region of the environment.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com"
+Test-AppInsightsConnection -EnvironmentId "00000000-0000-0000-0000-000000000000" -ConnectionString "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://westus-0.in.applicationinsights.azure.com/" -Message "Hello from Power Platform"
 
-Tests DNS resolution for microsoft.com from the environment's delegated subnet using default settings.
+Sends a test event with the supplied message to Application Insights from the environment's delegated subnet.
 
 ### EXAMPLE 2
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -Endpoint usgovhigh
+Test-AppInsightsConnection -EnvironmentId "00000000-0000-0000-0000-000000000000" -ConnectionString "InstrumentationKey=...;IngestionEndpoint=https://usgovvirginia-0.in.applicationinsights.azure.us/" -Message "Test" -Endpoint usgovhigh
 
-Tests DNS resolution for microsoft.com for an environment in the US Government High cloud.
+Sends a test event from an environment in the US Government High cloud.
 
 ### EXAMPLE 3
 
-Test-DnsResolution -EnvironmentId "00000000-0000-0000-0000-000000000000" -HostName "microsoft.com" -Region "westus"
+Test-AppInsightsConnection -EnvironmentId "00000000-0000-0000-0000-000000000000" -ConnectionString "..." -Message "Test" -Region "westus"
 
-Tests DNS resolution for microsoft.com in the westus region instead of the environment's default region.
+Sends a test event from the westus region instead of the environment's default region.
 
 ## PARAMETERS
+
+### -ConnectionString
+
+The Application Insights connection string to validate and use for the test event.
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: 1
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
 
 ### -Endpoint
 
@@ -68,7 +90,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: 4
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -80,7 +102,7 @@ HelpMessage: ''
 
 ### -EnvironmentId
 
-The Id of the environment to get usage for.
+The Id of the environment to test the Application Insights connection from.
 
 ```yaml
 Type: System.String
@@ -120,9 +142,9 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -HostName
+### -Message
 
-The hostname that DNS should attempt to resolve. IP addresses are not supported.
+The message body to send as the test telemetry event.
 
 ```yaml
 Type: System.String
@@ -131,7 +153,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: 2
   IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -143,7 +165,7 @@ HelpMessage: ''
 
 ### -Region
 
-The Azure region in which to test the resolution. Defaults to the region the environment is in.
+The Azure region in which to test the connection. Defaults to the region the environment is in.
 
 ```yaml
 Type: System.String
@@ -152,7 +174,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: 5
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -173,7 +195,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: 3
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -194,8 +216,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### HostResolutionInformation
-A class representing the result of the DNS resolution. [HostResolutionInformation](HostResolutionInformation.md)
+### ApplicationInsightsInformation
+A class representing the result of the Application Insights connection test. [ApplicationInsightsInformation](ApplicationInsightsInformation.md)
 
 {{ Fill in the Description }}
 
