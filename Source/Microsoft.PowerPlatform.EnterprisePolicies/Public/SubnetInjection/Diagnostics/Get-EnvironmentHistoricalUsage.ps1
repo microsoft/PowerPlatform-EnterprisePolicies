@@ -63,7 +63,7 @@ function Get-EnvironmentHistoricalUsage{
     }
 
     $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
-    $result = Send-Request -Request $request -OperationName "retrieve the environment network usage data"
+    $result = Send-Request -Request $request
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if(-not $contentString) {

@@ -281,10 +281,7 @@ function Send-Request {
     #>
     param (
         [Parameter(Mandatory)]
-        $Request,
-
-        [Parameter(Mandatory)]
-        [string] $OperationName
+        $Request
     )
 
     $client = Get-HttpClient
@@ -293,7 +290,7 @@ function Send-Request {
 
     if (-not $result.IsSuccessStatusCode) {
         $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-        throw "Failed to $OperationName. Status code: $($result.StatusCode). Correlation ID: $correlationId. $contentString"
+        throw "Request failed. Status code: $($result.StatusCode). Correlation ID: $correlationId. $contentString"
     }
 
     Write-Verbose "$(Get-LogDate): API Call returned $($result.StatusCode). Correlation ID: $correlationId"

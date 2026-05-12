@@ -119,7 +119,7 @@ function Get-SubnetHistoricalUsage {
     $query = "api-version=2024-10-01&enterprisePolicyId=$resolvedSystemId&region=$Region"
 
     $request = New-HomeTenantRouteRequest -TenantId $TenantId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
-    $result = Send-Request -Request $request -OperationName "retrieve the subnet usage data"
+    $result = Send-Request -Request $request
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if(-not $contentString) {
