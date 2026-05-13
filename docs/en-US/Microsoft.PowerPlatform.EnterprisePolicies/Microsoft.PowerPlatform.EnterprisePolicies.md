@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 05/07/2026
+ms.date: 05/12/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -82,13 +82,17 @@ Validates that the account has the correct permissions to run diagnostic command
 
 Tests connectivity to Application Insights by sending a test telemetry event from a specified environment.
 
+### [Test-AppInsightsConnectivity](Test-AppInsightsConnectivity.md)
+
+Tests network connectivity to the Application Insights ingestion endpoint described by a connection string.
+
 ### [Test-DnsResolution](Test-DnsResolution.md)
 
 Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
 
 ### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
 
-Tests the connectivity to a given service in a specified environment.
+Tests the connectivity to a given service in the specified environment.
 
 ### [Test-TLSHandshake](Test-TLSHandshake.md)
 
