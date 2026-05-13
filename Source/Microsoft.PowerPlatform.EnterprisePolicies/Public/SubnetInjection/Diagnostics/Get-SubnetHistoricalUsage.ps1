@@ -9,10 +9,10 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Retrieves the historical network usage of the subnet backing an enterprise policy, identified by ARM resource ID, linked environment, or system ID.
+Retrieves the historical network usage of the subnet backing an enterprise policy, identified by Azure Resource Manager (ARM) resource ID, linked environment, or system ID.
 
 .DESCRIPTION
-Retrieves the historical usage of the subnet backing a Subnet Injection enterprise policy. This includes usage from all environments linked to the policy and the IPs reserved by Azure.
+Retrieves the historical usage of the subnet backing a subnet injection enterprise policy. This includes usage from all environments linked to the policy and the IP addresses reserved by Azure.
 
 The policy can be identified in three ways:
 - By its Azure ARM resource ID (-EnterprisePolicyId). The policy is looked up via ARM and its systemId is resolved automatically.
@@ -50,7 +50,7 @@ function Get-SubnetHistoricalUsage {
         [ValidateAzureResourceId("Microsoft.PowerPlatform/enterprisePolicies")]
         [string]$EnterprisePolicyId,
 
-        [Parameter(Mandatory, ParameterSetName = 'ByEnvironmentId', HelpMessage="The Power Platform environment ID whose linked policy should be used.")]
+        [Parameter(Mandatory, ParameterSetName = 'ByEnvironmentId', HelpMessage="The Power Platform environment ID whose linked policy to use.")]
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
 
