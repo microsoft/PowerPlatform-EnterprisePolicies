@@ -52,17 +52,8 @@ function Get-EnvironmentRegion{
 
     $path = "/plex/environmentRegion"
     $query = "api-version=2026-02-01"
-    $client = Get-HttpClient
     $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
-    $result = Get-AsyncResult -Task $client.SendAsync($request)
-    $correlationId = $result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
-
-    if (-not $result.IsSuccessStatusCode) {
-        $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-        throw "Failed to retrieve the environment region. Status code: $($result.StatusCode). Correlation ID: $correlationId. $contentString"
-    }
-
-    Write-Verbose "$(Get-LogDate): API Call returned $($result.StatusCode). Correlation ID: $correlationId"
+    $result = Send-Request -Request $request
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if ($contentString) {
@@ -70,6 +61,6 @@ function Get-EnvironmentRegion{
         Write-Verbose "Your environment is located in region: [$region]"
         return $region
     } else {
-        throw "Failed to retrieve the environment region. Correlation ID: $correlationId"
+        throw "Failed to retrieve the environment region from response."
     }
 }

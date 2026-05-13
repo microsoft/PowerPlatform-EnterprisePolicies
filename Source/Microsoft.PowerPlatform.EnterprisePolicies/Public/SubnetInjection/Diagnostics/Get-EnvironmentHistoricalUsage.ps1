@@ -61,22 +61,20 @@ function Get-EnvironmentHistoricalUsage{
     if($ShowDetails){
         $query += "&showDetails=true"
     }
-    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
-        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
-    }
 
+    $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+    $result = Send-Request -Request $request
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
-    if($contentString) {
-        try {
-            return ConvertFrom-JsonToClass -Json $contentString -ClassType ([EnvironmentNetworkUsageDocument])
-        }
-        catch {
-            Write-Verbose "Failed to convert response to EnvironmentNetworkUsageDocument: $($_.Exception.Message)"
-            # If JSON conversion fails, return the raw string
-            return $contentString
-        }
-    } else {
+    if(-not $contentString) {
         throw "Failed to retrieve the environment network usage data from response."
+    }
+
+    try {
+        return ConvertFrom-JsonToClass -Json $contentString -ClassType ([EnvironmentNetworkUsageDocument])
+    }
+    catch {
+        Write-Verbose "Failed to convert response to EnvironmentNetworkUsageDocument: $($_.Exception.Message)"
+        return $contentString
     }
 }

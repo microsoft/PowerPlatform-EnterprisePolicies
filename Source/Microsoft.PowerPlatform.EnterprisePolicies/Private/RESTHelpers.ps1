@@ -268,6 +268,35 @@ function Get-APIResourceUrl {
     }
 }
 
+function Send-Request {
+    <#
+    .SYNOPSIS
+    Sends an HTTP request once and throws on a non-success status code.
+
+    .DESCRIPTION
+    Wraps the common request boilerplate: get the singleton HttpClient, send the request,
+    extract the x-ms-correlation-id header, and verbose-log the result. On a non-success
+    status code, throws an exception that includes the status code, correlation ID, and
+    response body. Does not retry — use Send-RequestWithRetries for that.
+    #>
+    param (
+        [Parameter(Mandatory)]
+        $Request
+    )
+
+    $client = Get-HttpClient
+    $result = Get-AsyncResult -Task $client.SendAsync($Request)
+    $correlationId = $result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
+
+    if (-not $result.IsSuccessStatusCode) {
+        $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+        throw "$(Get-LogDate): Request failed: $($contentString.Trim(".")). Status code: $($result.StatusCode). Correlation ID: $correlationId."
+    }
+
+    Write-Verbose "$(Get-LogDate): API Call returned $($result.StatusCode). Correlation ID: $correlationId"
+    return $result
+}
+
 function Send-RequestWithRetries {
     param (
         [Parameter(Mandatory)]
@@ -313,7 +342,7 @@ function Send-RequestWithRetries {
                     Write-Host "The service is working on the request and has requested a retry. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
                 }
             }
-            elseif($result.StatusCode -eq 502 -and $retryAfterFound) {
+            elseif(($result.StatusCode -eq 502 -or $result.StatusCode -eq 503) -and $retryAfterFound) {
                 # If we previously saw a Retry-After header, extend the wait time as the gateway might not have the route configured yet.
                 $sleepSeconds = 60
                 Write-Host "The gateway has not updated the route information yet. Waiting for $sleepSeconds seconds before retrying..." -ForegroundColor Yellow
