@@ -96,7 +96,7 @@ function Test-AppInsightsConnectivity{
         }
         elseif ($PSBoundParameters.ContainsKey('Message')) {
             if ($information.TestMessageSent) {
-                Write-Host "Application Insights connectivity succeeded and test event sent from [$($information.ContainerIpAddress)]."
+                Write-Host "Application Insights connectivity succeeded and test event sent from [$($information.ContainerIpAddress)]. Verify that the message arrived in your Application Insights resource - ingestion can take several minutes."
             }
             else {
                 Write-Warning "Application Insights connectivity test from [$($information.ContainerIpAddress)] failed to send the test event: $($information.ErrorMessage)"
