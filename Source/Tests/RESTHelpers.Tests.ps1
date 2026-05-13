@@ -99,7 +99,7 @@ Describe 'RESTHelpers Tests' {
                 Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
                 Mock Get-AsyncResult { return "server says no" } -ParameterFilter { $task -ne "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-                { Send-Request -Request "req" } | Should -Throw "*Request failed*500*abc-123*server says no*"
+                { Send-Request -Request "req" } | Should -Throw "*Request failed*server says no*500*abc-123*"
             }
         }
 
