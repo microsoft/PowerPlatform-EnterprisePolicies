@@ -284,5 +284,36 @@ Describe 'Enable-SubnetInjection Tests' {
 
             $result | Should -Be $true
         }
+
+        It 'Should treat unitedarabemirates environment with uae policy as compatible' {
+            $mockEnvironmentUnitedArabEmirates = [PSCustomObject]@{
+                name = $script:testEnvironmentId
+                location = "unitedarabemirates"
+                properties = @{
+                    enterprisePolicies = $null
+                }
+            }
+            $mockPolicyUae = [PSCustomObject]@{
+                ResourceId = $script:testPolicyArmId
+                Name = $script:testPolicyName
+                Kind = "NetworkInjection"
+                Location = "uae"
+                Properties = @{
+                    systemId = $script:testPolicySystemId
+                }
+            }
+
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-PPEnvironment { return $mockEnvironmentUnitedArabEmirates } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-EnterprisePolicy { return $mockPolicyUae } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-EnvironmentEnterprisePolicy { return $script:mockLinkResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Wait-EnterprisePolicyOperation { return "Succeeded" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            $result = Enable-SubnetInjection `
+                -EnvironmentId $script:testEnvironmentId `
+                -PolicyArmId $script:testPolicyArmId
+
+            $result | Should -Be $true
+        }
     }
 }
