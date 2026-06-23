@@ -6,6 +6,16 @@ Please note that these scripts are provided under MIT license and its usage is t
 
 ## Subnet Injection Users
 
+The legacy standalone subnet injection scripts have been replaced by the **Microsoft.PowerPlatform.EnterprisePolicies** PowerShell module. See [Using the Power Platform Enterprise Policies Module](#using-the-power-platform-enterprise-policies-module) below for setup instructions.
+
+For subnet injection-specific commands, see:
+- [New-SubnetInjectionEnterprisePolicy](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/New-SubnetInjectionEnterprisePolicy.md)
+- [Get-SubnetInjectionEnterprisePolicy](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Get-SubnetInjectionEnterprisePolicy.md)
+- [Remove-SubnetInjectionEnterprisePolicy](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Remove-SubnetInjectionEnterprisePolicy.md)
+- [New-VnetForSubnetDelegation](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/New-VnetForSubnetDelegation.md)
+
+For diagnostics, see: [Get-EnvironmentUsage](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Get-EnvironmentUsage.md), [Test-DnsResolution](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Test-DnsResolution.md), [Test-NetworkConnectivity](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Test-NetworkConnectivity.md)
+
 ## Using the Power Platform Enterprise Policies Module
 
 The Microsoft.PowerPlatform.EnterprisePolicies module is a new module that aims to simplify the management and creation of enterprise policies. It additionally, contains some diagnostic tooling specific for subnet injection scenarios. For a full list of commands that are available and its respective documentation see [Microsoft.PowerPlatform.EnterprisePolicies](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Microsoft.PowerPlatform.EnterprisePolicies.md)
