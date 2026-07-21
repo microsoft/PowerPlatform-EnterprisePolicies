@@ -91,7 +91,7 @@ function Test-TLSHandshake{
     try{
         $information = ConvertFrom-JsonToClass -Json $contentString -ClassType ([TLSConnectivityInformation])
         if(-not($information.TCPConnectivity)){
-            Write-Warning "TCP connectivity could not be established to $Destination on port $Port. TLS handshake cannot be performed."
+            Write-Warning "TCP connectivity could not be established to $Destination on port $Port. TLS handshake cannot be performed. For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
             return $information
         }
 
