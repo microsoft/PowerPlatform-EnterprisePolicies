@@ -94,7 +94,7 @@ function Test-AppInsightsConnection{
             Write-Warning "Application Insights connection string is invalid: $($information.ErrorMessage)"
         }
         else {
-            Write-Warning "Application Insights test event could not be sent from [$($information.ContainerIpAddress)] because: $($information.ErrorMessage)"
+            Write-Warning "Application Insights test event could not be sent from [$($information.ContainerIpAddress)] because: $($information.ErrorMessage). For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
         }
         return $information
     } catch {
