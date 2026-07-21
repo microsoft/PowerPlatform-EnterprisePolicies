@@ -100,6 +100,15 @@ Describe 'EnvironmentOperations Tests' {
             }
 
             It 'Should call the link API with correct URL' {
+                Mock Send-RequestWithRetries {
+                    $null = & $RequestFactory
+                    return $mock202Result
+                }
+                Mock New-JsonRequestMessage {
+                    param($Uri, $AccessToken, $Content, $HttpMethod)
+                    return [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, $Uri)
+                }
+
                 Set-EnvironmentEnterprisePolicy `
                     -EnvironmentId $script:testEnvironmentId `
                     -PolicyType ([PolicyType]::NetworkInjection) `
@@ -107,7 +116,9 @@ Describe 'EnvironmentOperations Tests' {
                     -Operation ([LinkOperation]::link) `
                     -Endpoint ([PPEndpoint]::Prod)
 
-                Should -Invoke Send-RequestWithRetries -Times 1
+                Should -Invoke New-JsonRequestMessage -Times 1 -ParameterFilter {
+                    $Uri -match 'scopes/admin/environments'
+                }
             }
 
             It 'Should return 202 response for successful initiation' {
