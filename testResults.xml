@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
-<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="9" errors="0" failures="9" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2026-07-21" time="05:27:34">
-  <environment clr-version="10.0.9" os-version="6.17.0-1020-azure" cwd="/home/runner/work/PowerPlatform-EnterprisePolicies/PowerPlatform-EnterprisePolicies" platform="Linux" nunit-version="2.5.8.0" user-domain="" machine-name="runnervm3jd5f" user="runner" />
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="9" errors="0" failures="9" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2026-07-21" time="05:27:59">
+  <environment user-domain="" cwd="/home/runner/work/PowerPlatform-EnterprisePolicies/PowerPlatform-EnterprisePolicies" os-version="6.17.0-1020-azure" platform="Linux" machine-name="runnervm3jd5f" user="runner" clr-version="10.0.9" nunit-version="2.5.8.0" />
   <culture-info current-culture="" current-uiculture="" />
-  <test-suite type="TestFixture" name="Pester" executed="True" result="Failure" success="False" time="1.6863" asserts="0" description="Pester">
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Failure" success="False" time="1.6546" asserts="0" description="Pester">
     <results>
-      <test-suite type="TestFixture" name="/home/runner/work/PowerPlatform-EnterprisePolicies/PowerPlatform-EnterprisePolicies/Source/Tests/EnvironmentOperations.Tests.ps1" executed="True" result="Failure" success="False" time="1.6863" asserts="0" description="/home/runner/work/PowerPlatform-EnterprisePolicies/PowerPlatform-EnterprisePolicies/Source/Tests/EnvironmentOperations.Tests.ps1">
+      <test-suite type="TestFixture" name="/home/runner/work/PowerPlatform-EnterprisePolicies/PowerPlatform-EnterprisePolicies/Source/Tests/EnvironmentOperations.Tests.ps1" executed="True" result="Failure" success="False" time="1.6546" asserts="0" description="/home/runner/work/PowerPlatform-EnterprisePolicies/PowerPlatform-EnterprisePolicies/Source/Tests/EnvironmentOperations.Tests.ps1">
         <results>
-          <test-suite type="TestFixture" name="EnvironmentOperations Tests" executed="True" result="Failure" success="False" time="0.1916" asserts="0" description="EnvironmentOperations Tests">
+          <test-suite type="TestFixture" name="EnvironmentOperations Tests" executed="True" result="Failure" success="False" time="0.1885" asserts="0" description="EnvironmentOperations Tests">
             <results>
-              <test-suite type="TestFixture" name="EnvironmentOperations Tests.Get-PPEnvironment" executed="True" result="Failure" success="False" time="0.0978" asserts="0" description="EnvironmentOperations Tests.Get-PPEnvironment">
+              <test-suite type="TestFixture" name="EnvironmentOperations Tests.Get-PPEnvironment" executed="True" result="Failure" success="False" time="0.0828" asserts="0" description="EnvironmentOperations Tests.Get-PPEnvironment">
                 <results>
                   <test-case description="Should retrieve environment successfully" name="EnvironmentOperations Tests.Get-PPEnvironment.Should retrieve environment successfully" time="0" asserts="0" success="False" result="Failure" executed="True">
                     <failure>
@@ -36,7 +36,7 @@
                   </test-case>
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="EnvironmentOperations Tests.Set-EnvironmentEnterprisePolicy" executed="True" result="Failure" success="False" time="0.104" asserts="0" description="EnvironmentOperations Tests.Set-EnvironmentEnterprisePolicy">
+              <test-suite type="TestFixture" name="EnvironmentOperations Tests.Set-EnvironmentEnterprisePolicy" executed="True" result="Failure" success="False" time="0.0904" asserts="0" description="EnvironmentOperations Tests.Set-EnvironmentEnterprisePolicy">
                 <results>
                   <test-case description="Should call the link API with correct URL" name="EnvironmentOperations Tests.Set-EnvironmentEnterprisePolicy.Should call the link API with correct URL" time="0" asserts="0" success="False" result="Failure" executed="True">
                     <failure>
@@ -52,7 +52,7 @@
                   </test-case>
                 </results>
               </test-suite>
-              <test-suite type="TestFixture" name="EnvironmentOperations Tests.Wait-EnterprisePolicyOperation" executed="True" result="Failure" success="False" time="0.1106" asserts="0" description="EnvironmentOperations Tests.Wait-EnterprisePolicyOperation">
+              <test-suite type="TestFixture" name="EnvironmentOperations Tests.Wait-EnterprisePolicyOperation" executed="True" result="Failure" success="False" time="0.0988" asserts="0" description="EnvironmentOperations Tests.Wait-EnterprisePolicyOperation">
                 <results>
                   <test-case description="Should return Succeeded when operation succeeds" name="EnvironmentOperations Tests.Wait-EnterprisePolicyOperation.Should return Succeeded when operation succeeds" time="0" asserts="0" success="False" result="Failure" executed="True">
                     <failure>
