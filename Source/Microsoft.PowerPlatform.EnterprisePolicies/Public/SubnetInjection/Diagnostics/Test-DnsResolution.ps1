@@ -85,7 +85,7 @@ function Test-DnsResolution {
             Write-Host "DNS resolution succeeded. [$($information.HostName)] was resolved to [$($information.IPAddresses -join ",")] using DNS servers [$($information.DNSServers)]"
         }
         else {
-            Write-Warning "DNS resolution failed. [$($information.HostName)] could not be resolved because: $($information.ErrorMessage)"
+            Write-Warning "DNS resolution failed. [$($information.HostName)] could not be resolved because: $($information.ErrorMessage). For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
         }
         return $information
     } catch {

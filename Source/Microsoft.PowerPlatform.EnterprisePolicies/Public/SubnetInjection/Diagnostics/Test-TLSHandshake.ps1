@@ -91,16 +91,16 @@ function Test-TLSHandshake{
     try{
         $information = ConvertFrom-JsonToClass -Json $contentString -ClassType ([TLSConnectivityInformation])
         if(-not($information.TCPConnectivity)){
-            Write-Warning "TCP connectivity could not be established to $Destination on port $Port. TLS handshake cannot be performed."
+            Write-Warning "TCP connectivity could not be established to $Destination on port $Port. TLS handshake cannot be performed. For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
             return $information
         }
 
         if(-not($information.SSLWithoutCRL.Success)){
-            Write-Warning "TLS handshake failed to $Destination on port $Port. This could indicate that the destination is not configured to accept TLS connections on that port, or there is a network device blocking or interfering with the TLS handshake. Analyze the returned TLSConnectivityInformation object for more details."
+            Write-Warning "TLS handshake failed to $Destination on port $Port. This could indicate that the destination is not configured to accept TLS connections on that port, or there is a network device blocking or interfering with the TLS handshake. Analyze the returned TLSConnectivityInformation object for more details. For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
         }
 
         if($information.SSLWithoutCRL.Success -and -not($information.SSLWithCRL.Success)){
-            Write-Warning "TLS handshake was successful when not checking the Certificate Revocation List (CRL), but failed when checking the CRL. This could indicate that the destination's certificate has been revoked or there is an issue with accessing the CRL distribution points. Analyze the returned TLSConnectivityInformation object for more details."
+            Write-Warning "TLS handshake was successful when not checking the Certificate Revocation List (CRL), but failed when checking the CRL. This could indicate that the destination's certificate has been revoked or there is an issue with accessing the CRL distribution points. Analyze the returned TLSConnectivityInformation object for more details. For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
         }
 
         return $information

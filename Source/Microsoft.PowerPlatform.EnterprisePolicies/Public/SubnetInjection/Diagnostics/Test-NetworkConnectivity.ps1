@@ -96,7 +96,7 @@ function Test-NetworkConnectivity{
             Write-Host "TCP connectivity succeeded. Successfully connected to [$($information.Destination):$($information.Port)]"
         }
         else {
-            Write-Warning "TCP connectivity failed. A connection to [$($information.Destination):$($information.Port)] from [$($information.ContainerIpAddress)] because : $($information.TCPErrorMessage)"
+            Write-Warning "TCP connectivity failed. A connection to [$($information.Destination):$($information.Port)] from [$($information.ContainerIpAddress)] because : $($information.TCPErrorMessage). For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
         }
         return $information
     } catch {
