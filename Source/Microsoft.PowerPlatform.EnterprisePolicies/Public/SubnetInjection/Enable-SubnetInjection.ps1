@@ -141,23 +141,17 @@ function Enable-SubnetInjection {
 
     Write-Verbose "Enterprise policy SystemId: $policySystemId"
 
-    # Validate that the environment location matches the policy location
+    # Validate location parity as a best-effort pre-check.
+    # Some clouds can expose different normalized strings between environment and policy APIs.
+    # Backend validation remains the source of truth, so do not fail early here.
     $environmentLocation = $environment.location
     $policyLocation = $policy.Location
 
     if ($environmentLocation -ine $policyLocation) {
-        if( ($environmentLocation -eq "unitedstates" -and $policyLocation -eq "unitedstateseuap") -or
-            ($environmentLocation -eq "unitedkingdom" -and $policyLocation -eq "uk") -or
-            ($environmentLocation -eq "unitedarabemirates" -and $policyLocation -eq "uae") -or
-            ($environmentLocation -eq "usgovhigh" -and $policyLocation -eq "usgov") ) {
-            Write-Verbose "Environment is in '$environmentLocation' and policy is in '$policyLocation'. Treating locations as compatible."
-        }
-        else {
-            throw "Environment location '$environmentLocation' does not match the enterprise policy location '$policyLocation'. The environment and policy must be in the same location."
-        }
+        Write-Warning "Environment location '$environmentLocation' differs from enterprise policy location '$policyLocation'. Continuing and relying on backend validation."
     }
 
-    Write-Verbose "Environment location '$environmentLocation' matches policy location '$policyLocation'"
+    Write-Verbose "Location pre-check complete. Environment location: '$environmentLocation'. Policy location: '$policyLocation'."
 
     # Link the policy to the environment
     Write-Verbose "Enabling Subnet Injection for environment..."

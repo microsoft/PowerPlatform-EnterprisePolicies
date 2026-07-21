@@ -213,14 +213,21 @@ Describe 'Enable-SubnetInjection Tests' {
                 -PolicyArmId $script:testPolicyArmId } | Should -Throw "*not a Subnet Injection*"
         }
 
-        It 'Should throw when environment location does not match policy location' {
+        It 'Should continue when environment location does not match policy location' {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-PPEnvironment { return $script:mockEnvironmentDifferentLocation } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-EnvironmentEnterprisePolicy { return $script:mockLinkResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Wait-EnterprisePolicyOperation { return "Succeeded" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            { Enable-SubnetInjection `
+            $result = Enable-SubnetInjection `
                 -EnvironmentId $script:testEnvironmentId `
-                -PolicyArmId $script:testPolicyArmId } | Should -Throw "*does not match*"
+                -PolicyArmId $script:testPolicyArmId
+
+            $result | Should -Be $true
+            Should -Invoke Write-Warning -Times 1 -ParameterFilter {
+                $Message -like "*differs from enterprise policy location*"
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should treat unitedstates environment with unitedstateseuap policy as compatible' {
