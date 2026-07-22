@@ -148,7 +148,9 @@ function Enable-SubnetInjection {
     if ($environmentLocation -ine $policyLocation) {
         if( ($environmentLocation -eq "unitedstates" -and $policyLocation -eq "unitedstateseuap") -or
             ($environmentLocation -eq "unitedkingdom" -and $policyLocation -eq "uk") -or
-            ($environmentLocation -eq "unitedarabemirates" -and $policyLocation -eq "uae") ) {
+            ($environmentLocation -eq "unitedarabemirates" -and $policyLocation -eq "uae") -or 
+            ($environmentLocation -eq "usgovhigh" -and $policyLocation -eq "usgov") -or
+            ($environmentLocation -eq "southamerica" -and $policyLocation -eq "brazil") ) {
             Write-Verbose "Environment is in '$environmentLocation' and policy is in '$policyLocation'. Treating locations as compatible."
         }
         else {
