@@ -11,7 +11,9 @@ function Read-InstallMissingPrerequisite {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        $Module
+        $Module,
+        
+        [string]$PSRepositoryName
     )
 
     $response = Read-Host "The $($Module.Name) module is not installed or the required version [$($Module.RequiredVersion)] is not installed. The exact version is required. Do you want to install it now? (Y/N)"
@@ -22,6 +24,10 @@ function Read-InstallMissingPrerequisite {
                 RequiredVersion = $Module.RequiredVersion
                 AllowClobber = $true
                 Force = $true
+            }
+
+            if (-not [string]::IsNullOrWhiteSpace($PSRepositoryName)) {
+                $installParams['Repository'] = $PSRepositoryName
             }
 
             # Install to CurrentUser scope if not elevated, AllUsers if elevated

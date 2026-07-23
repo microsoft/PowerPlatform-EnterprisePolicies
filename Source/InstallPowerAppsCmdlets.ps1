@@ -1,4 +1,7 @@
 ﻿function InstallPowerAppsCmdlets() {
+    param(
+        [string]$PSRepositoryName
+    )
 
     Set-ExecutionPolicy unrestricted -Scope Process
     # Install - only needs to be run once per machine
@@ -19,13 +22,22 @@
         }
     }
 
+    $installParams = @{
+        AllowClobber = $true
+        Force = $true
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($PSRepositoryName)) {
+        $installParams['Repository'] = $PSRepositoryName
+    }
+
     if ($installPowerApps) {
-        Install-Module -Name Microsoft.PowerApps.Administration.PowerShell -AllowClobber -Force
-        Install-Module -Name Microsoft.PowerApps.PowerShell -AllowClobber -Force
+        Install-Module -Name Microsoft.PowerApps.Administration.PowerShell @installParams
+        Install-Module -Name Microsoft.PowerApps.PowerShell @installParams
     }
 
     if ($null -eq $moduleAzure) {
-        Install-Module -Name Az -AllowClobber -Force
+        Install-Module -Name Az @installParams
     }
 
 }

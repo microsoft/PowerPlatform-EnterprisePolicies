@@ -114,7 +114,7 @@ Properties {
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $CodeCoverageOutputFormat = "JaCoCo"
 
-    # -------------------- Publishing properties ------------------------------
+     # -------------------- Publishing properties ------------------------------
 
     # Your NuGet API key for the PSGallery.  Leave it as $null and the first time you publish,
     # you will be prompted to enter your API key.  The build will store the key encrypted in the
@@ -122,7 +122,8 @@ Properties {
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $NuGetApiKey = $null
 
-    # Name of the repository you wish to publish to. If $null is specified the default repo (PowerShellGallery) is used.
+    # Name of the repository you wish to publish to.
+    # For CI/CD pipelines: Do not use $null. Specify the CFS feed.
     [System.Diagnostics.CodeAnalysis.SuppressMessage('PSUseDeclaredVarsMoreThanAssigments', '')]
     $PublishRepository = $null
 
