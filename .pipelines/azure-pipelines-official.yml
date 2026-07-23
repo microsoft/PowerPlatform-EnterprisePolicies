@@ -175,7 +175,7 @@ extends:
                 }
 
           - task: Powershell@2
-            displayName: '🛳️ Release module to PSGallery'
+            displayName: '🛳️ Release module to CommonDataServices'
             env:
               SYSTEM_ACCESSTOKEN: $(System.AccessToken)
             inputs:
@@ -188,6 +188,11 @@ extends:
                 [string]$PackageSourceName = "CommonDataServices"
 
                 [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+
+                if ([string]::IsNullOrWhiteSpace($env:SYSTEM_ACCESSTOKEN)) {
+                  Write-Error 'SYSTEM_ACCESSTOKEN is not available. Enable OAuth token access for this job before publishing to CommonDataServices.'
+                  exit 1
+                }
 
                 $patToken = $env:SYSTEM_ACCESSTOKEN | ConvertTo-SecureString -AsPlainText -Force
                 $credentialsObject = New-Object System.Management.Automation.PSCredential("AUTH_TOKEN", $patToken)
