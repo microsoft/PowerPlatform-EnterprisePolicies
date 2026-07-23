@@ -55,6 +55,25 @@ Describe 'EnvironmentOperations Tests' {
                 Should -Invoke Get-PPEndpointUrl -Times 1 -ParameterFilter { $Endpoint -eq [PPEndpoint]::usgovhigh }
             }
 
+            It 'Should use admin-scoped endpoint URL' {
+                # Verifies the admin endpoint is used so Power Platform Administrators without
+                # a direct environment role are not erroneously blocked by EnvironmentNotFound.
+                Mock Send-RequestWithRetries {
+                    $null = & $RequestFactory
+                    return $mockSuccessResult
+                }
+                Mock New-JsonRequestMessage {
+                    param($Uri, $AccessToken, $HttpMethod)
+                    return [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Get, $Uri)
+                }
+
+                Get-PPEnvironment -EnvironmentId $script:testEnvironmentId -Endpoint ([PPEndpoint]::Prod)
+
+                Should -Invoke New-JsonRequestMessage -Times 1 -ParameterFilter {
+                    $Uri -match 'scopes/admin/environments'
+                }
+            }
+
             It 'Should throw when API call fails' {
                 $mockErrorResult = [HttpClientResultMock]::new("Not Found", "text/plain")
                 $mockErrorResult.IsSuccessStatusCode = $false
@@ -81,6 +100,15 @@ Describe 'EnvironmentOperations Tests' {
             }
 
             It 'Should call the link API with correct URL' {
+                Mock Send-RequestWithRetries {
+                    $null = & $RequestFactory
+                    return $mock202Result
+                }
+                Mock New-JsonRequestMessage {
+                    param($Uri, $AccessToken, $Content, $HttpMethod)
+                    return [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, $Uri)
+                }
+
                 Set-EnvironmentEnterprisePolicy `
                     -EnvironmentId $script:testEnvironmentId `
                     -PolicyType ([PolicyType]::NetworkInjection) `
@@ -88,7 +116,10 @@ Describe 'EnvironmentOperations Tests' {
                     -Operation ([LinkOperation]::link) `
                     -Endpoint ([PPEndpoint]::Prod)
 
-                Should -Invoke Send-RequestWithRetries -Times 1
+                Should -Invoke New-JsonRequestMessage -Times 1 -ParameterFilter {
+                    $Uri -match 'scopes/admin/environments' -and
+                    $Uri -match 'enterprisePolicies/NetworkInjection/link'
+                }
             }
 
             It 'Should return 202 response for successful initiation' {

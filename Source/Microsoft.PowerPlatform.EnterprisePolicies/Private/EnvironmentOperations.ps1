@@ -19,7 +19,7 @@ function Get-PPEnvironment {
 
     $apiVersion = "2016-11-01"
     $baseUri = Get-PPEndpointUrl -Endpoint $Endpoint
-    $uri = "${baseUri}providers/Microsoft.BusinessAppPlatform/environments/${EnvironmentId}?api-version=${apiVersion}"
+    $uri = "${baseUri}providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/${EnvironmentId}?api-version=${apiVersion}"
 
     $result = Send-RequestWithRetries -RequestFactory {
         return New-JsonRequestMessage -Uri $uri -AccessToken (Get-PPAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get)
@@ -85,7 +85,7 @@ function Set-EnvironmentEnterprisePolicy {
 
     $apiVersion = "2019-10-01"
     $baseUri = Get-PPEndpointUrl -Endpoint $Endpoint
-    $uri = "${baseUri}providers/Microsoft.BusinessAppPlatform/environments/${EnvironmentId}/enterprisePolicies/${PolicyType}/${Operation}?api-version=${apiVersion}"
+    $uri = "${baseUri}providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/${EnvironmentId}/enterprisePolicies/${PolicyType}/${Operation}?api-version=${apiVersion}"
 
     $body = @{ SystemId = $PolicySystemId } | ConvertTo-Json
 
