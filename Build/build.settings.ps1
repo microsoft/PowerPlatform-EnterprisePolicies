@@ -200,6 +200,8 @@ Task PostBuild {
 Task PreBuildHelp {
     # When loading the module we don't want to run the prereq checks as that slows things down and forces certain unnecessary things to happen for building help docs.
     $Global:PrereqsChecked = $true
+    # Skip the PSGallery version check on module import so help generation doesn't make live network calls.
+    $Global:SkipModuleVersionCheck = $true
 }
 
 # Executes after the BuildHelpImpl phase of the BuildHelp task.
