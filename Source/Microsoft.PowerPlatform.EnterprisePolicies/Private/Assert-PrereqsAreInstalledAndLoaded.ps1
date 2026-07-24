@@ -72,6 +72,11 @@ if ($Global:PrereqsChecked) {
     return
 }
 
+$repositoryName = $null
+if (-not [string]::IsNullOrWhiteSpace($env:PSRepositoryName)) {
+    $repositoryName = $env:PSRepositoryName
+}
+
 $modules = [PSCustomObject]@{
     Name = "Az.Accounts"
     RequiredVersion = "5.3.0"
@@ -90,13 +95,13 @@ foreach ($module in $modules) {
     if($PSVersionTable.PSEdition -eq "Core") {
         $availableModule = Get-Module -Name $module.Name -ListAvailable | Where-Object { [version]$_.Version -eq [version]$module.RequiredVersion }
         if(-Not ($availableModule)) {
-            Read-InstallMissingPrerequisite -Module $module
+            Read-InstallMissingPrerequisite -Module $module -PSRepositoryName $repositoryName
         }
     }
     else {
         $availableModule = Get-InstalledModule -Name $module.Name -AllVersions -ErrorAction SilentlyContinue | Where-Object { [version]$_.Version -eq [version]$module.RequiredVersion }
         if(-Not ($availableModule)) {
-            Read-InstallMissingPrerequisite -Module $module
+            Read-InstallMissingPrerequisite -Module $module -PSRepositoryName $repositoryName
         }
     }
 }
@@ -104,4 +109,3 @@ foreach ($module in $modules) {
 Import-Module @("Az.Accounts", "Az.Resources", "Az.KeyVault", "Az.Network")
 
 $Global:PrereqsChecked = $true
-

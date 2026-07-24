@@ -1,4 +1,8 @@
-﻿function InstallPowerAppsCmdlets() {
+param(
+    [string]$PSRepositoryName
+)
+
+function InstallPowerAppsCmdlets() {
     param(
         [string]$PSRepositoryName
     )
@@ -42,4 +46,4 @@
 
 }
 
-InstallPowerAppsCmdlets
+InstallPowerAppsCmdlets -PSRepositoryName $PSRepositoryName

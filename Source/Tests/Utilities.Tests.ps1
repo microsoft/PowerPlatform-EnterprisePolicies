@@ -122,6 +122,17 @@ Describe 'Utilities Tests' {
                 { Test-LatestModuleVersion } | Should -Not -Throw
                 Should -Invoke Write-Verbose -Times 1 -ParameterFilter { $Message -like "*Could not check for the latest module version*" }
             }
+
+            It 'Uses custom repository when PSRepositoryName is provided' {
+                Mock Get-ModuleVersion { return "1.0.0" }
+                Mock Find-Module { return [PSCustomObject]@{ Version = "1.0.0" } }
+
+                Test-LatestModuleVersion -PSRepositoryName "CommonDataServices"
+
+                Should -Invoke Find-Module -Times 1 -ParameterFilter {
+                    $Name -eq "Microsoft.PowerPlatform.EnterprisePolicies" -and $Repository -eq "CommonDataServices"
+                }
+            }
         }
     }
 }

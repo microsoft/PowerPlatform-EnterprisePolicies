@@ -55,7 +55,7 @@ steps:
        -PublishLocation $feedUri `
        -InstallationPolicy Trusted `
        -Credential $credentialsObject `
-       -ErrorAction SilentlyContinue `
+       -ErrorAction Stop `
        -Verbose
      Write-Host "PS Repository registered successfully."
 
@@ -79,7 +79,7 @@ steps:
          Write-Host "Module $moduleName installed successfully." -ForegroundColor Green
        }
        catch {
-         Write-Host "Failed to install module $module due to exception $_" -ForegroundColor Red
+         throw "Failed to install module $moduleName version $moduleVersion from repository $PackageSourceName. Error: $_"
        }
      }
 
