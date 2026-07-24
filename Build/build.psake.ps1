@@ -285,7 +285,6 @@ Task Test -depends Build -requiredVariables TestRootDir, ModuleName, CodeCoverag
         Microsoft.PowerShell.Management\Push-Location -LiteralPath $TestRootDir
         $config = New-PesterConfiguration
         $config.Run.PassThru = $true
-        $config.Run.TestExtension = 'Utilities.Tests.ps1'
 
         if ($TestOutputEnabled) {
             $config.TestResult.Enabled = $true
