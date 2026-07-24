@@ -2,12 +2,10 @@
 param()
 
 BeforeDiscovery{
-    . $PSScriptRoot\Shared.ps1 -Module
+    . $PSScriptRoot\..\Private\Utilities.ps1
 }
 
-Describe 'Utilities Tests' {
-    InModuleScope 'Microsoft.PowerPlatform.EnterprisePolicies'{
-        
+Describe 'Utilities Tests' {      
         Context 'Testing Get-LogDate' {
             It 'Returns date in UTC format with correct timezone indicator' {
                 $result = Get-LogDate
@@ -123,5 +121,4 @@ Describe 'Utilities Tests' {
                 Should -Invoke Write-Verbose -Times 1 -ParameterFilter { $Message -like "*Could not check for the latest module version*" }
             }
         }
-    }
 }
