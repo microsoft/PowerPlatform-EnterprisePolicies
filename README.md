@@ -4,7 +4,7 @@ These scripts automate managing (create, update, get, delete) Power Platform Ent
 In addition, we are providing sample scripts on how to associate these policies with Power Platform environments.</br>
 Please note that these scripts are provided under MIT license and its usage is the sole responsibility of the user.
 
-## Subnet Injection Users
+## Subnet Injection and Identity Users
 
 ## Using the Power Platform Enterprise Policies Module
 
@@ -33,19 +33,31 @@ Import-Module .\Microsoft.PowerPlatform.EnterprisePolicies
 
 This will import the module, validate prerequisites and make the commands available for use. If you are missing any prerequisites, the module will inform you and ask for permission to install them.
 
-### Diagnostics commands
+### Forcing re-authentication
+
+By default, the powershell module will attempt to reuse an existing Azure session if one is available. If you want to manually choose which account to use instead of letting the module automatically select one, you can pass the `-ForceAuth` switch to any of the cmdlets:
+
+```powershell
+Get-EnvironmentUsage -EnvironmentId "your-environment-id" -ForceAuth
+```
+
+This will prompt you to re-authenticate, allowing you to select or enter the credentials for the account you want to use.
+
+### Subnet Users
+
+### Subnet Injection Diagnostics commands
 
 The diagnostic commands are designed to help troubleshoot issues with the VNET functionality provided by Power Platform. They can be run in both Windows PowerShell and PowerShell Core environments.
 
 You can get the module in two different ways. Either through the PowerShell Gallery or by downloading the module from Github Releases. Both options provide the same functionality.
 
-### Permissions required for diagnostic commands
+#### Permissions required for diagnostic commands
 
 In order to run these diagnostics commands the user used to invoke the commands must have the Power Platform Administrator role.
 
 To validate that the role is correctly assigned you can use the `Test-AccountPermissions` command.
 
-### Running the diagnostic functions
+#### Running the diagnostic functions
 
 Once your module has been imported into your PowerShell session, you can now run the diagnostic functions as needed. For example, to run the `Get-EnvironmentUsage` function, you would use:
 
@@ -55,17 +67,24 @@ Get-EnvironmentUsage -EnvironmentId "your-environment-id"
 
 For a full list of available functions and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies) folder.
 
-### Forcing re-authentication
+### Identity Users
 
-By default, the diagnostic functions will attempt to reuse an existing Azure session if one is available. If you want to manually choose which account to use instead of letting the module automatically select one, you can pass the `-ForceAuth` switch to any of the diagnostic functions:
+Identity enterprise policies let a Power Platform environment use a managed identity for scenarios such as customer managed key encryption. They are now managed through the `Microsoft.PowerPlatform.EnterprisePolicies` module, which replaces the legacy scripts that previously lived under `Source/Identity`.
 
-```powershell
-Get-EnvironmentUsage -EnvironmentId "your-environment-id" -ForceAuth
-```
+The summaries below give a quick overview of each cmdlet. For full parameter lists, examples, and output types, follow the links to the cmdlet reference documentation on Microsoft Learn.
 
-This will prompt you to re-authenticate, allowing you to select or enter the credentials for the account you want to use.
+#### Managing identity enterprise policies
 
-## CMK and Identity Users
+- **[New-IdentityEnterprisePolicy](https://learn.microsoft.com/en-us/powershell/module/microsoft.powerplatform.enterprisepolicies/new-identityenterprisepolicy?view=pa-ps-latest)** : Creates a new identity enterprise policy as an Azure resource in the specified subscription, resource group, and location.
+- **[Get-IdentityEnterprisePolicy](https://learn.microsoft.com/en-us/powershell/module/microsoft.powerplatform.enterprisepolicies/get-identityenterprisepolicy?view=pa-ps-latest)** : Retrieves identity enterprise policies. Replaces the separate legacy scripts that looked up a policy by ARM resource ID, subscription, or resource group.
+- **[Remove-IdentityEnterprisePolicy](https://learn.microsoft.com/en-us/powershell/module/microsoft.powerplatform.enterprisepolicies/remove-identityenterprisepolicy?view=pa-ps-latest)** : Deletes an identity enterprise policy.
+
+#### Linking policies to environments
+
+- **[Enable-Identity](https://learn.microsoft.com/en-us/powershell/module/microsoft.powerplatform.enterprisepolicies/enable-identity?view=pa-ps-latest)** : Links an identity enterprise policy to a Power Platform environment. Use the `-Swap` switch to replace a policy that is already linked to the environment.
+- **[Disable-Identity](https://learn.microsoft.com/en-us/powershell/module/microsoft.powerplatform.enterprisepolicies/disable-identity?view=pa-ps-latest)** : Unlinks an identity enterprise policy from a Power Platform environment.
+
+## CMK Users
 
 ### How to run scripts in this repository
 
@@ -281,77 +300,6 @@ Sample Input :</br>
 
 Sample Output :</br>
 ![alt text](./ReadMeImages/RemoveCMKFromEnv2.png)</br>
-
-### How to run Identity scripts
-
-The Identity scripts are present in folder [Identity](./Source/Identity/) at current location.
-
-> **Note**: These scripts are legacy scripts that may be replaced by the Microsoft.PowerPlatform.EnterprisePolicies module in the future. Use module cmdlets when available.
-
-#### Create Identity Enterprise Policy
-1. **Create Identity Enterprise Policy** : This script creates an Identity enterprise policy.</br>
-Script name : [CreateIdentityEnterprisePolicy.ps1](./Source/Identity/CreateIdentityEnterprisePolicy.ps1)</br>
-Input parameters :
-    - subscriptionId : The subscriptionId where Identity enterprise policy needs to be created
-    - resourceGroup : The resource group where Identity enterprise policy needs to be created
-    - enterprisePolicyName : The name of the Identity enterprise policy resource
-    - enterprisePolicyLocation : The Azure geo where Identity enterprise policy needs to be created
-
-#### Get Identity Enterprise Policy by ResourceId
-2. **Get Identity Enterprise Policy by ResourceId** : The script gets an Identity enterprise policy by ARM resourceId.</br>
-Script name : [GetIdentityEnterprisePolicyByResourceId.ps1](./Source/Identity/GetIdentityEnterprisePolicyByResourceId.ps1)</br>
-Input parameter :
-    - enterprisePolicyArmId : The ARM resource ID of the Identity Enterprise Policy
-
-#### Get Identity Enterprise Policies in Subscription
-3. **Get Identity Enterprise Policies in Subscription** : The script gets all Identity enterprise policies in an Azure subscription.</br>
-Script name : [GetIdentityEnterprisePoliciesInSubscription.ps1](./Source/Identity/GetIdentityEnterprisePoliciesInSubscription.ps1)</br>
-Input parameter :
-    - subscriptionId : The Azure subscription Id
-
-#### Get Identity Enterprise Policies in Resource Group
-4. **Get Identity Enterprise Policies in Resource Group** : The script gets all Identity enterprise policies in an Azure resource group.</br>
-Script name : [GetIdentityEnterprisePoliciesInResourceGroup.ps1](./Source/Identity/GetIdentityEnterprisePoliciesInResourceGroup.ps1)</br>
-Input parameters :
-    - subscriptionId : The Azure subscription Id
-    - resourceGroup : The Azure resource group
-
-#### Assign Identity to an environment
-5. **Assign Identity to an environment** : This script assigns an Identity enterprise policy to a Power Platform environment.</br>
-Script name : [NewIdentity.ps1](./Source/Identity/NewIdentity.ps1)</br>
-Input parameters :
-    - environmentId : The Power Platform environment ID
-    - policyArmId : The ARM ID of the Identity Enterprise Policy
-    - endpoint _(optional)_ : The BAP endpoint (default: prod). Valid values: tip1, tip2, prod, usgovhigh, dod, china
-
-#### Get Identity Enterprise Policy for an environment
-6. **Get Identity Enterprise Policy for an environment** : This script returns the Identity enterprise policy if applied to a given Power Platform environment.</br>
-Script name : [GetIdentityEnterprisePolicyForEnvironment.ps1](./Source/Identity/GetIdentityEnterprisePolicyForEnvironment.ps1)</br>
-Input parameters :
-    - environmentId : The Power Platform environment ID
-    - endpoint _(optional)_ : The BAP endpoint (default: prod)
-
-#### Swap Identity for an environment
-7. **Swap Identity for an environment** : This script swaps the Identity enterprise policy on a given Power Platform environment.</br>
-Script name : [SwapIdentity.ps1](./Source/Identity/SwapIdentity.ps1)</br>
-Input parameters :
-    - environmentId : The Power Platform environment ID
-    - newPolicyArmId : The ARM ID of the new Identity Enterprise Policy
-    - endpoint _(optional)_ : The BAP endpoint (default: prod)
-
-#### Remove Identity from an environment
-8. **Remove Identity from an environment** : This script removes the Identity enterprise policy from a Power Platform environment.</br>
-Script name : [RevertIdentity.ps1](./Source/Identity/RevertIdentity.ps1)</br>
-Input parameters :
-    - environmentId : The Power Platform environment ID
-    - policyArmId : The ARM ID of the Identity Enterprise Policy
-    - endpoint _(optional)_ : The BAP endpoint (default: prod)
-
-#### Delete Identity Enterprise Policy
-9. **Delete Identity Enterprise Policy** : This script deletes an Identity Enterprise Policy.</br>
-Script name : [RemoveIdentityEnterprisePolicy.ps1](./Source/Identity/RemoveIdentityEnterprisePolicy.ps1)</br>
-Input parameter :
-    - policyArmId : The ARM ID of the Identity enterprise policy to be deleted
 
 ## Development
 
