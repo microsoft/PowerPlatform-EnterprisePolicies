@@ -43,14 +43,14 @@ steps:
   displayName: 🧪 Test Scripts (Windows)
   inputs:
     filePath: $(Build.SourcesDirectory)\Build\build.ps1
-    arguments: '-Tasks @("Test")'
+    arguments: '-Tasks "Test"'
 
 - task: PowerShell@2
   displayName: 🧪 Test Scripts (Core)
   inputs:
     pwsh: true
     filePath: $(Build.SourcesDirectory)\Build\build.ps1
-    arguments: '-Tasks @("Test")'
+    arguments: '-Tasks "Test"'
   condition: succeededOrFailed()
 
 - task: PublishTestResults@2
@@ -82,7 +82,7 @@ steps:
   inputs:
     pwsh: true
     filePath: $(Build.SourcesDirectory)\Build\build.ps1
-    arguments: '-Tasks @("Build")'
+    arguments: '-Tasks "Build"'
 
 - ${{ if parameters.Official }}:
 

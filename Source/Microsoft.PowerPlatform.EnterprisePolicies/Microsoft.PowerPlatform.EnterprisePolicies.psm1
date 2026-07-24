@@ -21,6 +21,9 @@ foreach ($script in $Private) {
 
 Initialize-Cache
 
-Test-LatestModuleVersion
+# Skip the PSGallery version check during Pester execution and build automation (e.g. help generation) so we don't make live network calls.
+if (-not $Global:InPesterExecution -and -not $Global:SkipModuleVersionCheck) {
+    Test-LatestModuleVersion
+}
 
 Export-ModuleMember -Function $Public.BaseName
