@@ -6,7 +6,7 @@ Please note that these scripts are provided under MIT license and its usage is t
 
 ## Subnet Injection and Identity Users
 
-## Using the Power Platform Enterprise Policies Module
+### Using the Power Platform Enterprise Policies Module
 
 The Microsoft.PowerPlatform.EnterprisePolicies module is a new module that aims to simplify the management and creation of enterprise policies. It additionally, contains some diagnostic tooling specific for subnet injection scenarios. For a full list of commands that are available and its respective documentation see [Microsoft.PowerPlatform.EnterprisePolicies](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Microsoft.PowerPlatform.EnterprisePolicies.md)
 
