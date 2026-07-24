@@ -2,7 +2,7 @@
 param()
 
 BeforeDiscovery{
-    . $PSScriptRoot\..\Private\Utilities.ps1
+    . $PSScriptRoot\..\Microsoft.PowerPlatform.EnterprisePolicies\Private\Utilities.ps1
 }
 
 Describe 'Utilities Tests' {      
