@@ -50,7 +50,7 @@ steps:
   inputs:
     pwsh: true
     filePath: $(Build.SourcesDirectory)\Build\build.ps1
-    arguments: '`-Tasks `"Test`"'
+    arguments: '-Tasks "Test"'
   condition: succeededOrFailed()
 
 - task: PublishTestResults@2
