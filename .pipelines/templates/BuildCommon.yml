@@ -82,7 +82,7 @@ steps:
   inputs:
     pwsh: true
     filePath: $(Build.SourcesDirectory)\Build\build.ps1
-    arguments: '-Tasks @("Build")'
+    arguments: '-Tasks "Build"'
 
 - ${{ if parameters.Official }}:
 
