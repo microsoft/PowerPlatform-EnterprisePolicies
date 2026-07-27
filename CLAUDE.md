@@ -114,7 +114,6 @@ Everything under `Source/` outside the module and tests is legacy code being rep
 - `Source/Cmk/` - Legacy CMK scripts
 - `Source/SubnetInjection/` - Legacy subnet injection scripts
 - `Source/Common/` - Legacy shared helpers
-- `Source/Identity/` - Legacy identity scripts
 
 **Do not use these as reference for new code.** Follow patterns in the module only.
 
