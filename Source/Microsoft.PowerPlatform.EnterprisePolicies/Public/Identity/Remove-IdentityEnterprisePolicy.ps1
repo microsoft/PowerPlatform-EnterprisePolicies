@@ -108,7 +108,7 @@ function Remove-IdentityEnterprisePolicy {
 
     # Verify subscription is initialized for Power Platform
     if (-not(Initialize-SubscriptionForPowerPlatform -SubscriptionId $SubscriptionId)) {
-        throw "Failed to initialize subscription for Power Platform. Please ensure the subscription is registered for Microsoft.PowerPlatform, Microsoft.Network and the enterprisePoliciesPreview feature is enabled."
+        throw "Failed to initialize subscription for Power Platform. Please ensure the subscription is registered for Microsoft.PowerPlatform and Microsoft.Network."
     }
 
     # Get the policies based on parameter set

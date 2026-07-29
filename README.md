@@ -104,7 +104,7 @@ The summaries below give a quick overview of each cmdlet. For full parameter lis
 
 ### How to run the Azure subscription setup script
 
-This script registers the Azure subscription for Microsoft.PowerPlatform resource provider and also allowlists the subscription for enterprisePoliciesPreview feature. This will allow you to create and manage enterprise policies in the registered subscription for use with Power Platform.
+This script registers the Azure subscription for the Microsoft.PowerPlatform resource provider. This will allow you to create and manage enterprise policies in the registered subscription for use with Power Platform.
 
 Script name: [SetupSubscriptionForPowerPlatform.ps1](./Source/SetupSubscriptionForPowerPlatform.ps1)
 

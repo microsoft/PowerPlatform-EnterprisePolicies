@@ -103,64 +103,6 @@ function Register-ResourceProvider {
     }
 }
 
-function Register-ProviderFeature {
-    <#
-    .SYNOPSIS
-    Registers an Azure provider feature if it is not already registered.
-
-    .DESCRIPTION
-    Checks if the specified Azure provider feature is registered.
-    If not registered, initiates feature registration.
-
-    .PARAMETER FeatureName
-    The name of the feature to register (e.g., "enterprisePoliciesPreview")
-
-    .PARAMETER ProviderNamespace
-    The namespace of the provider that owns the feature (e.g., "Microsoft.PowerPlatform")
-
-    .EXAMPLE
-    Register-ProviderFeature -FeatureName "enterprisePoliciesPreview" -ProviderNamespace "Microsoft.PowerPlatform"
-    #>
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$FeatureName,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]$ProviderNamespace
-    )
-
-    Write-Verbose "Checking $FeatureName feature registration status for $ProviderNamespace..."
-    
-    try {
-        $feature = Get-AzProviderFeature -FeatureName $FeatureName -ProviderNamespace $ProviderNamespace -ErrorAction SilentlyContinue
-        
-        if ($feature -and $feature.RegistrationState -eq "Registered") {
-            Write-Verbose "Feature $FeatureName for $ProviderNamespace is already registered"
-            return $true
-        }
-
-        Write-Host "Registering the subscription for feature $FeatureName for $ProviderNamespace" -ForegroundColor Yellow
-        
-        $register = Register-AzProviderFeature -FeatureName $FeatureName -ProviderNamespace $ProviderNamespace -ErrorAction Stop
-        
-        if ($null -eq $register -or $null -eq $register.RegistrationState) {
-            $registerString = $register | ConvertTo-Json
-            Write-Host "Registration failed for feature $FeatureName for $ProviderNamespace. $registerString" -ForegroundColor Red
-            return $false
-        }
-
-        Write-Host "Subscription registered for feature $FeatureName for $ProviderNamespace" -ForegroundColor Green
-        return $true
-    }
-    catch {
-        Write-Host "Error registering feature $FeatureName for $ProviderNamespace : $($_.Exception.Message)" -ForegroundColor Red
-        return $false
-    }
-}
-
 function Initialize-SubscriptionForPowerPlatform {
     [CmdletBinding()]
     param (
@@ -177,10 +119,6 @@ function Initialize-SubscriptionForPowerPlatform {
     }
     if(-not(Register-ResourceProvider -ProviderNamespace "Microsoft.PowerPlatform")) {
         Write-Host "Failed to register Microsoft.PowerPlatform resource provider" -ForegroundColor Red
-        return $false
-    }
-    if(-not(Register-ProviderFeature -FeatureName "enterprisePoliciesPreview" -ProviderNamespace "Microsoft.PowerPlatform")) {
-        Write-Host "Failed to register enterprisePoliciesPreview feature for Microsoft.PowerPlatform" -ForegroundColor Red
         return $false
     }
     Add-ValidatedSubscriptionToCache -SubscriptionId $SubscriptionId
