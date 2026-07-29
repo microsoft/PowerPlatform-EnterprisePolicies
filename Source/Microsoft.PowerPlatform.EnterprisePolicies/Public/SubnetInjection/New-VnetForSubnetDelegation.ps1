@@ -93,7 +93,7 @@ function New-VnetForSubnetDelegation {
     $null = Set-AzContext -Subscription $SubscriptionId
 
     if(-not(Initialize-SubscriptionForPowerPlatform -SubscriptionId $SubscriptionId)) {
-        throw "Failed to initialize subscription for Power Platform. Please ensure the subscription is registered for Microsoft.PowerPlatform, Microsoft.Network and the enterprisePoliciesPreview feature is enabled."
+        throw "Failed to initialize subscription for Power Platform. Please ensure the subscription is registered for Microsoft.PowerPlatform and Microsoft.Network."
     }
 
     if ($CreateVirtualNetwork) {

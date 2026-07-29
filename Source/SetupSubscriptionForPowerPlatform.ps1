@@ -43,16 +43,5 @@ function SetupSubscriptionForPowerPlatform
         }
         Write-Host "Subscription registered for Microsoft.PowerPlatform" 
     }
-    
-    #Enable the feature
-    Write-Host "Registering the subscription for feature enterprisePoliciesPreview for Microsoft.PowerPlatform"
-    $register = Register-AzProviderFeature -FeatureName enterprisePoliciesPreview -ProviderNamespace Microsoft.PowerPlatform
-    if ($null -eq $register -or $null -eq $register.RegistrationState)
-    {
-        $registerString = $register | ConvertTo-Json
-        Write-Host "Registration failed for feature enterprisePoliciesPreview for subscription $subscription $registerString" -ForegroundColor Red
-        return
-    }
-    Write-Host "Subscription registered for feature enterprisePoliciesPreview for Microsoft.PowerPlatform"        
 }
 SetupSubscriptionForPowerPlatform

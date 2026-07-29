@@ -53,8 +53,6 @@ function Get-AzResource {
 function New-AzResourceGroupDeployment {}
 function Get-AzResourceProvider {}
 function Register-AzResourceProvider {}
-function Get-AzProviderFeature {}
-function Register-AzProviderFeature {}
 function Remove-AzResource {
     param(
         [string]$ResourceId,
