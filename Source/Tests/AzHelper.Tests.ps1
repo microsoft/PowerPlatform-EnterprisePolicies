@@ -196,105 +196,10 @@ Describe 'AzHelper Tests' {
             }
         }
 
-        Context 'Register-ProviderFeature' {
-            It 'Returns true when feature is already registered' {
-                Mock Get-AzProviderFeature {
-                    return [PSCustomObject]@{
-                        FeatureName = "enterprisePoliciesPreview"
-                        ProviderName = "Microsoft.PowerPlatform"
-                        RegistrationState = "Registered"
-                    }
-                }
-
-                $result = Register-ProviderFeature -FeatureName "enterprisePoliciesPreview" -ProviderNamespace "Microsoft.PowerPlatform"
-
-                $result | Should -Be $true
-                Should -Invoke Get-AzProviderFeature -Times 1
-            }
-
-            It 'Registers feature when not registered' {
-                Mock Get-AzProviderFeature { return $null }
-                Mock Register-AzProviderFeature {
-                    return [PSCustomObject]@{
-                        FeatureName = "enterprisePoliciesPreview"
-                        ProviderName = "Microsoft.PowerPlatform"
-                        RegistrationState = "Registered"
-                    }
-                }
-
-                $result = Register-ProviderFeature -FeatureName "enterprisePoliciesPreview" -ProviderNamespace "Microsoft.PowerPlatform"
-
-                $result | Should -Be $true
-                Should -Invoke Register-AzProviderFeature -Times 1
-            }
-
-            It 'Registers feature when registration state is not Registered' {
-                Mock Get-AzProviderFeature {
-                    return [PSCustomObject]@{
-                        FeatureName = "enterprisePoliciesPreview"
-                        ProviderName = "Microsoft.PowerPlatform"
-                        RegistrationState = "NotRegistered"
-                    }
-                }
-                Mock Register-AzProviderFeature {
-                    return [PSCustomObject]@{
-                        FeatureName = "enterprisePoliciesPreview"
-                        ProviderName = "Microsoft.PowerPlatform"
-                        RegistrationState = "Registering"
-                    }
-                }
-
-                $result = Register-ProviderFeature -FeatureName "enterprisePoliciesPreview" -ProviderNamespace "Microsoft.PowerPlatform"
-
-                $result | Should -Be $true
-            }
-
-            It 'Returns false when Register-AzProviderFeature returns null' {
-                Mock Get-AzProviderFeature { return $null }
-                Mock Register-AzProviderFeature { return $null }
-
-                $result = Register-ProviderFeature -FeatureName "enterprisePoliciesPreview" -ProviderNamespace "Microsoft.PowerPlatform"
-
-                $result | Should -Be $false
-            }
-
-            It 'Returns false when Register-AzProviderFeature has no RegistrationState' {
-                Mock Get-AzProviderFeature { return $null }
-                Mock Register-AzProviderFeature {
-                    return [PSCustomObject]@{
-                        FeatureName = "enterprisePoliciesPreview"
-                        ProviderName = "Microsoft.PowerPlatform"
-                    }
-                }
-
-                $result = Register-ProviderFeature -FeatureName "enterprisePoliciesPreview" -ProviderNamespace "Microsoft.PowerPlatform"
-
-                $result | Should -Be $false
-            }
-
-            It 'Returns false when Get-AzProviderFeature throws exception' {
-                Mock Get-AzProviderFeature { throw "Network error" }
-
-                $result = Register-ProviderFeature -FeatureName "enterprisePoliciesPreview" -ProviderNamespace "Microsoft.PowerPlatform"
-
-                $result | Should -Be $false
-            }
-
-            It 'Returns false when Register-AzProviderFeature throws exception' {
-                Mock Get-AzProviderFeature { return $null }
-                Mock Register-AzProviderFeature { throw "Registration failed" }
-
-                $result = Register-ProviderFeature -FeatureName "enterprisePoliciesPreview" -ProviderNamespace "Microsoft.PowerPlatform"
-
-                $result | Should -Be $false
-            }
-        }
-
         Context 'Initialize-SubscriptionForPowerPlatform' {
             It 'Returns true when subscription is already validated' {
                 Mock Test-SubscriptionValidated { return $true }
                 Mock Register-ResourceProvider { return $true }
-                Mock Register-ProviderFeature { return $true }
                 Mock Add-ValidatedSubscriptionToCache {}
 
                 $result = Initialize-SubscriptionForPowerPlatform -SubscriptionId "sub-123"
@@ -302,21 +207,18 @@ Describe 'AzHelper Tests' {
                 $result | Should -Be $true
                 Should -Invoke Test-SubscriptionValidated -Times 1
                 Should -Invoke Register-ResourceProvider -Times 0
-                Should -Invoke Register-ProviderFeature -Times 0
                 Should -Invoke Add-ValidatedSubscriptionToCache -Times 0
             }
 
-            It 'Registers all required providers and features for new subscription' {
+            It 'Registers all required providers for new subscription' {
                 Mock Test-SubscriptionValidated { return $false }
                 Mock Register-ResourceProvider { return $true }
-                Mock Register-ProviderFeature { return $true }
                 Mock Add-ValidatedSubscriptionToCache {}
 
                 $result = Initialize-SubscriptionForPowerPlatform -SubscriptionId "sub-456"
 
                 $result | Should -Be $true
                 Should -Invoke Register-ResourceProvider -Times 2
-                Should -Invoke Register-ProviderFeature -Times 1
                 Should -Invoke Add-ValidatedSubscriptionToCache -Times 1
             }
 
@@ -330,7 +232,6 @@ Describe 'AzHelper Tests' {
                     }
                     return $true
                 }
-                Mock Register-ProviderFeature { return $true }
                 Mock Add-ValidatedSubscriptionToCache {}
 
                 $result = Initialize-SubscriptionForPowerPlatform -SubscriptionId "sub-789"
@@ -349,7 +250,6 @@ Describe 'AzHelper Tests' {
                     }
                     return $true
                 }
-                Mock Register-ProviderFeature { return $true }
                 Mock Add-ValidatedSubscriptionToCache {}
 
                 $result = Initialize-SubscriptionForPowerPlatform -SubscriptionId "sub-abc"
@@ -358,22 +258,9 @@ Describe 'AzHelper Tests' {
                 Should -Invoke Add-ValidatedSubscriptionToCache -Times 0
             }
 
-            It 'Returns false when feature registration fails' {
-                Mock Test-SubscriptionValidated { return $false }
-                Mock Register-ResourceProvider { return $true }
-                Mock Register-ProviderFeature { return $false }
-                Mock Add-ValidatedSubscriptionToCache {}
-
-                $result = Initialize-SubscriptionForPowerPlatform -SubscriptionId "sub-def"
-
-                $result | Should -Be $false
-                Should -Invoke Add-ValidatedSubscriptionToCache -Times 0
-            }
-
             It 'Adds subscription to cache after successful initialization' {
                 Mock Test-SubscriptionValidated { return $false }
                 Mock Register-ResourceProvider { return $true }
-                Mock Register-ProviderFeature { return $true }
                 Mock Add-ValidatedSubscriptionToCache {}
                 $subscriptionId = "sub-ghi"
 

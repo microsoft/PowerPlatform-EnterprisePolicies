@@ -116,7 +116,7 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
         It 'Should throw when PolicyResourceId format is invalid' {
             { Get-SubnetInjectionEnterprisePolicy `
                 -PolicyResourceId "invalid-resource-id" `
-                -TenantId $script:testTenantId } | Should -Throw "*Invalid PolicyResourceId format*"
+                -TenantId $script:testTenantId } | Should -Throw "*Invalid resource ID format*"
         }
 
         It 'Should throw when policy is not found' {
@@ -134,7 +134,7 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
         }
 
         It 'Should retrieve policy linked to environment and return EnterprisePolicy object' {
-            Mock Get-BAPEnvironment { return $script:mockEnvironmentWithPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-PPEnvironment { return $script:mockEnvironmentWithPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-EnterprisePolicy { return $script:mockPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             $result = Get-SubnetInjectionEnterprisePolicy `
@@ -146,7 +146,7 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
         }
 
         It 'Should throw when environment has no linked policy' {
-            Mock Get-BAPEnvironment { return $script:mockEnvironmentWithoutPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-PPEnvironment { return $script:mockEnvironmentWithoutPolicy } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             { Get-SubnetInjectionEnterprisePolicy `
                 -EnvironmentId $script:testEnvironmentId `
@@ -154,7 +154,7 @@ Describe 'Get-SubnetInjectionEnterprisePolicy Tests' {
         }
 
         It 'Should throw when environment retrieval fails' {
-            Mock Get-BAPEnvironment { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-PPEnvironment { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             { Get-SubnetInjectionEnterprisePolicy `
                 -EnvironmentId $script:testEnvironmentId `

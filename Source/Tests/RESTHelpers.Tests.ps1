@@ -13,28 +13,28 @@ Describe 'RESTHelpers Tests' {
         
         Context 'Testing Get-APIResourceUrl' {
             It 'Throws an error for unsupported endpoint' {
-                { Get-APIResourceUrl -Endpoint ([BAPEndpoint]::unknown) } | Should -Throw "Unsupported BAP endpoint: unknown"
+                { Get-APIResourceUrl -Endpoint ([PPEndpoint]::unknown) } | Should -Throw "Unsupported PP endpoint: unknown"
             }
     
             It 'Returns the correct resource URL for a valid endpoint' {
-                $result = Get-APIResourceUrl -Endpoint ([BAPEndpoint]::prod)
+                $result = Get-APIResourceUrl -Endpoint ([PPEndpoint]::prod)
                 $result | Should -Be "https://api.powerplatform.com/"
             }
         }
     
         Context 'Testing Get-EnvironmentRouteHostName' {
             It 'Returns the correct route for TIP1 endpoint' {
-                $result = Get-EnvironmentRouteHostName -EnvironmentId "12345678-1234-1234-1234-123456789012" -Endpoint ([BAPEndpoint]::tip1)
+                $result = Get-EnvironmentRouteHostName -EnvironmentId "12345678-1234-1234-1234-123456789012" -Endpoint ([PPEndpoint]::tip1)
                 $result | Should -Be "1234567812341234123412345678901.2.environment.api.preprod.powerplatform.com"
             }
     
             It 'Returns the correct route for PROD endpoint' {
-                $result = Get-EnvironmentRouteHostName -EnvironmentId "3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([BAPEndpoint]::prod)
+                $result = Get-EnvironmentRouteHostName -EnvironmentId "3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([PPEndpoint]::prod)
                 $result | Should -Be "3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
             }
     
             It 'Returns the correct route when EnvironmentId is not a Guid' {
-                $result = Get-EnvironmentRouteHostName -EnvironmentId "Default3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([BAPEndpoint]::prod)
+                $result = Get-EnvironmentRouteHostName -EnvironmentId "Default3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([PPEndpoint]::prod)
                 $result | Should -Be "Default3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
             }
         }
@@ -46,37 +46,60 @@ Describe 'RESTHelpers Tests' {
                 $query = "api-version=2024-10-01"
                 $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
                 $httpMethod = [System.Net.Http.HttpMethod]::Get
-                $endpoint = [BAPEndpoint]::prod
+                $endpoint = [PPEndpoint]::prod
 
                 $result = New-EnvironmentRouteRequest -EnvironmentId $envId -Path $path -Query $query -AccessToken $secureString -HttpMethod $httpMethod -Endpoint $endpoint
 
-                $result.RequestUri.AbsoluteUri | Should -Be "https://primary-3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com/plex/networkUsage?api-version=2024-10-01"
+                $result.RequestUri.AbsoluteUri | Should -Be "https://3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com/plex/networkUsage?api-version=2024-10-01"
                 $result.Method | Should -Be $httpMethod
-                $result.Headers.Host | Should -Be "3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
             }
         }
 
         Context 'Testing Get-HttpClient' {
             BeforeEach {
-                #This test could be flaky if other tests create HttpClient instances, ensure that doesn't happen
                 $script:httpClient = $null
             }
             AfterAll {
                 $script:httpClient = $null
             }
-            It 'Returns an HttpClient with only the User-Agent header set' {
+            It 'Returns an HttpClient with User-Agent and x-ms-useragent headers set' {
                 $client = Get-HttpClient
                 $client.DefaultRequestHeaders.UserAgent.Count | Should -Be 1
                 $client.DefaultRequestHeaders.UserAgent[0].Product.Name | Should -Be "Microsoft.PowerPlatform.EnterprisePolicies"
                 $client.DefaultRequestHeaders.UserAgent[0].Product.Version | Should -Be "1.0.0"
-                $client.DefaultRequestHeaders.Count | Should -Be 1
+                $client.DefaultRequestHeaders.Contains("x-ms-useragent") | Should -BeTrue
+                $client.DefaultRequestHeaders.GetValues("x-ms-useragent") | Should -Be "Microsoft.PowerPlatform.EnterprisePolicies/1.0.0 ($([System.Environment]::OSVersion.Platform))"
             }
 
             It 'Follows a singleton pattern'{
-                Mock New-Object -ParameterFilter { $TypeName -eq 'System.Net.Http.HttpClient' } { [System.Net.Http.HttpClient]::new() } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-                Get-HttpClient
-                Get-HttpClient
-                Should -Invoke New-Object -Times 1
+                $client1 = Get-HttpClient
+                $client2 = Get-HttpClient
+                [Object]::ReferenceEquals($client1, $client2) | Should -BeTrue
+            }
+        }
+
+        Context 'Testing Send-Request' {
+            It 'Returns the response on a success status' {
+                $mockClient = [HttpClientMock]::new()
+                $mockResult = [HttpClientResultMock]::new("ok")
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                $result = Send-Request -Request "req"
+
+                $result | Should -Be $mockResult
+            }
+
+            It 'Throws with status code and correlation ID on a failure status' {
+                $mockClient = [HttpClientMock]::new()
+                $mockResult = [HttpClientResultMock]::new("server says no", "text/plain", @{"x-ms-correlation-id" = "abc-123"})
+                $mockResult.StatusCode = 500
+                $mockResult.IsSuccessStatusCode = $false
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return "server says no" } -ParameterFilter { $task -ne "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                { Send-Request -Request "req" } | Should -Throw "*Request failed*server says no*500*abc-123*"
             }
         }
 

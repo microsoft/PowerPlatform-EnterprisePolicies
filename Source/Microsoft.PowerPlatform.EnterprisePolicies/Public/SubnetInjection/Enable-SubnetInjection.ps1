@@ -9,14 +9,14 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Enables Subnet Injection for a Power Platform environment by linking it to an Enterprise Policy.
+Enables subnet injection for a Power Platform environment by linking it to an enterprise policy.
 
 .DESCRIPTION
-This cmdlet links an existing Subnet Injection Enterprise Policy to a Power Platform environment,
+The Enable-SubnetInjection cmdlet links an existing subnet injection enterprise policy to a Power Platform environment,
 enabling the environment to use the delegated virtual network subnets configured in the policy.
 
 If the environment already has a different policy linked, use the -Swap switch to replace it.
-Without -Swap, the cmdlet will throw an error to prevent accidental policy replacement.
+Without -Swap, the cmdlet returns an error to prevent accidental policy replacement.
 
 The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
 Use -NoWait to return immediately after the operation is initiated.
@@ -27,19 +27,19 @@ System.Boolean
 Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated.
 
 .EXAMPLE
-Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
 
-Enables Subnet Injection for the environment by linking it to the specified policy.
+Enables subnet injection for the environment by linking it to the specified policy.
 
 .EXAMPLE
-Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -TenantId "87654321-4321-4321-4321-210987654321" -Endpoint usgovhigh
+Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -Endpoint usgovhigh
 
-Enables Subnet Injection for an environment in the US Government High cloud.
+Enables subnet injection for an environment in the US Government High cloud.
 
 .EXAMPLE
 Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/newPolicy" -Swap
 
-Replaces the existing Subnet Injection policy with a new one.
+Replaces the existing subnet injection policy with a new one.
 
 .EXAMPLE
 Enable-SubnetInjection -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait
@@ -55,14 +55,17 @@ function Enable-SubnetInjection {
         [string]$EnvironmentId,
 
         [Parameter(Mandatory, HelpMessage="The full Azure ARM resource ID of the Subnet Injection Enterprise Policy")]
-        [ValidateNotNullOrEmpty()]
+        [ValidateAzureResourceId("Microsoft.PowerPlatform/enterprisePolicies")]
         [string]$PolicyArmId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The Azure AD tenant ID")]
+        [Parameter(Mandatory=$false, HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use")]
+        [AzureEnvironment]$AzureEnvironment = [AzureEnvironment]::AzureCloud,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth,
@@ -80,16 +83,16 @@ function Enable-SubnetInjection {
     $ErrorActionPreference = "Stop"
 
     # Connect to Azure
-    if (-not(Connect-Azure -Endpoint $Endpoint -TenantId $TenantId -Force:$ForceAuth)) {
+    if (-not(Connect-Azure -AzureEnvironment $AzureEnvironment -TenantId $TenantId -Force:$ForceAuth)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
     }
 
     # Validate that the environment exists
     Write-Verbose "Retrieving environment: $EnvironmentId"
-    $environment = Get-BAPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
+    $environment = Get-PPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
 
     if ($null -eq $environment) {
-        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environement exists, ensure you have the necessary permissions to access it and that you are connecting to the correct BAP endpoint."
+        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environement exists, ensure you have the necessary permissions to access it and that you are connecting to the correct PP endpoint."
     }
 
     Write-Verbose "Environment retrieved successfully"
@@ -113,15 +116,11 @@ function Enable-SubnetInjection {
         throw "Cannot use -Swap when no Subnet Injection policy is currently linked to the environment. Remove the -Swap parameter to enable Subnet Injection."
     }
 
-    # Extract subscription ID from policy ARM ID and set context
-    if ($PolicyArmId -match "/subscriptions/([^/]+)/") {
-        $subscriptionId = $Matches[1]
-        Write-Verbose "Setting subscription context to $subscriptionId"
-        $null = Set-AzContext -Subscription $subscriptionId
-    }
-    else {
-        throw "Invalid PolicyArmId format. Expected format: /subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.PowerPlatform/enterprisePolicies/{policyName}"
-    }
+    # Extract subscription ID from policy ARM ID and set context (format validated by attribute)
+    $null = $PolicyArmId -match "/subscriptions/([^/]+)/"
+    $subscriptionId = $Matches[1]
+    Write-Verbose "Setting subscription context to $subscriptionId"
+    $null = Set-AzContext -Subscription $subscriptionId
 
     # Get the enterprise policy and extract SystemId
     Write-Verbose "Retrieving enterprise policy: $PolicyArmId"
@@ -147,7 +146,16 @@ function Enable-SubnetInjection {
     $policyLocation = $policy.Location
 
     if ($environmentLocation -ine $policyLocation) {
-        throw "Environment location '$environmentLocation' does not match the enterprise policy location '$policyLocation'. The environment and policy must be in the same location."
+        if( ($environmentLocation -eq "unitedstates" -and $policyLocation -eq "unitedstateseuap") -or
+            ($environmentLocation -eq "unitedkingdom" -and $policyLocation -eq "uk") -or
+            ($environmentLocation -eq "unitedarabemirates" -and $policyLocation -eq "uae") -or 
+            ($environmentLocation -eq "usgovhigh" -and $policyLocation -eq "usgov") -or
+            ($environmentLocation -eq "southamerica" -and $policyLocation -eq "brazil") ) {
+            Write-Verbose "Environment is in '$environmentLocation' and policy is in '$policyLocation'. Treating locations as compatible."
+        }
+        else {
+            throw "Environment location '$environmentLocation' does not match the enterprise policy location '$policyLocation'. The environment and policy must be in the same location."
+        }
     }
 
     Write-Verbose "Environment location '$environmentLocation' matches policy location '$policyLocation'"

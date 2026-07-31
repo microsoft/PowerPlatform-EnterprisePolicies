@@ -20,15 +20,15 @@ Describe 'Get-EnvironmentHistoricalUsage Tests' {
             $resultClass.AzureRegion = "EastUs"
             $resultClass.SubnetName = "default"
             $resultJsonString = ($resultClass | ConvertTo-Json)
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $region = "EastUs"
             $mockResult = [HttpClientResultMock]::new($resultJsonString)
+            $httpClientMock = [HttpClientMock]::new()
 
-            Mock Send-RequestWithRetries { return $mockResult } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock New-JsonRequestMessage -ParameterFilter { $Query.EndsWith($region) } { return "message" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AsyncResult { return $resultJsonString } -ParameterFilter { $task -eq $resultJsonString } -Verifiable -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-HttpClient { return $httpClientMock } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AsyncResult { return $resultJsonString } -ParameterFilter { $task -eq $resultJsonString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             
             $result = Get-EnvironmentHistoricalUsage -Endpoint $endpoint -EnvironmentId $environmentId -Region $region
 

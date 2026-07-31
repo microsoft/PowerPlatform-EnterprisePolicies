@@ -69,6 +69,10 @@ Describe 'VnetValidations Tests' {
                 $result.ResourceId | Should -Be $mockVnet.ResourceId
             }
 
+            It 'Throws when VirtualNetworkId has trailing slash' {
+                { Get-VirtualNetwork -VirtualNetworkId "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/vnet/" -EnterprisePolicyLocation "unitedstates" } | Should -Throw "*trailing slash*"
+            }
+
             It 'Throws when VNet is not found' {
                 Mock Get-AzResource { return [PSCustomObject]@{ ResourceId = $null } }
 

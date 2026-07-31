@@ -12,8 +12,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 Validates that the account has the correct permissions to run diagnostic commands.
 
 .DESCRIPTION
-Tests that the generated Bearer token for the logged in account has the claim that is necessary to be able to call the diagnostic APIs.
-The necessary permission is the Power Platform Administrator role which is assigned through the Entra portal.
+The Test-AccountPermissions cmdlet tests that the generated bearer token for the signed in account has the claim that's necessary to call the diagnostic APIs. The necessary permission is the Power Platform administrator role, which is assigned through the Microsoft Entra ID portal.
 
 .OUTPUTS
 System.Boolean
@@ -22,8 +21,12 @@ Whether the account has the required permissions.
 .EXAMPLE
 Test-AccountPermissions
 
+Validates that the signed-in account has the Power Platform Administrator role using default settings.
+
 .EXAMPLE
-Test-AccountPermissions -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Test-AccountPermissions -Endpoint usgovhigh
+
+Validates account permissions for an environment in the US Government High cloud.
 #>
 
 function Test-AccountPermissions{
@@ -31,8 +34,8 @@ function Test-AccountPermissions{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
         [switch]$ForceAuth

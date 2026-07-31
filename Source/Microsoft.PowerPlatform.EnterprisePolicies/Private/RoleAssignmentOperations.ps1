@@ -34,7 +34,7 @@ function New-RoleAssignment {
         [string]$EnvironmentGroupId,
 
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod
     )
 
     # Build the scope and path based on parameter set
@@ -83,10 +83,11 @@ function New-RoleAssignment {
 
     # Get authorization service token
     $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
+    $secureAccessToken = ConvertTo-SecureString -String $accessToken -AsPlainText -Force
 
     # Create and send the request
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
-        New-JsonRequestMessage -Uri $uri -AccessToken $accessToken -Content $body -HttpMethod ([System.Net.Http.HttpMethod]::Post)
+        New-JsonRequestMessage -Uri $uri -AccessToken $secureAccessToken -Content $body -HttpMethod ([System.Net.Http.HttpMethod]::Post)
     }
 
     Assert-Result -Result $result
@@ -133,7 +134,7 @@ function Get-RoleAssignments {
         [string]$Permission,
 
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod
     )
 
     # Build the scope and path based on parameter set
@@ -191,11 +192,12 @@ function Get-RoleAssignments {
 
     # Get authorization service token
     $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
+    $secureAccessToken = ConvertTo-SecureString -String $accessToken -AsPlainText -Force
 
     # Create and send the initial request (POST with body)
     $httpMethod = [System.Net.Http.HttpMethod]::Post
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
-        New-JsonRequestMessage -Uri $uri -AccessToken $accessToken -Content $body -HttpMethod $httpMethod
+        New-JsonRequestMessage -Uri $uri -AccessToken $secureAccessToken -Content $body -HttpMethod $httpMethod
     }
 
     Assert-Result -Result $result
@@ -220,7 +222,7 @@ function Get-RoleAssignments {
         Write-Verbose "Fetching next page: $nextLink"
 
         $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
-            New-JsonRequestMessage -Uri $nextLink -AccessToken $accessToken -Content $body -HttpMethod $httpMethod
+            New-JsonRequestMessage -Uri $nextLink -AccessToken $secureAccessToken -Content $body -HttpMethod $httpMethod
         }
 
         Assert-Result -Result $result
@@ -257,7 +259,7 @@ function Remove-RoleAssignment {
         [string]$EnvironmentGroupId,
 
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod
     )
 
     # Build the path based on parameter set
@@ -285,10 +287,11 @@ function Remove-RoleAssignment {
 
     # Get authorization service token
     $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
+    $secureAccessToken = ConvertTo-SecureString -String $accessToken -AsPlainText -Force
 
     # Create and send the request
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
-        New-JsonRequestMessage -Uri $uri -AccessToken $accessToken -HttpMethod ([System.Net.Http.HttpMethod]::Delete)
+        New-JsonRequestMessage -Uri $uri -AccessToken $secureAccessToken -HttpMethod ([System.Net.Http.HttpMethod]::Delete)
     }
 
     # 200 = deleted, 404 = not found
@@ -326,7 +329,7 @@ function Test-PrincipalPermission {
         [string[]]$Permissions,
 
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod
     )
 
     $scope = "/tenants/$TenantId/environments/$EnvironmentId"
@@ -352,10 +355,11 @@ function Test-PrincipalPermission {
 
     # Get authorization service token
     $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
+    $secureAccessToken = ConvertTo-SecureString -String $accessToken -AsPlainText -Force
 
     # Create and send the request
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
-        New-JsonRequestMessage -Uri $uri -AccessToken $accessToken -Content $body -HttpMethod ([System.Net.Http.HttpMethod]::Post)
+        New-JsonRequestMessage -Uri $uri -AccessToken $secureAccessToken -Content $body -HttpMethod ([System.Net.Http.HttpMethod]::Post)
     }
 
     Assert-Result -Result $result

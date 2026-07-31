@@ -1,3 +1,4 @@
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification="Unit test code")]
 param()
 
 BeforeDiscovery{
@@ -6,7 +7,8 @@ BeforeDiscovery{
 
 Describe 'Get-EnvironmentRegion Tests' {
     BeforeAll {
-        Mock Get-PPAPIAccessToken { return "mock-access-token" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        $secureString = (ConvertTo-SecureString "MySecretValue" -AsPlainText -Force)
+        Mock Get-PPAPIAccessToken { return $secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Write-Host {}
         Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
@@ -14,7 +16,7 @@ Describe 'Get-EnvironmentRegion Tests' {
     Context 'Testing Get-EnvironmentRegion' {
         It 'Returns region for a valid environment' {
             $regionString = '"Central US"'
-            $endpoint = [BAPEndpoint]::prod
+            $endpoint = [PPEndpoint]::prod
             $environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
             $mockResult = [HttpClientResultMock]::new($regionString)
             $httpClientMock = [HttpClientMock]::new()

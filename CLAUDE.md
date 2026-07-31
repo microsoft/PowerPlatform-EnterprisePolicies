@@ -66,6 +66,22 @@ Tests use Pester loaded from NuGet packages (version defined in `Directory.Packa
 # Mock Azure module: Source/Tests/FakeAzModule/FakeAZ.psd1
 ```
 
+### Fake Az Module for Testing
+
+The tests use a fake Az module (`Source/Tests/FakeAzModule/`) instead of the real Az module. When adding new cmdlets that call Az cmdlets:
+
+1. Check if the Az cmdlet is already in `Fake-AzModuleFunctions.psm1`
+2. If not, add a stub function with the required parameters:
+   ```powershell
+   function Remove-AzResource {
+       param(
+           [string]$ResourceId,
+           [switch]$Force
+       )
+   }
+   ```
+3. In tests, mock the function with `-ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"`
+
 ## Architecture
 
 ### Module Structure
@@ -79,10 +95,11 @@ Source/Microsoft.PowerPlatform.EnterprisePolicies/
 │   │   ├── New-AuthorizationApplication.ps1         # Create Azure AD app for auth
 │   │   └── Test-AuthorizationApplication.ps1        # Validate auth app setup
 │   └── SubnetInjection/
-│       ├── New-SubnetInjectionEnterprisePolicy.ps1  # Create subnet injection policy
-│       ├── Get-SubnetInjectionEnterprisePolicy.ps1  # Retrieve subnet injection policies
-│       ├── New-VnetForSubnetDelegation.ps1          # VNet setup cmdlet
-│       └── Diagnostics/                              # Diagnostic cmdlets
+│       ├── New-SubnetInjectionEnterprisePolicy.ps1     # Create subnet injection policy
+│       ├── Get-SubnetInjectionEnterprisePolicy.ps1     # Retrieve subnet injection policies
+│       ├── Remove-SubnetInjectionEnterprisePolicy.ps1  # Remove subnet injection policy
+│       ├── New-VnetForSubnetDelegation.ps1             # VNet setup cmdlet
+│       └── Diagnostics/                                 # Diagnostic cmdlets
 │           ├── Get-EnvironmentUsage.ps1
 │           ├── Get-EnvironmentHistoricalUsage.ps1
 │           ├── Get-EnvironmentRegion.ps1
@@ -92,7 +109,7 @@ Source/Microsoft.PowerPlatform.EnterprisePolicies/
 │           └── Test-RBACDiagnosticPermission.ps1    # Test RBAC diagnostic permissions
 └── Private/                   # Internal implementation
     ├── Types.psm1             # Enums and data classes
-    ├── AuthenticationOperations.ps1  # Azure auth + MSAL client for Authorization Service
+    ├── AuthenticationOperations.ps1  # Azure authentication, MSAL client caching for Authorization Service
     ├── EnvironmentOperations.ps1     # BAP environment operations
     ├── RESTHelpers.ps1        # HTTP client with retry logic, BAP API endpoints
     ├── AzHelper.ps1           # Azure resource operations
@@ -107,7 +124,6 @@ Everything under `Source/` outside the module and tests is legacy code being rep
 - `Source/Cmk/` - Legacy CMK scripts
 - `Source/SubnetInjection/` - Legacy subnet injection scripts
 - `Source/Common/` - Legacy shared helpers
-- `Source/Identity/` - Legacy identity scripts
 
 **Do not use these as reference for new code.** Follow patterns in the module only.
 
@@ -167,6 +183,21 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 **Exception:** Test files (`Source/Tests/*.Tests.ps1`) do not require this header.
 
+### Creating New PowerShell Files (CRLF Line Endings)
+
+**CRITICAL:** The Write tool creates files with LF line endings, but the header disclaimer test expects CRLF (`\r\n`). After creating any new `.ps1` file in the module, you **MUST** fix the line endings by running:
+
+```powershell
+Set-Content -Path 'path/to/file.ps1' -Value (Get-Content 'path/to/file.ps1')
+```
+
+This reads the file and writes it back with Windows CRLF line endings. Without this step, the "Contains header disclaimer file" test will fail.
+
+**Example workflow for creating a new cmdlet:**
+1. Use the Write tool to create the file with the header and code
+2. Immediately run the `Set-Content` command to fix line endings
+3. Then run tests
+
 ### Common Parameters for Public Cmdlets
 Public cmdlets that call Azure/BAP APIs should include these common parameters:
 - `TenantId` - Optional Azure AD tenant ID
@@ -193,6 +224,7 @@ Public cmdlets that call Azure/BAP APIs should include these common parameters:
 ### Testing Conventions
 - Write concise, meaningful tests focused on behavior and error handling
 - Avoid testing implementation details (e.g., "Should call X with correct parameters") - focus on outcomes
+- Avoid redundant tests that exercise the same code path with different inputs
 - When using `ConvertTo-SecureString -AsPlainText` in tests, add the suppression attribute at the top of the file:
   ```powershell
   [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification="Unit test code")]
@@ -200,6 +232,15 @@ Public cmdlets that call Azure/BAP APIs should include these common parameters:
   ```
 - **FakeAzModule stubs**: If you need to use `-ParameterFilter` on `Assert-MockCalled`/`Should -Invoke` for a mock, the stub function in `Source/Tests/FakeAzModule/Fake-AzModuleFunctions.psm1` must declare that parameter. Stubs with no parameters won't capture filter values.
 - **Do not run build tasks in parallel**: All build tasks (Build, Test, BuildHelp) share the `Release/` directory. Running them concurrently causes file lock conflicts.
+- **Testing internal types**: Custom types defined in `Private/Types.psm1` aren't directly accessible in tests. Use `InModuleScope` to access them:
+  ```powershell
+  It 'Should validate resource ID' {
+      InModuleScope "Microsoft.PowerPlatform.EnterprisePolicies" {
+          $attribute = [ValidateAzureResourceIdAttribute]::new("Microsoft.PowerPlatform/enterprisePolicies")
+          { $attribute.Validate($resourceId, $null) } | Should -Not -Throw
+      }
+  }
+  ```
 
 ## Dependencies
 
@@ -259,6 +300,14 @@ When adding new classes or enums to `Private/Types.psm1`:
 3. **Create manual documentation**: Types cannot be auto-documented. Create a markdown file in `docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/` following the manual type documentation format (see below).
 
 4. **Update build.settings.ps1**: Add entries to the `$markdownToAppend` variable in the `PostBuildHelp` task to link to your documentation file.
+
+### Custom Validation Attributes
+
+When creating custom `ValidateArgumentsAttribute` classes (like `ValidateAzureResourceIdAttribute`), the type accelerator registration in Types.psm1 automatically registers both:
+- The full name (e.g., `ValidateAzureResourceIdAttribute`)
+- The short name without "Attribute" suffix (e.g., `ValidateAzureResourceId`)
+
+This allows using `[ValidateAzureResourceId("...")]` syntax in parameter declarations. The registration logic handles this automatically for any type ending in "Attribute".
 
 ### Manual Type Documentation Format
 

@@ -200,6 +200,8 @@ Task PostBuild {
 Task PreBuildHelp {
     # When loading the module we don't want to run the prereq checks as that slows things down and forces certain unnecessary things to happen for building help docs.
     $Global:PrereqsChecked = $true
+    # Skip the PSGallery version check on module import so help generation doesn't make live network calls.
+    $Global:SkipModuleVersionCheck = $true
 }
 
 # Executes after the BuildHelpImpl phase of the BuildHelp task.
@@ -232,6 +234,18 @@ The `SSLInformation` class contains detailed information on the TLS handshake at
 
 The `CertificateInformation` class contains detailed information about the certificate presented during the TLS handshake.
 
+#### [ConnectivityInformation](ConnectivityInformation.md)
+
+The `ConnectivityInformation` class represents the result of a TCP connectivity test from your delegated subnet to a destination on a specified port.
+
+#### [HostResolutionInformation](HostResolutionInformation.md)
+
+The `HostResolutionInformation` class represents the result of a DNS resolution performed from your delegated subnet against a hostname.
+
+#### [ApplicationInsightsInformation](ApplicationInsightsInformation.md)
+
+The `ApplicationInsightsInformation` class represents the result of an Application Insights connection test performed from your delegated subnet.
+
 #### [NetworkUsageData](NetworkUsageData.md)
 
 The `NetworkUsageData` class represents historical network usage information about the network configuration of a Power Platform environment.
@@ -246,9 +260,9 @@ The `SubnetUsageDocument` class represents historical network usage information 
 
 Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
 
-#### [BAPEndpoint](BAPEndpoint.md)
+#### [PPEndpoint](PPEndpoint.md)
 
-Represents the different BAP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+Represents the different PP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
 "@
 
     $targetFile = "$DocsRootDir\$DefaultLocale\$ModuleName\$ModuleName.md"

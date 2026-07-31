@@ -12,8 +12,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 Retrieves the current usage of the specified environment.
 
 .DESCRIPTION
-Retrieves the current usage of the specified environment.
-Note, this is only the usage that this environment has. It does not include usage from other environments and it does not include any ips that might be reserved by azure.
+The Get-EnvironmentUsage cmdlet retrieves the current usage of the specified environment. This is only the usage that this environment has. It doesn't include usage from other environments and it doesn't include any IP addresses that might be reserved by Azure.
 
 .OUTPUTS
 NetworkUsage
@@ -22,11 +21,17 @@ A class representing the network usage of the environment. [NetworkUsage](Networ
 .EXAMPLE
 Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
-.EXAMPLE
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Retrieves the current network usage for the specified environment using default settings.
 
 .EXAMPLE
-Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+
+Retrieves the current network usage for an environment in the US Government High cloud.
+
+.EXAMPLE
+Get-EnvironmentUsage -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
+
+Retrieves the current network usage for the specified environment filtered to the westus region.
 #>
 function Get-EnvironmentUsage{
     param(
@@ -37,8 +42,8 @@ function Get-EnvironmentUsage{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region to filter the usage by. Defaults to the region the environment is in.")]
         [string]$Region,
@@ -55,16 +60,13 @@ function Get-EnvironmentUsage{
 
     $path = "/plex/networkUsage"
 
-    $query = "api-version=2024-10-01"
-    if(-not([string]::IsNullOrWhiteSpace($Region)))
-    {
-        $query += "&region=$Region"
+    if ([string]::IsNullOrWhiteSpace($Region)) {
+        $Region = Get-EnvironmentRegionFromCache -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
     }
+    $query = "api-version=2024-10-01&region=$Region"
 
-    $result = Send-RequestWithRetries -MaxRetries 3 -DelaySeconds 2 -RequestFactory {
-        return New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
-    }
-
+    $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
+    $result = Send-Request -Request $request
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if($contentString) {

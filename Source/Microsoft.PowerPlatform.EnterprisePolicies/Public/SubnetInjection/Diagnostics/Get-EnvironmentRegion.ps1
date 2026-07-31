@@ -9,10 +9,10 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Retrieves the region that the specified environment is deployed in.
+Retrieves the region where the specified environment is deployed.
 
 .DESCRIPTION
-Retrieves the region that the specified environment is deployed in. Note, the region is the Power Platform region, but it is aligned with an Azure region.
+The Get-EnvironmentRegion cmdlet retrieves the region where the specified environment is deployed. The region is the Power Platform region, but it's aligned with an Azure region.
 
 .OUTPUTS
 System.String
@@ -21,8 +21,12 @@ A string representing the region of the environment.
 .EXAMPLE
 Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
+Retrieves the region where the specified environment is deployed using default settings.
+
 .EXAMPLE
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+
+Retrieves the region where the specified environment is deployed for an environment in the US Government High cloud.
 #>
 function Get-EnvironmentRegion{
     param(
@@ -33,8 +37,8 @@ function Get-EnvironmentRegion{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication to Azure.")]
         [switch]$ForceAuth
@@ -47,13 +51,9 @@ function Get-EnvironmentRegion{
     }
 
     $path = "/plex/environmentRegion"
-    $query = "api-version=2024-10-01"
-    $client = Get-HttpClient
+    $query = "api-version=2026-02-01"
     $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path $path -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Get) -Endpoint $Endpoint
-    $result = Get-AsyncResult -Task $client.SendAsync($request)
-
-    Assert-Result -Result $result
-
+    $result = Send-Request -Request $request
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
 
     if ($contentString) {
@@ -61,6 +61,6 @@ function Get-EnvironmentRegion{
         Write-Verbose "Your environment is located in region: [$region]"
         return $region
     } else {
-        throw "Failed to retrieve the environment region."
+        throw "Failed to retrieve the environment region from response."
     }
 }

@@ -9,30 +9,37 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Tests the connectivity to a given service in a specified environment.
+Tests the connectivity to a given service in the specified environment.
 
 .DESCRIPTION
-Tests the connectivity to a given service in a specified environment.
-The connectivity test will attempt to establish a TCP connection to the specified destination on the specified port.
-This function is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+The Test-NetworkConnectivity cmdlet tests the connectivity to a given service in the specified environment.
+The connectivity test attempts to establish a TCP connection to the specified destination on the specified port.
+The cmdlet is executed in the context of your delegated subnet in the region that you specify.
+If the region isn't specified, it defaults to the region of the environment.
 
 .OUTPUTS
-System.String
-
-A string representing the result of the connectivity test.
+ConnectivityInformation
+A class representing the result of the TCP connectivity test. [ConnectivityInformation](ConnectivityInformation.md)
 
 .EXAMPLE
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
+Tests TCP connectivity to microsoft.com on the default port (443) from the environment's delegated subnet.
+
 .EXAMPLE
 Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
 
-.EXAMPLE
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Tests TCP connectivity to a SQL database on port 1433 from the environment's delegated subnet.
 
 .EXAMPLE
-Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint usgovhigh
+
+Tests TCP connectivity to a SQL database for an environment in the US Government High cloud.
+
+.EXAMPLE
+Test-NetworkConnectivity -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Region "westus"
+
+Tests TCP connectivity to a SQL database in the westus region instead of the environment's default region.
 #>
 function Test-NetworkConnectivity{
     param(
@@ -50,8 +57,8 @@ function Test-NetworkConnectivity{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the connectivity. Defaults to the region the environment is in.")]
         [string]$Region,
@@ -67,11 +74,10 @@ function Test-NetworkConnectivity{
     }
 
     $path = "/plex/testConnection"
-    $query = "api-version=2024-10-01"
-    if(-not([string]::IsNullOrWhiteSpace($Region)))
-    {
-        $query += "&region=$Region"
+    if ([string]::IsNullOrWhiteSpace($Region)) {
+        $Region = Get-EnvironmentRegionFromCache -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
     }
+    $query = "api-version=2026-02-01&region=$Region"
 
     $Body = @{
         Destination = $Destination
@@ -84,16 +90,18 @@ function Test-NetworkConnectivity{
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
     
-    if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
-        try{
-            return ConvertFrom-Json -InputObject $contentString
-        } catch {
-            Write-Verbose "Failed to convert response to JSON: $($_.Exception.Message)"
-            # If JSON conversion fails, return the raw string
-            return $contentString
+    try{
+        $information = ConvertFrom-JsonToClass -Json $contentString -ClassType ([ConnectivityInformation])
+        if($information.TCPSuccess){
+            Write-Host "TCP connectivity succeeded. Successfully connected to [$($information.Destination):$($information.Port)]"
         }
-    }
-    else {
+        else {
+            Write-Warning "TCP connectivity failed. A connection to [$($information.Destination):$($information.Port)] from [$($information.ContainerIpAddress)] because : $($information.TCPErrorMessage). For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
+        }
+        return $information
+    } catch {
+        Write-Verbose "Failed to convert response to JSON: $($_.Exception.Message)"
+        # If JSON conversion fails, return the raw string
         return $contentString
     }
 }

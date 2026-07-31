@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 01/27/2026
+ms.date: 02/17/2026
 PlatyPS schema version: 2024-05-01
 title: Get-EnvironmentRegion
 ---
@@ -13,14 +13,14 @@ title: Get-EnvironmentRegion
 
 ## SYNOPSIS
 
-Retrieves the region that the specified environment is deployed in.
+Retrieves the region where the specified environment is deployed.
 
 ## SYNTAX
 
 ### __AllParameterSets
 
 ```
-Get-EnvironmentRegion [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <BAPEndpoint>]
+Get-EnvironmentRegion [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>]
  [-ForceAuth] [<CommonParameters>]
 ```
 
@@ -31,8 +31,8 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Retrieves the region that the specified environment is deployed in.
-Note, the region is the Power Platform region, but it is aligned with an Azure region.
+The Get-EnvironmentRegion cmdlet retrieves the region where the specified environment is deployed.
+The region is the Power Platform region, but it's aligned with an Azure region.
 
 ## EXAMPLES
 
@@ -40,18 +40,22 @@ Note, the region is the Power Platform region, but it is aligned with an Azure r
 
 Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
+Retrieves the region where the specified environment is deployed using default settings.
+
 ### EXAMPLE 2
 
-Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Get-EnvironmentRegion -EnvironmentId "00000000-0000-0000-0000-000000000000" -Endpoint usgovhigh
+
+Retrieves the region where the specified environment is deployed for an environment in the US Government High cloud.
 
 ## PARAMETERS
 
 ### -Endpoint
 
-The BAP endpoint to connect to. Default is 'prod'.
+The Power Platform endpoint to connect to. Defaults to 'prod'.
 
 ```yaml
-Type: BAPEndpoint
+Type: PPEndpoint
 DefaultValue: prod
 SupportsWildcards: false
 Aliases: []

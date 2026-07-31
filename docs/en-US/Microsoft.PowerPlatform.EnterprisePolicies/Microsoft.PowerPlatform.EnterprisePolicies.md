@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/13/2026
+ms.date: 07/31/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -18,13 +18,21 @@ Microsoft PowerPlatform Enterprise policies module
 
 ## Microsoft.PowerPlatform.EnterprisePolicies
 
+### [Disable-Identity](Disable-Identity.md)
+
+Disables identity for a Power Platform environment by unlinking it from its enterprise policy.
+
 ### [Disable-SubnetInjection](Disable-SubnetInjection.md)
 
-Disables Subnet Injection for a Power Platform environment by unlinking it from its Enterprise Policy.
+Disables subnet injection for a Power Platform environment by unlinking it from its enterprise policy.
+
+### [Enable-Identity](Enable-Identity.md)
+
+Enables identity for a Power Platform environment by linking it to an enterprise policy.
 
 ### [Enable-SubnetInjection](Enable-SubnetInjection.md)
 
-Enables Subnet Injection for a Power Platform environment by linking it to an Enterprise Policy.
+Enables subnet injection for a Power Platform environment by linking it to an enterprise policy.
 
 ### [Get-EnvironmentHistoricalUsage](Get-EnvironmentHistoricalUsage.md)
 
@@ -32,23 +40,35 @@ Retrieves the historical network usage of the specified environment.
 
 ### [Get-EnvironmentRegion](Get-EnvironmentRegion.md)
 
-Retrieves the region that the specified environment is deployed in.
+Retrieves the region where the specified environment is deployed.
 
 ### [Get-EnvironmentUsage](Get-EnvironmentUsage.md)
 
 Retrieves the current usage of the specified environment.
 
+### [Get-IdentityEnterprisePolicy](Get-IdentityEnterprisePolicy.md)
+
+Retrieves identity enterprise policies for Power Platform.
+
 ### [Get-RBACRoleAssignment](Get-RBACRoleAssignment.md)
 
 Gets Power Platform RBAC role assignments at a specified scope.
 
+### [Get-SubnetHistoricalUsage](Get-SubnetHistoricalUsage.md)
+
+Retrieves the historical network usage of the subnet backing an enterprise policy, identified by Azure Resource Manager (ARM) resource ID, linked environment, or system ID.
+
 ### [Get-SubnetInjectionEnterprisePolicy](Get-SubnetInjectionEnterprisePolicy.md)
 
-Retrieves Subnet Injection Enterprise Policies for Power Platform.
+Retrieves subnet injection enterprise policies for Power Platform.
 
 ### [New-AuthorizationApplication](New-AuthorizationApplication.md)
 
 Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
+
+### [New-IdentityEnterprisePolicy](New-IdentityEnterprisePolicy.md)
+
+Creates a new identity enterprise policy for Power Platform.
 
 ### [New-RBACRoleAssignment](New-RBACRoleAssignment.md)
 
@@ -56,19 +76,31 @@ Creates a Power Platform RBAC role assignment.
 
 ### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
 
-Creates a new Subnet Injection Enterprise Policy for Power Platform.
+Creates a new subnet injection enterprise policy for Power Platform.
 
 ### [New-VnetForSubnetDelegation](New-VnetForSubnetDelegation.md)
 
 Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprisePolicies delegation, or configures an existing VNet/subnet.
 
+### [Remove-IdentityEnterprisePolicy](Remove-IdentityEnterprisePolicy.md)
+
+Removes an identity enterprise policy for Power Platform.
+
 ### [Remove-RBACRoleAssignment](Remove-RBACRoleAssignment.md)
 
 Removes a Power Platform RBAC role assignment.
 
+### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
+
+Removes a subnet injection enterprise policy for Power Platform.
+
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
 Validates that the account has the correct permissions to run diagnostic commands.
+
+### [Test-AppInsightsConnection](Test-AppInsightsConnection.md)
+
+Tests connectivity to Application Insights by sending a test telemetry event from a specified environment.
 
 ### [Test-AuthorizationApplication](Test-AuthorizationApplication.md)
 
@@ -76,11 +108,11 @@ Tests that an Azure AD application is correctly configured for Power Platform Au
 
 ### [Test-DnsResolution](Test-DnsResolution.md)
 
-Tests the DNS resolution for a given hostname in a specified environment.
+Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
 
 ### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
 
-Tests the connectivity to a given service in a specified environment.
+Tests the connectivity to a given service in the specified environment.
 
 ### [Test-RBACDiagnosticPermission](Test-RBACDiagnosticPermission.md)
 
@@ -88,7 +120,7 @@ Tests Power Platform RBAC diagnostic permissions for a principal on an environme
 
 ### [Test-TLSHandshake](Test-TLSHandshake.md)
 
-Attempts to establish a TLS handshake with the provided destination and port.
+Attempts to establish a Transport Layer Security (TLS) handshake with the provided destination and port.
 
 ## Types
 
@@ -114,6 +146,18 @@ The SSLInformation class contains detailed information on the TLS handshake atte
 
 The CertificateInformation class contains detailed information about the certificate presented during the TLS handshake.
 
+#### [ConnectivityInformation](ConnectivityInformation.md)
+
+The ConnectivityInformation class represents the result of a TCP connectivity test from your delegated subnet to a destination on a specified port.
+
+#### [HostResolutionInformation](HostResolutionInformation.md)
+
+The HostResolutionInformation class represents the result of a DNS resolution performed from your delegated subnet against a hostname.
+
+#### [ApplicationInsightsInformation](ApplicationInsightsInformation.md)
+
+The ApplicationInsightsInformation class represents the result of an Application Insights connection test performed from your delegated subnet.
+
 #### [NetworkUsageData](NetworkUsageData.md)
 
 The NetworkUsageData class represents historical network usage information about the network configuration of a Power Platform environment.
@@ -128,6 +172,6 @@ The SubnetUsageDocument class represents historical network usage information an
 
 Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.
 
-#### [BAPEndpoint](BAPEndpoint.md)
+#### [PPEndpoint](PPEndpoint.md)
 
-Represents the different BAP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+Represents the different PP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.

@@ -9,13 +9,12 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Attempts to establish a TLS handshake with the provided destination and port.
+Attempts to establish a Transport Layer Security (TLS) handshake with the provided destination and port.
 
 .DESCRIPTION
-Tests that a TLS handshake can be established against the provided destination and port.
-
-This function is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+The Test-TLSHandshake cmdlet tests that a TLS handshake can be established against the provided destination and port.
+The cmdlet is executed in the context of your delegated subnet in the region that you specify.
+If the region isn't specified, it defaults to the region of the environment.
 
 .OUTPUTS
 TLSConnectivityInformation
@@ -24,14 +23,22 @@ A class representing the result of the TLS handshake. [TLSConnectivityInformatio
 .EXAMPLE
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "microsoft.com"
 
+Tests TLS handshake with microsoft.com on the default port (443) from the environment's delegated subnet.
+
 .EXAMPLE
 Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433
 
-.EXAMPLE
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod
+Tests TLS handshake with a SQL database on port 1433 from the environment's delegated subnet.
 
 .EXAMPLE
-Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -TenantId "00000000-0000-0000-0000-000000000000" -Endpoint [BAPEndpoint]::Prod -Region "westus"
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Endpoint usgovhigh
+
+Tests TLS handshake with a SQL database for an environment in the US Government High cloud.
+
+.EXAMPLE
+Test-TLSHandshake -EnvironmentId "00000000-0000-0000-0000-000000000000" -Destination "unknowndb.database.windows.net" -Port 1433 -Region "westus"
+
+Tests TLS handshake with a SQL database in the westus region instead of the environment's default region.
 #>
 function Test-TLSHandshake{
     param(
@@ -49,8 +56,8 @@ function Test-TLSHandshake{
         [Parameter(Mandatory=$false, HelpMessage="The id of the tenant that the environment belongs to.")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The BAP endpoint to connect to. Default is 'prod'.")]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure region in which to test the handshake. Defaults to the region the environment is in.")]
         [string]$Region,
@@ -66,11 +73,10 @@ function Test-TLSHandshake{
     }
 
     $path = "/plex/testTLSConnection"
-    $query = "api-version=2024-10-01"
-    if(-not([string]::IsNullOrWhiteSpace($Region)))
-    {
-        $query += "&region=$Region"
+    if ([string]::IsNullOrWhiteSpace($Region)) {
+        $Region = Get-EnvironmentRegionFromCache -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
     }
+    $query = "api-version=2026-02-01&region=$Region"
 
     $Body = @{
         Destination = $Destination
@@ -82,16 +88,25 @@ function Test-TLSHandshake{
     }
 
     $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
-    if ($result.Content.Headers.GetValues("Content-Type") -eq "application/json") {
-        try{
-            return ConvertFrom-JsonToClass -Json $contentString -ClassType ([TLSConnectivityInformation])
-        } catch {
-            Write-Verbose "Failed to convert response to TLSConnectivityInformation: $($_.Exception.Message)"
-            # If JSON conversion fails, return the raw string
-            return $contentString
+    try{
+        $information = ConvertFrom-JsonToClass -Json $contentString -ClassType ([TLSConnectivityInformation])
+        if(-not($information.TCPConnectivity)){
+            Write-Warning "TCP connectivity could not be established to $Destination on port $Port. TLS handshake cannot be performed. For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
+            return $information
         }
-    }
-    else {
+
+        if(-not($information.SSLWithoutCRL.Success)){
+            Write-Warning "TLS handshake failed to $Destination on port $Port. This could indicate that the destination is not configured to accept TLS connections on that port, or there is a network device blocking or interfering with the TLS handshake. Analyze the returned TLSConnectivityInformation object for more details. For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
+        }
+
+        if($information.SSLWithoutCRL.Success -and -not($information.SSLWithCRL.Success)){
+            Write-Warning "TLS handshake was successful when not checking the Certificate Revocation List (CRL), but failed when checking the CRL. This could indicate that the destination's certificate has been revoked or there is an issue with accessing the CRL distribution points. Analyze the returned TLSConnectivityInformation object for more details. For additional troubleshooting steps, please refer to the documentation: https://aka.ms/PPVNET/troubleshoot"
+        }
+
+        return $information
+    } catch {
+        Write-Verbose "Failed to convert response to TLSConnectivityInformation: $($_.Exception.Message)"
+        # If JSON conversion fails, return the raw string
         return $contentString
     }
 }

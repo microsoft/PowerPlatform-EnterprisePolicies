@@ -31,6 +31,7 @@ $SupportedVnetLocations.Add("singapore", "southeastasia")
 $SupportedVnetLocations.Add("sweden", "swedencentral")
 $SupportedVnetLocations.Add("italy", "italynorth")
 $SupportedVnetLocations.Add("usgov", "usgovtexas|usgovvirginia")
+$SupportedVnetLocations.Add("usdod", "usdodeast|usdodcentral")
 
 <#
 .SYNOPSIS
@@ -118,6 +119,11 @@ function Get-VirtualNetwork{
         [ValidateNotNullOrEmpty()]
         [string] $EnterprisePolicyLocation
     )
+
+    if ($VirtualNetworkId.EndsWith("/"))
+    {
+        throw "The VirtualNetworkId parameter has a trailing slash. Please remove the trailing slash and try again. Provided value: $VirtualNetworkId"
+    }
 
     $vnetResource = Get-AzResource -ResourceId $VirtualNetworkId
     if ($null -eq $vnetResource.ResourceId)

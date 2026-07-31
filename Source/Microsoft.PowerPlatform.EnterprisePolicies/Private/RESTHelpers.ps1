@@ -29,7 +29,7 @@ function New-JsonRequestMessage
         [Parameter(Mandatory)]
         [string] $Uri,
         [Parameter(Mandatory)]
-        [string] $AccessToken,
+        [System.Security.SecureString] $AccessToken,
         [Parameter(Mandatory=$false)]
         [string] $Content,
         [Parameter(Mandatory=$false)]
@@ -42,7 +42,7 @@ function New-JsonRequestMessage
     {
         $request.Content = New-Object -TypeName System.Net.Http.StringContent -ArgumentList @($Content, [System.Text.Encoding]::UTF8, "application/json")
     }
-    $request.Headers.Authorization = "Bearer $AccessToken"
+    $request.Headers.Authorization = "Bearer $(ConvertFrom-SecureStringInternal $AccessToken)"
 
     return $request
 }
@@ -57,9 +57,9 @@ function New-EnvironmentRouteRequest
         [Parameter(Mandatory)]
         [string] $Query,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint,
-        [Parameter(Mandatory)]
-        [string] $AccessToken,
+        [PPEndpoint] $Endpoint,
+        [Parameter(Mandatory=$true)]
+        [System.Security.SecureString] $AccessToken,
         [Parameter(Mandatory=$false)]
         [string] $Content,
         [Parameter(Mandatory=$false)]
@@ -69,12 +69,11 @@ function New-EnvironmentRouteRequest
     $hostName = Get-EnvironmentRouteHostName -Endpoint $Endpoint -EnvironmentId $EnvironmentId
     $uriBuilder = [System.UriBuilder]::new()
     $uriBuilder.Scheme = "https"
-    $uriBuilder.Host = "primary-$hostName"
+    $uriBuilder.Host = $hostName
     $uriBuilder.Path = $Path
     $uriBuilder.Query = $Query
 
     $request = New-JsonRequestMessage -Uri $uriBuilder.Uri.ToString() -AccessToken $AccessToken -Content $Content -HttpMethod $HttpMethod
-    $request.Headers.Host = $hostName
     return $request
 }
 
@@ -88,9 +87,9 @@ function New-HomeTenantRouteRequest
         [Parameter(Mandatory)]
         [string] $Query,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint,
-        [Parameter(Mandatory)]
-        [string] $AccessToken,
+        [PPEndpoint] $Endpoint,
+        [Parameter(Mandatory=$true)]
+        [System.Security.SecureString] $AccessToken,
         [Parameter(Mandatory=$false)]
         [string] $Content,
         [Parameter(Mandatory=$false)]
@@ -118,10 +117,16 @@ function Get-HttpClient
     if($null -eq $script:httpClient)
     {
         [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls13 -bor [System.Net.SecurityProtocolType]::Tls12
-    
+
         $script:httpClient = New-Object -TypeName System.Net.Http.HttpClient
         $script:httpClient.DefaultRequestHeaders.Clear()
-        $script:httpClient.DefaultRequestHeaders.UserAgent.Add([System.Net.Http.Headers.ProductInfoHeaderValue]::new("Microsoft.PowerPlatform.EnterprisePolicies", (Get-ModuleVersion)))
+
+        $moduleName = "Microsoft.PowerPlatform.EnterprisePolicies"
+        $moduleVersion = Get-ModuleVersion
+        $osPlatform = [System.Environment]::OSVersion.Platform
+
+        $script:httpClient.DefaultRequestHeaders.UserAgent.Add([System.Net.Http.Headers.ProductInfoHeaderValue]::new($moduleName, $moduleVersion))
+        $script:httpClient.DefaultRequestHeaders.Add("x-ms-useragent", "$moduleName/$moduleVersion ($osPlatform)")
     }
 
     return $script:httpClient
@@ -170,14 +175,14 @@ function Get-EnvironmentRouteHostName {
         [Parameter(Mandatory)]
         [string] $EnvironmentId,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     $baseUri = Get-APIResourceUrl -Endpoint $Endpoint
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $EnvironmentId = $EnvironmentId.Replace("-", "")
-    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2 -or $Endpoint -eq [BAPEndpoint]::usgovhigh) {
+    if(Test-IsSingleCharEndpoint -Endpoint $Endpoint) {
         $shortEnvId = $EnvironmentId.Substring($EnvironmentId.Length - 1, 1)
         $remainingEnvId = $EnvironmentId.Substring(0, $EnvironmentId.Length - 1)
     }
@@ -193,14 +198,14 @@ function Get-TenantRouteHostName {
         [Parameter(Mandatory)]
         [string] $TenantId,
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     $baseUri = Get-APIResourceUrl -Endpoint $Endpoint
     # Separate the scheme from the base URI
     $baseUri = $baseUri.Replace("https://", "").Trim('/')
     $TenantId = $TenantId.Replace("-", "")
-    if($Endpoint -eq [BAPEndpoint]::tip1 -or $Endpoint -eq [BAPEndpoint]::tip2 -or $Endpoint -eq [BAPEndpoint]::usgovhigh) {
+    if(Test-IsSingleCharEndpoint -Endpoint $Endpoint) {
         $shortTenantId = $TenantId.Substring($TenantId.Length - 1, 1)
         $remainingTenantId = $TenantId.Substring(0, $TenantId.Length - 1)
     }
@@ -211,37 +216,37 @@ function Get-TenantRouteHostName {
     return "il-$remainingTenantId.$shortTenantId.tenant.$baseUri"
 }
 
-function Get-BAPEndpointUrl {
+function Get-PPEndpointUrl {
     param (
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     switch ($Endpoint) {
-        ([BAPEndpoint]::tip1) { return "https://tip1.api.bap.microsoft.com/" }
-        ([BAPEndpoint]::tip2) { return "https://tip2.api.bap.microsoft.com/" }
-        ([BAPEndpoint]::prod) { return "https://api.bap.microsoft.com/" }
-        ([BAPEndpoint]::usgovhigh) { return "https://high.api.bap.microsoft.us/" }
-        ([BAPEndpoint]::dod) { return "https://api.bap.appsplatform.us/" }
-        ([BAPEndpoint]::china) { return "https://api.bap.partner.microsoftonline.cn/" }
-        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+        ([PPEndpoint]::tip1) { return "https://tip1.api.bap.microsoft.com/" }
+        ([PPEndpoint]::tip2) { return "https://tip2.api.bap.microsoft.com/" }
+        ([PPEndpoint]::prod) { return "https://api.bap.microsoft.com/" }
+        ([PPEndpoint]::usgovhigh) { return "https://high.api.bap.microsoft.us/" }
+        ([PPEndpoint]::dod) { return "https://api.bap.appsplatform.us/" }
+        ([PPEndpoint]::china) { return "https://api.bap.partner.microsoftonline.cn/" }
+        Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
 
-function Get-BAPResourceUrl {
+function Get-PPResourceUrl {
     param (
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     switch ($Endpoint) {
-        ([BAPEndpoint]::tip1) { return "https://service.powerapps.com/" }
-        ([BAPEndpoint]::tip2) { return "https://service.powerapps.com/" }
-        ([BAPEndpoint]::prod) { return "https://service.powerapps.com/" }
-        ([BAPEndpoint]::usgovhigh) { return "https://high.service.powerapps.us/" }
-        ([BAPEndpoint]::dod) { return "https://service.apps.appsplatform.us/" }
-        ([BAPEndpoint]::china) { return "https://service.powerapps.cn/" }
-        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+        ([PPEndpoint]::tip1) { return "https://service.powerapps.com/" }
+        ([PPEndpoint]::tip2) { return "https://service.powerapps.com/" }
+        ([PPEndpoint]::prod) { return "https://service.powerapps.com/" }
+        ([PPEndpoint]::usgovhigh) { return "https://high.service.powerapps.us/" }
+        ([PPEndpoint]::dod) { return "https://service.apps.appsplatform.us/" }
+        ([PPEndpoint]::china) { return "https://service.powerapps.cn/" }
+        Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
 
@@ -249,18 +254,47 @@ function Get-BAPResourceUrl {
 function Get-APIResourceUrl {
     param (
         [Parameter(Mandatory)]
-        [BAPEndpoint] $Endpoint
+        [PPEndpoint] $Endpoint
     )
 
     switch ($Endpoint) {
-        ([BAPEndpoint]::tip1) { return "https://api.preprod.powerplatform.com/" }
-        ([BAPEndpoint]::tip2) { return "https://api.test.powerplatform.com/" }
-        ([BAPEndpoint]::prod) { return "https://api.powerplatform.com/" }
-        ([BAPEndpoint]::usgovhigh) { return "https://api.high.powerplatform.microsoft.us/" }
-        ([BAPEndpoint]::dod) { return "https://api.appsplatform.us/" }
-        ([BAPEndpoint]::china) { return "https://api.powerplatform.partner.microsoftonline.cn/" }
-        Default { throw "Unsupported BAP endpoint: $Endpoint" }
+        ([PPEndpoint]::tip1) { return "https://api.preprod.powerplatform.com/" }
+        ([PPEndpoint]::tip2) { return "https://api.test.powerplatform.com/" }
+        ([PPEndpoint]::prod) { return "https://api.powerplatform.com/" }
+        ([PPEndpoint]::usgovhigh) { return "https://api.high.powerplatform.microsoft.us/" }
+        ([PPEndpoint]::dod) { return "https://api.appsplatform.us/" }
+        ([PPEndpoint]::china) { return "https://api.powerplatform.partner.microsoftonline.cn/" }
+        Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
+}
+
+function Send-Request {
+    <#
+    .SYNOPSIS
+    Sends an HTTP request once and throws on a non-success status code.
+
+    .DESCRIPTION
+    Wraps the common request boilerplate: get the singleton HttpClient, send the request,
+    extract the x-ms-correlation-id header, and verbose-log the result. On a non-success
+    status code, throws an exception that includes the status code, correlation ID, and
+    response body. Does not retry — use Send-RequestWithRetries for that.
+    #>
+    param (
+        [Parameter(Mandatory)]
+        $Request
+    )
+
+    $client = Get-HttpClient
+    $result = Get-AsyncResult -Task $client.SendAsync($Request)
+    $correlationId = $result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
+
+    if (-not $result.IsSuccessStatusCode) {
+        $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
+        throw "$(Get-LogDate): Request failed: $($contentString.Trim(".")). Status code: $($result.StatusCode). Correlation ID: $correlationId."
+    }
+
+    Write-Verbose "$(Get-LogDate): API Call returned $($result.StatusCode). Correlation ID: $correlationId"
+    return $result
 }
 
 function Send-RequestWithRetries {
@@ -308,7 +342,7 @@ function Send-RequestWithRetries {
                     Write-Host "The service is working on the request and has requested a retry. Waiting for $sleepSeconds seconds as indicated by the Retry-After header..." -ForegroundColor Yellow
                 }
             }
-            elseif($result.StatusCode -eq 502 -and $retryAfterFound) {
+            elseif(($result.StatusCode -eq 502 -or $result.StatusCode -eq 503) -and $retryAfterFound) {
                 # If we previously saw a Retry-After header, extend the wait time as the gateway might not have the route configured yet.
                 $sleepSeconds = 60
                 Write-Host "The gateway has not updated the route information yet. Waiting for $sleepSeconds seconds before retrying..." -ForegroundColor Yellow
@@ -338,21 +372,23 @@ function Test-Result {
         $Result
     )
 
+    $correlationId = $Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
     if (-not($Result.IsSuccessStatusCode))
     {
         $contentString = Get-AsyncResult -Task $Result.Content.ReadAsStringAsync()
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $correlationId"
             return $false
         }
         else
         {
-            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $correlationId"
             return $false
         }
     }
+    Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode). Correlation ID: $correlationId"
     return $true
 }
 
@@ -459,3 +495,16 @@ function ConvertTo-Hashtable($obj) {
     }
     return $hash
 }
+
+ function Test-IsSingleCharEndpoint {
+     param (
+         [Parameter(Mandatory)]
+         [PPEndpoint] $Endpoint
+     )
+     return $Endpoint -in @(
+         [PPEndpoint]::tip1,
+         [PPEndpoint]::tip2,
+         [PPEndpoint]::usgovhigh,
+         [PPEndpoint]::dod
+     )
+ }

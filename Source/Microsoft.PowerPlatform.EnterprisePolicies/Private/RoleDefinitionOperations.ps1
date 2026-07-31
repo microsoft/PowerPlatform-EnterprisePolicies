@@ -11,7 +11,7 @@ function Get-RoleDefinitions {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false)]
         [switch]$RefreshRoles
@@ -33,9 +33,10 @@ function Get-RoleDefinitions {
     Write-Verbose "Fetching role definitions from: $uri"
 
     $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
+    $secureAccessToken = ConvertTo-SecureString -String $accessToken -AsPlainText -Force
 
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
-        New-JsonRequestMessage -Uri $uri -AccessToken $accessToken -HttpMethod ([System.Net.Http.HttpMethod]::Get)
+        New-JsonRequestMessage -Uri $uri -AccessToken $secureAccessToken -HttpMethod ([System.Net.Http.HttpMethod]::Get)
     }
 
     Assert-Result -Result $result
@@ -63,7 +64,7 @@ function Resolve-RoleDefinitionId {
         [string]$RoleName,
 
         [Parameter(Mandatory=$false)]
-        [BAPEndpoint]$Endpoint = [BAPEndpoint]::Prod,
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false)]
         [switch]$RefreshRoles

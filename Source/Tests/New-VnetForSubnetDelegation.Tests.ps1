@@ -58,7 +58,7 @@ Describe 'New-VnetForSubnetDelegation Tests' {
             Should -Invoke Set-AzVirtualNetwork -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
-        It 'Should skip adding delegation if it already exists' {
+        It 'Should skip adding delegation but still return VNet when delegation already exists' {
             $mockSubnetWithDelegation = [PSCustomObject]@{
                 Name = "default"
                 Id = "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/test-rg/providers/Microsoft.Network/virtualNetworks/test-vnet/subnets/default"
@@ -69,6 +69,8 @@ Describe 'New-VnetForSubnetDelegation Tests' {
 
             $result = New-VnetForSubnetDelegation -SubscriptionId "12345678-1234-1234-1234-123456789012" -VirtualNetworkName "test-vnet" -SubnetName "default" -ResourceGroupName "test-rg"
 
+            $result | Should -Not -BeNullOrEmpty
+            $result.Name | Should -Be "test-vnet"
             Should -Invoke Add-AzDelegation -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
     }
