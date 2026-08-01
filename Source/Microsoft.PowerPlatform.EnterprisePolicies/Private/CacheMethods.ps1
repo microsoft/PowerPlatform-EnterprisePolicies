@@ -11,6 +11,9 @@ $script:CachePath = Join-Path $([Environment]::GetFolderPath('LocalApplicationDa
 $script:CacheData = $null
 $script:CurrentCacheVersion = "1.1"
 
+# Well-known key, inside the cache configuration container, that stores the service principal auth settings.
+$script:ServicePrincipalAuthConfigName = "ServicePrincipalAuth"
+
 function Get-EmptyCache{
     return [PSCustomObject]@{
         Version = $script:CurrentCacheVersion
@@ -18,6 +21,7 @@ function Get-EmptyCache{
         RegionCache = [PSCustomObject]@{}
         RoleDefinitions = @{}
         ClientId = ""
+        Configuration = [PSCustomObject]@{}
     }
 }
 
@@ -183,6 +187,72 @@ function Set-CachedClientId{
     }
     else{
         $script:CacheData | Add-Member -NotePropertyName "ClientId" -NotePropertyValue $ClientId -Force
+    }
+
+    Save-Cache
+}
+
+function Get-CachedServicePrincipalAuth{
+    # Reads the service principal auth configuration from the generic configuration
+    # container in the cache. Returns $null when it has not been configured.
+    if($null -eq $script:CacheData.Configuration){
+        return $null
+    }
+
+    $name = $script:ServicePrincipalAuthConfigName
+
+    # Configuration may be a PSCustomObject (from JSON) or a hashtable (in-memory)
+    if($script:CacheData.Configuration -is [hashtable]){
+        if($script:CacheData.Configuration.ContainsKey($name)){
+            return $script:CacheData.Configuration[$name]
+        }
+        return $null
+    }
+
+    $property = $script:CacheData.Configuration.PSObject.Properties[$name]
+    if($null -eq $property){
+        return $null
+    }
+
+    return $property.Value
+}
+
+function Set-CachedServicePrincipalAuth{
+    param(
+        [Parameter(Mandatory)]
+        [AllowNull()]
+        [object]$Configuration
+    )
+
+    # Ensure the configuration container exists (for caches created before this feature)
+    if($null -eq $script:CacheData.Configuration){
+        if($script:CacheData -is [hashtable]){
+            $script:CacheData["Configuration"] = [PSCustomObject]@{}
+        }
+        else{
+            $script:CacheData | Add-Member -NotePropertyName "Configuration" -NotePropertyValue ([PSCustomObject]@{}) -Force
+        }
+    }
+
+    $name = $script:ServicePrincipalAuthConfigName
+
+    if($script:CacheData.Configuration -is [hashtable]){
+        if($null -eq $Configuration){
+            $script:CacheData.Configuration.Remove($name)
+        }
+        else{
+            $script:CacheData.Configuration[$name] = $Configuration
+        }
+    }
+    else{
+        if($null -eq $Configuration){
+            if($null -ne $script:CacheData.Configuration.PSObject.Properties[$name]){
+                $script:CacheData.Configuration.PSObject.Properties.Remove($name)
+            }
+        }
+        else{
+            $script:CacheData.Configuration | Add-Member -NotePropertyName $name -NotePropertyValue $Configuration -Force
+        }
     }
 
     Save-Cache

@@ -9,6 +9,7 @@ Describe 'AuthenticationOperations Tests' {
     InModuleScope 'Microsoft.PowerPlatform.EnterprisePolicies' {
         BeforeAll{
             Mock Write-Host {}
+            Mock Get-CachedServicePrincipalAuth { return $null }
         }
         Context 'Testing Connect-Azure' {
             It 'Connects to Azure with the correct environment' {
@@ -55,34 +56,7 @@ Describe 'AuthenticationOperations Tests' {
                 Assert-MockCalled Connect-AzAccount -Exactly 1
             }
 
-            It 'Prefers service principal context over user context (no tenant)' {
-                $endpoint = [PPEndpoint]::prod
-                Mock Get-AzContext {
-                    return @(
-                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "user@test.com"; Type = "User"; Tenants = @("tenant1") } },
-                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "sp-app-id"; Type = "ServicePrincipal"; Tenants = @("tenant1") } }
-                    )
-                }
-                Mock Set-AzContext {}
-                Connect-Azure -Endpoint $endpoint | Should -Be $true
-                Assert-MockCalled Set-AzContext -Exactly 1 -ParameterFilter { $Context.Account.Id -eq "sp-app-id" }
-            }
-
-            It 'Prefers service principal context over user context (with tenant)' {
-                $endpoint = [PPEndpoint]::prod
-                $tenantId = "12345678-1234-1234-1234-123456789012"
-                Mock Get-AzContext {
-                    return @(
-                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "user@test.com"; Type = "User"; Tenants = @($tenantId) }; Tenant = @{ TenantCategory = "Home"; Id = $tenantId } },
-                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "sp-app-id"; Type = "ServicePrincipal"; Tenants = @($tenantId) }; Tenant = @{ TenantCategory = "Home"; Id = $tenantId } }
-                    )
-                }
-                Mock Set-AzContext {}
-                Connect-Azure -Endpoint $endpoint -TenantId $tenantId | Should -Be $true
-                Assert-MockCalled Set-AzContext -Exactly 1 -ParameterFilter { $Context.Account.Id -eq "sp-app-id" }
-            }
-
-            It 'Falls back to user context when no SP available' {
+            It 'Uses the first available matching context' {
                 $endpoint = [PPEndpoint]::prod
                 Mock Get-AzContext {
                     return @(
@@ -92,20 +66,6 @@ Describe 'AuthenticationOperations Tests' {
                 Mock Set-AzContext {}
                 Connect-Azure -Endpoint $endpoint | Should -Be $true
                 Assert-MockCalled Set-AzContext -Exactly 1 -ParameterFilter { $Context.Account.Id -eq "user@test.com" }
-            }
-
-            It 'Prefers SP in fallback tenant selection' {
-                $endpoint = [PPEndpoint]::prod
-                $tenantId = "12345678-1234-1234-1234-123456789012"
-                Mock Get-AzContext {
-                    return @(
-                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "user@test.com"; Type = "User"; Tenants = @($tenantId) }; Tenant = @{ TenantCategory = ""; Id = "other-tenant" } },
-                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "sp-app-id"; Type = "ServicePrincipal"; Tenants = @($tenantId) }; Tenant = @{ TenantCategory = ""; Id = "other-tenant" } }
-                    )
-                }
-                Mock Set-AzContext {}
-                Connect-Azure -Endpoint $endpoint -TenantId $tenantId | Should -Be $true
-                Assert-MockCalled Set-AzContext -Exactly 1 -ParameterFilter { $Context.Account.Id -eq "sp-app-id" }
             }
 
             It 'Forces a login in with Force switch' {
@@ -148,6 +108,127 @@ Describe 'AuthenticationOperations Tests' {
                 Mock Get-AzContext { return $null }
                 Connect-Azure -Endpoint $endpoint -AuthScope $authScope -Force | Should -Be $true
                 Assert-MockCalled Connect-AzAccount -Exactly 1
+            }
+        }
+
+        Context 'Testing Connect-Azure service principal auth' {
+            It 'Logs in with a managed identity when configured' {
+                $endpoint = [PPEndpoint]::prod
+                Mock Get-CachedServicePrincipalAuth { return @{ Method = "ManagedIdentity"; ClientId = "mi-client-id" } }
+                Mock Get-AzContext { return $null }
+                Mock Connect-AzAccount { return $true } -ParameterFilter { $Identity -and $AccountId -eq "mi-client-id" } -Verifiable
+
+                Connect-Azure -Endpoint $endpoint | Should -Be $true
+
+                Assert-MockCalled Connect-AzAccount -Exactly 1 -ParameterFilter { $Identity -and $AccountId -eq "mi-client-id" }
+            }
+
+            It 'Logs in with a certificate service principal using a thumbprint' {
+                $endpoint = [PPEndpoint]::prod
+                Mock Get-CachedServicePrincipalAuth { return @{ Method = "Certificate"; ClientId = "app-id"; TenantId = "tenant-id"; CertificateThumbprint = "THUMB123" } }
+                Mock Get-AzContext { return $null }
+                Mock Connect-AzAccount { return $true } -ParameterFilter { $ServicePrincipal -and $ApplicationId -eq "app-id" -and $CertificateThumbprint -eq "THUMB123" } -Verifiable
+
+                Connect-Azure -Endpoint $endpoint | Should -Be $true
+
+                Assert-MockCalled Connect-AzAccount -Exactly 1 -ParameterFilter { $ServicePrincipal -and $CertificateThumbprint -eq "THUMB123" }
+            }
+
+            It 'Resolves the certificate thumbprint from a subject name' {
+                $endpoint = [PPEndpoint]::prod
+                Mock Get-CachedServicePrincipalAuth { return @{ Method = "Certificate"; ClientId = "app-id"; TenantId = "tenant-id"; CertificateSubjectName = "CN=MyCert" } }
+                Mock Get-AzContext { return $null }
+                Mock Resolve-CertificateThumbprint { return "RESOLVED-THUMB" } -ParameterFilter { $SubjectName -eq "CN=MyCert" }
+                Mock Connect-AzAccount { return $true } -ParameterFilter { $CertificateThumbprint -eq "RESOLVED-THUMB" } -Verifiable
+
+                Connect-Azure -Endpoint $endpoint | Should -Be $true
+
+                Assert-MockCalled Resolve-CertificateThumbprint -Exactly 1
+                Assert-MockCalled Connect-AzAccount -Exactly 1 -ParameterFilter { $CertificateThumbprint -eq "RESOLVED-THUMB" }
+            }
+
+            It 'Reuses an existing matching service principal context' {
+                $endpoint = [PPEndpoint]::prod
+                Mock Get-CachedServicePrincipalAuth { return @{ Method = "ManagedIdentity"; ClientId = "mi-client-id" } }
+                Mock Get-AzContext {
+                    return @(
+                        [PSCustomObject]@{ Environment = @{ Name = "AzureCloud" }; Account = @{ Id = "mi-client-id"; Tenants = @("tenant1") } }
+                    )
+                }
+                Mock Set-AzContext {}
+                Mock Connect-AzAccount { return $true }
+
+                Connect-Azure -Endpoint $endpoint | Should -Be $true
+
+                Assert-MockCalled Set-AzContext -Exactly 1 -ParameterFilter { $Context.Account.Id -eq "mi-client-id" }
+                Assert-MockCalled Connect-AzAccount -Exactly 0
+            }
+
+            It 'Ignores service principal configuration when Force is specified' {
+                $endpoint = [PPEndpoint]::prod
+                Mock Get-CachedServicePrincipalAuth { return @{ Method = "ManagedIdentity"; ClientId = "mi-client-id" } }
+                Mock Get-AzContext { return $null }
+                Mock Connect-AzAccount { return $true } -ParameterFilter { -not $Identity -and -not $ServicePrincipal } -Verifiable
+
+                Connect-Azure -Endpoint $endpoint -Force | Should -Be $true
+
+                Assert-MockCalled Connect-AzAccount -Exactly 1 -ParameterFilter { -not $Identity -and -not $ServicePrincipal }
+            }
+
+            It 'Throws when the configured method is unknown' {
+                $endpoint = [PPEndpoint]::prod
+                Mock Get-CachedServicePrincipalAuth { return @{ Method = "Bogus"; ClientId = "some-id" } }
+                Mock Get-AzContext { return $null }
+
+                { Connect-Azure -Endpoint $endpoint } | Should -Throw "*Unknown service principal auth method*"
+            }
+        }
+
+        Context 'Testing Set-ServicePrincipalAuth' {
+            BeforeEach {
+                Mock Set-CachedServicePrincipalAuth {}
+            }
+
+            It 'Stores a validated managed identity configuration' {
+                Set-ServicePrincipalAuth -Configuration @{ Method = "ManagedIdentity"; ClientId = "mi-client-id" }
+
+                Assert-MockCalled Set-CachedServicePrincipalAuth -Exactly 1 -ParameterFilter {
+                    $Configuration.Method -eq "ManagedIdentity" -and $Configuration.ClientId -eq "mi-client-id"
+                }
+            }
+
+            It 'Stores a validated certificate configuration' {
+                Set-ServicePrincipalAuth -Configuration @{ Method = "Certificate"; ClientId = "app-id"; TenantId = "tenant-id"; CertificateThumbprint = "THUMB123" }
+
+                Assert-MockCalled Set-CachedServicePrincipalAuth -Exactly 1 -ParameterFilter {
+                    $Configuration.Method -eq "Certificate" -and $Configuration.CertificateThumbprint -eq "THUMB123"
+                }
+            }
+
+            It 'Clears the configuration when passed null' {
+                Set-ServicePrincipalAuth -Configuration $null
+
+                Assert-MockCalled Set-CachedServicePrincipalAuth -Exactly 1 -ParameterFilter { $null -eq $Configuration }
+            }
+
+            It 'Throws when the method is missing' {
+                { Set-ServicePrincipalAuth -Configuration @{ ClientId = "mi-client-id" } } | Should -Throw "*requires a 'Method'*"
+            }
+
+            It 'Throws when a managed identity is missing its client id' {
+                { Set-ServicePrincipalAuth -Configuration @{ Method = "ManagedIdentity" } } | Should -Throw "*requires a 'ClientId'*"
+            }
+
+            It 'Throws when a certificate configuration is missing its tenant id' {
+                { Set-ServicePrincipalAuth -Configuration @{ Method = "Certificate"; ClientId = "app-id"; CertificateThumbprint = "THUMB123" } } | Should -Throw "*requires a 'TenantId'*"
+            }
+
+            It 'Throws when a certificate configuration has neither thumbprint nor subject name' {
+                { Set-ServicePrincipalAuth -Configuration @{ Method = "Certificate"; ClientId = "app-id"; TenantId = "tenant-id" } } | Should -Throw "*requires either 'CertificateThumbprint' or 'CertificateSubjectName'*"
+            }
+
+            It 'Throws when the method is unknown' {
+                { Set-ServicePrincipalAuth -Configuration @{ Method = "Bogus"; ClientId = "some-id" } } | Should -Throw "*Unknown service principal auth method*"
             }
         }
 

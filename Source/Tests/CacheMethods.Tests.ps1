@@ -452,5 +452,73 @@ Describe 'CacheMethods Tests' {
                 $script:CacheData.RoleDefinitions["Prod"].value[0].roleDefinitionName | Should -Be "New Role"
             }
         }
+
+        Context 'Get-CachedServicePrincipalAuth and Set-CachedServicePrincipalAuth' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Returns null when service principal auth is not set' {
+                Get-CachedServicePrincipalAuth | Should -BeNullOrEmpty
+            }
+
+            It 'Stores and retrieves a configuration' {
+                $config = [PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "mi-client-id" }
+                Set-CachedServicePrincipalAuth -Configuration $config
+
+                $result = Get-CachedServicePrincipalAuth
+                $result.Method | Should -Be "ManagedIdentity"
+                $result.ClientId | Should -Be "mi-client-id"
+            }
+
+            It 'Persists the configuration to disk' {
+                $config = [PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "persisted-id" }
+                Set-CachedServicePrincipalAuth -Configuration $config
+
+                Test-Path $script:TestCachePath | Should -Be $true
+                $savedData = Get-Content $script:TestCachePath | ConvertFrom-Json
+                $savedData.Configuration.ServicePrincipalAuth.ClientId | Should -Be "persisted-id"
+            }
+
+            It 'Round-trips a configuration through disk' {
+                $config = [PSCustomObject]@{ Method = "Certificate"; ClientId = "app-id"; TenantId = "tenant-id"; CertificateThumbprint = "THUMB123" }
+                Set-CachedServicePrincipalAuth -Configuration $config
+
+                # Reload from disk
+                Initialize-Cache
+
+                $result = Get-CachedServicePrincipalAuth
+                $result.Method | Should -Be "Certificate"
+                $result.CertificateThumbprint | Should -Be "THUMB123"
+            }
+
+            It 'Removes the configuration when set to null' {
+                Set-CachedServicePrincipalAuth -Configuration ([PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "mi-client-id" })
+                Set-CachedServicePrincipalAuth -Configuration $null
+
+                Get-CachedServicePrincipalAuth | Should -BeNullOrEmpty
+            }
+
+            It 'Overwrites an existing configuration' {
+                Set-CachedServicePrincipalAuth -Configuration ([PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "old-id" })
+                Set-CachedServicePrincipalAuth -Configuration ([PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "new-id" })
+
+                (Get-CachedServicePrincipalAuth).ClientId | Should -Be "new-id"
+            }
+
+            It 'Handles cache files created before the Configuration feature' {
+                # Simulate an old cache without the Configuration key
+                $script:CacheData = [PSCustomObject]@{
+                    Version = "1.1"
+                    SubscriptionsValidated = @()
+                    RegionCache = [PSCustomObject]@{}
+                    RoleDefinitions = @{}
+                }
+
+                Get-CachedServicePrincipalAuth | Should -BeNullOrEmpty
+                { Set-CachedServicePrincipalAuth -Configuration ([PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "mi-client-id" }) } | Should -Not -Throw
+                (Get-CachedServicePrincipalAuth).ClientId | Should -Be "mi-client-id"
+            }
+        }
     }
 }
