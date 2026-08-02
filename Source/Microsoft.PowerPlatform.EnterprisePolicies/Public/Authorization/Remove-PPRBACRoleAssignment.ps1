@@ -16,7 +16,7 @@ This cmdlet removes a role assignment by its ID. The scope can be at the tenant,
 environment, or environment group level.
 
 If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
-New-AuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
+New-PPAuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
 When -ClientId is provided, it is stored in the cache for future use.
 
 Returns $true if the role assignment was deleted, $false if it was not found.
@@ -26,22 +26,22 @@ System.Boolean
 Returns $true if the role assignment was deleted, $false if it was not found.
 
 .EXAMPLE
-Remove-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002"
+Remove-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002"
 
 Removes a tenant-scoped role assignment.
 
 .EXAMPLE
-Remove-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
+Remove-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
 
 Removes an environment-scoped role assignment.
 
 .EXAMPLE
-Remove-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
+Remove-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
 
 Removes an environment group-scoped role assignment.
 #>
 
-function Remove-RBACRoleAssignment {
+function Remove-PPRBACRoleAssignment {
     [CmdletBinding(DefaultParameterSetName = 'TenantScope', SupportsShouldProcess, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory=$false, HelpMessage="The application (client) ID of the app registration")]

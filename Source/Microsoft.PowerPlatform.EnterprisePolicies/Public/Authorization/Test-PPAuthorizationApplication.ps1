@@ -25,17 +25,17 @@ System.Boolean
 Returns $true if the application is correctly configured, $false otherwise.
 
 .EXAMPLE
-Test-AuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012"
+Test-PPAuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012"
 
 Tests that the application is correctly configured for the prod endpoint.
 
 .EXAMPLE
-Test-AuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint tip1
+Test-PPAuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint tip1
 
 Tests that the application is correctly configured for the TIP1 endpoint.
 #>
 
-function Test-AuthorizationApplication {
+function Test-PPAuthorizationApplication {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, HelpMessage="The Application (client) ID of the Azure AD application")]
@@ -85,14 +85,14 @@ function Test-AuthorizationApplication {
 
     # Check if it's configured as a public client
     if (-not $application.IsFallbackPublicClient) {
-        Write-Warning "Application is not configured as a public client. Run New-AuthorizationApplication with -Update to fix this."
+        Write-Warning "Application is not configured as a public client. Run New-PPAuthorizationApplication with -Update to fix this."
         return $false
     }
 
     # Check for localhost redirect URI (required for interactive MSAL authentication)
     $redirectUris = $application.PublicClient.RedirectUri
     if ($null -eq $redirectUris -or $redirectUris.Count -eq 0 -or $redirectUris -notcontains "http://localhost") {
-        Write-Warning "Application does not have 'http://localhost' configured as a redirect URI. Run New-AuthorizationApplication with -Update to fix this."
+        Write-Warning "Application does not have 'http://localhost' configured as a redirect URI. Run New-PPAuthorizationApplication with -Update to fix this."
         return $false
     }
 

@@ -186,29 +186,29 @@ Describe 'AuthenticationOperations Tests' {
 
         Context 'Testing Set-ServicePrincipalAuth' {
             BeforeEach {
-                Mock Set-CachedServicePrincipalAuth {}
+                Mock Set-CachedConfiguration {}
             }
 
             It 'Stores a validated managed identity configuration' {
                 Set-ServicePrincipalAuth -Configuration @{ Method = "ManagedIdentity"; ClientId = "mi-client-id" }
 
-                Assert-MockCalled Set-CachedServicePrincipalAuth -Exactly 1 -ParameterFilter {
-                    $Configuration.Method -eq "ManagedIdentity" -and $Configuration.ClientId -eq "mi-client-id"
+                Assert-MockCalled Set-CachedConfiguration -Exactly 1 -ParameterFilter {
+                    $Name -eq "ServicePrincipalAuth" -and $Value.Method -eq "ManagedIdentity" -and $Value.ClientId -eq "mi-client-id"
                 }
             }
 
             It 'Stores a validated certificate configuration' {
                 Set-ServicePrincipalAuth -Configuration @{ Method = "Certificate"; ClientId = "app-id"; TenantId = "tenant-id"; CertificateThumbprint = "THUMB123" }
 
-                Assert-MockCalled Set-CachedServicePrincipalAuth -Exactly 1 -ParameterFilter {
-                    $Configuration.Method -eq "Certificate" -and $Configuration.CertificateThumbprint -eq "THUMB123"
+                Assert-MockCalled Set-CachedConfiguration -Exactly 1 -ParameterFilter {
+                    $Name -eq "ServicePrincipalAuth" -and $Value.Method -eq "Certificate" -and $Value.CertificateThumbprint -eq "THUMB123"
                 }
             }
 
             It 'Clears the configuration when passed null' {
                 Set-ServicePrincipalAuth -Configuration $null
 
-                Assert-MockCalled Set-CachedServicePrincipalAuth -Exactly 1 -ParameterFilter { $null -eq $Configuration }
+                Assert-MockCalled Set-CachedConfiguration -Exactly 1 -ParameterFilter { $Name -eq "ServicePrincipalAuth" -and $null -eq $Value }
             }
 
             It 'Throws when the method is missing' {
@@ -443,7 +443,7 @@ Describe 'AuthenticationOperations Tests' {
                 $script:mockSilentRequest | Add-Member -MemberType ScriptMethod -Name 'ExecuteAsync' -Value { return $script:mockTask }
 
                 $script:mockApp = [PSCustomObject]@{}
-                $script:mockApp | Add-Member -MemberType ScriptMethod -Name 'AcquireTokenInteractive' -Value { return $script:mockInteractiveRequest }
+                $script:mockApp | Add-Member -MemberType ScriptMethod -Name 'AcquireTokenInteractive' -Value { $script:capturedInteractiveScopes = $args[0]; return $script:mockInteractiveRequest }
                 $script:mockApp | Add-Member -MemberType ScriptMethod -Name 'AcquireTokenSilent' -Value { return $script:mockSilentRequest }
 
                 $script:mockBuilder = [PSCustomObject]@{}
@@ -470,6 +470,20 @@ Describe 'AuthenticationOperations Tests' {
                 $result = Get-AuthorizationServiceToken -Endpoint ([PPEndpoint]::Prod)
 
                 $result | Should -Be "mock-access-token"
+            }
+
+            It 'Passes scopes to the interactive request as a string array' {
+                # Regression guard: MSAL's AcquireTokenInteractive expects IEnumerable<string>.
+                # @("...") is object[], which fails overload resolution, so scopes must be [string[]].
+                Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
+                Mock Get-APIResourceUrl { return "https://api.powerplatform.com/" }
+
+                $script:capturedInteractiveScopes = $null
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
+                Get-AuthorizationServiceToken -Endpoint ([PPEndpoint]::Prod) | Out-Null
+
+                $script:capturedInteractiveScopes -is [string[]] | Should -Be $true
+                $script:capturedInteractiveScopes[0] | Should -Be "https://api.powerplatform.com/.default"
             }
 
             It 'Throws when token acquisition fails' {

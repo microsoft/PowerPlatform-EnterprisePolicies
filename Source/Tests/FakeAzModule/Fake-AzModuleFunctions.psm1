@@ -39,8 +39,21 @@ function Connect-AzAccount {
 function Get-AzContext {}
 function Set-AzContext {
     param(
-        $Context
+        $Context,
+        $Subscription
     )
+}
+function Get-AzSubscription {
+    [CmdletBinding()]
+    param(
+        $SubscriptionId,
+        $TenantId
+    )
+    return [PSCustomObject]@{
+        Id    = $SubscriptionId
+        Name  = "FakeSubscription"
+        State = "Enabled"
+    }
 }
 function Get-AzADAppCredential {}
 function New-AzADAppCredential {}

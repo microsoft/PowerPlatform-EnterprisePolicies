@@ -4,12 +4,12 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 07/31/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
-title: Test-AuthorizationApplication
+title: Test-PPAuthorizationApplication
 ---
 
-# Test-AuthorizationApplication
+# Test-PPAuthorizationApplication
 
 ## SYNOPSIS
 
@@ -20,7 +20,7 @@ Tests that an Azure AD application is correctly configured for Power Platform Au
 ### __AllParameterSets
 
 ```
-Test-AuthorizationApplication [-ClientId] <string> [-TenantId] <string> [[-Endpoint] <PPEndpoint>]
+Test-PPAuthorizationApplication [-ClientId] <string> [-TenantId] <string> [[-Endpoint] <PPEndpoint>]
  [-ForceAuth] [<CommonParameters>]
 ```
 
@@ -43,13 +43,13 @@ It checks:
 
 ### EXAMPLE 1
 
-Test-AuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012"
+Test-PPAuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012"
 
 Tests that the application is correctly configured for the prod endpoint.
 
 ### EXAMPLE 2
 
-Test-AuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint tip1
+Test-PPAuthorizationApplication -ClientId "00000000-0000-0000-0000-000000000001" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint tip1
 
 Tests that the application is correctly configured for the TIP1 endpoint.
 

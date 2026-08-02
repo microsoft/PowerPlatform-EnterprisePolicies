@@ -5,7 +5,7 @@ BeforeDiscovery{
     . $PSScriptRoot\Shared.ps1
 }
 
-Describe 'New-RBACRoleAssignment Tests' {
+Describe 'New-PPRBACRoleAssignment Tests' {
     BeforeAll {
         $script:testClientId = "00000000-0000-0000-0000-000000789012"
         $script:testTenantId = "12345678-1234-1234-1234-123456789012"
@@ -36,13 +36,13 @@ Describe 'New-RBACRoleAssignment Tests' {
         }
 
         It 'Should create a tenant-scoped role assignment' {
-            $result = New-RBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId
+            $result = New-PPRBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId
 
             $result | Should -Not -BeNullOrEmpty
         }
 
         It 'Should call Resolve-RoleDefinitionId with the role name' {
-            New-RBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId
+            New-PPRBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId
 
             Should -Invoke Resolve-RoleDefinitionId -Times 1 -ParameterFilter {
                 $RoleName -eq $script:testRoleName
@@ -50,7 +50,7 @@ Describe 'New-RBACRoleAssignment Tests' {
         }
 
         It 'Should call New-RoleAssignment with resolved role definition ID' {
-            New-RBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId
+            New-PPRBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId
 
             Should -Invoke New-RoleAssignment -Times 1 -ParameterFilter {
                 $RoleDefinitionId -eq $script:testRoleDefinitionId
@@ -67,7 +67,7 @@ Describe 'New-RBACRoleAssignment Tests' {
         }
 
         It 'Should create an environment-scoped role assignment' {
-            $result = New-RBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType Group -Role $script:testRoleName -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId
+            $result = New-PPRBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType Group -Role $script:testRoleName -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId
 
             $result | Should -Not -BeNullOrEmpty
         }
@@ -82,7 +82,7 @@ Describe 'New-RBACRoleAssignment Tests' {
         }
 
         It 'Should create an environment group-scoped role assignment' {
-            $result = New-RBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType ApplicationUser -Role $script:testRoleName -TenantId $script:testTenantId -EnvironmentGroupId $script:testEnvironmentGroupId
+            $result = New-PPRBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType ApplicationUser -Role $script:testRoleName -TenantId $script:testTenantId -EnvironmentGroupId $script:testEnvironmentGroupId
 
             $result | Should -Not -BeNullOrEmpty
         }
@@ -97,7 +97,7 @@ Describe 'New-RBACRoleAssignment Tests' {
         }
 
         It 'Should pass RefreshRoles to Resolve-RoleDefinitionId' {
-            New-RBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId -RefreshRoles
+            New-PPRBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId -RefreshRoles
 
             Should -Invoke Resolve-RoleDefinitionId -Times 1 -ParameterFilter {
                 $RefreshRoles -eq $true
@@ -115,7 +115,7 @@ Describe 'New-RBACRoleAssignment Tests' {
         }
 
         It 'Should use cached ClientId when not specified' {
-            $result = New-RBACRoleAssignment -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId
+            $result = New-PPRBACRoleAssignment -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId
 
             $result | Should -Not -BeNullOrEmpty
         }
@@ -127,7 +127,7 @@ Describe 'New-RBACRoleAssignment Tests' {
         }
 
         It 'Should throw when no ClientId specified and none cached' {
-            { New-RBACRoleAssignment -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
+            { New-PPRBACRoleAssignment -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
         }
     }
 
@@ -136,7 +136,7 @@ Describe 'New-RBACRoleAssignment Tests' {
             Mock New-AuthorizationServiceMsalClient { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            { New-RBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId } | Should -Throw "*Failed to connect to Authorization Service*"
+            { New-PPRBACRoleAssignment -ClientId $script:testClientId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -Role $script:testRoleName -TenantId $script:testTenantId } | Should -Throw "*Failed to connect to Authorization Service*"
         }
     }
 }

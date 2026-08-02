@@ -89,11 +89,11 @@ The tests use a fake Az module (`Source/Tests/FakeAzModule/`) instead of the rea
 Source/Microsoft.PowerPlatform.EnterprisePolicies/
 ├── Public/
 │   ├── Authorization/                                # Power Platform RBAC cmdlets
-│   │   ├── Get-RBACRoleAssignment.ps1               # Query role assignments
-│   │   ├── New-RBACRoleAssignment.ps1               # Create role assignments
-│   │   ├── Remove-RBACRoleAssignment.ps1            # Delete role assignments
-│   │   ├── New-AuthorizationApplication.ps1         # Create Azure AD app for auth
-│   │   └── Test-AuthorizationApplication.ps1        # Validate auth app setup
+│   │   ├── Get-PPRBACRoleAssignment.ps1               # Query role assignments
+│   │   ├── New-PPRBACRoleAssignment.ps1               # Create role assignments
+│   │   ├── Remove-PPRBACRoleAssignment.ps1            # Delete role assignments
+│   │   ├── New-PPAuthorizationApplication.ps1         # Create Azure AD app for auth
+│   │   └── Test-PPAuthorizationApplication.ps1        # Validate auth app setup
 │   └── SubnetInjection/
 │       ├── New-SubnetInjectionEnterprisePolicy.ps1     # Create subnet injection policy
 │       ├── Get-SubnetInjectionEnterprisePolicy.ps1     # Retrieve subnet injection policies

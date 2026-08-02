@@ -7,19 +7,6 @@ THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAI
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
 
-function Select-PreferredContext {
-    param(
-        $Contexts
-    )
-    if ($null -eq $Contexts) {
-        return $null
-    }
-    return $Contexts | Select-Object -First 1
-}
-
-# Supported service principal authentication methods.
-$script:ServicePrincipalAuthMethods = @("ManagedIdentity", "Certificate")
-
 function Set-ServicePrincipalAuth {
     param(
         [Parameter(Mandatory)]
@@ -30,13 +17,13 @@ function Set-ServicePrincipalAuth {
     # A null configuration clears any stored service principal auth so Connect-Azure
     # reverts to the default interactive flow.
     if($null -eq $Configuration){
-        Set-CachedServicePrincipalAuth -Configuration $null
+        Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value $null
         return
     }
 
     $method = $Configuration.Method
     if([string]::IsNullOrWhiteSpace($method)){
-        throw "Service principal auth configuration requires a 'Method' property. Supported methods: $($script:ServicePrincipalAuthMethods -join ', ')."
+        throw "Service principal auth configuration requires a 'Method' property. Supported methods: $([Enum]::GetNames([ServicePrincipalAuthMethod]) -join ', ')."
     }
 
     switch ($method) {
@@ -47,6 +34,7 @@ function Set-ServicePrincipalAuth {
             $normalized = [PSCustomObject]@{
                 Method   = "ManagedIdentity"
                 ClientId = $Configuration.ClientId
+                TenantId = $Configuration.TenantId
             }
         }
         "Certificate" {
@@ -68,11 +56,11 @@ function Set-ServicePrincipalAuth {
             }
         }
         default {
-            throw "Unknown service principal auth method '$method'. Supported methods: $($script:ServicePrincipalAuthMethods -join ', ')."
+            throw "Unknown service principal auth method '$method'. Supported methods: $([Enum]::GetNames([ServicePrincipalAuthMethod]) -join ', ')."
         }
     }
 
-    Set-CachedServicePrincipalAuth -Configuration $normalized
+    Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value $normalized
 }
 
 function Connect-Azure {
@@ -117,8 +105,7 @@ function Connect-Azure {
 
     if(-not($Force) -and [string]::IsNullOrWhiteSpace($AuthScope) -and $null -ne $context) {
         if([string]::IsNullOrWhiteSpace($TenantId)) {
-            $matchedContexts = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment }
-            $matchedContext = Select-PreferredContext -Contexts $matchedContexts
+            $matchedContext = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment } | Select-Object -First 1
             if($matchedContext) {
                 Set-AzContext -Context $matchedContext
                 Write-Host "Already connected to Azure environment: $AzureEnvironment with account $($matchedContext.Account.Id) with tenants [$($matchedContext.Account.Tenants -join ",")]" -ForegroundColor Yellow
@@ -127,16 +114,14 @@ function Connect-Azure {
         }
         else {
             # Prioritize the home tenant if it exists
-            $homeTenantContexts = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Tenant.TenantCategory -eq "Home" -and $_.Tenant.Id -eq $TenantId }
-            $homeTenantContext = Select-PreferredContext -Contexts $homeTenantContexts
+            $homeTenantContext = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Tenant.TenantCategory -eq "Home" -and $_.Tenant.Id -eq $TenantId } | Select-Object -First 1
             if($homeTenantContext) {
                 Set-AzContext -Context $homeTenantContext
                 Write-Host "Already connected to Azure environment: $AzureEnvironment with account $($homeTenantContext.Account.Id) with home tenant Id $TenantId" -ForegroundColor Yellow
                 $foundContext = $true
             }
             else {
-                $tenantContexts = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Account.Tenants -contains $TenantId }
-                $tenantContext = Select-PreferredContext -Contexts $tenantContexts
+                $tenantContext = $context | Where-Object { $_.Environment.Name -eq $AzureEnvironment -and $_.Account.Tenants -contains $TenantId } | Select-Object -First 1
                 if ($tenantContext) {
                     Set-AzContext -Context $tenantContext
                     Write-Host "Already connected to Azure environment: $AzureEnvironment with account $($tenantContext.Account.Id) with tenant Id $TenantId" -ForegroundColor Yellow
@@ -400,7 +385,7 @@ function New-AuthorizationServiceMsalClient {
     if ([string]::IsNullOrWhiteSpace($ClientId)) {
         $ClientId = Get-CachedClientId
         if ([string]::IsNullOrWhiteSpace($ClientId)) {
-            throw "ClientId was not provided and no cached ClientId was found. Run New-AuthorizationApplication or specify -ClientId."
+            throw "ClientId was not provided and no cached ClientId was found. Run New-PPAuthorizationApplication or specify -ClientId."
         }
     }
     else {
@@ -458,7 +443,7 @@ function Get-AuthorizationServiceToken {
     }
 
     $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
-    $Scopes = @("$resourceUrl.default")
+    [string[]]$Scopes = @("$resourceUrl.default")
 
     $cached = $script:AuthorizationServiceCache[$script:AuthorizationServiceCurrentKey]
     $app = $cached.App

@@ -17,7 +17,7 @@ permissions via Power Platform RBAC. The role can be scoped at the tenant,
 environment, or environment group level.
 
 If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
-New-AuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
+New-PPAuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
 When -ClientId is provided, it is stored in the cache for future use.
 
 The Role parameter accepts the role definition name as returned by the Power Platform
@@ -29,27 +29,27 @@ System.Management.Automation.PSCustomObject
 Returns the created role assignment object from the API.
 
 .EXAMPLE
-New-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType User -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002"
+New-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType User -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002"
 
 Creates a tenant-scoped role assignment for a user with the "Power Platform Reader" role.
 
 .EXAMPLE
-New-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType Group -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
+New-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType Group -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
 
 Creates an environment-scoped role assignment for a group.
 
 .EXAMPLE
-New-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType ApplicationUser -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
+New-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType ApplicationUser -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
 
 Creates an environment group-scoped role assignment for an application.
 
 .EXAMPLE
-New-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType User -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -RefreshRoles
+New-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType User -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -RefreshRoles
 
 Creates a role assignment while forcing a refresh of the cached role definitions.
 #>
 
-function New-RBACRoleAssignment {
+function New-PPRBACRoleAssignment {
     [CmdletBinding(DefaultParameterSetName = 'TenantScope')]
     param(
         [Parameter(Mandatory=$false, HelpMessage="The application (client) ID of the app registration")]

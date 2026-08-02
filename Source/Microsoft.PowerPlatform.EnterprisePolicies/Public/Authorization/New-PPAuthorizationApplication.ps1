@@ -18,7 +18,7 @@ is configured as a single-tenant app with delegated permissions for Authorizatio
 and Authorization.RoleAssignments.Write.
 
 If an application with the specified display name already exists, the cmdlet will prompt you to use
-Test-AuthorizationApplication to verify the configuration, or use the -Update switch to update the
+Test-PPAuthorizationApplication to verify the configuration, or use the -Update switch to update the
 existing application with the required settings.
 
 Admin consent is NOT granted automatically. A tenant administrator must grant consent before
@@ -30,22 +30,22 @@ System.String
 Returns the Application (client) ID of the created or updated application.
 
 .EXAMPLE
-New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012"
+New-PPAuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012"
 
 Creates a new app registration and service principal named "MyAuthorizationApp".
 
 .EXAMPLE
-New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Update
+New-PPAuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Update
 
 Updates an existing app registration named "MyAuthorizationApp" with the required permissions.
 
 .EXAMPLE
-New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint usgovhigh
+New-PPAuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint usgovhigh
 
 Creates a new app registration and service principal for the US Government High cloud.
 #>
 
-function New-AuthorizationApplication {
+function New-PPAuthorizationApplication {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory, HelpMessage="The display name for the application registration")]
@@ -83,10 +83,10 @@ function New-AuthorizationApplication {
         Write-Host "  Application (client) ID: $($existingApp.AppId)" -ForegroundColor Yellow
         Write-Host ""
         Write-Host "To verify if this application is correctly configured, run:" -ForegroundColor Cyan
-        Write-Host "  Test-AuthorizationApplication -ClientId '$($existingApp.AppId)' -TenantId '$TenantId' -Endpoint $Endpoint" -ForegroundColor White
+        Write-Host "  Test-PPAuthorizationApplication -ClientId '$($existingApp.AppId)' -TenantId '$TenantId' -Endpoint $Endpoint" -ForegroundColor White
         Write-Host ""
         Write-Host "If the test fails, run this command with the -Update switch to update the application:" -ForegroundColor Cyan
-        Write-Host "  New-AuthorizationApplication -DisplayName '$DisplayName' -TenantId '$TenantId' -Endpoint $Endpoint -Update" -ForegroundColor White
+        Write-Host "  New-PPAuthorizationApplication -DisplayName '$DisplayName' -TenantId '$TenantId' -Endpoint $Endpoint -Update" -ForegroundColor White
         Write-Host ""
         return
     }

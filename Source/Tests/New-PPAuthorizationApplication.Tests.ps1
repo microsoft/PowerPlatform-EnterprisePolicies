@@ -5,7 +5,7 @@ BeforeDiscovery{
     . $PSScriptRoot\Shared.ps1
 }
 
-Describe 'New-AuthorizationApplication Tests' {
+Describe 'New-PPAuthorizationApplication Tests' {
     BeforeAll {
         $script:testTenantId = "12345678-1234-1234-1234-123456789012"
         $script:testDisplayName = "TestAuthorizationApp"
@@ -65,25 +65,25 @@ Describe 'New-AuthorizationApplication Tests' {
         }
 
         It 'Should create application and return AppId' {
-            $result = New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
+            $result = New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
 
             $result | Should -Be $script:testAppId
         }
 
         It 'Should call Get-AzADServicePrincipal to look up API permissions' {
-            New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Endpoint prod
+            New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Endpoint prod
 
             Should -Invoke Get-AzADServicePrincipal -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should create service principal for the application' {
-            New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
+            New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
 
             Should -Invoke New-AzADServicePrincipal -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should cache the returned ClientId' {
-            New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
+            New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
 
             Should -Invoke Set-CachedClientId -Times 1 -ParameterFilter {
                 $ClientId -eq $script:testAppId
@@ -125,13 +125,13 @@ Describe 'New-AuthorizationApplication Tests' {
         }
 
         It 'Should succeed with tip1 endpoint' {
-            $result = New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Endpoint tip1
+            $result = New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Endpoint tip1
 
             $result | Should -Be $script:testAppId
         }
 
         It 'Should succeed with tip2 endpoint' {
-            $result = New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Endpoint tip2
+            $result = New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Endpoint tip2
 
             $result | Should -Be $script:testAppId
         }
@@ -156,7 +156,7 @@ Describe 'New-AuthorizationApplication Tests' {
             Mock Get-AzADApplication { return $script:mockExistingApp } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADApplication { return $script:mockApplication } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
+            $result = New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId
 
             $result | Should -BeNullOrEmpty
             Should -Invoke New-AzADApplication -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -165,7 +165,7 @@ Describe 'New-AuthorizationApplication Tests' {
         It 'Should update existing app when -Update switch is used' {
             Mock Get-AzADApplication { return $script:mockExistingApp } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            $result = New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Update
+            $result = New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Update
 
             $result | Should -Be $script:testAppId
             Should -Invoke Update-AzADApplication -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -182,7 +182,7 @@ Describe 'New-AuthorizationApplication Tests' {
                 return $null
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Update
+            New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId -Update
 
             Should -Invoke New-AzADServicePrincipal -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
@@ -192,7 +192,7 @@ Describe 'New-AuthorizationApplication Tests' {
         It 'Should throw when Connect-Azure fails' {
             Mock Connect-Azure { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            { New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId } | Should -Throw "*Failed to connect to Azure*"
+            { New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId } | Should -Throw "*Failed to connect to Azure*"
         }
 
         It 'Should throw when API service principal not found' {
@@ -200,7 +200,7 @@ Describe 'New-AuthorizationApplication Tests' {
             Mock Get-AzADApplication { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-AzADServicePrincipal { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            { New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId } | Should -Throw "*Could not find service principal*"
+            { New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId } | Should -Throw "*Could not find service principal*"
         }
 
         It 'Should throw when application creation fails' {
@@ -209,7 +209,7 @@ Describe 'New-AuthorizationApplication Tests' {
             Mock Get-AzADServicePrincipal { return $script:mockServicePrincipal } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADApplication { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            { New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId } | Should -Throw "*Failed to create the application*"
+            { New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId } | Should -Throw "*Failed to create the application*"
         }
 
         It 'Should throw when service principal creation fails' {
@@ -227,7 +227,7 @@ Describe 'New-AuthorizationApplication Tests' {
             Mock Update-AzADApplication {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-AzADServicePrincipal { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            { New-AuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId } | Should -Throw "*Failed to create the service principal*"
+            { New-PPAuthorizationApplication -DisplayName $script:testDisplayName -TenantId $script:testTenantId } | Should -Throw "*Failed to create the service principal*"
         }
     }
 }

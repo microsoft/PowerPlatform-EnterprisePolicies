@@ -7,25 +7,26 @@ BeforeDiscovery{
 Describe 'Set-PPModuleConfiguration Tests' {
     BeforeAll {
         Mock Write-Verbose {}
-        Mock Set-ServicePrincipalAuth {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Set-CachedConfiguration {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
-    It 'Routes ServicePrincipalAuth configuration to Set-ServicePrincipalAuth' {
-        $config = @{ Method = "ManagedIdentity"; ClientId = "abc" }
+    It 'Blocks the reserved ServicePrincipalAuth name and points to the dedicated cmdlet' {
+        { Set-PPModuleConfiguration -Name "ServicePrincipalAuth" -Value @{ Method = "ManagedIdentity"; ClientId = "abc" } } |
+            Should -Throw "*Set-PPServicePrincipalAuth*"
 
-        Set-PPModuleConfiguration -Name "ServicePrincipalAuth" -Value $config
-
-        Should -Invoke Set-ServicePrincipalAuth -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter { $Configuration.ClientId -eq "abc" }
+        Should -Invoke Set-CachedConfiguration -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
-    It 'Passes a null value through to clear the configuration' {
-        { Set-PPModuleConfiguration -Name "ServicePrincipalAuth" -Value $null } | Should -Not -Throw
+    It 'Stores a generic named value' {
+        Set-PPModuleConfiguration -Name "MySetting" -Value "SomeValue"
 
-        Should -Invoke Set-ServicePrincipalAuth -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter { $null -eq $Configuration }
+        Should -Invoke Set-CachedConfiguration -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter { $Name -eq "MySetting" -and $Value -eq "SomeValue" }
     }
 
-    It 'Throws for an unsupported configuration name' {
-        { Set-PPModuleConfiguration -Name "SomethingElse" -Value "x" } | Should -Throw "*Unsupported configuration name*"
+    It 'Passes a null value through to remove the entry' {
+        { Set-PPModuleConfiguration -Name "MySetting" -Value $null } | Should -Not -Throw
+
+        Should -Invoke Set-CachedConfiguration -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter { $Name -eq "MySetting" -and $null -eq $Value }
     }
 
     It 'Throws when Name is null or empty' {

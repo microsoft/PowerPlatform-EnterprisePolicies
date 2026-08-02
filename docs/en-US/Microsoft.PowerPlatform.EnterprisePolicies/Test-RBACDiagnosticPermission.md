@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 07/31/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
 title: Test-RBACDiagnosticPermission
 ---
@@ -52,7 +52,7 @@ This cmdlet tests whether a principal (user, group, or application) has a specif
 Subnet Injection diagnostic permission on a Power Platform environment.
 
 If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
-New-AuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
+New-PPAuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
 When -ClientId is provided, it is stored in the cache for future use.
 
 Use one of the switches to test a specific permission level:

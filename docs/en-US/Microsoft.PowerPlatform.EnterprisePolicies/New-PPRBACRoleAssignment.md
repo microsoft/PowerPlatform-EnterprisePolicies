@@ -4,40 +4,41 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 07/31/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
-title: Remove-RBACRoleAssignment
+title: New-PPRBACRoleAssignment
 ---
 
-# Remove-RBACRoleAssignment
+# New-PPRBACRoleAssignment
 
 ## SYNOPSIS
 
-Removes a Power Platform RBAC role assignment.
+Creates a Power Platform RBAC role assignment.
 
 ## SYNTAX
 
 ### TenantScope (Default)
 
 ```
-Remove-RBACRoleAssignment -RoleAssignmentId <string> -TenantId <string> [-ClientId <string>]
- [-Endpoint <PPEndpoint>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm] [<CommonParameters>]
+New-PPRBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType>
+ -Role <string> -TenantId <string> [-ClientId <string>] [-Endpoint <PPEndpoint>] [-ForceAuth]
+ [-RefreshRoles] [<CommonParameters>]
 ```
 
 ### EnvironmentScope
 
 ```
-Remove-RBACRoleAssignment -RoleAssignmentId <string> -TenantId <string> -EnvironmentId <string>
- [-ClientId <string>] [-Endpoint <PPEndpoint>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+New-PPRBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType>
+ -Role <string> -TenantId <string> -EnvironmentId <string> [-ClientId <string>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
 ```
 
 ### EnvironmentGroupScope
 
 ```
-Remove-RBACRoleAssignment -RoleAssignmentId <string> -TenantId <string> -EnvironmentGroupId <string>
- [-ClientId <string>] [-Endpoint <PPEndpoint>] [-ForceAuth] [-Force] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+New-PPRBACRoleAssignment -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType>
+ -Role <string> -TenantId <string> -EnvironmentGroupId <string> [-ClientId <string>]
+ [-Endpoint <PPEndpoint>] [-ForceAuth] [-RefreshRoles] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -47,35 +48,45 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-This cmdlet removes a role assignment by its ID.
-The scope can be at the tenant,
+This cmdlet creates a role assignment for a principal (user, group, or application) to grant
+permissions via Power Platform RBAC.
+The role can be scoped at the tenant,
 environment, or environment group level.
 
 If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
-New-AuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
+New-PPAuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
 When -ClientId is provided, it is stored in the cache for future use.
 
-Returns $true if the role assignment was deleted, $false if it was not found.
+The Role parameter accepts the role definition name as returned by the Power Platform
+Authorization API (e.g., "Power Platform Reader").
+Use -RefreshRoles to update the
+cached list of available roles.
 
 ## EXAMPLES
 
 ### EXAMPLE 1
 
-Remove-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002"
+New-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType User -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002"
 
-Removes a tenant-scoped role assignment.
+Creates a tenant-scoped role assignment for a user with the "Power Platform Reader" role.
 
 ### EXAMPLE 2
 
-Remove-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
+New-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType Group -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentId "00000000-0000-0000-0000-000000000003"
 
-Removes an environment-scoped role assignment.
+Creates an environment-scoped role assignment for a group.
 
 ### EXAMPLE 3
 
-Remove-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
+New-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType ApplicationUser -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -EnvironmentGroupId "00000000-0000-0000-0000-000000000004"
 
-Removes an environment group-scoped role assignment.
+Creates an environment group-scoped role assignment for an application.
+
+### EXAMPLE 4
+
+New-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -PrincipalObjectId "00000000-0000-0000-0000-000000000001" -PrincipalType User -Role "Power Platform Reader" -TenantId "00000000-0000-0000-0000-000000000002" -RefreshRoles
+
+Creates a role assignment while forcing a refresh of the cached role definitions.
 
 ## PARAMETERS
 
@@ -88,28 +99,6 @@ Type: System.String
 DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -Confirm
-
-Prompts you for confirmation before running the cmdlet.
-
-```yaml
-Type: System.Management.Automation.SwitchParameter
-DefaultValue: ''
-SupportsWildcards: false
-Aliases:
-- cf
 ParameterSets:
 - Name: (All)
   Position: Named
@@ -145,7 +134,7 @@ HelpMessage: ''
 
 ### -EnvironmentGroupId
 
-The environment group ID for environment group-scoped role assignments
+The environment group ID for environment group-scoped assignments
 
 ```yaml
 Type: System.String
@@ -166,7 +155,7 @@ HelpMessage: ''
 
 ### -EnvironmentId
 
-The environment ID for environment-scoped role assignments
+The environment ID for environment-scoped assignments
 
 ```yaml
 Type: System.String
@@ -177,27 +166,6 @@ ParameterSets:
 - Name: EnvironmentScope
   Position: Named
   IsRequired: true
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
-### -Force
-
-Remove the role assignment without prompting for confirmation
-
-```yaml
-Type: System.Management.Automation.SwitchParameter
-DefaultValue: False
-SupportsWildcards: false
-Aliases: []
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -227,9 +195,72 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -RoleAssignmentId
+### -PrincipalObjectId
 
-The ID of the role assignment to remove
+The object ID of the principal to assign the role to
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -PrincipalType
+
+The type of principal
+
+```yaml
+Type: AuthorizationPrincipalType
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -RefreshRoles
+
+Force re-fetch of role definitions from the API
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: (All)
+  Position: Named
+  IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -Role
+
+The role definition name to assign (e.g., 'Power Platform Reader')
 
 ```yaml
 Type: System.String
@@ -269,28 +300,6 @@ AcceptedValues: []
 HelpMessage: ''
 ```
 
-### -WhatIf
-
-Runs the command in a mode that only reports what would happen without performing the actions.
-
-```yaml
-Type: System.Management.Automation.SwitchParameter
-DefaultValue: ''
-SupportsWildcards: false
-Aliases:
-- wi
-ParameterSets:
-- Name: (All)
-  Position: Named
-  IsRequired: false
-  ValueFromPipeline: false
-  ValueFromPipelineByPropertyName: false
-  ValueFromRemainingArguments: false
-DontShow: false
-AcceptedValues: []
-HelpMessage: ''
-```
-
 ### CommonParameters
 
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable,
@@ -302,8 +311,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Boolean
-Returns $true if the role assignment was deleted
+### System.Management.Automation.PSCustomObject
+Returns the created role assignment object from the API.
 
 {{ Fill in the Description }}
 

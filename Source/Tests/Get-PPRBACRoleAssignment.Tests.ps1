@@ -5,7 +5,7 @@ BeforeDiscovery{
     . $PSScriptRoot\Shared.ps1
 }
 
-Describe 'Get-RBACRoleAssignment Tests' {
+Describe 'Get-PPRBACRoleAssignment Tests' {
     BeforeAll {
         $script:testClientId = "00000000-0000-0000-0000-000000789012"
         $script:testTenantId = "12345678-1234-1234-1234-123456789012"
@@ -40,19 +40,19 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should get tenant-scoped role assignments' {
-            $result = Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
+            $result = Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             $result | Should -Not -BeNullOrEmpty
         }
 
         It 'Should call New-AuthorizationServiceMsalClient' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke New-AuthorizationServiceMsalClient -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should call Get-RoleAssignments with correct parameters' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $TenantId -eq $script:testTenantId
@@ -68,13 +68,13 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should get environment-scoped role assignments' {
-            $result = Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId
+            $result = Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId
 
             $result | Should -Not -BeNullOrEmpty
         }
 
         It 'Should pass EnvironmentId to Get-RoleAssignments' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $EnvironmentId -eq $script:testEnvironmentId
@@ -90,7 +90,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should default IncludeParentScopes to true' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $IncludeParentScopes -eq $true
@@ -98,7 +98,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should default ExpandSecurityGroups to true' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $ExpandSecurityGroups -eq $true
@@ -106,7 +106,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should default ExpandEnvironmentGroups to true' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $ExpandEnvironmentGroups -eq $true
@@ -114,7 +114,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should default IncludeNestedScopes to true' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $IncludeNestedScopes -eq $true
@@ -130,7 +130,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should set IncludeParentScopes to false when ExcludeParentScopes is specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -ExcludeParentScopes
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -ExcludeParentScopes
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $IncludeParentScopes -eq $false
@@ -138,7 +138,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should set ExpandSecurityGroups to false when NoExpandSecurityGroups is specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -NoExpandSecurityGroups
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -NoExpandSecurityGroups
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $ExpandSecurityGroups -eq $false
@@ -146,7 +146,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should set ExpandEnvironmentGroups to false when NoExpandEnvironmentGroups is specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -NoExpandEnvironmentGroups
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -NoExpandEnvironmentGroups
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $ExpandEnvironmentGroups -eq $false
@@ -154,7 +154,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should set IncludeNestedScopes to false when ExcludeNestedScopes is specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -ExcludeNestedScopes
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -ExcludeNestedScopes
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $IncludeNestedScopes -eq $false
@@ -170,7 +170,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should pass PrincipalType when specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -PrincipalType User
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -PrincipalType User
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $PrincipalType -eq [AuthorizationPrincipalType]::User
@@ -179,7 +179,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
 
         It 'Should pass PrincipalObjectId when specified' {
             $testPrincipalId = "00000000-0000-0000-0000-000000000005"
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -PrincipalObjectId $testPrincipalId
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -PrincipalObjectId $testPrincipalId
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $PrincipalObjectId -eq $testPrincipalId
@@ -187,7 +187,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should pass Permission when specified' {
-            Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -Permission "Read"
+            Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId -Permission "Read"
 
             Should -Invoke Get-RoleAssignments -Times 1 -ParameterFilter {
                 $Permission -eq "Read"
@@ -204,7 +204,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should use cached ClientId when not specified' {
-            $result = Get-RBACRoleAssignment -TenantId $script:testTenantId
+            $result = Get-PPRBACRoleAssignment -TenantId $script:testTenantId
 
             $result | Should -Not -BeNullOrEmpty
         }
@@ -216,7 +216,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
         }
 
         It 'Should throw when no ClientId specified and none cached' {
-            { Get-RBACRoleAssignment -TenantId $script:testTenantId } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
+            { Get-PPRBACRoleAssignment -TenantId $script:testTenantId } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
         }
     }
 
@@ -225,7 +225,7 @@ Describe 'Get-RBACRoleAssignment Tests' {
             Mock New-AuthorizationServiceMsalClient { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            { Get-RBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId } | Should -Throw "*Failed to connect to Authorization Service*"
+            { Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId } | Should -Throw "*Failed to connect to Authorization Service*"
         }
     }
 }

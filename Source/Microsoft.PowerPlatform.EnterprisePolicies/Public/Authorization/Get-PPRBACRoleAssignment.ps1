@@ -16,7 +16,7 @@ This cmdlet retrieves role assignments for Power Platform RBAC operations. The s
 at the tenant or environment level.
 
 If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
-New-AuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
+New-PPAuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
 When -ClientId is provided, it is stored in the cache for future use.
 
 By default, results include parent scopes, nested scopes, expanded security groups, and
@@ -27,37 +27,37 @@ System.Management.Automation.PSCustomObject
 Returns the role assignments from the API.
 
 .EXAMPLE
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001"
+Get-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001"
 
 Gets all role assignments at the tenant scope with all expansions enabled.
 
 .EXAMPLE
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002"
+Get-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002"
 
 Gets all role assignments at the environment scope with all expansions enabled.
 
 .EXAMPLE
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -ExcludeParentScopes -NoExpandSecurityGroups
+Get-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -ExcludeParentScopes -NoExpandSecurityGroups
 
 Gets role assignments at the environment scope, excluding parent scopes and without expanding security group memberships.
 
 .EXAMPLE
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -ExcludeNestedScopes -NoExpandEnvironmentGroups
+Get-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -ExcludeNestedScopes -NoExpandEnvironmentGroups
 
 Gets role assignments at the tenant scope, excluding nested scopes and without expanding environment group memberships.
 
 .EXAMPLE
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -PrincipalType User -PrincipalObjectId "00000000-0000-0000-0000-000000000005"
+Get-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -PrincipalType User -PrincipalObjectId "00000000-0000-0000-0000-000000000005"
 
 Gets role assignments for a specific user principal.
 
 .EXAMPLE
-Get-RBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -Permission "Read"
+Get-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -Permission "Read"
 
 Gets role assignments filtered by a specific permission.
 #>
 
-function Get-RBACRoleAssignment {
+function Get-PPRBACRoleAssignment {
     [CmdletBinding(DefaultParameterSetName = 'TenantScope')]
     param(
         [Parameter(Mandatory=$false, HelpMessage="The application (client) ID of the app registration")]

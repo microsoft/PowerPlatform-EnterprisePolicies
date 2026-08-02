@@ -4,12 +4,12 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 07/31/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
-title: New-AuthorizationApplication
+title: New-PPAuthorizationApplication
 ---
 
-# New-AuthorizationApplication
+# New-PPAuthorizationApplication
 
 ## SYNOPSIS
 
@@ -20,8 +20,8 @@ Creates or updates an Azure AD application registration and service principal fo
 ### __AllParameterSets
 
 ```
-New-AuthorizationApplication [-DisplayName] <string> [-TenantId] <string> [[-Endpoint] <PPEndpoint>]
- [-Update] [-ForceAuth] [<CommonParameters>]
+New-PPAuthorizationApplication [-DisplayName] <string> [-TenantId] <string>
+ [[-Endpoint] <PPEndpoint>] [-Update] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -38,7 +38,7 @@ is configured as a single-tenant app with delegated permissions for Authorizatio
 and Authorization.RoleAssignments.Write.
 
 If an application with the specified display name already exists, the cmdlet will prompt you to use
-Test-AuthorizationApplication to verify the configuration, or use the -Update switch to update the
+Test-PPAuthorizationApplication to verify the configuration, or use the -Update switch to update the
 existing application with the required settings.
 
 Admin consent is NOT granted automatically.
@@ -49,19 +49,19 @@ the application can be used.
 
 ### EXAMPLE 1
 
-New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012"
+New-PPAuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012"
 
 Creates a new app registration and service principal named "MyAuthorizationApp".
 
 ### EXAMPLE 2
 
-New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Update
+New-PPAuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Update
 
 Updates an existing app registration named "MyAuthorizationApp" with the required permissions.
 
 ### EXAMPLE 3
 
-New-AuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint usgovhigh
+New-PPAuthorizationApplication -DisplayName "MyAuthorizationApp" -TenantId "12345678-1234-1234-1234-123456789012" -Endpoint usgovhigh
 
 Creates a new app registration and service principal for the US Government High cloud.
 

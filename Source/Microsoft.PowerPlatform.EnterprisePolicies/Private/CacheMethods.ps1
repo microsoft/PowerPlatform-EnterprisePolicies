@@ -11,9 +11,6 @@ $script:CachePath = Join-Path $([Environment]::GetFolderPath('LocalApplicationDa
 $script:CacheData = $null
 $script:CurrentCacheVersion = "1.1"
 
-# Well-known key, inside the cache configuration container, that stores the service principal auth settings.
-$script:ServicePrincipalAuthConfigName = "ServicePrincipalAuth"
-
 function Get-EmptyCache{
     return [PSCustomObject]@{
         Version = $script:CurrentCacheVersion
@@ -192,24 +189,34 @@ function Set-CachedClientId{
     Save-Cache
 }
 
-function Get-CachedServicePrincipalAuth{
-    # Reads the service principal auth configuration from the generic configuration
-    # container in the cache. Returns $null when it has not been configured.
+function Get-CachedConfiguration{
+    param(
+        [Parameter(Mandatory=$false)]
+        [string]$Name
+    )
+
+    # Reads from the generic configuration container in the cache. With no name, returns the
+    # entire container; with a name, returns that entry's value (or $null when it is not set).
     if($null -eq $script:CacheData.Configuration){
-        return $null
-    }
-
-    $name = $script:ServicePrincipalAuthConfigName
-
-    # Configuration may be a PSCustomObject (from JSON) or a hashtable (in-memory)
-    if($script:CacheData.Configuration -is [hashtable]){
-        if($script:CacheData.Configuration.ContainsKey($name)){
-            return $script:CacheData.Configuration[$name]
+        if([string]::IsNullOrWhiteSpace($Name)){
+            return [PSCustomObject]@{}
         }
         return $null
     }
 
-    $property = $script:CacheData.Configuration.PSObject.Properties[$name]
+    if([string]::IsNullOrWhiteSpace($Name)){
+        return $script:CacheData.Configuration
+    }
+
+    # Configuration may be a PSCustomObject (from JSON) or a hashtable (in-memory)
+    if($script:CacheData.Configuration -is [hashtable]){
+        if($script:CacheData.Configuration.ContainsKey($Name)){
+            return $script:CacheData.Configuration[$Name]
+        }
+        return $null
+    }
+
+    $property = $script:CacheData.Configuration.PSObject.Properties[$Name]
     if($null -eq $property){
         return $null
     }
@@ -217,11 +224,15 @@ function Get-CachedServicePrincipalAuth{
     return $property.Value
 }
 
-function Set-CachedServicePrincipalAuth{
+function Set-CachedConfiguration{
     param(
         [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [Parameter(Mandatory)]
         [AllowNull()]
-        [object]$Configuration
+        [object]$Value
     )
 
     # Ensure the configuration container exists (for caches created before this feature)
@@ -234,28 +245,32 @@ function Set-CachedServicePrincipalAuth{
         }
     }
 
-    $name = $script:ServicePrincipalAuthConfigName
-
     if($script:CacheData.Configuration -is [hashtable]){
-        if($null -eq $Configuration){
-            $script:CacheData.Configuration.Remove($name)
+        if($null -eq $Value){
+            $script:CacheData.Configuration.Remove($Name)
         }
         else{
-            $script:CacheData.Configuration[$name] = $Configuration
+            $script:CacheData.Configuration[$Name] = $Value
         }
     }
     else{
-        if($null -eq $Configuration){
-            if($null -ne $script:CacheData.Configuration.PSObject.Properties[$name]){
-                $script:CacheData.Configuration.PSObject.Properties.Remove($name)
+        if($null -eq $Value){
+            if($null -ne $script:CacheData.Configuration.PSObject.Properties[$Name]){
+                $script:CacheData.Configuration.PSObject.Properties.Remove($Name)
             }
         }
         else{
-            $script:CacheData.Configuration | Add-Member -NotePropertyName $name -NotePropertyValue $Configuration -Force
+            $script:CacheData.Configuration | Add-Member -NotePropertyName $Name -NotePropertyValue $Value -Force
         }
     }
 
     Save-Cache
+}
+
+function Get-CachedServicePrincipalAuth{
+    # Reads the service principal auth configuration from the generic configuration
+    # container in the cache. Returns $null when it has not been configured.
+    return Get-CachedConfiguration -Name "ServicePrincipalAuth"
 }
 
 function Get-EnvironmentRegionFromCache{

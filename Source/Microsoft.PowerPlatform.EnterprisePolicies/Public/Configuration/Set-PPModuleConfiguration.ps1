@@ -13,40 +13,28 @@ Stores a named configuration value in the module's local cache.
 
 .DESCRIPTION
 The Set-PPModuleConfiguration cmdlet persists a named configuration value in the module's cached
-configuration file so it is available across sessions. Each supported configuration name is validated
-and routed to a dedicated handler before it is stored.
+configuration file so it is available across sessions. The value can be any object and is stored under
+the provided name.
 
-Currently the supported configuration name is 'ServicePrincipalAuth'. When set, Connect-Azure uses it to
-authenticate with a service principal instead of the default interactive flow (unless re-authentication
-is forced). The value is an object describing the authentication method and is validated before it is
-saved:
+The reserved 'ServicePrincipalAuth' name cannot be set through this cmdlet because it requires a
+validated, strongly-typed configuration. Use the dedicated Set-PPServicePrincipalAuth cmdlet to
+configure service principal authentication.
 
-- Managed identity (user-assigned):
-    @{ Method = 'ManagedIdentity'; ClientId = '<managed-identity-client-id>' }
-
-- Certificate-based service principal:
-    @{ Method = 'Certificate'; ClientId = '<app-id>'; TenantId = '<tenant-id>'; CertificateThumbprint = '<thumbprint>' }
-    @{ Method = 'Certificate'; ClientId = '<app-id>'; TenantId = '<tenant-id>'; CertificateSubjectName = '<subject-name>' }
-
-Passing $null for the value removes the named configuration entry.
+Passing $null for the value removes the named configuration entry. Use Get-PPModuleConfiguration to read
+stored configuration values back.
 
 .OUTPUTS
 None.
 
 .EXAMPLE
-Set-PPModuleConfiguration -Name "ServicePrincipalAuth" -Value @{ Method = "ManagedIdentity"; ClientId = "11111111-1111-1111-1111-111111111111" }
+Set-PPModuleConfiguration -Name "MySetting" -Value "SomeValue"
 
-Configures Connect-Azure to authenticate using a user-assigned managed identity.
-
-.EXAMPLE
-Set-PPModuleConfiguration -Name "ServicePrincipalAuth" -Value @{ Method = "Certificate"; ClientId = "22222222-2222-2222-2222-222222222222"; TenantId = "33333333-3333-3333-3333-333333333333"; CertificateThumbprint = "A1B2C3D4E5F6..." }
-
-Configures Connect-Azure to authenticate using a certificate-based service principal identified by thumbprint.
+Stores the value "SomeValue" under the name "MySetting".
 
 .EXAMPLE
-Set-PPModuleConfiguration -Name "ServicePrincipalAuth" -Value $null
+Set-PPModuleConfiguration -Name "MySetting" -Value $null
 
-Removes the ServicePrincipalAuth configuration so Connect-Azure reverts to the default interactive flow.
+Removes the "MySetting" configuration entry.
 #>
 function Set-PPModuleConfiguration {
     [CmdletBinding()]
@@ -62,12 +50,11 @@ function Set-PPModuleConfiguration {
 
     $ErrorActionPreference = "Stop"
 
-    if ($Name -eq $script:ServicePrincipalAuthConfigName) {
-        Set-ServicePrincipalAuth -Configuration $Value
+    if ($Name -eq "ServicePrincipalAuth") {
+        throw "The '$Name' configuration cannot be set with Set-PPModuleConfiguration. Use the dedicated Set-PPServicePrincipalAuth cmdlet to configure service principal authentication."
     }
-    else {
-        throw "Unsupported configuration name '$Name'. Supported configuration names: '$($script:ServicePrincipalAuthConfigName)'."
-    }
+
+    Set-CachedConfiguration -Name $Name -Value $Value
 
     if ($null -eq $Value) {
         Write-Verbose "Removed module configuration '$Name'."

@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 07/31/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -50,7 +50,11 @@ Retrieves the current usage of the specified environment.
 
 Retrieves identity enterprise policies for Power Platform.
 
-### [Get-RBACRoleAssignment](Get-RBACRoleAssignment.md)
+### [Get-PPModuleConfiguration](Get-PPModuleConfiguration.md)
+
+Reads configuration values stored in the module's local cache.
+
+### [Get-PPRBACRoleAssignment](Get-PPRBACRoleAssignment.md)
 
 Gets Power Platform RBAC role assignments at a specified scope.
 
@@ -62,15 +66,15 @@ Retrieves the historical network usage of the subnet backing an enterprise polic
 
 Retrieves subnet injection enterprise policies for Power Platform.
 
-### [New-AuthorizationApplication](New-AuthorizationApplication.md)
-
-Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
-
 ### [New-IdentityEnterprisePolicy](New-IdentityEnterprisePolicy.md)
 
 Creates a new identity enterprise policy for Power Platform.
 
-### [New-RBACRoleAssignment](New-RBACRoleAssignment.md)
+### [New-PPAuthorizationApplication](New-PPAuthorizationApplication.md)
+
+Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
+
+### [New-PPRBACRoleAssignment](New-PPRBACRoleAssignment.md)
 
 Creates a Power Platform RBAC role assignment.
 
@@ -86,13 +90,21 @@ Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprise
 
 Removes an identity enterprise policy for Power Platform.
 
-### [Remove-RBACRoleAssignment](Remove-RBACRoleAssignment.md)
+### [Remove-PPRBACRoleAssignment](Remove-PPRBACRoleAssignment.md)
 
 Removes a Power Platform RBAC role assignment.
 
 ### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
 
 Removes a subnet injection enterprise policy for Power Platform.
+
+### [Set-PPModuleConfiguration](Set-PPModuleConfiguration.md)
+
+Stores a named configuration value in the module's local cache.
+
+### [Set-PPServicePrincipalAuth](Set-PPServicePrincipalAuth.md)
+
+Configures the service principal that the module uses to authenticate to Azure.
 
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
@@ -102,10 +114,6 @@ Validates that the account has the correct permissions to run diagnostic command
 
 Tests connectivity to Application Insights by sending a test telemetry event from a specified environment.
 
-### [Test-AuthorizationApplication](Test-AuthorizationApplication.md)
-
-Tests that an Azure AD application is correctly configured for Power Platform Authorization.
-
 ### [Test-DnsResolution](Test-DnsResolution.md)
 
 Tests the Domain Name System (DNS) resolution for a given hostname in a specified environment.
@@ -113,6 +121,10 @@ Tests the Domain Name System (DNS) resolution for a given hostname in a specifie
 ### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
 
 Tests the connectivity to a given service in the specified environment.
+
+### [Test-PPAuthorizationApplication](Test-PPAuthorizationApplication.md)
+
+Tests that an Azure AD application is correctly configured for Power Platform Authorization.
 
 ### [Test-RBACDiagnosticPermission](Test-RBACDiagnosticPermission.md)
 
@@ -175,3 +187,7 @@ Represents the different Azure environments that can be used to connect to Azure
 #### [PPEndpoint](PPEndpoint.md)
 
 Represents the different PP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+
+#### [ServicePrincipalAuthMethod](ServicePrincipalAuthMethod.md)
+
+Represents the service principal authentication methods that the module can use to connect to Azure. The value determines which parameters Set-PPServicePrincipalAuth requires.

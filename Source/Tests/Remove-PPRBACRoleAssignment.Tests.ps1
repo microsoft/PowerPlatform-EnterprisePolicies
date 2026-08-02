@@ -5,7 +5,7 @@ BeforeDiscovery{
     . $PSScriptRoot\Shared.ps1
 }
 
-Describe 'Remove-RBACRoleAssignment Tests' {
+Describe 'Remove-PPRBACRoleAssignment Tests' {
     BeforeAll {
         $script:testClientId = "00000000-0000-0000-0000-000000789012"
         $script:testTenantId = "12345678-1234-1234-1234-123456789012"
@@ -25,19 +25,19 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         }
 
         It 'Should remove a tenant-scoped role assignment' {
-            $result = Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
+            $result = Remove-PPRBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
 
             $result | Should -Be $true
         }
 
         It 'Should call New-AuthorizationServiceMsalClient' {
-            Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
+            Remove-PPRBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
 
             Should -Invoke New-AuthorizationServiceMsalClient -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should call Remove-RoleAssignment with correct parameters' {
-            Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
+            Remove-PPRBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
 
             Should -Invoke Remove-RoleAssignment -Times 1 -ParameterFilter {
                 $RoleAssignmentId -eq $script:testRoleAssignmentId
@@ -53,13 +53,13 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         }
 
         It 'Should remove an environment-scoped role assignment' {
-            $result = Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -Force
+            $result = Remove-PPRBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -Force
 
             $result | Should -Be $true
         }
 
         It 'Should pass EnvironmentId to Remove-RoleAssignment' {
-            Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -Force
+            Remove-PPRBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -Force
 
             Should -Invoke Remove-RoleAssignment -Times 1 -ParameterFilter {
                 $EnvironmentId -eq $script:testEnvironmentId
@@ -75,13 +75,13 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         }
 
         It 'Should remove an environment group-scoped role assignment' {
-            $result = Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -EnvironmentGroupId $script:testEnvironmentGroupId -Force
+            $result = Remove-PPRBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -EnvironmentGroupId $script:testEnvironmentGroupId -Force
 
             $result | Should -Be $true
         }
 
         It 'Should pass EnvironmentGroupId to Remove-RoleAssignment' {
-            Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -EnvironmentGroupId $script:testEnvironmentGroupId -Force
+            Remove-PPRBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -EnvironmentGroupId $script:testEnvironmentGroupId -Force
 
             Should -Invoke Remove-RoleAssignment -Times 1 -ParameterFilter {
                 $EnvironmentGroupId -eq $script:testEnvironmentGroupId
@@ -97,7 +97,7 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         }
 
         It 'Should return false when role assignment is not found' {
-            $result = Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
+            $result = Remove-PPRBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
 
             $result | Should -Be $false
         }
@@ -112,7 +112,7 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         }
 
         It 'Should use cached ClientId when not specified' {
-            $result = Remove-RBACRoleAssignment -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
+            $result = Remove-PPRBACRoleAssignment -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force
 
             $result | Should -Be $true
         }
@@ -124,7 +124,7 @@ Describe 'Remove-RBACRoleAssignment Tests' {
         }
 
         It 'Should throw when no ClientId specified and none cached' {
-            { Remove-RBACRoleAssignment -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
+            { Remove-PPRBACRoleAssignment -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
         }
     }
 
@@ -133,7 +133,7 @@ Describe 'Remove-RBACRoleAssignment Tests' {
             Mock New-AuthorizationServiceMsalClient { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            { Remove-RBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force } | Should -Throw "*Failed to connect to Authorization Service*"
+            { Remove-PPRBACRoleAssignment -ClientId $script:testClientId -RoleAssignmentId $script:testRoleAssignmentId -TenantId $script:testTenantId -Force } | Should -Throw "*Failed to connect to Authorization Service*"
         }
     }
 }
