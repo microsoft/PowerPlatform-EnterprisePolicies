@@ -27,11 +27,22 @@ namespace Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels
 function Connect-AzAccount {
     param(
         [string] $Tenant,
-        [string] $Environment
+        [string] $Environment,
+        [string] $AuthScope,
+        [switch] $Identity,
+        [string] $AccountId,
+        [switch] $ServicePrincipal,
+        [string] $ApplicationId,
+        [string] $CertificateThumbprint
     )
 }
 function Get-AzContext {}
-function Set-AzContext {}
+function Set-AzContext {
+    param(
+        $Context,
+        $Subscription
+    )
+}
 function Get-AzADAppCredential {}
 function New-AzADAppCredential {}
 function Get-AzADApplication {}
