@@ -117,7 +117,7 @@ Describe 'EnvironmentOperations Tests' {
                     -Endpoint ([PPEndpoint]::Prod)
 
                 Should -Invoke New-JsonRequestMessage -Times 1 -ParameterFilter {
-                    $Uri -match 'scopes/admin/environments' -and
+                    $Uri -match 'environments' -and
                     $Uri -match 'enterprisePolicies/NetworkInjection/link'
                 }
             }
