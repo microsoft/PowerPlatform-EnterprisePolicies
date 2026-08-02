@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 05/11/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
 title: Get-SubnetHistoricalUsage
 ---
@@ -13,7 +13,7 @@ title: Get-SubnetHistoricalUsage
 
 ## SYNOPSIS
 
-Retrieves the historical network usage of the subnet backing an enterprise policy, identified by ARM resource ID, linked environment, or system ID.
+Retrieves the historical network usage of the subnet backing an enterprise policy, identified by Azure Resource Manager (ARM) resource ID, linked environment, or system ID.
 
 ## SYNTAX
 
@@ -45,8 +45,8 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-Retrieves the historical usage of the subnet backing a Subnet Injection enterprise policy.
-This includes usage from all environments linked to the policy and the IPs reserved by Azure.
+Retrieves the historical usage of the subnet backing a subnet injection enterprise policy.
+This includes usage from all environments linked to the policy and the IP addresses reserved by Azure.
 
 The policy can be identified in three ways:
 - By its Azure ARM resource ID (-EnterprisePolicyId).
@@ -148,7 +148,7 @@ HelpMessage: ''
 
 ### -EnvironmentId
 
-The Power Platform environment ID whose linked policy should be used.
+The Power Platform environment ID whose linked policy to use.
 
 ```yaml
 Type: System.String

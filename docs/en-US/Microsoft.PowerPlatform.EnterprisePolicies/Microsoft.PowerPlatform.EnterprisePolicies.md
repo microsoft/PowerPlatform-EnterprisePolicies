@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 05/11/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -52,7 +52,7 @@ Retrieves identity enterprise policies for Power Platform.
 
 ### [Get-SubnetHistoricalUsage](Get-SubnetHistoricalUsage.md)
 
-Retrieves the historical network usage of the subnet backing an enterprise policy, identified by ARM resource ID, linked environment, or system ID.
+Retrieves the historical network usage of the subnet backing an enterprise policy, identified by Azure Resource Manager (ARM) resource ID, linked environment, or system ID.
 
 ### [Get-SubnetInjectionEnterprisePolicy](Get-SubnetInjectionEnterprisePolicy.md)
 
@@ -92,7 +92,7 @@ Tests the Domain Name System (DNS) resolution for a given hostname in a specifie
 
 ### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
 
-Tests the connectivity to a given service in a specified environment.
+Tests the connectivity to a given service in the specified environment.
 
 ### [Test-TLSHandshake](Test-TLSHandshake.md)
 
