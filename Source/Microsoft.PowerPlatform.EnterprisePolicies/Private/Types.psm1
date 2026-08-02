@@ -168,6 +168,12 @@ enum AzureEnvironment{
     CentralUSEuap
 }
 
+enum AuthorizationPrincipalType{
+    User
+    Group
+    ApplicationUser
+}
+
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
     [ApplicationInsightsInformation]
@@ -186,6 +192,7 @@ $ExportableTypes = @(
     [NetworkUsageData]
     [EnvironmentNetworkUsageDocument]
     [SubnetUsageDocument]
+    [AuthorizationPrincipalType]
 )
 
 # Get the internal TypeAccelerators class to use its static methods.

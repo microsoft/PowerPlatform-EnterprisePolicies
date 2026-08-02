@@ -27,17 +27,51 @@ namespace Microsoft.Azure.Commands.ResourceManager.Cmdlets.SdkModels
 function Connect-AzAccount {
     param(
         [string] $Tenant,
-        [string] $Environment
+        [string] $Environment,
+        [string] $AuthScope
     )
 }
 function Get-AzContext {}
-function Set-AzContext {}
+function Set-AzContext {
+    param(
+        $Context
+    )
+}
 function Get-AzADAppCredential {}
 function New-AzADAppCredential {}
-function Get-AzADApplication {}
-function New-AzADApplication {}
-function New-AzADServicePrincipal {}
-function Get-AzADServicePrincipal {}
+function Get-AzADApplication {
+    param(
+        [string]$Filter
+    )
+}
+function New-AzADApplication {
+    param(
+        [string]$DisplayName,
+        [string]$SignInAudience,
+        $RequiredResourceAccess,
+        [switch]$IsFallbackPublicClient,
+        [string[]]$PublicClientRedirectUri
+    )
+}
+function Update-AzADApplication {
+    param(
+        [string]$ObjectId,
+        $RequiredResourceAccess,
+        [switch]$IsFallbackPublicClient,
+        [string[]]$IdentifierUri,
+        [string[]]$PublicClientRedirectUri
+    )
+}
+function New-AzADServicePrincipal {
+    param(
+        [string]$ApplicationId
+    )
+}
+function Get-AzADServicePrincipal {
+    param(
+        [string]$Filter
+    )
+}
 
 # Az.Resources cmdlets
 function Get-AzResourceGroup {}

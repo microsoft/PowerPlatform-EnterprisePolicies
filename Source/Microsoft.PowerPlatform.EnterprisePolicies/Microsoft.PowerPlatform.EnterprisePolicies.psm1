@@ -19,6 +19,15 @@ foreach ($script in $Private) {
     Write-Verbose "Loaded script: $($script.FullName)"
 }
 
+# Load MSAL wrapper only when not running in Pester tests (to avoid type resolution issues)
+if (-not $Global:InPesterExecution) {
+    $msalWrapper = Join-Path $PSScriptRoot "Private\RuntimeLoaded\MSALWrapper.ps1"
+    if (Test-Path $msalWrapper) {
+        . $msalWrapper
+        Write-Verbose "Loaded MSAL wrapper: $msalWrapper"
+    }
+}
+
 Initialize-Cache
 
 # Skip the PSGallery version check during Pester execution and build automation (e.g. help generation) so we don't make live network calls.

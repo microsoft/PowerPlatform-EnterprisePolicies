@@ -50,6 +50,10 @@ Retrieves the current usage of the specified environment.
 
 Retrieves identity enterprise policies for Power Platform.
 
+### [Get-PPRBACRoleAssignment](Get-PPRBACRoleAssignment.md)
+
+Gets Power Platform RBAC role assignments at a specified scope.
+
 ### [Get-SubnetHistoricalUsage](Get-SubnetHistoricalUsage.md)
 
 Retrieves the historical network usage of the subnet backing an enterprise policy, identified by ARM resource ID, linked environment, or system ID.
@@ -62,6 +66,14 @@ Retrieves subnet injection enterprise policies for Power Platform.
 
 Creates a new identity enterprise policy for Power Platform.
 
+### [New-PPAuthorizationApplication](New-PPAuthorizationApplication.md)
+
+Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
+
+### [New-PPRBACRoleAssignment](New-PPRBACRoleAssignment.md)
+
+Creates a Power Platform RBAC role assignment.
+
 ### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
 
 Creates a new subnet injection enterprise policy for Power Platform.
@@ -73,6 +85,10 @@ Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprise
 ### [Remove-IdentityEnterprisePolicy](Remove-IdentityEnterprisePolicy.md)
 
 Removes an identity enterprise policy for Power Platform.
+
+### [Remove-PPRBACRoleAssignment](Remove-PPRBACRoleAssignment.md)
+
+Removes a Power Platform RBAC role assignment.
 
 ### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
 
@@ -93,6 +109,14 @@ Tests the Domain Name System (DNS) resolution for a given hostname in a specifie
 ### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
 
 Tests the connectivity to a given service in a specified environment.
+
+### [Test-PPAuthorizationApplication](Test-PPAuthorizationApplication.md)
+
+Tests that an Azure AD application is correctly configured for Power Platform Authorization.
+
+### [Test-RBACDiagnosticPermission](Test-RBACDiagnosticPermission.md)
+
+Tests Power Platform RBAC diagnostic permissions for a principal on an environment.
 
 ### [Test-TLSHandshake](Test-TLSHandshake.md)
 

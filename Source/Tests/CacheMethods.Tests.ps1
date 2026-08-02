@@ -299,12 +299,159 @@ Describe 'CacheMethods Tests' {
                 Add-ValidatedSubscriptionToCache -SubscriptionId "sub-1"
                 Add-ValidatedSubscriptionToCache -SubscriptionId "sub-2"
                 Add-ValidatedSubscriptionToCache -SubscriptionId "sub-3"
-                
+
                 $script:CacheData.SubscriptionsValidated.Count | Should -Be 3
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-1"
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-2"
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-3"
             }
         }
+
+        Context 'Get-CachedRoleDefinitions' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Returns null when no role definitions are cached for the endpoint' {
+                Get-CachedRoleDefinitions -Endpoint "Prod" | Should -BeNullOrEmpty
+            }
+
+            It 'Returns cached role definitions when cache is fresh' {
+                $mockRoles = @(
+                    @{ roleDefinitionId = "id1"; roleDefinitionName = "Role1" }
+                )
+                Set-CachedRoleDefinitions -Endpoint "Prod" -RoleDefinitions $mockRoles
+
+                $result = Get-CachedRoleDefinitions -Endpoint "Prod"
+                $result | Should -Not -BeNullOrEmpty
+            }
+
+            It 'Returns null when cache is expired' {
+                # Manually set an expired entry
+                $script:CacheData.RoleDefinitions["Prod"] = @{
+                    fetchedAt = [DateTime]::UtcNow.AddHours(-2).ToString("o")
+                    value = @(@{ roleDefinitionId = "id1"; roleDefinitionName = "Role1" })
+                }
+
+                Get-CachedRoleDefinitions -Endpoint "Prod" | Should -BeNullOrEmpty
+            }
+
+            It 'Returns different results for different endpoints' {
+                $prodRoles = @(@{ roleDefinitionId = "prod-id"; roleDefinitionName = "Prod Role" })
+                $tip1Roles = @(@{ roleDefinitionId = "tip1-id"; roleDefinitionName = "Tip1 Role" })
+
+                Set-CachedRoleDefinitions -Endpoint "Prod" -RoleDefinitions $prodRoles
+                Set-CachedRoleDefinitions -Endpoint "tip1" -RoleDefinitions $tip1Roles
+
+                $script:CacheData.RoleDefinitions["Prod"].value[0].roleDefinitionName | Should -Be "Prod Role"
+                $script:CacheData.RoleDefinitions["tip1"].value[0].roleDefinitionName | Should -Be "Tip1 Role"
+            }
+        }
+
+        Context 'Get-CachedClientId' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Returns null when no ClientId is cached' {
+                Get-CachedClientId | Should -BeNullOrEmpty
+            }
+
+            It 'Returns cached ClientId after it is set' {
+                Set-CachedClientId -ClientId "test-client-id"
+
+                Get-CachedClientId | Should -Be "test-client-id"
+            }
+
+            It 'Handles cache files created before ClientId feature' {
+                # Simulate an old cache without the ClientId key
+                $script:CacheData = [PSCustomObject]@{
+                    Version = "1.0"
+                    SubscriptionsValidated = @()
+                    RoleDefinitions = @{}
+                }
+
+                Get-CachedClientId | Should -BeNullOrEmpty
+            }
+        }
+
+        Context 'Set-CachedClientId' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Stores ClientId in the cache' {
+                Set-CachedClientId -ClientId "my-client-id"
+
+                $script:CacheData.ClientId | Should -Be "my-client-id"
+            }
+
+            It 'Persists to disk after setting' {
+                Set-CachedClientId -ClientId "my-client-id"
+
+                Test-Path $script:TestCachePath | Should -Be $true
+                $savedData = Get-Content $script:TestCachePath | ConvertFrom-Json
+                $savedData.ClientId | Should -Be "my-client-id"
+            }
+
+            It 'Overwrites existing ClientId' {
+                Set-CachedClientId -ClientId "old-client-id"
+                Set-CachedClientId -ClientId "new-client-id"
+
+                $script:CacheData.ClientId | Should -Be "new-client-id"
+            }
+
+            It 'Handles cache files created before ClientId feature' {
+                # Simulate an old cache without the ClientId key
+                $script:CacheData = [PSCustomObject]@{
+                    Version = "1.0"
+                    SubscriptionsValidated = @()
+                    RoleDefinitions = @{}
+                }
+
+                Set-CachedClientId -ClientId "new-client-id"
+
+                $script:CacheData.ClientId | Should -Be "new-client-id"
+            }
+
+            It 'Throws when ClientId is null or empty' {
+                { Set-CachedClientId -ClientId $null } | Should -Throw
+                { Set-CachedClientId -ClientId "" } | Should -Throw
+            }
+        }
+
+        Context 'Set-CachedRoleDefinitions' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Stores role definitions in the cache' {
+                $mockRoles = @(@{ roleDefinitionId = "id1"; roleDefinitionName = "Role1" })
+
+                Set-CachedRoleDefinitions -Endpoint "Prod" -RoleDefinitions $mockRoles
+
+                $script:CacheData.RoleDefinitions.Prod | Should -Not -BeNullOrEmpty
+                $script:CacheData.RoleDefinitions.Prod.fetchedAt | Should -Not -BeNullOrEmpty
+            }
+
+            It 'Persists to disk after setting' {
+                $mockRoles = @(@{ roleDefinitionId = "id1"; roleDefinitionName = "Role1" })
+
+                Set-CachedRoleDefinitions -Endpoint "Prod" -RoleDefinitions $mockRoles
+
+                Test-Path $script:TestCachePath | Should -Be $true
+            }
+
+            It 'Overwrites existing entry for the same endpoint' {
+                $roles1 = @(@{ roleDefinitionId = "id1"; roleDefinitionName = "Old Role" })
+                $roles2 = @(@{ roleDefinitionId = "id2"; roleDefinitionName = "New Role" })
+
+                Set-CachedRoleDefinitions -Endpoint "Prod" -RoleDefinitions $roles1
+                Set-CachedRoleDefinitions -Endpoint "Prod" -RoleDefinitions $roles2
+
+                $script:CacheData.RoleDefinitions["Prod"].value[0].roleDefinitionName | Should -Be "New Role"
+            }
+        }
+
     }
 }
