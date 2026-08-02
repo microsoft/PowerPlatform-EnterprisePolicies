@@ -68,7 +68,7 @@ function New-IdentityEnterprisePolicy {
     }
 
     Write-Verbose "Setting subscription context to $SubscriptionId"
-    $null = Set-AzContext -Subscription $SubscriptionId
+    $null = Set-SubscriptionContext -SubscriptionId $SubscriptionId
 
     if (-not(Initialize-SubscriptionForPowerPlatform -SubscriptionId $SubscriptionId)) {
         throw "Failed to initialize subscription for Power Platform. Please ensure the subscription is registered for Microsoft.PowerPlatform and Microsoft.Network."
