@@ -50,6 +50,10 @@ Retrieves the current usage of the specified environment.
 
 Retrieves identity enterprise policies for Power Platform.
 
+### [Get-PPModuleConfiguration](Get-PPModuleConfiguration.md)
+
+Reads configuration values stored in the module's local cache.
+
 ### [Get-SubnetHistoricalUsage](Get-SubnetHistoricalUsage.md)
 
 Retrieves the historical network usage of the subnet backing an enterprise policy, identified by Azure Resource Manager (ARM) resource ID, linked environment, or system ID.
@@ -77,6 +81,14 @@ Removes an identity enterprise policy for Power Platform.
 ### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
 
 Removes a subnet injection enterprise policy for Power Platform.
+
+### [Set-PPModuleConfiguration](Set-PPModuleConfiguration.md)
+
+Stores a named configuration value in the module's local cache.
+
+### [Set-PPServicePrincipalAuth](Set-PPServicePrincipalAuth.md)
+
+Configures the service principal that the module uses to authenticate to Azure.
 
 ### [Test-AccountPermissions](Test-AccountPermissions.md)
 
@@ -151,3 +163,7 @@ Represents the different Azure environments that can be used to connect to Azure
 #### [PPEndpoint](PPEndpoint.md)
 
 Represents the different PP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+
+#### [ServicePrincipalAuthMethod](ServicePrincipalAuthMethod.md)
+
+Represents the service principal authentication methods that the module can use to connect to Azure. The value determines which parameters Set-PPServicePrincipalAuth requires.

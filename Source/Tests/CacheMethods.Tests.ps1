@@ -299,11 +299,125 @@ Describe 'CacheMethods Tests' {
                 Add-ValidatedSubscriptionToCache -SubscriptionId "sub-1"
                 Add-ValidatedSubscriptionToCache -SubscriptionId "sub-2"
                 Add-ValidatedSubscriptionToCache -SubscriptionId "sub-3"
-                
+
                 $script:CacheData.SubscriptionsValidated.Count | Should -Be 3
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-1"
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-2"
                 $script:CacheData.SubscriptionsValidated | Should -Contain "sub-3"
+            }
+        }
+
+        Context 'Get-CachedServicePrincipalAuth' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Returns null when service principal auth is not set' {
+                Get-CachedServicePrincipalAuth | Should -BeNullOrEmpty
+            }
+
+            It 'Stores and retrieves a configuration' {
+                $config = [PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "mi-client-id" }
+                Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value $config
+
+                $result = Get-CachedServicePrincipalAuth
+                $result.Method | Should -Be "ManagedIdentity"
+                $result.ClientId | Should -Be "mi-client-id"
+            }
+
+            It 'Persists the configuration to disk' {
+                $config = [PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "persisted-id" }
+                Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value $config
+
+                Test-Path $script:TestCachePath | Should -Be $true
+                $savedData = Get-Content $script:TestCachePath | ConvertFrom-Json
+                $savedData.Configuration.ServicePrincipalAuth.ClientId | Should -Be "persisted-id"
+            }
+
+            It 'Round-trips a configuration through disk' {
+                $config = [PSCustomObject]@{ Method = "Certificate"; ClientId = "app-id"; TenantId = "tenant-id"; CertificateThumbprint = "THUMB123" }
+                Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value $config
+
+                # Reload from disk
+                Initialize-Cache
+
+                $result = Get-CachedServicePrincipalAuth
+                $result.Method | Should -Be "Certificate"
+                $result.CertificateThumbprint | Should -Be "THUMB123"
+            }
+
+            It 'Removes the configuration when set to null' {
+                Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value ([PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "mi-client-id" })
+                Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value $null
+
+                Get-CachedServicePrincipalAuth | Should -BeNullOrEmpty
+            }
+
+            It 'Overwrites an existing configuration' {
+                Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value ([PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "old-id" })
+                Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value ([PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "new-id" })
+
+                (Get-CachedServicePrincipalAuth).ClientId | Should -Be "new-id"
+            }
+
+            It 'Handles cache files created before the Configuration feature' {
+                # Simulate an old cache without the Configuration key
+                $script:CacheData = [PSCustomObject]@{
+                    Version = "1.1"
+                    SubscriptionsValidated = @()
+                    RegionCache = [PSCustomObject]@{}
+                }
+
+                Get-CachedServicePrincipalAuth | Should -BeNullOrEmpty
+                { Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value ([PSCustomObject]@{ Method = "ManagedIdentity"; ClientId = "mi-client-id" }) } | Should -Not -Throw
+                (Get-CachedServicePrincipalAuth).ClientId | Should -Be "mi-client-id"
+            }
+        }
+
+        Context 'Get-CachedConfiguration and Set-CachedConfiguration' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Returns an empty container when nothing is configured' {
+                $all = Get-CachedConfiguration
+                # An empty [PSCustomObject]@{} is treated as null/empty by -BeNullOrEmpty,
+                # so assert non-null explicitly and that it has no properties.
+                $null -ne $all | Should -Be $true
+                $all.PSObject.Properties.Name.Count | Should -Be 0
+            }
+
+            It 'Returns null for an unset named entry' {
+                Get-CachedConfiguration -Name "Missing" | Should -BeNullOrEmpty
+            }
+
+            It 'Stores and retrieves a named value' {
+                Set-CachedConfiguration -Name "MySetting" -Value "SomeValue"
+
+                Get-CachedConfiguration -Name "MySetting" | Should -Be "SomeValue"
+            }
+
+            It 'Returns all stored values when no name is provided' {
+                Set-CachedConfiguration -Name "First" -Value "1"
+                Set-CachedConfiguration -Name "Second" -Value "2"
+
+                $all = Get-CachedConfiguration
+                $all.First | Should -Be "1"
+                $all.Second | Should -Be "2"
+            }
+
+            It 'Removes a named value when set to null' {
+                Set-CachedConfiguration -Name "MySetting" -Value "SomeValue"
+                Set-CachedConfiguration -Name "MySetting" -Value $null
+
+                Get-CachedConfiguration -Name "MySetting" | Should -BeNullOrEmpty
+            }
+
+            It 'Persists named values to disk' {
+                Set-CachedConfiguration -Name "Persisted" -Value "OnDisk"
+
+                Initialize-Cache
+                Get-CachedConfiguration -Name "Persisted" | Should -Be "OnDisk"
             }
         }
     }
