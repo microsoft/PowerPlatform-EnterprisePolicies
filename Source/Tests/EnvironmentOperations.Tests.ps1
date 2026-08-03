@@ -117,8 +117,53 @@ Describe 'EnvironmentOperations Tests' {
                     -Endpoint ([PPEndpoint]::Prod)
 
                 Should -Invoke New-JsonRequestMessage -Times 1 -ParameterFilter {
-                    $Uri -match 'scopes/admin/environments' -and
-                    $Uri -match 'enterprisePolicies/NetworkInjection/link'
+                    $Uri -eq "https://api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/environments/$script:testEnvironmentId/enterprisePolicies/NetworkInjection/link?api-version=2019-10-01"
+                }
+            }
+
+            It 'Should not use an admin-scoped path for link or unlink' {
+                Mock Send-RequestWithRetries {
+                    $null = & $RequestFactory
+                    return $mock202Result
+                }
+                Mock New-JsonRequestMessage {
+                    param($Uri, $AccessToken, $Content, $HttpMethod)
+                    return [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, $Uri)
+                }
+
+                Set-EnvironmentEnterprisePolicy `
+                    -EnvironmentId $script:testEnvironmentId `
+                    -PolicyType ([PolicyType]::NetworkInjection) `
+                    -PolicySystemId $script:testPolicySystemId `
+                    -Operation ([LinkOperation]::unlink) `
+                    -Endpoint ([PPEndpoint]::Prod)
+
+                Should -Invoke New-JsonRequestMessage -Times 1 -ParameterFilter {
+                    $Uri -notmatch 'scopes/' -and
+                    $Uri -eq "https://api.bap.microsoft.com/providers/Microsoft.BusinessAppPlatform/environments/$script:testEnvironmentId/enterprisePolicies/NetworkInjection/unlink?api-version=2019-10-01"
+                }
+            }
+
+            It 'Should build the link URL from the shared endpoint mapping for GCCH' {
+                Mock Get-PPEndpointUrl { return "https://high.api.bap.microsoft.us/" }
+                Mock Send-RequestWithRetries {
+                    $null = & $RequestFactory
+                    return $mock202Result
+                }
+                Mock New-JsonRequestMessage {
+                    param($Uri, $AccessToken, $Content, $HttpMethod)
+                    return [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, $Uri)
+                }
+
+                Set-EnvironmentEnterprisePolicy `
+                    -EnvironmentId $script:testEnvironmentId `
+                    -PolicyType ([PolicyType]::NetworkInjection) `
+                    -PolicySystemId $script:testPolicySystemId `
+                    -Operation ([LinkOperation]::link) `
+                    -Endpoint ([PPEndpoint]::usgovhigh)
+
+                Should -Invoke New-JsonRequestMessage -Times 1 -ParameterFilter {
+                    $Uri -eq "https://high.api.bap.microsoft.us/providers/Microsoft.BusinessAppPlatform/environments/$script:testEnvironmentId/enterprisePolicies/NetworkInjection/link?api-version=2019-10-01"
                 }
             }
 
