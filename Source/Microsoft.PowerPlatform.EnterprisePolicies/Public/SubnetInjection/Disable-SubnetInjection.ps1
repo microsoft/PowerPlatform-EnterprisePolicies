@@ -92,7 +92,7 @@ function Disable-SubnetInjection {
     if ($linkedPolicyArmId -match "/subscriptions/([^/]+)/") {
         $subscriptionId = $Matches[1]
         Write-Verbose "Setting subscription context to $subscriptionId"
-        $null = Set-AzContext -Subscription $subscriptionId
+        $null = Set-SubscriptionContext -SubscriptionId $subscriptionId
     }
     else {
         throw "Invalid linked policy ARM ID format: $linkedPolicyArmId"

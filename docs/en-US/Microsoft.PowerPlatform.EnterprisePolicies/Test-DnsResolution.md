@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 05/07/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
 title: Test-DnsResolution
 ---
@@ -33,7 +33,7 @@ This cmdlet has the following aliases,
 
 The Test-DnsResolution cmdlet tests the DNS resolution for a given hostname in a specified environment.
 This cmdlet is executed in the context of your delegated subnet in the region that you have specified.
-If the region is not specified, it defaults to the region of the environment.
+If the region isn't specified, it defaults to the region of the environment.
 
 ## EXAMPLES
 

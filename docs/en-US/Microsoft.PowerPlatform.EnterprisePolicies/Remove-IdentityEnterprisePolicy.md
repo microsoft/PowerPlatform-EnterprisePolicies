@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 04/07/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
 title: Remove-IdentityEnterprisePolicy
 ---
@@ -56,8 +56,9 @@ The Remove-IdentityEnterprisePolicy cmdlet removes an identity enterprise policy
 When using BySubscription or ByResourceGroup, if multiple policies are found, the cmdlet outputs the policy ARM IDs.
 You can specify which policy to remove using -PolicyResourceId.
 
-Note: A policy can't be deleted if it's associated with any Power Platform environments.
-Unlink the policy from all environments before attempting to remove it.
+Note:
+- A policy can't be deleted if it's associated with any Power Platform environments.
+- Unlink the policy from all environments before attempting to remove it.
 
 ## EXAMPLES
 

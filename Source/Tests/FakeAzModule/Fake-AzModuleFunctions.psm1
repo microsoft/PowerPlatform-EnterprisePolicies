@@ -43,6 +43,14 @@ function Set-AzContext {
         $Subscription
     )
 }
+function Get-AzSubscription {
+    [CmdletBinding()]
+    param(
+        $SubscriptionId,
+        $TenantId
+    )
+    return [PSCustomObject]@{ Id = $SubscriptionId }
+}
 function Get-AzADAppCredential {}
 function New-AzADAppCredential {}
 function Get-AzADApplication {}

@@ -104,7 +104,7 @@ function Remove-IdentityEnterprisePolicy {
 
     # Set subscription context
     Write-Verbose "Setting subscription context to $SubscriptionId"
-    $null = Set-AzContext -Subscription $SubscriptionId
+    $null = Set-SubscriptionContext -SubscriptionId $SubscriptionId
 
     # Verify subscription is initialized for Power Platform
     if (-not(Initialize-SubscriptionForPowerPlatform -SubscriptionId $SubscriptionId)) {
