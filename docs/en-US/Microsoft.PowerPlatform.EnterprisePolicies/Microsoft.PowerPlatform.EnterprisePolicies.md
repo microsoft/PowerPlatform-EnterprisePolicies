@@ -114,7 +114,7 @@ Tests the connectivity to a given service in a specified environment.
 
 Tests that an Azure AD application is correctly configured for Power Platform Authorization.
 
-### [Test-RBACDiagnosticPermission](Test-RBACDiagnosticPermission.md)
+### [Test-PPRBACDiagnosticPermission](Test-PPRBACDiagnosticPermission.md)
 
 Tests Power Platform RBAC diagnostic permissions for a principal on an environment.
 

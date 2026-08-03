@@ -4,12 +4,12 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 08/02/2026
+ms.date: 08/03/2026
 PlatyPS schema version: 2024-05-01
-title: Test-RBACDiagnosticPermission
+title: Test-PPRBACDiagnosticPermission
 ---
 
-# Test-RBACDiagnosticPermission
+# Test-PPRBACDiagnosticPermission
 
 ## SYNOPSIS
 
@@ -20,25 +20,25 @@ Tests Power Platform RBAC diagnostic permissions for a principal on an environme
 ### ReadDiagnostic
 
 ```
-Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -PrincipalObjectId <string>
- -PrincipalType <AuthorizationPrincipalType> -ReadDiagnostic [-ClientId <string>]
- [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
+Test-PPRBACDiagnosticPermission -TenantId <string> -EnvironmentId <string>
+ -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType> -ReadDiagnostic
+ [-ClientId <string>] [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### RunDiagnostic
 
 ```
-Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -PrincipalObjectId <string>
- -PrincipalType <AuthorizationPrincipalType> -RunDiagnostic [-ClientId <string>]
- [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
+Test-PPRBACDiagnosticPermission -TenantId <string> -EnvironmentId <string>
+ -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType> -RunDiagnostic
+ [-ClientId <string>] [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ### RunMitigation
 
 ```
-Test-RBACDiagnosticPermission -TenantId <string> -EnvironmentId <string> -PrincipalObjectId <string>
- -PrincipalType <AuthorizationPrincipalType> -RunMitigation [-ClientId <string>]
- [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
+Test-PPRBACDiagnosticPermission -TenantId <string> -EnvironmentId <string>
+ -PrincipalObjectId <string> -PrincipalType <AuthorizationPrincipalType> -RunMitigation
+ [-ClientId <string>] [-Endpoint <PPEndpoint>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -66,19 +66,19 @@ Exactly one switch must be specified.
 
 ### EXAMPLE 1
 
-Test-RBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType User -ReadDiagnostic
+Test-PPRBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType User -ReadDiagnostic
 
 Tests the ReadDiagnostic permission for a user on the specified environment.
 
 ### EXAMPLE 2
 
-Test-RBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType ApplicationUser -RunDiagnostic
+Test-PPRBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType ApplicationUser -RunDiagnostic
 
 Tests the RunDiagnostic permission for an application user.
 
 ### EXAMPLE 3
 
-Test-RBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType Group -RunMitigation
+Test-PPRBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType Group -RunMitigation
 
 Tests the RunMitigation permission for a group.
 

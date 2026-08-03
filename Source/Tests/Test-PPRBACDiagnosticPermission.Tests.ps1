@@ -5,7 +5,7 @@ BeforeDiscovery{
     . $PSScriptRoot\Shared.ps1
 }
 
-Describe 'Test-RBACDiagnosticPermission Tests' {
+Describe 'Test-PPRBACDiagnosticPermission Tests' {
     BeforeAll {
         $script:testClientId = "00000000-0000-0000-0000-000000789012"
         $script:testTenantId = "12345678-1234-1234-1234-123456789012"
@@ -31,7 +31,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         }
 
         It 'Should return permission results' {
-            $result = Test-RBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic
+            $result = Test-PPRBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic
 
             $result | Should -Not -BeNullOrEmpty
         }
@@ -45,7 +45,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         }
 
         It 'Should test only Read permission when -ReadDiagnostic specified' {
-            Test-RBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic
+            Test-PPRBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic
 
             Should -Invoke Test-PrincipalPermission -Times 1 -ParameterFilter {
                 $Permissions.Count -eq 1 -and
@@ -54,7 +54,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         }
 
         It 'Should test only Action permission when -RunDiagnostic specified' {
-            Test-RBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType ApplicationUser -RunDiagnostic
+            Test-PPRBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType ApplicationUser -RunDiagnostic
 
             Should -Invoke Test-PrincipalPermission -Times 1 -ParameterFilter {
                 $Permissions.Count -eq 1 -and
@@ -63,7 +63,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         }
 
         It 'Should test only Write permission when -RunMitigation specified' {
-            Test-RBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType Group -RunMitigation
+            Test-PPRBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType Group -RunMitigation
 
             Should -Invoke Test-PrincipalPermission -Times 1 -ParameterFilter {
                 $Permissions.Count -eq 1 -and
@@ -80,7 +80,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         }
 
         It 'Should pass correct parameters to Test-PrincipalPermission' {
-            Test-RBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic
+            Test-PPRBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic
 
             Should -Invoke Test-PrincipalPermission -Times 1 -ParameterFilter {
                 $TenantId -eq $script:testTenantId -and
@@ -100,7 +100,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         }
 
         It 'Should use cached ClientId when not specified' {
-            $result = Test-RBACDiagnosticPermission -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic
+            $result = Test-PPRBACDiagnosticPermission -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic
 
             $result | Should -Not -BeNullOrEmpty
         }
@@ -112,7 +112,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
         }
 
         It 'Should throw when no ClientId specified and none cached' {
-            { Test-RBACDiagnosticPermission -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
+            { Test-PPRBACDiagnosticPermission -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic } | Should -Throw "*ClientId was not provided and no cached ClientId was found*"
         }
     }
 
@@ -121,7 +121,7 @@ Describe 'Test-RBACDiagnosticPermission Tests' {
             Mock New-AuthorizationServiceMsalClient { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-            { Test-RBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic } | Should -Throw "*Failed to connect to Authorization Service*"
+            { Test-PPRBACDiagnosticPermission -ClientId $script:testClientId -TenantId $script:testTenantId -EnvironmentId $script:testEnvironmentId -PrincipalObjectId $script:testPrincipalObjectId -PrincipalType User -ReadDiagnostic } | Should -Throw "*Failed to connect to Authorization Service*"
         }
     }
 }

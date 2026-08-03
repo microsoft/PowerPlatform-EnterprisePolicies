@@ -31,22 +31,22 @@ System.Management.Automation.PSCustomObject
 Returns the permission check results from the API.
 
 .EXAMPLE
-Test-RBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType User -ReadDiagnostic
+Test-PPRBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType User -ReadDiagnostic
 
 Tests the ReadDiagnostic permission for a user on the specified environment.
 
 .EXAMPLE
-Test-RBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType ApplicationUser -RunDiagnostic
+Test-PPRBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType ApplicationUser -RunDiagnostic
 
 Tests the RunDiagnostic permission for an application user.
 
 .EXAMPLE
-Test-RBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType Group -RunMitigation
+Test-PPRBACDiagnosticPermission -ClientId "00000000-0000-0000-0000-000000000000" -TenantId "00000000-0000-0000-0000-000000000001" -EnvironmentId "00000000-0000-0000-0000-000000000002" -PrincipalObjectId "00000000-0000-0000-0000-000000000003" -PrincipalType Group -RunMitigation
 
 Tests the RunMitigation permission for a group.
 #>
 
-function Test-RBACDiagnosticPermission {
+function Test-PPRBACDiagnosticPermission {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$false, HelpMessage="The application (client) ID of the app registration")]
