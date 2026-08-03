@@ -18,6 +18,7 @@ function Get-EmptyCache{
         RegionCache = [PSCustomObject]@{}
         RoleDefinitions = @{}
         ClientId = ""
+        Configuration = [PSCustomObject]@{}
     }
 }
 
@@ -157,6 +158,84 @@ function Set-CachedRoleDefinitions{
     Save-Cache
 }
 
+function Get-CachedConfiguration{
+    param(
+        [Parameter(Mandatory=$false)]
+        [string]$Name
+    )
+
+    # Reads from the generic configuration container in the cache. With no name, returns the
+    # entire container; with a name, returns that entry's value (or $null when it is not set).
+    if($null -eq $script:CacheData.Configuration){
+        if([string]::IsNullOrWhiteSpace($Name)){
+            return [PSCustomObject]@{}
+        }
+        return $null
+    }
+
+    if([string]::IsNullOrWhiteSpace($Name)){
+        return $script:CacheData.Configuration
+    }
+
+    # Configuration may be a PSCustomObject (from JSON) or a hashtable (in-memory)
+    if($script:CacheData.Configuration -is [hashtable]){
+        if($script:CacheData.Configuration.ContainsKey($Name)){
+            return $script:CacheData.Configuration[$Name]
+        }
+        return $null
+    }
+
+    $property = $script:CacheData.Configuration.PSObject.Properties[$Name]
+    if($null -eq $property){
+        return $null
+    }
+
+    return $property.Value
+}
+
+function Set-CachedConfiguration{
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Name,
+
+        [Parameter(Mandatory)]
+        [AllowNull()]
+        [object]$Value
+    )
+
+    # Ensure the configuration container exists (for caches created before this feature)
+    if($null -eq $script:CacheData.Configuration){
+        if($script:CacheData -is [hashtable]){
+            $script:CacheData["Configuration"] = [PSCustomObject]@{}
+        }
+        else{
+            $script:CacheData | Add-Member -NotePropertyName "Configuration" -NotePropertyValue ([PSCustomObject]@{}) -Force
+        }
+    }
+
+    if($script:CacheData.Configuration -is [hashtable]){
+        if($null -eq $Value){
+            $script:CacheData.Configuration.Remove($Name)
+        }
+        else{
+            $script:CacheData.Configuration[$Name] = $Value
+        }
+    }
+    else{
+        if($null -eq $Value){
+            if($null -ne $script:CacheData.Configuration.PSObject.Properties[$Name]){
+                $script:CacheData.Configuration.PSObject.Properties.Remove($Name)
+            }
+        }
+        else{
+            $script:CacheData.Configuration | Add-Member -NotePropertyName $Name -NotePropertyValue $Value -Force
+        }
+    }
+
+    Save-Cache
+}
+
 function Get-CachedClientId{
     # Ensure ClientId key exists (for caches created before this feature)
     if($null -eq $script:CacheData.ClientId){
@@ -186,6 +265,12 @@ function Set-CachedClientId{
     }
 
     Save-Cache
+}
+
+function Get-CachedServicePrincipalAuth{
+    # Reads the service principal auth configuration from the generic configuration
+    # container in the cache. Returns $null when it has not been configured.
+    return Get-CachedConfiguration -Name "ServicePrincipalAuth"
 }
 
 function Get-EnvironmentRegionFromCache{

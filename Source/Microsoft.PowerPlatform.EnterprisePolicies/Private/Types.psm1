@@ -174,6 +174,11 @@ enum AuthorizationPrincipalType{
     ApplicationUser
 }
 
+enum ServicePrincipalAuthMethod{
+    ManagedIdentity
+    Certificate
+}
+
 # Define the types to export with type accelerators.
 $ExportableTypes = @(
     [ApplicationInsightsInformation]
@@ -193,6 +198,7 @@ $ExportableTypes = @(
     [EnvironmentNetworkUsageDocument]
     [SubnetUsageDocument]
     [AuthorizationPrincipalType]
+    [ServicePrincipalAuthMethod]
 )
 
 # Get the internal TypeAccelerators class to use its static methods.

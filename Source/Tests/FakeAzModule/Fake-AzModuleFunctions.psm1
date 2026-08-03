@@ -28,14 +28,28 @@ function Connect-AzAccount {
     param(
         [string] $Tenant,
         [string] $Environment,
-        [string] $AuthScope
+        [string] $AuthScope,
+        [switch] $Identity,
+        [string] $AccountId,
+        [switch] $ServicePrincipal,
+        [string] $ApplicationId,
+        [string] $CertificateThumbprint
     )
 }
 function Get-AzContext {}
 function Set-AzContext {
     param(
-        $Context
+        $Context,
+        $Subscription
     )
+}
+function Get-AzSubscription {
+    [CmdletBinding()]
+    param(
+        $SubscriptionId,
+        $TenantId
+    )
+    return [PSCustomObject]@{ Id = $SubscriptionId }
 }
 function Get-AzADAppCredential {}
 function New-AzADAppCredential {}

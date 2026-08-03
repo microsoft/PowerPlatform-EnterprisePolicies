@@ -86,7 +86,7 @@ function Get-SubnetHistoricalUsage {
         }
         'ByEnterprisePolicyId' {
             $null = $EnterprisePolicyId -match "/subscriptions/([^/]+)/"
-            $null = Set-AzContext -Subscription $Matches[1]
+            $null = Set-SubscriptionContext -SubscriptionId $Matches[1]
             $policy = Get-EnterprisePolicy -PolicyArmId $EnterprisePolicyId
             if ($null -eq $policy) {
                 throw "Failed to retrieve enterprise policy with ARM ID: $EnterprisePolicyId."
@@ -106,7 +106,7 @@ function Get-SubnetHistoricalUsage {
             }
             $policyArmId = $environment.properties.enterprisePolicies.VNets.id
             $null = $policyArmId -match "/subscriptions/([^/]+)/"
-            $null = Set-AzContext -Subscription $Matches[1]
+            $null = Set-SubscriptionContext -SubscriptionId $Matches[1]
             $policy = Get-EnterprisePolicy -PolicyArmId $policyArmId
             if ($null -eq $policy -or [string]::IsNullOrWhiteSpace($policy.Properties.systemId)) {
                 throw "Could not retrieve enterprise policy details for: $policyArmId."

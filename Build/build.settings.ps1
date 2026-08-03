@@ -263,6 +263,10 @@ Represents the different Azure environments that can be used to connect to Azure
 #### [PPEndpoint](PPEndpoint.md)
 
 Represents the different PP endpoints that can be used to connect to Power Platform services. Only endpoints that are currently supported are included.
+
+#### [ServicePrincipalAuthMethod](ServicePrincipalAuthMethod.md)
+
+Represents the service principal authentication methods that the module can use to connect to Azure. The value determines which parameters Set-PPServicePrincipalAuth requires.
 "@
 
     $targetFile = "$DocsRootDir\$DefaultLocale\$ModuleName\$ModuleName.md"

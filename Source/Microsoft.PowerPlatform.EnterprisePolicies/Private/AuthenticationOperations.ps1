@@ -35,6 +35,15 @@ function Connect-Azure {
         }
     }
 
+    # When re-authentication is not forced, honor a cached service principal auth
+    # configuration and prioritize that flow over the default interactive login.
+    if(-not($Force)) {
+        $servicePrincipalConfig = Get-CachedServicePrincipalAuth
+        if($null -ne $servicePrincipalConfig) {
+            return Connect-AzureWithServicePrincipal -Config $servicePrincipalConfig -AzureEnvironment $AzureEnvironment -TenantId $TenantId
+        }
+    }
+
     $context = Get-AzContext -ListAvailable
     $foundContext = $false
 
@@ -86,6 +95,117 @@ function Connect-Azure {
     if ($null -eq $connect)
     {
         Write-Host "Error connecting to Azure Account" -ForegroundColor Red
+        return $false
+    }
+
+    Write-Host "Logged In..." -ForegroundColor Green
+    return $true
+}
+
+function Resolve-CertificateThumbprint {
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$SubjectName
+    )
+
+    $stores = @("Cert:\CurrentUser\My", "Cert:\LocalMachine\My")
+    foreach ($store in $stores) {
+        $cert = Get-ChildItem -Path $store -ErrorAction SilentlyContinue |
+            Where-Object { $_.Subject -eq $SubjectName -or $_.Subject -like "*CN=$SubjectName*" } |
+            Sort-Object -Property NotAfter -Descending |
+            Select-Object -First 1
+        if ($null -ne $cert) {
+            return $cert.Thumbprint
+        }
+    }
+
+    throw "Could not find a certificate with subject name '$SubjectName' in the CurrentUser or LocalMachine 'My' store."
+}
+
+function Connect-AzureWithServicePrincipal {
+    param(
+        [Parameter(Mandatory)]
+        [object]$Config,
+
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$AzureEnvironment,
+
+        [Parameter(Mandatory=$false)]
+        [string]$TenantId = $null
+    )
+
+    $method = $Config.Method
+    if ([string]::IsNullOrWhiteSpace($method)) {
+        throw "Service principal auth configuration is missing the 'Method' property. Expected 'ManagedIdentity' or 'Certificate'."
+    }
+
+    $clientId = $Config.ClientId
+    $effectiveTenantId = if (-not [string]::IsNullOrWhiteSpace($TenantId)) { $TenantId } else { $Config.TenantId }
+
+    # Reuse an existing matching context when one is already available.
+    $existingContexts = Get-AzContext -ListAvailable | Where-Object {
+        $_.Environment.Name -eq $AzureEnvironment -and $_.Account.Id -eq $clientId
+    }
+    if (-not [string]::IsNullOrWhiteSpace($effectiveTenantId)) {
+        $existingContexts = $existingContexts | Where-Object {
+            $_.Tenant.Id -eq $effectiveTenantId -or $_.Account.Tenants -contains $effectiveTenantId
+        }
+    }
+    $existingContext = $existingContexts | Select-Object -First 1
+    if ($existingContext) {
+        Set-AzContext -Context $existingContext
+        Write-Host "Already connected to Azure environment: $AzureEnvironment with service principal $($existingContext.Account.Id)" -ForegroundColor Yellow
+        return $true
+    }
+
+    $connectParameters = @{
+        Environment = $AzureEnvironment
+    }
+
+    switch ($method) {
+        "ManagedIdentity" {
+            $connectParameters['Identity'] = $true
+            if (-not [string]::IsNullOrWhiteSpace($clientId)) {
+                $connectParameters['AccountId'] = $clientId
+            }
+            if (-not [string]::IsNullOrWhiteSpace($effectiveTenantId)) {
+                $connectParameters['Tenant'] = $effectiveTenantId
+            }
+            Write-Host "Logging in with managed identity..." -ForegroundColor Green
+        }
+        "Certificate" {
+            if ([string]::IsNullOrWhiteSpace($clientId)) {
+                throw "Service principal auth configuration for 'Certificate' requires a 'ClientId'."
+            }
+            if ([string]::IsNullOrWhiteSpace($effectiveTenantId)) {
+                throw "Service principal auth configuration for 'Certificate' requires a 'TenantId'."
+            }
+
+            $thumbprint = $Config.CertificateThumbprint
+            if ([string]::IsNullOrWhiteSpace($thumbprint) -and -not [string]::IsNullOrWhiteSpace($Config.CertificateSubjectName)) {
+                $thumbprint = Resolve-CertificateThumbprint -SubjectName $Config.CertificateSubjectName
+            }
+            if ([string]::IsNullOrWhiteSpace($thumbprint)) {
+                throw "Service principal auth configuration for 'Certificate' requires either 'CertificateThumbprint' or 'CertificateSubjectName'."
+            }
+
+            $connectParameters['ServicePrincipal'] = $true
+            $connectParameters['ApplicationId'] = $clientId
+            $connectParameters['Tenant'] = $effectiveTenantId
+            $connectParameters['CertificateThumbprint'] = $thumbprint
+            Write-Host "Logging in with certificate-based service principal..." -ForegroundColor Green
+        }
+        default {
+            throw "Unknown service principal auth method '$method'. Expected 'ManagedIdentity' or 'Certificate'."
+        }
+    }
+
+    $connect = Connect-AzAccount @connectParameters
+
+    if ($null -eq $connect) {
+        Write-Host "Error connecting to Azure with service principal" -ForegroundColor Red
         return $false
     }
 

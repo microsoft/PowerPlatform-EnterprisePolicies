@@ -22,6 +22,13 @@ Describe 'RESTHelpers Tests' {
             }
         }
     
+        Context 'Testing Get-PPEndpointUrl' {
+            It 'Returns the GCCH BAP host used by all GCCH call paths' {
+                $result = Get-PPEndpointUrl -Endpoint ([PPEndpoint]::usgovhigh)
+                $result | Should -Be "https://high.api.bap.microsoft.us/"
+            }
+        }
+    
         Context 'Testing Get-EnvironmentRouteHostName' {
             It 'Returns the correct route for TIP1 endpoint' {
                 $result = Get-EnvironmentRouteHostName -EnvironmentId "12345678-1234-1234-1234-123456789012" -Endpoint ([PPEndpoint]::tip1)

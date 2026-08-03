@@ -7,6 +7,37 @@ THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAI
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
 
+function Set-SubscriptionContext {
+    <#
+    .SYNOPSIS
+    Validates access to an Azure subscription, then makes it the active context.
+
+    .DESCRIPTION
+    Confirms the current Azure context (user or service principal) can at least read the
+    target subscription before switching to it. A service principal that has not been
+    granted access to the subscription cannot resolve it, and Set-AzContext then fails with
+    "Please provide a valid tenant or a valid subscription." Validating access first lets
+    the caller surface a clear, actionable error instead of that opaque failure.
+
+    .PARAMETER SubscriptionId
+    The Azure subscription ID to validate and make current.
+    #>
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$SubscriptionId
+    )
+
+    $subscription = Get-AzSubscription -SubscriptionId $SubscriptionId -ErrorAction SilentlyContinue
+    if ($null -eq $subscription) {
+        $context = Get-AzContext
+        $accountSuffix = if ($null -ne $context -and $null -ne $context.Account) { " (account '$($context.Account.Id)')" } else { "" }
+        throw "The current Azure context$accountSuffix does not have access to subscription '$SubscriptionId'. Ensure the identity has at least Reader access to the subscription."
+    }
+
+    return Set-AzContext -Subscription $SubscriptionId
+}
+
 function Register-ResourceProvider {
     <#
     .SYNOPSIS
