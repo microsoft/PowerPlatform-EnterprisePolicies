@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 08/02/2026
+ms.date: 08/03/2026
 PlatyPS schema version: 2024-05-01
 title: Set-PPServicePrincipalAuth
 ---
@@ -58,7 +58,7 @@ interactive login (unless re-authentication is forced).
 The parameters available depend on the authentication method, expressed by the ServicePrincipalAuthMethod
 enum:
 
-- ManagedIdentity: authenticates with a user-assigned managed identity identified by -ClientId.
+- ManagedIdentity: authenticates with a managed identity with the specified client ID and tenant ID.
 - Certificate: authenticates with a certificate-based service principal identified by -ClientId and
   -TenantId, using either -CertificateThumbprint or -CertificateSubjectName to locate the certificate.
 
@@ -68,9 +68,9 @@ Use -Clear to remove any stored configuration so Connect-Azure reverts to the de
 
 ### EXAMPLE 1
 
-Set-PPServicePrincipalAuth -ClientId "11111111-1111-1111-1111-111111111111"
+Set-PPServicePrincipalAuth -ClientId "11111111-1111-1111-1111-111111111111" -TenantId "33333333-3333-3333-3333-333333333333"
 
-Configures Connect-Azure to authenticate using a user-assigned managed identity.
+Configures Connect-Azure to authenticate using a managed identity with the specified client ID and tenant ID.
 
 ### EXAMPLE 2
 
