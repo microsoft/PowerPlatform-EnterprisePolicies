@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 02/17/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
 title: Get-EnvironmentHistoricalUsage
 ---
@@ -32,7 +32,7 @@ This cmdlet has the following aliases,
 ## DESCRIPTION
 
 The Get-EnvironmentHistoricalUsage cmdlet retrieves the historical usage of the specified environment.
-This is only the historical usage that the specified environment has.
+This cmdlet only includes the historical usage for the specified environment.
 It doesn't include usage from other environments and it doesn't include any IP addresses that might be reserved by Azure.
 
 ## EXAMPLES

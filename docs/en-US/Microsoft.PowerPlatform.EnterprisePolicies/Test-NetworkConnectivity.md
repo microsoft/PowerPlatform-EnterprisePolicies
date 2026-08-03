@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 05/07/2026
+ms.date: 08/02/2026
 PlatyPS schema version: 2024-05-01
 title: Test-NetworkConnectivity
 ---
@@ -13,7 +13,7 @@ title: Test-NetworkConnectivity
 
 ## SYNOPSIS
 
-Tests the connectivity to a given service in a specified environment.
+Tests the connectivity to a given service in the specified environment.
 
 ## SYNTAX
 
@@ -32,7 +32,7 @@ This cmdlet has the following aliases,
 
 ## DESCRIPTION
 
-The Test-NetworkConnectivity cmdlet tests the connectivity to a given service in a specified environment.
+The Test-NetworkConnectivity cmdlet tests the connectivity to a given service in the specified environment.
 The connectivity test attempts to establish a TCP connection to the specified destination on the specified port.
 The cmdlet is executed in the context of your delegated subnet in the region that you specify.
 If the region isn't specified, it defaults to the region of the environment.
