@@ -85,7 +85,7 @@ function Set-EnvironmentEnterprisePolicy {
 
     $apiVersion = "2019-10-01"
     $baseUri = Get-PPEndpointUrl -Endpoint $Endpoint
-    $uri = "${baseUri}providers/Microsoft.BusinessAppPlatform/scopes/admin/environments/${EnvironmentId}/enterprisePolicies/${PolicyType}/${Operation}?api-version=${apiVersion}"
+    $uri = "${baseUri}providers/Microsoft.BusinessAppPlatform/environments/${EnvironmentId}/enterprisePolicies/${PolicyType}/${Operation}?api-version=${apiVersion}"
 
     $body = @{ SystemId = $PolicySystemId } | ConvertTo-Json
 
