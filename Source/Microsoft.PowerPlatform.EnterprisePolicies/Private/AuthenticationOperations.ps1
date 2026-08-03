@@ -7,62 +7,6 @@ THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAI
 NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
 #>
 
-function Set-ServicePrincipalAuth {
-    param(
-        [Parameter(Mandatory)]
-        [AllowNull()]
-        [object]$Configuration
-    )
-
-    # A null configuration clears any stored service principal auth so Connect-Azure
-    # reverts to the default interactive flow.
-    if($null -eq $Configuration){
-        Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value $null
-        return
-    }
-
-    $method = $Configuration.Method
-    if([string]::IsNullOrWhiteSpace($method)){
-        throw "Service principal auth configuration requires a 'Method' property. Supported methods: $([Enum]::GetNames([ServicePrincipalAuthMethod]) -join ', ')."
-    }
-
-    switch ($method) {
-        "ManagedIdentity" {
-            if([string]::IsNullOrWhiteSpace($Configuration.ClientId)){
-                throw "Service principal auth configuration for 'ManagedIdentity' requires a 'ClientId' (the client ID of the user-assigned managed identity)."
-            }
-            $normalized = [PSCustomObject]@{
-                Method   = "ManagedIdentity"
-                ClientId = $Configuration.ClientId
-                TenantId = $Configuration.TenantId
-            }
-        }
-        "Certificate" {
-            if([string]::IsNullOrWhiteSpace($Configuration.ClientId)){
-                throw "Service principal auth configuration for 'Certificate' requires a 'ClientId' (the application/client ID)."
-            }
-            if([string]::IsNullOrWhiteSpace($Configuration.TenantId)){
-                throw "Service principal auth configuration for 'Certificate' requires a 'TenantId'."
-            }
-            if([string]::IsNullOrWhiteSpace($Configuration.CertificateThumbprint) -and [string]::IsNullOrWhiteSpace($Configuration.CertificateSubjectName)){
-                throw "Service principal auth configuration for 'Certificate' requires either 'CertificateThumbprint' or 'CertificateSubjectName'."
-            }
-            $normalized = [PSCustomObject]@{
-                Method                 = "Certificate"
-                ClientId               = $Configuration.ClientId
-                TenantId               = $Configuration.TenantId
-                CertificateThumbprint  = $Configuration.CertificateThumbprint
-                CertificateSubjectName = $Configuration.CertificateSubjectName
-            }
-        }
-        default {
-            throw "Unknown service principal auth method '$method'. Supported methods: $([Enum]::GetNames([ServicePrincipalAuthMethod]) -join ', ')."
-        }
-    }
-
-    Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value $normalized
-}
-
 function Connect-Azure {
     param(
         [Parameter(Mandatory, ParameterSetName = 'ByEndpoint')]

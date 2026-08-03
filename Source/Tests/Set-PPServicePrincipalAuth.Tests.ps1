@@ -8,7 +8,6 @@ Describe 'Set-PPServicePrincipalAuth Tests' {
     BeforeAll {
         Mock Write-Verbose {}
         Mock Set-CachedConfiguration {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-        Mock Set-ServicePrincipalAuth {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
     It 'Stores a managed identity configuration' {
@@ -38,7 +37,7 @@ Describe 'Set-PPServicePrincipalAuth Tests' {
     It 'Clears the configuration with -Clear' {
         Set-PPServicePrincipalAuth -Clear
 
-        Should -Invoke Set-ServicePrincipalAuth -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter { $null -eq $Configuration }
+        Should -Invoke Set-CachedConfiguration -Times 1 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter { $Name -eq "ServicePrincipalAuth" -and $null -eq $Value }
     }
 
     It 'Requires a client id' {

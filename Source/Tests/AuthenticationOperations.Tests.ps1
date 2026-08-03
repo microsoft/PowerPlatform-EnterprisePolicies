@@ -184,54 +184,6 @@ Describe 'AuthenticationOperations Tests' {
             }
         }
 
-        Context 'Testing Set-ServicePrincipalAuth' {
-            BeforeEach {
-                Mock Set-CachedConfiguration {}
-            }
-
-            It 'Stores a validated managed identity configuration' {
-                Set-ServicePrincipalAuth -Configuration @{ Method = "ManagedIdentity"; ClientId = "mi-client-id" }
-
-                Assert-MockCalled Set-CachedConfiguration -Exactly 1 -ParameterFilter {
-                    $Name -eq "ServicePrincipalAuth" -and $Value.Method -eq "ManagedIdentity" -and $Value.ClientId -eq "mi-client-id"
-                }
-            }
-
-            It 'Stores a validated certificate configuration' {
-                Set-ServicePrincipalAuth -Configuration @{ Method = "Certificate"; ClientId = "app-id"; TenantId = "tenant-id"; CertificateThumbprint = "THUMB123" }
-
-                Assert-MockCalled Set-CachedConfiguration -Exactly 1 -ParameterFilter {
-                    $Name -eq "ServicePrincipalAuth" -and $Value.Method -eq "Certificate" -and $Value.CertificateThumbprint -eq "THUMB123"
-                }
-            }
-
-            It 'Clears the configuration when passed null' {
-                Set-ServicePrincipalAuth -Configuration $null
-
-                Assert-MockCalled Set-CachedConfiguration -Exactly 1 -ParameterFilter { $Name -eq "ServicePrincipalAuth" -and $null -eq $Value }
-            }
-
-            It 'Throws when the method is missing' {
-                { Set-ServicePrincipalAuth -Configuration @{ ClientId = "mi-client-id" } } | Should -Throw "*requires a 'Method'*"
-            }
-
-            It 'Throws when a managed identity is missing its client id' {
-                { Set-ServicePrincipalAuth -Configuration @{ Method = "ManagedIdentity" } } | Should -Throw "*requires a 'ClientId'*"
-            }
-
-            It 'Throws when a certificate configuration is missing its tenant id' {
-                { Set-ServicePrincipalAuth -Configuration @{ Method = "Certificate"; ClientId = "app-id"; CertificateThumbprint = "THUMB123" } } | Should -Throw "*requires a 'TenantId'*"
-            }
-
-            It 'Throws when a certificate configuration has neither thumbprint nor subject name' {
-                { Set-ServicePrincipalAuth -Configuration @{ Method = "Certificate"; ClientId = "app-id"; TenantId = "tenant-id" } } | Should -Throw "*requires either 'CertificateThumbprint' or 'CertificateSubjectName'*"
-            }
-
-            It 'Throws when the method is unknown' {
-                { Set-ServicePrincipalAuth -Configuration @{ Method = "Bogus"; ClientId = "some-id" } } | Should -Throw "*Unknown service principal auth method*"
-            }
-        }
-
         Context 'Testing Get-AccessToken' {
             It 'Returns token when Get-AzAccessToken succeeds' {
                 $mockToken = [PSCustomObject]@{ Token = (ConvertTo-SecureString "test-token" -AsPlainText -Force) }

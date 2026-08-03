@@ -78,7 +78,7 @@ function Set-PPServicePrincipalAuth {
     $ErrorActionPreference = "Stop"
 
     if ($PSCmdlet.ParameterSetName -eq 'Clear') {
-        Set-ServicePrincipalAuth -Configuration $null
+        Set-CachedConfiguration -Name "ServicePrincipalAuth" -Value $null
         Write-Verbose "Cleared service principal authentication configuration."
         return
     }
