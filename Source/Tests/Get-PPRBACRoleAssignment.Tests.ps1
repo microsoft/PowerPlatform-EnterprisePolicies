@@ -36,7 +36,7 @@ Describe 'Get-PPRBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedAuthorizationServiceClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should get tenant-scoped role assignments' {
@@ -64,7 +64,7 @@ Describe 'Get-PPRBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedAuthorizationServiceClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should get environment-scoped role assignments' {
@@ -86,7 +86,7 @@ Describe 'Get-PPRBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedAuthorizationServiceClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should default IncludeParentScopes to true' {
@@ -126,7 +126,7 @@ Describe 'Get-PPRBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedAuthorizationServiceClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should set IncludeParentScopes to false when ExcludeParentScopes is specified' {
@@ -166,7 +166,7 @@ Describe 'Get-PPRBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedAuthorizationServiceClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should pass PrincipalType when specified' {
@@ -199,8 +199,8 @@ Describe 'Get-PPRBACRoleAssignment Tests' {
         BeforeAll {
             Mock New-AuthorizationServiceMsalClient { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-RoleAssignments { return $script:mockRoleAssignmentsResponse } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-CachedClientId { return $script:testClientId } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-CachedAuthorizationServiceClientId { return $script:testClientId } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedAuthorizationServiceClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should use cached ClientId when not specified' {
@@ -212,7 +212,7 @@ Describe 'Get-PPRBACRoleAssignment Tests' {
 
     Context 'Throws when no ClientId specified and none cached' {
         BeforeAll {
-            Mock Get-CachedClientId { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-CachedAuthorizationServiceClientId { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         }
 
         It 'Should throw when no ClientId specified and none cached' {
@@ -223,7 +223,7 @@ Describe 'Get-PPRBACRoleAssignment Tests' {
     Context 'Error handling' {
         It 'Should throw when New-AuthorizationServiceMsalClient fails' {
             Mock New-AuthorizationServiceMsalClient { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Set-CachedClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-CachedAuthorizationServiceClientId {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             { Get-PPRBACRoleAssignment -ClientId $script:testClientId -TenantId $script:testTenantId } | Should -Throw "*Failed to connect to Authorization Service*"
         }

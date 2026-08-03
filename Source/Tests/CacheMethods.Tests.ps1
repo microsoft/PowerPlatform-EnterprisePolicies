@@ -348,22 +348,22 @@ Describe 'CacheMethods Tests' {
             }
         }
 
-        Context 'Get-CachedClientId' {
+        Context 'Get-CachedAuthorizationServiceClientId' {
             BeforeEach {
                 Initialize-Cache
             }
 
             It 'Returns null when no ClientId is cached' {
-                Get-CachedClientId | Should -BeNullOrEmpty
+                Get-CachedAuthorizationServiceClientId | Should -BeNullOrEmpty
             }
 
             It 'Returns cached ClientId after it is set' {
-                Set-CachedClientId -ClientId "test-client-id"
+                Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId "test-client-id"
 
-                Get-CachedClientId | Should -Be "test-client-id"
+                Get-CachedAuthorizationServiceClientId | Should -Be "test-client-id"
             }
 
-            It 'Handles cache files created before ClientId feature' {
+            It 'Handles cache files created before AuthorizationServiceClientId feature' {
                 # Simulate an old cache without the ClientId key
                 $script:CacheData = [PSCustomObject]@{
                     Version = "1.0"
@@ -371,37 +371,37 @@ Describe 'CacheMethods Tests' {
                     RoleDefinitions = @{}
                 }
 
-                Get-CachedClientId | Should -BeNullOrEmpty
+                Get-CachedAuthorizationServiceClientId | Should -BeNullOrEmpty
             }
         }
 
-        Context 'Set-CachedClientId' {
+        Context 'Set-CachedAuthorizationServiceClientId' {
             BeforeEach {
                 Initialize-Cache
             }
 
             It 'Stores ClientId in the cache' {
-                Set-CachedClientId -ClientId "my-client-id"
+                Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId "my-client-id"
 
-                $script:CacheData.ClientId | Should -Be "my-client-id"
+                $script:CacheData.AuthorizationServiceClientId | Should -Be "my-client-id"
             }
 
             It 'Persists to disk after setting' {
-                Set-CachedClientId -ClientId "my-client-id"
+                Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId "my-client-id"
 
                 Test-Path $script:TestCachePath | Should -Be $true
                 $savedData = Get-Content $script:TestCachePath | ConvertFrom-Json
-                $savedData.ClientId | Should -Be "my-client-id"
+                $savedData.AuthorizationServiceClientId | Should -Be "my-client-id"
             }
 
             It 'Overwrites existing ClientId' {
-                Set-CachedClientId -ClientId "old-client-id"
-                Set-CachedClientId -ClientId "new-client-id"
+                Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId "old-client-id"
+                Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId "new-client-id"
 
-                $script:CacheData.ClientId | Should -Be "new-client-id"
+                $script:CacheData.AuthorizationServiceClientId | Should -Be "new-client-id"
             }
 
-            It 'Handles cache files created before ClientId feature' {
+            It 'Handles cache files created before AuthorizationServiceClientId feature' {
                 # Simulate an old cache without the ClientId key
                 $script:CacheData = [PSCustomObject]@{
                     Version = "1.0"
@@ -409,14 +409,14 @@ Describe 'CacheMethods Tests' {
                     RoleDefinitions = @{}
                 }
 
-                Set-CachedClientId -ClientId "new-client-id"
+                Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId "new-client-id"
 
-                $script:CacheData.ClientId | Should -Be "new-client-id"
+                $script:CacheData.AuthorizationServiceClientId | Should -Be "new-client-id"
             }
 
             It 'Throws when ClientId is null or empty' {
-                { Set-CachedClientId -ClientId $null } | Should -Throw
-                { Set-CachedClientId -ClientId "" } | Should -Throw
+                { Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId $null } | Should -Throw
+                { Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId "" } | Should -Throw
             }
         }
 

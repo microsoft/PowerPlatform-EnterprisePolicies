@@ -190,7 +190,7 @@ function New-PPAuthorizationApplication {
     Write-Host "  Application Object ID: $($application.Id)" -ForegroundColor Green
     Write-Host "  Service Principal Object ID: $($appServicePrincipal.Id)" -ForegroundColor Green
 
-    Set-CachedClientId -ClientId $application.AppId
+    Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId $application.AppId
 
     return $application.AppId
 }

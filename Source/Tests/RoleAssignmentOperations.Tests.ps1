@@ -29,7 +29,7 @@ Describe 'New-RoleAssignment Tests' {
             $script:mockResultJson = ($script:mockRoleAssignmentResponse | ConvertTo-Json)
             $script:mockResult = [HttpClientResultMock]::new($script:mockResultJson)
 
-            Mock Get-AuthorizationServiceToken { return "test-token" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AuthorizationServiceToken { return (ConvertTo-SecureString -String "test-token" -AsPlainText -Force) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-APIResourceUrl { return "https://api.powerplatform.com/" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-JsonRequestMessage { return [PSCustomObject]@{} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Send-RequestWithRetries { return $script:mockResult } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -83,7 +83,7 @@ Describe 'New-RoleAssignment Tests' {
             $script:mockResultJson = ($script:mockEnvironmentRoleAssignmentResponse | ConvertTo-Json)
             $script:mockResult = [HttpClientResultMock]::new($script:mockResultJson)
 
-            Mock Get-AuthorizationServiceToken { return "test-token" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AuthorizationServiceToken { return (ConvertTo-SecureString -String "test-token" -AsPlainText -Force) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-APIResourceUrl { return "https://api.powerplatform.com/" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-JsonRequestMessage { return [PSCustomObject]@{} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Send-RequestWithRetries { return $script:mockResult } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -116,7 +116,7 @@ Describe 'New-RoleAssignment Tests' {
             $script:mockResultJson = ($script:mockEnvGroupRoleAssignmentResponse | ConvertTo-Json)
             $script:mockResult = [HttpClientResultMock]::new($script:mockResultJson)
 
-            Mock Get-AuthorizationServiceToken { return "test-token" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AuthorizationServiceToken { return (ConvertTo-SecureString -String "test-token" -AsPlainText -Force) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-APIResourceUrl { return "https://api.powerplatform.com/" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock New-JsonRequestMessage { return [PSCustomObject]@{} } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Send-RequestWithRetries { return $script:mockResult } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"

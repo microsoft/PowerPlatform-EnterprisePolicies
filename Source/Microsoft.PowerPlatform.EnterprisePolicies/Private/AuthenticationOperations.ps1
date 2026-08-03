@@ -327,13 +327,13 @@ function New-AuthorizationServiceMsalClient {
 
     # Resolve ClientId from cache if not provided; cache it if provided
     if ([string]::IsNullOrWhiteSpace($ClientId)) {
-        $ClientId = Get-CachedClientId
+        $ClientId = Get-CachedAuthorizationServiceClientId
         if ([string]::IsNullOrWhiteSpace($ClientId)) {
             throw "ClientId was not provided and no cached ClientId was found. Run New-PPAuthorizationApplication or specify -ClientId."
         }
     }
     else {
-        Set-CachedClientId -ClientId $ClientId
+        Set-CachedAuthorizationServiceClientId -AuthorizationServiceClientId $ClientId
     }
 
     $cacheKey = "$Endpoint|$TenantId|$ClientId"
@@ -382,6 +382,7 @@ function Get-AuthorizationServiceToken {
         [int]$TimeoutSeconds = 60
     )
 
+    # Returns the access token as a SecureString so callers can use it directly without converting.
     if ($null -eq $script:AuthorizationServiceCurrentKey -or -not $script:AuthorizationServiceCache.ContainsKey($script:AuthorizationServiceCurrentKey)) {
         throw "Authorization Service MSAL client application not created. Call New-AuthorizationServiceMsalClient first."
     }
@@ -404,7 +405,7 @@ function Get-AuthorizationServiceToken {
                 $result = $app.AcquireTokenSilent($Scopes, $account).ExecuteAsync($cts.Token).GetAwaiter().GetResult()
                 if ($null -ne $result -and -not [string]::IsNullOrEmpty($result.AccessToken)) {
                     Write-Verbose "Successfully acquired token silently for account: $($result.Account.Username)"
-                    return $result.AccessToken
+                    return (ConvertTo-SecureString -String $result.AccessToken -AsPlainText -Force)
                 }
             }
             catch [System.OperationCanceledException] {
@@ -431,7 +432,7 @@ function Get-AuthorizationServiceToken {
         # Cache the account for future silent acquisitions
         $script:AuthorizationServiceCache[$script:AuthorizationServiceCurrentKey].Account = $result.Account
         Write-Verbose "Successfully acquired token for account: $($result.Account.Username)"
-        return $result.AccessToken
+        return (ConvertTo-SecureString -String $result.AccessToken -AsPlainText -Force)
     }
     finally {
         $cts.Dispose()

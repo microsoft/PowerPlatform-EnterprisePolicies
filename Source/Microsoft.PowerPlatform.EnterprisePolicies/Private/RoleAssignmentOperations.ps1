@@ -82,8 +82,7 @@ function New-RoleAssignment {
     Write-Verbose "Request URI: $uri"
 
     # Get authorization service token
-    $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
-    $secureAccessToken = ConvertTo-SecureString -String $accessToken -AsPlainText -Force
+    $secureAccessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
 
     # Create and send the request
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
@@ -191,8 +190,7 @@ function Get-RoleAssignments {
     Write-Verbose "Request URI: $uri"
 
     # Get authorization service token
-    $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
-    $secureAccessToken = ConvertTo-SecureString -String $accessToken -AsPlainText -Force
+    $secureAccessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
 
     # Create and send the initial request (POST with body)
     $httpMethod = [System.Net.Http.HttpMethod]::Post
@@ -286,8 +284,7 @@ function Remove-RoleAssignment {
     Write-Verbose "Request URI: $uri"
 
     # Get authorization service token
-    $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
-    $secureAccessToken = ConvertTo-SecureString -String $accessToken -AsPlainText -Force
+    $secureAccessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
 
     # Create and send the request
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {
@@ -354,8 +351,7 @@ function Test-PrincipalPermission {
     Write-Verbose "Request URI: $uri"
 
     # Get authorization service token
-    $accessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
-    $secureAccessToken = ConvertTo-SecureString -String $accessToken -AsPlainText -Force
+    $secureAccessToken = Get-AuthorizationServiceToken -Endpoint $Endpoint
 
     # Create and send the request
     $result = Send-RequestWithRetries -MaxRetries 1 -DelaySeconds 5 -RequestFactory {

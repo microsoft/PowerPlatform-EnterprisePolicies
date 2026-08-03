@@ -268,7 +268,7 @@ Describe 'AuthenticationOperations Tests' {
                 # Reset module-scoped cache before each test
                 $script:AuthorizationServiceCache = @{}
                 $script:AuthorizationServiceCurrentKey = $null
-                Mock Set-CachedClientId {}
+                Mock Set-CachedAuthorizationServiceClientId {}
             }
 
             It 'Returns true on successful connection' {
@@ -280,7 +280,7 @@ Describe 'AuthenticationOperations Tests' {
             }
 
             It 'Resolves ClientId from cache when not provided' {
-                Mock Get-CachedClientId { return "cached-client-id" }
+                Mock Get-CachedAuthorizationServiceClientId { return "cached-client-id" }
                 Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
 
                 $result = New-AuthorizationServiceMsalClient -TenantId "test-tenant-id"
@@ -289,7 +289,7 @@ Describe 'AuthenticationOperations Tests' {
             }
 
             It 'Throws when ClientId not provided and not cached' {
-                Mock Get-CachedClientId { return $null }
+                Mock Get-CachedAuthorizationServiceClientId { return $null }
 
                 { New-AuthorizationServiceMsalClient -TenantId "test-tenant-id" } | Should -Throw "*no cached ClientId was found*"
             }
@@ -299,7 +299,7 @@ Describe 'AuthenticationOperations Tests' {
 
                 New-AuthorizationServiceMsalClient -ClientId "my-client-id" -TenantId "test-tenant-id"
 
-                Should -Invoke Set-CachedClientId -Exactly 1 -ParameterFilter { $ClientId -eq "my-client-id" }
+                Should -Invoke Set-CachedAuthorizationServiceClientId -Exactly 1 -ParameterFilter { $AuthorizationServiceClientId -eq "my-client-id" }
             }
 
             It 'Uses correct authority for prod endpoint' {
@@ -421,7 +421,7 @@ Describe 'AuthenticationOperations Tests' {
                 New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "test-tenant-id"
                 $result = Get-AuthorizationServiceToken -Endpoint ([PPEndpoint]::Prod)
 
-                $result | Should -Be "mock-access-token"
+                [System.Net.NetworkCredential]::new("", $result).Password | Should -Be "mock-access-token"
             }
 
             It 'Passes scopes to the interactive request as a string array' {

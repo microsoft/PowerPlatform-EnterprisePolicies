@@ -33,7 +33,7 @@ Describe 'Get-RoleDefinitions Tests' {
             Mock Get-CachedRoleDefinitions { return $null } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Set-CachedRoleDefinitions {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Get-APIResourceUrl { return "https://api.powerplatform.com/" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AuthorizationServiceToken { return "test-token" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AuthorizationServiceToken { return (ConvertTo-SecureString -String "test-token" -AsPlainText -Force) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             $mockResultContent = [System.Net.Http.StringContent]::new($script:mockApiResponse, [System.Text.Encoding]::UTF8, "application/json")
             $mockResult = New-Object -TypeName System.Net.Http.HttpResponseMessage -ArgumentList @([System.Net.HttpStatusCode]::OK)
@@ -82,7 +82,7 @@ Describe 'Get-RoleDefinitions Tests' {
             $mockResult.Content = $mockResultContent
 
             Mock Get-APIResourceUrl { return "https://api.powerplatform.com/" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
-            Mock Get-AuthorizationServiceToken { return "test-token" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-AuthorizationServiceToken { return (ConvertTo-SecureString -String "test-token" -AsPlainText -Force) } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
             Mock Send-RequestWithRetries { return $mockResult } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
             InModuleScope "Microsoft.PowerPlatform.EnterprisePolicies" {
