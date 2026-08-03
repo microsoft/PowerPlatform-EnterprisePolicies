@@ -10,6 +10,27 @@ Describe 'AzHelper Tests' {
             Mock Start-Sleep {}
         }
 
+        Context 'Set-SubscriptionContext' {
+            It 'Sets the subscription context when the identity can read the subscription' {
+                Mock Get-AzSubscription { return [PSCustomObject]@{ Id = "sub-123"; State = "Enabled" } }
+                Mock Set-AzContext {}
+
+                Set-SubscriptionContext -SubscriptionId "sub-123"
+
+                Should -Invoke Set-AzContext -Times 1 -ParameterFilter { $Subscription -eq "sub-123" }
+            }
+
+            It 'Throws without switching context when the identity cannot access the subscription' {
+                Mock Get-AzSubscription { return $null }
+                Mock Get-AzContext { return [PSCustomObject]@{ Account = [PSCustomObject]@{ Id = "sp-client-id" } } }
+                Mock Set-AzContext {}
+
+                { Set-SubscriptionContext -SubscriptionId "sub-123" } | Should -Throw "*does not have access to subscription 'sub-123'*"
+
+                Should -Invoke Set-AzContext -Times 0
+            }
+        }
+
         Context 'Register-ResourceProvider' {
             It 'Returns true when provider is already registered' {
                 Mock Get-AzResourceProvider {

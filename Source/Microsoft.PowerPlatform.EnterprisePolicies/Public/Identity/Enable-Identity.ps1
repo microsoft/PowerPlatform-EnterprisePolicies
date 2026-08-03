@@ -120,7 +120,7 @@ function Enable-Identity {
     $null = $PolicyArmId -match "/subscriptions/([^/]+)/"
     $subscriptionId = $Matches[1]
     Write-Verbose "Setting subscription context to $subscriptionId"
-    $null = Set-AzContext -Subscription $subscriptionId
+    $null = Set-SubscriptionContext -SubscriptionId $subscriptionId
 
     # Get the enterprise policy and extract SystemId
     Write-Verbose "Retrieving enterprise policy: $PolicyArmId"

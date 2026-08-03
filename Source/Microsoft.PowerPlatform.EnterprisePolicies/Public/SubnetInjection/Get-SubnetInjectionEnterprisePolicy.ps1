@@ -95,7 +95,7 @@ function Get-SubnetInjectionEnterprisePolicy{
     # Set subscription context for non-ByEnvironment parameter sets
     if ($PSCmdlet.ParameterSetName -ne 'ByEnvironment') {
         Write-Verbose "Setting subscription context to $SubscriptionId"
-        $null = Set-AzContext -Subscription $SubscriptionId
+        $null = Set-SubscriptionContext -SubscriptionId $SubscriptionId
     }
 
     # Retrieve policies based on parameter set
@@ -144,7 +144,7 @@ function Get-SubnetInjectionEnterprisePolicy{
             # Set subscription context from the policy ARM ID
             if ($policyArmId -match "/subscriptions/([^/]+)/") {
                 Write-Verbose "Setting subscription context to $($Matches[1])"
-                $null = Set-AzContext -Subscription $Matches[1]
+                $null = Set-SubscriptionContext -SubscriptionId $Matches[1]
             }
 
             $policy = Get-EnterprisePolicy -PolicyArmId $policyArmId
