@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 08/02/2026
+ms.date: 08/04/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -179,6 +179,10 @@ The NetworkUsageData class represents historical network usage information about
 The SubnetUsageDocument class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 
 ### Enums
+
+#### [AuthorizationPrincipalType](AuthorizationPrincipalType.md)
+
+Represents the type of Microsoft Entra ID principal that a Power Platform RBAC operation targets. The value is supplied through the -PrincipalType parameter of New-PPRBACRoleAssignment, Get-PPRBACRoleAssignment, and Test-PPRBACDiagnosticPermission.
 
 #### [AzureEnvironment](AzureEnvironment.md)
 

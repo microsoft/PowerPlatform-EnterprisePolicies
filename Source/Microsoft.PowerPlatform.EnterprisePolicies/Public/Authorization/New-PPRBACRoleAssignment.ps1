@@ -126,3 +126,4 @@ function New-PPRBACRoleAssignment {
     Write-Host "  Principal Type: $PrincipalType" -ForegroundColor Green
     Write-Host "  Role: $Role" -ForegroundColor Green
     return $roleAssignment
+}
