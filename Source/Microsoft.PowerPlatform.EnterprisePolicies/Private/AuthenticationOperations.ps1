@@ -374,6 +374,7 @@ function New-AuthorizationServiceMsalClient {
 }
 
 function Get-AuthorizationServiceToken {
+    [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingConvertToSecureStringWithPlainText", "", Justification="Converting AAD token into secure string")]
     param(
         [Parameter(Mandatory=$false)]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
