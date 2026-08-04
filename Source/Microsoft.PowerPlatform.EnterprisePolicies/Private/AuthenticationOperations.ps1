@@ -387,8 +387,8 @@ function Get-AuthorizationServiceToken {
         throw "Authorization Service MSAL client application not created. Call New-AuthorizationServiceMsalClient first."
     }
 
-    $resourceUrl = Get-APIResourceUrl -Endpoint $Endpoint
-    [string[]]$Scopes = @("$resourceUrl.default")
+    $resourceUrl = (Get-APIResourceUrl -Endpoint $Endpoint).TrimEnd('/')
+    [string[]]$Scopes = @("$resourceUrl/.default")
 
     $cached = $script:AuthorizationServiceCache[$script:AuthorizationServiceCurrentKey]
     $app = $cached.App
