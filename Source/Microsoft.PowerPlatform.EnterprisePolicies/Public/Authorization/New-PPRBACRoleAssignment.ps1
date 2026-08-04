@@ -117,13 +117,12 @@ function New-PPRBACRoleAssignment {
 
     $roleAssignment = New-RoleAssignment @params
 
-    if ($roleAssignment) {
-        Write-Host "Role assignment created successfully." -ForegroundColor Green
-        Write-Host "  Principal Object ID: $PrincipalObjectId" -ForegroundColor Green
-        Write-Host "  Principal Type: $PrincipalType" -ForegroundColor Green
-        Write-Host "  Role: $Role" -ForegroundColor Green
-        return $roleAssignment
+    if (-not $roleAssignment) {
+        throw "Failed to create role assignment."
     }
 
     Write-Host "Role assignment created successfully." -ForegroundColor Green
-}
+    Write-Host "  Principal Object ID: $PrincipalObjectId" -ForegroundColor Green
+    Write-Host "  Principal Type: $PrincipalType" -ForegroundColor Green
+    Write-Host "  Role: $Role" -ForegroundColor Green
+    return $roleAssignment
