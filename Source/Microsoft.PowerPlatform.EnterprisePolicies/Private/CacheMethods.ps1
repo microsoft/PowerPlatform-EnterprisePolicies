@@ -16,6 +16,8 @@ function Get-EmptyCache{
         Version = $script:CurrentCacheVersion
         SubscriptionsValidated = @()
         RegionCache = [PSCustomObject]@{}
+        RoleDefinitions = @{}
+        AuthorizationServiceClientId = ""
         Configuration = [PSCustomObject]@{}
     }
 }
@@ -98,6 +100,64 @@ function Add-ValidatedSubscriptionToCache{
     }
 }
 
+function Get-CachedRoleDefinitions{
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Endpoint
+    )
+
+    # Ensure RoleDefinitions key exists (for caches created before this feature)
+    if($null -eq $script:CacheData.RoleDefinitions){
+        $script:CacheData | Add-Member -NotePropertyName "RoleDefinitions" -NotePropertyValue @{} -Force
+    }
+
+    $entry = $script:CacheData.RoleDefinitions.$Endpoint
+    if($null -eq $entry){
+        return $null
+    }
+
+    $fetchedAt = [DateTime]::Parse($entry.fetchedAt).ToUniversalTime()
+    $age = [DateTime]::UtcNow - $fetchedAt
+
+    if($age.TotalHours -ge 1){
+        return $null
+    }
+
+    return $entry.value
+}
+
+function Set-CachedRoleDefinitions{
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$Endpoint,
+
+        [Parameter(Mandatory)]
+        $RoleDefinitions
+    )
+
+    # Ensure RoleDefinitions key exists
+    if($null -eq $script:CacheData.RoleDefinitions){
+        $script:CacheData | Add-Member -NotePropertyName "RoleDefinitions" -NotePropertyValue @{} -Force
+    }
+
+    $entry = @{
+        fetchedAt = [DateTime]::UtcNow.ToString("o")
+        value = $RoleDefinitions
+    }
+
+    # CacheData.RoleDefinitions may be a PSCustomObject (from JSON) or a hashtable
+    if($script:CacheData.RoleDefinitions -is [hashtable]){
+        $script:CacheData.RoleDefinitions[$Endpoint] = $entry
+    }
+    else{
+        $script:CacheData.RoleDefinitions | Add-Member -NotePropertyName $Endpoint -NotePropertyValue $entry -Force
+    }
+
+    Save-Cache
+}
+
 function Get-CachedConfiguration{
     param(
         [Parameter(Mandatory=$false)]
@@ -171,6 +231,37 @@ function Set-CachedConfiguration{
         else{
             $script:CacheData.Configuration | Add-Member -NotePropertyName $Name -NotePropertyValue $Value -Force
         }
+    }
+
+    Save-Cache
+}
+
+function Get-CachedAuthorizationServiceClientId{
+    # Ensure AuthorizationServiceClientId key exists (for caches created before this feature)
+    if($null -eq $script:CacheData.AuthorizationServiceClientId){
+        return $null
+    }
+
+    if([string]::IsNullOrWhiteSpace($script:CacheData.AuthorizationServiceClientId)){
+        return $null
+    }
+
+    return $script:CacheData.AuthorizationServiceClientId
+}
+
+function Set-CachedAuthorizationServiceClientId{
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$AuthorizationServiceClientId
+    )
+
+    # CacheData may be a hashtable (from Get-EmptyCache) or PSCustomObject (from JSON)
+    if($script:CacheData -is [hashtable]){
+        $script:CacheData["AuthorizationServiceClientId"] = $AuthorizationServiceClientId
+    }
+    else{
+        $script:CacheData | Add-Member -NotePropertyName "AuthorizationServiceClientId" -NotePropertyValue $AuthorizationServiceClientId -Force
     }
 
     Save-Cache

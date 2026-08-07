@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 08/02/2026
+ms.date: 08/04/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -54,6 +54,10 @@ Retrieves identity enterprise policies for Power Platform.
 
 Reads configuration values stored in the module's local cache.
 
+### [Get-PPRBACRoleAssignment](Get-PPRBACRoleAssignment.md)
+
+Gets Power Platform RBAC role assignments at a specified scope.
+
 ### [Get-SubnetHistoricalUsage](Get-SubnetHistoricalUsage.md)
 
 Retrieves the historical network usage of the subnet backing an enterprise policy, identified by Azure Resource Manager (ARM) resource ID, linked environment, or system ID.
@@ -66,6 +70,14 @@ Retrieves subnet injection enterprise policies for Power Platform.
 
 Creates a new identity enterprise policy for Power Platform.
 
+### [New-PPAuthorizationApplication](New-PPAuthorizationApplication.md)
+
+Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
+
+### [New-PPRBACRoleAssignment](New-PPRBACRoleAssignment.md)
+
+Creates a Power Platform RBAC role assignment.
+
 ### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
 
 Creates a new subnet injection enterprise policy for Power Platform.
@@ -77,6 +89,10 @@ Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprise
 ### [Remove-IdentityEnterprisePolicy](Remove-IdentityEnterprisePolicy.md)
 
 Removes an identity enterprise policy for Power Platform.
+
+### [Remove-PPRBACRoleAssignment](Remove-PPRBACRoleAssignment.md)
+
+Removes a Power Platform RBAC role assignment.
 
 ### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
 
@@ -105,6 +121,14 @@ Tests the Domain Name System (DNS) resolution for a given hostname in a specifie
 ### [Test-NetworkConnectivity](Test-NetworkConnectivity.md)
 
 Tests the connectivity to a given service in the specified environment.
+
+### [Test-PPAuthorizationApplication](Test-PPAuthorizationApplication.md)
+
+Tests that an Azure AD application is correctly configured for Power Platform Authorization.
+
+### [Test-PPRBACDiagnosticPermission](Test-PPRBACDiagnosticPermission.md)
+
+Tests Power Platform RBAC diagnostic permissions for a principal on an environment.
 
 ### [Test-TLSHandshake](Test-TLSHandshake.md)
 
@@ -155,6 +179,10 @@ The NetworkUsageData class represents historical network usage information about
 The SubnetUsageDocument class represents historical network usage information and network usage metadata of a subnet delegated to one or more power platform environments.
 
 ### Enums
+
+#### [AuthorizationPrincipalType](AuthorizationPrincipalType.md)
+
+Represents the type of Microsoft Entra ID principal that a Power Platform RBAC operation targets. The value is supplied through the -PrincipalType parameter of New-PPRBACRoleAssignment, Get-PPRBACRoleAssignment, and Test-PPRBACDiagnosticPermission.
 
 #### [AzureEnvironment](AzureEnvironment.md)
 

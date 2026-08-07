@@ -256,6 +256,10 @@ The `SubnetUsageDocument` class represents historical network usage information 
 
 ### Enums
 
+#### [AuthorizationPrincipalType](AuthorizationPrincipalType.md)
+
+Represents the type of Microsoft Entra ID principal that a Power Platform RBAC operation targets. The value is supplied through the -PrincipalType parameter of New-PPRBACRoleAssignment, Get-PPRBACRoleAssignment, and Test-PPRBACDiagnosticPermission.
+
 #### [AzureEnvironment](AzureEnvironment.md)
 
 Represents the different Azure environments that can be used to connect to Azure services. Only environments that are currently supported are included.

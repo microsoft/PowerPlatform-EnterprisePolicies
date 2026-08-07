@@ -168,6 +168,12 @@ enum AzureEnvironment{
     CentralUSEuap
 }
 
+enum AuthorizationPrincipalType{
+    User
+    Group
+    ApplicationUser
+}
+
 enum ServicePrincipalAuthMethod{
     ManagedIdentity
     Certificate
@@ -191,6 +197,7 @@ $ExportableTypes = @(
     [NetworkUsageData]
     [EnvironmentNetworkUsageDocument]
     [SubnetUsageDocument]
+    [AuthorizationPrincipalType]
     [ServicePrincipalAuthMethod]
 )
 
