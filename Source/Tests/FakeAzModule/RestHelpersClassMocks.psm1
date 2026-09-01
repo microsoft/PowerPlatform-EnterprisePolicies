@@ -11,6 +11,12 @@ class HttpClientResultHeaderMock
     }
     [string]GetValues($Header)
     {
+        # Mirror System.Net.Http.Headers.HttpHeaders.GetValues, which throws when the
+        # header is absent. Callers must guard with Contains() first.
+        if (-not $this.Headers.ContainsKey($Header))
+        {
+            throw [System.InvalidOperationException]::new("The given header was not found.")
+        }
         return $this.Headers[$Header]
     }
 }

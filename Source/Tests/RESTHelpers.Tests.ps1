@@ -85,6 +85,39 @@ Describe 'RESTHelpers Tests' {
             }
         }
 
+        Context 'Testing Get-CorrelationId' {
+            It 'Returns the header value when the correlation ID header is present' {
+                $mockResult = [HttpClientResultMock]::new("ok", "text/plain", @{"x-ms-correlation-id" = "abc-123"})
+
+                $correlationId = Get-CorrelationId -Result $mockResult
+
+                $correlationId | Should -Be "abc-123"
+            }
+
+            It 'Returns an empty string when the correlation ID header is absent' {
+                # Regression: HttpHeaders.GetValues throws "The given header was not found."
+                # when the header is missing. Some endpoints omit x-ms-correlation-id, so
+                # reading it must not throw.
+                $mockResult = [HttpClientResultMock]::new("ok")
+
+                $correlationId = Get-CorrelationId -Result $mockResult
+
+                $correlationId | Should -Be ""
+            }
+        }
+
+        Context 'Testing Test-Result' {
+            It 'Returns true for a success response missing the correlation ID header' {
+                # Exact reproduction of the reported failure: Test-Result read
+                # x-ms-correlation-id unconditionally and threw "The given header was
+                # not found." for endpoints that omit it, causing bogus retries.
+                $mockResult = [HttpClientResultMock]::new("ok")
+
+                { Test-Result -Result $mockResult } | Should -Not -Throw
+                Test-Result -Result $mockResult | Should -BeTrue
+            }
+        }
+
         Context 'Testing Send-Request' {
             It 'Returns the response on a success status' {
                 $mockClient = [HttpClientMock]::new()
@@ -95,6 +128,17 @@ Describe 'RESTHelpers Tests' {
                 $result = Send-Request -Request "req"
 
                 $result | Should -Be $mockResult
+            }
+
+            It 'Succeeds when the response is missing the correlation ID header' {
+                # Regression for the "The given header was not found." failure: a successful
+                # response without x-ms-correlation-id must not throw.
+                $mockClient = [HttpClientMock]::new()
+                $mockResult = [HttpClientResultMock]::new("ok")
+                Mock Get-HttpClient { return $mockClient } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+                Mock Get-AsyncResult { return $mockResult } -ParameterFilter { $task -eq "SendAsyncResult" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+                { Send-Request -Request "req" } | Should -Not -Throw
             }
 
             It 'Throws with status code and correlation ID on a failure status' {
