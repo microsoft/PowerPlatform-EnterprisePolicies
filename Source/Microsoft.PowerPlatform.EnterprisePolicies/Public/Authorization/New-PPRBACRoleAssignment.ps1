@@ -9,19 +9,19 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Creates a Power Platform RBAC role assignment.
+Creates a Power Platform role-based access control (RBAC) role assignment.
 
 .DESCRIPTION
 This cmdlet creates a role assignment for a principal (user, group, or application) to grant
 permissions via Power Platform RBAC. The role can be scoped at the tenant,
 environment, or environment group level.
 
-If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+If -ClientId isn't specified, the cmdlet uses the cached ClientId from a previous call to
 New-PPAuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
 When -ClientId is provided, it is stored in the cache for future use.
 
 The Role parameter accepts the role definition name as returned by the Power Platform
-Authorization API (e.g., "Power Platform Reader"). Use -RefreshRoles to update the
+Authorization API, such as "Power Platform Reader". Use -RefreshRoles to update the
 cached list of available roles.
 
 .OUTPUTS

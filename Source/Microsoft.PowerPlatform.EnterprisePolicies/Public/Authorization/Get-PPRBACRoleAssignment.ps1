@@ -9,15 +9,15 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Gets Power Platform RBAC role assignments at a specified scope.
+Gets Power Platform  role-based access control (RBAC) role assignments at a specified scope.
 
 .DESCRIPTION
 This cmdlet retrieves role assignments for Power Platform RBAC operations. The scope can be
 at the tenant or environment level.
 
-If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+If -ClientId isn't specified, the cmdlet uses the cached ClientId from a previous call to
 New-PPAuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
-When -ClientId is provided, it is stored in the cache for future use.
+When -ClientId is provided, it's stored in the cache for future use.
 
 By default, results include parent scopes, nested scopes, expanded security groups, and
 expanded environment groups. Use the corresponding switches to disable these behaviors.

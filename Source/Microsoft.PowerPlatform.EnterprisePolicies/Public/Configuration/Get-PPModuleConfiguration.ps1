@@ -14,7 +14,7 @@ Reads configuration values stored in the module's local cache.
 .DESCRIPTION
 The Get-PPModuleConfiguration cmdlet returns configuration values persisted in the module's cached
 configuration file. When called without a name, it returns the entire configuration container. When a
-name is provided, it returns the value stored under that name, or $null when the name is not set.
+name is provided, it returns the value stored under that name, or $null when the name isn't set.
 
 .OUTPUTS
 System.Object
@@ -30,7 +30,7 @@ Returns every stored module configuration value.
 .EXAMPLE
 Get-PPModuleConfiguration -Name "ServicePrincipalAuth"
 
-Returns the stored service principal authentication configuration, or $null when it has not been set.
+Returns the stored service principal authentication configuration, or $null when it hasn't been set.
 #>
 function Get-PPModuleConfiguration {
     [CmdletBinding()]

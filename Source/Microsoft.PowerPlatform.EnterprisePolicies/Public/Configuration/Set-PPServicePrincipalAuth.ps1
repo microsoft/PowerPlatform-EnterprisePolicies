@@ -14,13 +14,13 @@ Configures the service principal that the module uses to authenticate to Azure.
 .DESCRIPTION
 The Set-PPServicePrincipalAuth cmdlet stores a service principal authentication configuration in the
 module's local cache. Once configured, Connect-Azure uses the service principal instead of the default
-interactive login (unless re-authentication is forced).
+interactive login, unless re-authentication is forced.
 
 The parameters available depend on the authentication method, expressed by the ServicePrincipalAuthMethod
 enum:
 
-- ManagedIdentity: authenticates with a managed identity with the specified client ID and tenant ID.
-- Certificate: authenticates with a certificate-based service principal identified by -ClientId and
+- ManagedIdentity: Authenticates with a managed identity with the specified client ID and tenant ID.
+- Certificate: Authenticates with a certificate-based service principal identified by -ClientId and
   -TenantId, using either -CertificateThumbprint or -CertificateSubjectName to locate the certificate.
 
 Use -Clear to remove any stored configuration so Connect-Azure reverts to the default interactive flow.

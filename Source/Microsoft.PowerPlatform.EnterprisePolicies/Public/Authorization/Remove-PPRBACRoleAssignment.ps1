@@ -9,21 +9,21 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Removes a Power Platform RBAC role assignment.
+Removes a Power Platform role-based access control (RBAC) role assignment.
 
 .DESCRIPTION
 This cmdlet removes a role assignment by its ID. The scope can be at the tenant,
 environment, or environment group level.
 
-If -ClientId is not specified, the cmdlet uses the cached ClientId from a previous call to
+If -ClientId isn't specified, the cmdlet uses the cached ClientId from a previous call to
 New-PPAuthorizationApplication or any Power Platform RBAC cmdlet that was given -ClientId explicitly.
-When -ClientId is provided, it is stored in the cache for future use.
+When -ClientId is provided, it's stored in the cache for future use.
 
-Returns $true if the role assignment was deleted, $false if it was not found.
+Returns $true if the role assignment was deleted, $false if it wasn't found.
 
 .OUTPUTS
 System.Boolean
-Returns $true if the role assignment was deleted, $false if it was not found.
+Returns $true if the role assignment was deleted, $false if it wasn't found.
 
 .EXAMPLE
 Remove-PPRBACRoleAssignment -ClientId "00000000-0000-0000-0000-000000000000" -RoleAssignmentId "00000000-0000-0000-0000-000000000001" -TenantId "00000000-0000-0000-0000-000000000002"
