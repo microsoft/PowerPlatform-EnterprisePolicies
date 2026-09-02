@@ -9,7 +9,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Gets Power Platform  role-based access control (RBAC) role assignments at a specified scope.
+Gets Power Platform role-based access control (RBAC) role assignments at a specified scope.
 
 .DESCRIPTION
 This cmdlet retrieves role assignments for Power Platform RBAC operations. The scope can be
