@@ -268,6 +268,29 @@ function Get-APIResourceUrl {
     }
 }
 
+function Get-CorrelationId {
+    <#
+    .SYNOPSIS
+    Safely extracts the x-ms-correlation-id header from an HTTP response.
+
+    .DESCRIPTION
+    Returns the first x-ms-correlation-id header value if present, otherwise an empty string.
+    HttpHeaders.GetValues throws "The given header was not found." when the header is absent,
+    so its presence is checked with Contains before reading it. Some endpoints do not return
+    this header, and reading it unconditionally masked the real response with a header exception.
+    #>
+    param (
+        [Parameter(Mandatory)]
+        $Result
+    )
+
+    if ($Result.Headers.Contains("x-ms-correlation-id")) {
+        return $Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
+    }
+
+    return ""
+}
+
 function Send-Request {
     <#
     .SYNOPSIS
@@ -286,7 +309,7 @@ function Send-Request {
 
     $client = Get-HttpClient
     $result = Get-AsyncResult -Task $client.SendAsync($Request)
-    $correlationId = $result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
+    $correlationId = Get-CorrelationId -Result $result
 
     if (-not $result.IsSuccessStatusCode) {
         $contentString = Get-AsyncResult -Task $result.Content.ReadAsStringAsync()
@@ -372,7 +395,7 @@ function Test-Result {
         $Result
     )
 
-    $correlationId = $Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1
+    $correlationId = Get-CorrelationId -Result $Result
     if (-not($Result.IsSuccessStatusCode))
     {
         $contentString = Get-AsyncResult -Task $Result.Content.ReadAsStringAsync()
@@ -400,17 +423,18 @@ function Assert-Result {
 
     if (-not($Result.IsSuccessStatusCode))
     {
+        $correlationId = Get-CorrelationId -Result $Result
         $contentString = Get-AsyncResult -Task $Result.Content.ReadAsStringAsync()
         if ($contentString)
         {
             $errorMessage = $contentString.Trim('.')
-            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $correlationId"
+            throw "$(Get-LogDate): API Call returned $($Result.StatusCode): $($errorMessage). Correlation ID: $correlationId"
         }
         else
         {
-            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
-            throw "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $($($Result.Headers.GetValues("x-ms-correlation-id") | Select-Object -First 1))"
+            Write-Verbose "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $correlationId"
+            throw "$(Get-LogDate): API Call returned $($Result.StatusCode): $($Result.ReasonPhrase). Correlation ID: $correlationId"
         }
     }
 }
