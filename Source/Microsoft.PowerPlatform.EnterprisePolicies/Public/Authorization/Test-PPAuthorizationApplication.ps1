@@ -9,12 +9,12 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Tests that an Azure Entra ID application is correctly configured for Power Platform authorization.
+Tests that an Microsoft Entra ID application is correctly configured for Power Platform authorization.
 
 .DESCRIPTION
-This cmdlet validates that an Azure Entra ID application registration exists and is properly configured
+This cmdlet validates that a Microsoft Entra ID application registration exists and is properly configured
 for Power Platform authorization operations. It checks:
-- The application exists in Azure Entra ID.
+- The application exists in Microsoft Entra ID.
 - The application has the required API permissions configured (Authorization.RoleAssignments.Read and Write).
 - The application is configured as a public client
 - The application has http://localhost configured as a redirect URI.
