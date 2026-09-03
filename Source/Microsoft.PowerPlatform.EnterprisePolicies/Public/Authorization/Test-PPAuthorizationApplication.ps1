@@ -9,7 +9,7 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Tests that an Microsoft Entra ID application is correctly configured for Power Platform authorization.
+Tests that a Microsoft Entra ID application is correctly configured for Power Platform authorization.
 
 .DESCRIPTION
 This cmdlet validates that a Microsoft Entra ID application registration exists and is properly configured
