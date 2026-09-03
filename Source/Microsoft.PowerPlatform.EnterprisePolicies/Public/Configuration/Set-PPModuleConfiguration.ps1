@@ -13,10 +13,10 @@ Stores a named configuration value in the module's local cache.
 
 .DESCRIPTION
 The Set-PPModuleConfiguration cmdlet persists a named configuration value in the module's cached
-configuration file so it is available across sessions. The value can be any object and is stored under
+configuration file so it's available across sessions. The value can be any object and is stored under
 the provided name.
 
-The reserved 'ServicePrincipalAuth' name cannot be set through this cmdlet because it requires a
+The reserved 'ServicePrincipalAuth' name can't be set through this cmdlet because it requires a
 validated, strongly-typed configuration. Use the dedicated Set-PPServicePrincipalAuth cmdlet to
 configure service principal authentication.
 

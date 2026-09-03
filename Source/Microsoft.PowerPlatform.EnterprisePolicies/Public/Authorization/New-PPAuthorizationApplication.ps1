@@ -9,15 +9,15 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
+Creates or updates an Microsoft Entra ID application registration and service principal for Power Platform authorization.
 
 .DESCRIPTION
 This cmdlet creates a public client application (app registration) and its associated service principal
-in Azure AD with the required API permissions for Power Platform Authorization operations. The application
+in Microsoft Entra ID with the required API permissions for Power Platform authorization operations. The application
 is configured as a single-tenant app with delegated permissions for Authorization.RoleAssignments.Read
 and Authorization.RoleAssignments.Write.
 
-If an application with the specified display name already exists, the cmdlet will prompt you to use
+If an application with the specified display name already exists, the cmdlet prompts you to use
 Test-PPAuthorizationApplication to verify the configuration, or use the -Update switch to update the
 existing application with the required settings.
 
