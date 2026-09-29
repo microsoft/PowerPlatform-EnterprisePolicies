@@ -20,6 +20,15 @@ Describe 'AuthenticationOperations Tests' {
                 Assert-MockCalled Connect-AzAccount -Exactly 1
             }
 
+            It 'Connects to the registered custom Azure environment' {
+                Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "Custom" } -Verifiable
+                Mock Get-AzContext {}
+
+                Connect-Azure -Endpoint ([PPEndpoint]::custom) | Should -Be $true
+
+                Assert-MockCalled Connect-AzAccount -Exactly 1
+            }
+
             It 'Prefers a context with home tenant if multiple context are available' {
                 $endpoint = [PPEndpoint]::prod
                 $tenantId = "12345678-1234-1234-1234-123456789012"
@@ -268,6 +277,8 @@ Describe 'AuthenticationOperations Tests' {
                 # Reset module-scoped cache before each test
                 $script:AuthorizationServiceCache = @{}
                 $script:AuthorizationServiceCurrentKey = $null
+                $script:CustomEndpointConfiguration = $null
+                Remove-Item Env:PP_ENTERPRISE_POLICIES_ENDPOINTS -ErrorAction SilentlyContinue
                 Mock Set-CachedAuthorizationServiceClientId {}
             }
 
@@ -345,6 +356,27 @@ Describe 'AuthenticationOperations Tests' {
                 New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "my-tenant" -Endpoint ([PPEndpoint]::china)
 
                 $script:capturedAuthority | Should -Be "https://login.chinacloudapi.cn/my-tenant"
+            }
+
+            It 'Uses configured authority for custom endpoint' {
+                $env:PP_ENTERPRISE_POLICIES_ENDPOINTS = @{
+                    Authority = "https://login.example.test/"
+                    Bap = "https://bap.example.test"
+                    PowerApps = "https://service.example.test"
+                    Api = "https://api.example.test"
+                    IsSingleCharEndpoint = $true
+                } | ConvertTo-Json -Compress
+                $builderWithCapture = [PSCustomObject]@{}
+                $builderWithCapture | Add-Member -MemberType ScriptMethod -Name 'WithAuthority' -Value {
+                    param($auth)
+                    $script:capturedAuthority = $auth
+                    return $script:mockBuilder
+                }
+                Mock Get-PublicClientApplicationBuilder { return $builderWithCapture }
+
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "my-tenant" -Endpoint ([PPEndpoint]::custom)
+
+                $script:capturedAuthority | Should -Be "https://login.example.test/my-tenant"
             }
 
             It 'Skips connection if already connected and Force not specified' {

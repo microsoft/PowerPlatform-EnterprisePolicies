@@ -229,6 +229,7 @@ function Get-PPEndpointUrl {
         ([PPEndpoint]::usgovhigh) { return "https://high.api.bap.microsoft.us/" }
         ([PPEndpoint]::dod) { return "https://api.bap.appsplatform.us/" }
         ([PPEndpoint]::china) { return "https://api.bap.partner.microsoftonline.cn/" }
+        ([PPEndpoint]::custom) { return (Get-CustomEndpointConfiguration).Bap }
         Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
@@ -246,6 +247,7 @@ function Get-PPResourceUrl {
         ([PPEndpoint]::usgovhigh) { return "https://high.service.powerapps.us/" }
         ([PPEndpoint]::dod) { return "https://service.apps.appsplatform.us/" }
         ([PPEndpoint]::china) { return "https://service.powerapps.cn/" }
+        ([PPEndpoint]::custom) { return (Get-CustomEndpointConfiguration).PowerApps }
         Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
@@ -264,6 +266,7 @@ function Get-APIResourceUrl {
         ([PPEndpoint]::usgovhigh) { return "https://api.high.powerplatform.microsoft.us/" }
         ([PPEndpoint]::dod) { return "https://api.appsplatform.us/" }
         ([PPEndpoint]::china) { return "https://api.powerplatform.partner.microsoftonline.cn/" }
+        ([PPEndpoint]::custom) { return (Get-CustomEndpointConfiguration).Api }
         Default { throw "Unsupported PP endpoint: $Endpoint" }
     }
 }
@@ -525,6 +528,10 @@ function ConvertTo-Hashtable($obj) {
          [Parameter(Mandatory)]
          [PPEndpoint] $Endpoint
      )
+     if ($Endpoint -eq [PPEndpoint]::custom) {
+         return (Get-CustomEndpointConfiguration).IsSingleCharEndpoint
+     }
+
      return $Endpoint -in @(
          [PPEndpoint]::tip1,
          [PPEndpoint]::tip2,

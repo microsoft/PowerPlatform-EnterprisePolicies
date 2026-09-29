@@ -153,6 +153,7 @@ enum PPEndpoint{
     usgovhigh
     dod
     china
+    custom
 }
 
 enum LinkOperation{
@@ -166,6 +167,7 @@ enum AzureEnvironment{
     AzureUSGovernment
     EastUs2Euap
     CentralUSEuap
+    Custom
 }
 
 enum AuthorizationPrincipalType{

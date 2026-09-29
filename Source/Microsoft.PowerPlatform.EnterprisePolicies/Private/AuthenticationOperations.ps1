@@ -31,6 +31,7 @@ function Connect-Azure {
             ([PPEndpoint]::china) { "AzureChinaCloud" }
             ([PPEndpoint]::dod) { "AzureUSGovernment" }
             ([PPEndpoint]::usgovhigh) { "AzureUSGovernment" }
+            ([PPEndpoint]::custom) { "Custom" }
             Default { "AzureCloud" }
         }
     }
@@ -349,6 +350,7 @@ function New-AuthorizationServiceMsalClient {
     $authority = switch ($Endpoint) {
         ([PPEndpoint]::china) { "https://login.chinacloudapi.cn/$TenantId" }
         { $_ -in [PPEndpoint]::dod, [PPEndpoint]::usgovhigh } { "https://login.microsoftonline.us/$TenantId" }
+        ([PPEndpoint]::custom) { "$((Get-CustomEndpointConfiguration).Authority)/$TenantId" }
         default { "https://login.microsoftonline.com/$TenantId" }
     }
 

@@ -12,6 +12,14 @@ Describe 'RESTHelpers Tests' {
         }
         
         Context 'Testing Get-APIResourceUrl' {
+            BeforeEach {
+                $script:CustomEndpointConfiguration = $null
+            }
+
+            AfterEach {
+                Remove-Item Env:PP_ENTERPRISE_POLICIES_ENDPOINTS -ErrorAction SilentlyContinue
+            }
+
             It 'Throws an error for unsupported endpoint' {
                 { Get-APIResourceUrl -Endpoint ([PPEndpoint]::unknown) } | Should -Throw "Unsupported PP endpoint: unknown"
             }
@@ -20,6 +28,21 @@ Describe 'RESTHelpers Tests' {
                 $result = Get-APIResourceUrl -Endpoint ([PPEndpoint]::prod)
                 $result | Should -Be "https://api.powerplatform.com/"
             }
+
+            It 'Returns custom endpoint URLs from configuration' {
+                $env:PP_ENTERPRISE_POLICIES_ENDPOINTS = @{
+                    Authority = "https://login.example.test"
+                    Bap = "https://bap.example.test"
+                    PowerApps = "https://service.example.test"
+                    Api = "https://api.example.test"
+                    IsSingleCharEndpoint = $true
+                } | ConvertTo-Json -Compress
+
+                Get-PPEndpointUrl -Endpoint ([PPEndpoint]::custom) | Should -Be "https://bap.example.test/"
+                Get-PPResourceUrl -Endpoint ([PPEndpoint]::custom) | Should -Be "https://service.example.test/"
+                Get-APIResourceUrl -Endpoint ([PPEndpoint]::custom) | Should -Be "https://api.example.test/"
+            }
+
         }
     
         Context 'Testing Get-PPEndpointUrl' {
@@ -43,6 +66,21 @@ Describe 'RESTHelpers Tests' {
             It 'Returns the correct route when EnvironmentId is not a Guid' {
                 $result = Get-EnvironmentRouteHostName -EnvironmentId "Default3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([PPEndpoint]::prod)
                 $result | Should -Be "Default3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
+            }
+
+            It 'Uses the configured route partition for custom endpoints' {
+                $script:CustomEndpointConfiguration = $null
+                $env:PP_ENTERPRISE_POLICIES_ENDPOINTS = @{
+                    Authority = "https://login.example.test"
+                    Bap = "https://bap.example.test"
+                    PowerApps = "https://service.example.test"
+                    Api = "https://api.example.test"
+                    IsSingleCharEndpoint = $true
+                } | ConvertTo-Json -Compress
+
+                $result = Get-EnvironmentRouteHostName -EnvironmentId "12345678-1234-1234-1234-123456789012" -Endpoint ([PPEndpoint]::custom)
+
+                $result | Should -Be "1234567812341234123412345678901.2.environment.api.example.test"
             }
         }
 
