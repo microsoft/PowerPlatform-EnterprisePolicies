@@ -63,20 +63,49 @@ Describe 'Trusted override import' {
         $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $originalOverride
     }
 
-    It 'Replaces a private helper without exporting override-only functions' {
+    It 'Preserves exports when an override replaces helpers and assigns a public variable' {
         $override = Join-Path $TestDrive 'override.ps1'
         @'
 function Get-PPEndpointUrl { param([PPEndpoint]$Endpoint) return 'https://custom.example/' }
+function Get-CachedConfiguration { param([string]$Name) return 'custom configuration' }
 function Get-OverrideOnly { return 'private' }
+$public = @([pscustomobject]@{ BaseName = 'Get-OverrideOnly' })
 '@ | Set-Content -LiteralPath $override
         $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $override
         $module = Import-Module -Name $moduleScript -Prefix HookTest -PassThru -Force -ErrorAction Stop
         try {
             (& $module { Get-PPEndpointUrl -Endpoint Custom }) | Should -Be 'https://custom.example/'
+            Get-HookTestPPModuleConfiguration -Name 'test' | Should -Be 'custom configuration'
+            $module.ExportedFunctions.Count | Should -Be @(Get-ChildItem -LiteralPath "$testModuleRoot\Public" -Recurse -Filter '*.ps1').Count
             @($module.ExportedFunctions.Keys | Where-Object { $_ -like '*OverrideOnly*' }).Count | Should -Be 0
         }
         finally {
             Remove-Module $module -Force
+        }
+    }
+
+    It 'Rejects an existing Windows <PathKind> script' -ForEach @(
+        @{ PathKind = 'drive-relative' },
+        @{ PathKind = 'root-relative' }
+    ) -Skip:([System.IO.Path]::DirectorySeparatorChar -ne '\') {
+        $override = Join-Path $testModuleRoot 'relative-override.ps1'
+        "throw 'An ambiguous override path was executed'" | Set-Content -LiteralPath $override
+        $absoluteOverride = (Get-Item -LiteralPath $override).FullName
+        $drive = Split-Path -Path $absoluteOverride -Qualifier
+        Push-Location -LiteralPath $testModuleRoot
+        try {
+            $path = if ($PathKind -eq 'drive-relative') {
+                "$drive$(Split-Path -Path $absoluteOverride -Leaf)"
+            }
+            else {
+                $absoluteOverride.Substring($drive.Length)
+            }
+            Test-Path -LiteralPath $path -PathType Leaf | Should -BeTrue
+            $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $path
+            { Import-Module -Name $moduleScript -Force -ErrorAction Stop } | Should -Throw '*absolute path*'
+        }
+        finally {
+            Pop-Location
         }
     }
 

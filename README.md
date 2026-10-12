@@ -42,9 +42,9 @@ $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = 'C:\ApprovedTools\EnterprisePo
 Import-Module Microsoft.PowerPlatform.EnterprisePolicies
 ```
 
-The script runs in module scope after the built-in helpers and cache have loaded, and before the module version check. It can replace private helpers to support `-Endpoint Custom` and `-AzureEnvironment Custom`. Custom authentication fails unless the override supplies its implementation; existing cloud behavior is unchanged when no override is configured.
+The script runs in module scope after the built-in helpers and cache have loaded, and before the module version check. It can replace private helpers to support `-Endpoint Custom` and `-AzureEnvironment Custom`. Public exports are declared before the override runs, so ordinary override assignments such as `$public = ...` do not change the exported command list. Custom authentication fails unless the override supplies its implementation; existing cloud behavior is unchanged when no override is configured.
 
-**This hook executes PowerShell code, not configuration data.** Only use reviewed scripts in access-controlled locations. Invalid configured paths or terminating script errors fail the import. Keep deployment-specific files outside this public repository. Overrides depend on internal helpers and must be tested against each module version; they are responsible for endpoint/audience validation, authentication, routing, cache isolation, and offline behavior. To change or disable an override, remove the module, change or clear the environment variable, and import it again.
+**This hook executes PowerShell code, not configuration data.** Only use reviewed scripts in access-controlled locations. On Windows, use a fully qualified drive or UNC path; drive-relative paths such as `C:override.ps1` and root-relative paths such as `\override.ps1` are rejected. Invalid configured paths or terminating script errors fail the import. Keep deployment-specific files outside this public repository. Overrides depend on internal helpers and must be tested against each module version; they are responsible for endpoint/audience validation, authentication, routing, cache isolation, and offline behavior. To change or disable an override, remove the module, change or clear the environment variable, and import it again.
 
 ### Forcing re-authentication
 

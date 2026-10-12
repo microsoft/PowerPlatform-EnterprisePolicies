@@ -30,9 +30,13 @@ if (-not $Global:InPesterExecution) {
 
 Initialize-Cache
 
+Export-ModuleMember -Function $Public.BaseName
+
 $overrideScript = $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE
 if (-not [string]::IsNullOrWhiteSpace($overrideScript)) {
+    # Windows drive-relative and root-relative paths have roots shorter than a full drive root.
     if (-not [System.IO.Path]::IsPathRooted($overrideScript) -or
+        ([System.IO.Path]::DirectorySeparatorChar -eq '\' -and [System.IO.Path]::GetPathRoot($overrideScript).Length -lt 3) -or
         [System.IO.Path]::GetExtension($overrideScript) -ne '.ps1' -or
         -not (Test-Path -LiteralPath $overrideScript -PathType Leaf)) {
         throw "POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE must specify an existing PowerShell script using an absolute path."
@@ -44,5 +48,3 @@ if (-not [string]::IsNullOrWhiteSpace($overrideScript)) {
 if (-not $Global:InPesterExecution -and -not $Global:SkipModuleVersionCheck) {
     Test-LatestModuleVersion
 }
-
-Export-ModuleMember -Function $Public.BaseName
