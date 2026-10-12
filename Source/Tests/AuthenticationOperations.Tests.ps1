@@ -12,6 +12,16 @@ Describe 'AuthenticationOperations Tests' {
             Mock Get-CachedServicePrincipalAuth { return $null }
         }
         Context 'Testing Connect-Azure' {
+            It 'Rejects custom authentication without an override' {
+                { Connect-Azure -Endpoint Custom } | Should -Throw '*trusted module override*'
+                { Connect-Azure -AzureEnvironment Custom } | Should -Throw '*trusted module override*'
+            }
+
+            It 'Rejects a custom MSAL authority without an override' {
+                { New-AuthorizationServiceMsalClient -Endpoint Custom -TenantId 'tenant' -ClientId 'client' -Force } |
+                    Should -Throw '*trusted module override*'
+            }
+
             It 'Connects to Azure with the correct environment' {
                 $endpoint = [PPEndpoint]::usgovhigh
                 Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "AzureUSGovernment" } -Verifiable

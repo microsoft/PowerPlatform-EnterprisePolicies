@@ -27,6 +27,7 @@ Represents the different PP endpoints that can be used to connect to Power Platf
 | usgovhigh | Azure Government Community Cloud High endpoint. |
 | dod | Azure Department of Defense endpoint. |
 | china | Azure China cloud endpoint. |
+| Custom | Deployment-specific endpoint implemented by a trusted module override script. |
 
 ## EXAMPLES
 

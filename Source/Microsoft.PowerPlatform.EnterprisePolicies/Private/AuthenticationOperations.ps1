@@ -26,6 +26,10 @@ function Connect-Azure {
         [switch]$Force
     )
 
+    if ($Endpoint -eq [PPEndpoint]::Custom -or $AzureEnvironment -eq [AzureEnvironment]::Custom) {
+        throw "Custom authentication requires a trusted module override script."
+    }
+
     if($PSCmdlet.ParameterSetName -eq 'ByEndpoint') {
         $AzureEnvironment = switch ($Endpoint) {
             ([PPEndpoint]::china) { "AzureChinaCloud" }
@@ -324,6 +328,8 @@ function New-AuthorizationServiceMsalClient {
         [Parameter(Mandatory = $false)]
         [switch]$Force
     )
+
+    if ($Endpoint -eq [PPEndpoint]::Custom) { throw "Custom authentication requires a trusted module override script." }
 
     # Resolve ClientId from cache if not provided; cache it if provided
     if ([string]::IsNullOrWhiteSpace($ClientId)) {

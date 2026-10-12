@@ -33,6 +33,19 @@ Import-Module .\Microsoft.PowerPlatform.EnterprisePolicies
 
 This will import the module, validate prerequisites and make the commands available for use. If you are missing any prerequisites, the module will inform you and ask for permission to install them.
 
+### Trusted module overrides
+
+To extend endpoint and authentication behavior without embedding deployment-specific values in this module, set `POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE` to the absolute path of a trusted `.ps1` file before importing the module:
+
+```powershell
+$env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = 'C:\ApprovedTools\EnterprisePolicies.Override.ps1'
+Import-Module Microsoft.PowerPlatform.EnterprisePolicies
+```
+
+The script runs in module scope after the built-in helpers and cache have loaded, and before the module version check. It can replace private helpers to support `-Endpoint Custom` and `-AzureEnvironment Custom`. Custom authentication fails unless the override supplies its implementation; existing cloud behavior is unchanged when no override is configured.
+
+**This hook executes PowerShell code, not configuration data.** Only use reviewed scripts in access-controlled locations. Invalid configured paths or terminating script errors fail the import. Keep deployment-specific files outside this public repository. Overrides depend on internal helpers and must be tested against each module version; they are responsible for endpoint/audience validation, authentication, routing, cache isolation, and offline behavior. To change or disable an override, remove the module, change or clear the environment variable, and import it again.
+
 ### Forcing re-authentication
 
 By default, the powershell module will attempt to reuse an existing Azure session if one is available. If you want to manually choose which account to use instead of letting the module automatically select one, you can pass the `-ForceAuth` switch to any of the cmdlets:

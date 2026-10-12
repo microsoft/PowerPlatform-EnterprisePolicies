@@ -49,6 +49,54 @@ Describe 'Module Manifest Tests' {
     }
 }
 
+Describe 'Trusted override import' {
+    BeforeAll {
+        $originalOverride = $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE
+        $testModuleRoot = Join-Path $TestDrive 'OverrideImportTests'
+        $null = New-Item -ItemType Directory -Path $testModuleRoot
+        Get-ChildItem -LiteralPath $Global:ModuleManifestPath | Copy-Item -Destination $testModuleRoot -Recurse
+        $moduleScript = Join-Path $testModuleRoot 'OverrideImportTests.psm1'
+        Copy-Item -LiteralPath "$testModuleRoot\Microsoft.PowerPlatform.EnterprisePolicies.psm1" -Destination $moduleScript
+    }
+
+    AfterAll {
+        $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $originalOverride
+    }
+
+    It 'Replaces a private helper without exporting override-only functions' {
+        $override = Join-Path $TestDrive 'override.ps1'
+        @'
+function Get-PPEndpointUrl { param([PPEndpoint]$Endpoint) return 'https://custom.example/' }
+function Get-OverrideOnly { return 'private' }
+'@ | Set-Content -LiteralPath $override
+        $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $override
+        $module = Import-Module -Name $moduleScript -Prefix HookTest -PassThru -Force -ErrorAction Stop
+        try {
+            (& $module { Get-PPEndpointUrl -Endpoint Custom }) | Should -Be 'https://custom.example/'
+            @($module.ExportedFunctions.Keys | Where-Object { $_ -like '*OverrideOnly*' }).Count | Should -Be 0
+        }
+        finally {
+            Remove-Module $module -Force
+        }
+    }
+
+    It 'Rejects an invalid configured path: <Path>' -ForEach @(
+        @{ Path = 'relative.ps1' },
+        @{ Path = 'C:\MissingOverride\override.ps1' },
+        @{ Path = 'C:\MissingOverride\override.json' }
+    ) {
+        $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $Path
+        { Import-Module -Name $moduleScript -Force -ErrorAction Stop } | Should -Throw '*absolute path*'
+    }
+
+    It 'Propagates a terminating override failure' {
+        $override = Join-Path $TestDrive 'failing.ps1'
+        "throw 'Override configuration is invalid'" | Set-Content -LiteralPath $override
+        $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $override
+        { Import-Module -Name $moduleScript -Force -ErrorAction Stop } | Should -Throw '*Override configuration is invalid*'
+    }
+}
+
 Describe 'Script Tests' {
     BeforeAll {
         # List of files that historically do not have a test file. All new scripts shall have test files.
