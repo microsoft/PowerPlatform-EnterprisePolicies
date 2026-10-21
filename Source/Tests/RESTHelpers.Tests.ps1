@@ -40,9 +40,105 @@ Describe 'RESTHelpers Tests' {
                 $result | Should -Be "3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
             }
     
-            It 'Returns the correct route when EnvironmentId is not a Guid' {
+            It 'Returns the correct route for a default environment without a prefix separator' {
                 $result = Get-EnvironmentRouteHostName -EnvironmentId "Default3496a854-39b3-41bd-a783-1f2479ca3fbd" -Endpoint ([PPEndpoint]::prod)
                 $result | Should -Be "Default3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com"
+            }
+        }
+
+        Context 'Validating route IDs' {
+            It 'Preserves routing across supported endpoints: <EndpointName>' -ForEach @(
+                @{ EndpointName = 'tip1'; BaseHost = 'api.preprod.powerplatform.com'; ShortId = 'D'; RemainingId = '3496A85439B341BDA7831F2479CA3FB' }
+                @{ EndpointName = 'tip2'; BaseHost = 'api.test.powerplatform.com'; ShortId = 'D'; RemainingId = '3496A85439B341BDA7831F2479CA3FB' }
+                @{ EndpointName = 'prod'; BaseHost = 'api.powerplatform.com'; ShortId = 'BD'; RemainingId = '3496A85439B341BDA7831F2479CA3F' }
+                @{ EndpointName = 'usgovhigh'; BaseHost = 'api.high.powerplatform.microsoft.us'; ShortId = 'D'; RemainingId = '3496A85439B341BDA7831F2479CA3FB' }
+                @{ EndpointName = 'dod'; BaseHost = 'api.appsplatform.us'; ShortId = 'D'; RemainingId = '3496A85439B341BDA7831F2479CA3FB' }
+                @{ EndpointName = 'china'; BaseHost = 'api.powerplatform.partner.microsoftonline.cn'; ShortId = 'BD'; RemainingId = '3496A85439B341BDA7831F2479CA3F' }
+            ) {
+                $endpoint = [PPEndpoint]$EndpointName
+                foreach ($id in @('3496A854-39B3-41BD-A783-1F2479CA3FBD', '3496A85439B341BDA7831F2479CA3FBD')) {
+                    Get-EnvironmentRouteHostName -EnvironmentId $id -Endpoint $endpoint |
+                        Should -Be "$RemainingId.$ShortId.environment.$BaseHost"
+                    Get-TenantRouteHostName -TenantId $id -Endpoint $endpoint |
+                        Should -Be "il-$RemainingId.$ShortId.tenant.$BaseHost"
+                    foreach ($prefix in @('Default-', 'Default')) {
+                        Get-EnvironmentRouteHostName -EnvironmentId "$prefix$id" -Endpoint $endpoint |
+                            Should -Be "Default$RemainingId.$ShortId.environment.$BaseHost"
+                    }
+                }
+            }
+
+            It 'Rejects invalid IDs before creating either authenticated request: <InvalidId>' -ForEach @(
+                @{ InvalidId = 'evil.com/Aab' }
+                @{ InvalidId = 'evil.com\Aab' }
+                @{ InvalidId = 'evil.com?ab' }
+                @{ InvalidId = 'evil.com#ab' }
+                @{ InvalidId = 'evil.com@ab' }
+                @{ InvalidId = 'evil.com:443ab' }
+                @{ InvalidId = 'evil.com%2Fab' }
+                @{ InvalidId = '3496a854-39b3-41bd-a783-1f2479ca3fbz' }
+                @{ InvalidId = '3496a854--39b3-41bd-a783-1f2479ca3fbd' }
+                @{ InvalidId = ' 3496a854-39b3-41bd-a783-1f2479ca3fbd' }
+                @{ InvalidId = "3496a854-39b3-41bd-a783-1f2479ca3fbd`n" }
+                @{ InvalidId = 'Default-Default-3496a854-39b3-41bd-a783-1f2479ca3fbd' }
+                @{ InvalidId = 'ab' }
+            ) {
+                $ErrorActionPreference = 'Continue'
+                Mock New-JsonRequestMessage { throw 'Request creation must not be reached' }
+                $requestParams = @{
+                    Path = '/plex/networkUsage'
+                    Query = 'api-version=2024-10-01'
+                    Endpoint = [PPEndpoint]::prod
+                    AccessToken = ConvertTo-SecureString -String 'synthetic-test-token' -AsPlainText -Force
+                }
+
+                { Get-EnvironmentRouteHostName -EnvironmentId $InvalidId -Endpoint ([PPEndpoint]::prod) } |
+                    Should -Throw -ExpectedMessage '*Cannot validate argument*'
+                { Get-TenantRouteHostName -TenantId $InvalidId -Endpoint ([PPEndpoint]::prod) } |
+                    Should -Throw -ExpectedMessage '*Cannot validate argument*'
+                { New-EnvironmentRouteRequest -EnvironmentId $InvalidId @requestParams } |
+                    Should -Throw -ExpectedMessage '*Cannot validate argument*'
+                { New-HomeTenantRouteRequest -TenantId $InvalidId @requestParams } |
+                    Should -Throw -ExpectedMessage '*Cannot validate argument*'
+                Should -Invoke New-JsonRequestMessage -Times 0 -Exactly
+            }
+
+            It 'Rejects default environment prefixes on tenant IDs' -ForEach @(
+                @{ TenantId = 'Default-3496a854-39b3-41bd-a783-1f2479ca3fbd' }
+                @{ TenantId = 'Default3496a85439b341bda7831f2479ca3fbd' }
+            ) {
+                { Get-TenantRouteHostName -TenantId $TenantId -Endpoint ([PPEndpoint]::prod) } |
+                    Should -Throw -ExpectedMessage '*Cannot validate argument*'
+            }
+
+            It 'Creates safe HTTPS environment and tenant requests without changing path or query' {
+                $requestParams = @{
+                    Path = '/plex/networkUsage'
+                    Query = 'api-version=2024-10-01'
+                    Endpoint = [PPEndpoint]::prod
+                    AccessToken = ConvertTo-SecureString -String 'synthetic-test-token' -AsPlainText -Force
+                    HttpMethod = [System.Net.Http.HttpMethod]::Get
+                }
+                $environmentRequest = New-EnvironmentRouteRequest -EnvironmentId 'Default-3496a854-39b3-41bd-a783-1f2479ca3fbd' @requestParams
+                $tenantRequest = New-HomeTenantRouteRequest -TenantId '3496a854-39b3-41bd-a783-1f2479ca3fbd' @requestParams
+                try {
+                    $environmentRequest.RequestUri.Host | Should -Be 'default3496a85439b341bda7831f2479ca3f.bd.environment.api.powerplatform.com'
+                    $tenantRequest.RequestUri.Host | Should -Be 'il-3496a85439b341bda7831f2479ca3f.bd.tenant.api.powerplatform.com'
+                    $tenantRequest.Headers.Host | Should -Be $tenantRequest.RequestUri.Host
+                    foreach ($request in @($environmentRequest, $tenantRequest)) {
+                        $request.RequestUri.Scheme | Should -Be 'https'
+                        $request.RequestUri.IsDefaultPort | Should -BeTrue
+                        $request.RequestUri.UserInfo | Should -BeNullOrEmpty
+                        $request.RequestUri.AbsolutePath | Should -Be $requestParams.Path
+                        $request.RequestUri.Query | Should -Be "?$($requestParams.Query)"
+                        $request.Method | Should -Be $requestParams.HttpMethod
+                        $request.Headers.Authorization.Scheme | Should -Be 'Bearer'
+                    }
+                }
+                finally {
+                    $environmentRequest.Dispose()
+                    $tenantRequest.Dispose()
+                }
             }
         }
 

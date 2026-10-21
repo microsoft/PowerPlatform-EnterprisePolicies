@@ -13,6 +13,8 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
     
 .DESCRIPTION
     This script can be imported to enable cmdlets to deal with HTTP connection and JSON messages.
+    Route IDs must be hyphenated or compact GUIDs. Environment IDs also support a Default-
+    or Default prefix. Invalid IDs are rejected before an authenticated request is created.
 
 .NOTES
     Copyright © 2025 Microsoft. All rights reserved.
@@ -66,6 +68,8 @@ function New-EnvironmentRouteRequest
         [System.Net.Http.HttpMethod] $HttpMethod = [System.Net.Http.HttpMethod]::Post
     )
 
+    $ErrorActionPreference = "Stop"
+
     $hostName = Get-EnvironmentRouteHostName -Endpoint $Endpoint -EnvironmentId $EnvironmentId
     $uriBuilder = [System.UriBuilder]::new()
     $uriBuilder.Scheme = "https"
@@ -95,6 +99,8 @@ function New-HomeTenantRouteRequest
         [Parameter(Mandatory=$false)]
         [System.Net.Http.HttpMethod] $HttpMethod = [System.Net.Http.HttpMethod]::Post
     )
+
+    $ErrorActionPreference = "Stop"
 
     $hostName = Get-TenantRouteHostName -Endpoint $Endpoint -TenantId $TenantId
     $uriBuilder = [System.UriBuilder]::new()
@@ -173,6 +179,7 @@ function Get-AsyncResult
 function Get-EnvironmentRouteHostName {
     param (
         [Parameter(Mandatory)]
+        [ValidatePattern('\A(?:Default-?)?(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\z')]
         [string] $EnvironmentId,
         [Parameter(Mandatory)]
         [PPEndpoint] $Endpoint
@@ -196,6 +203,7 @@ function Get-EnvironmentRouteHostName {
 function Get-TenantRouteHostName {
     param (
         [Parameter(Mandatory)]
+        [ValidatePattern('\A(?:[0-9a-fA-F]{32}|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})\z')]
         [string] $TenantId,
         [Parameter(Mandatory)]
         [PPEndpoint] $Endpoint
