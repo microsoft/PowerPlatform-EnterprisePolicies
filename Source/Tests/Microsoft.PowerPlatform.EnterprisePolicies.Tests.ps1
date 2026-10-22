@@ -49,6 +49,83 @@ Describe 'Module Manifest Tests' {
     }
 }
 
+Describe 'Trusted override import' {
+    BeforeAll {
+        $originalOverride = $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE
+        $testModuleRoot = Join-Path $TestDrive 'OverrideImportTests'
+        $null = New-Item -ItemType Directory -Path $testModuleRoot
+        Get-ChildItem -LiteralPath $Global:ModuleManifestPath | Copy-Item -Destination $testModuleRoot -Recurse
+        $moduleScript = Join-Path $testModuleRoot 'OverrideImportTests.psm1'
+        Copy-Item -LiteralPath "$testModuleRoot\Microsoft.PowerPlatform.EnterprisePolicies.psm1" -Destination $moduleScript
+    }
+
+    AfterAll {
+        $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $originalOverride
+    }
+
+    It 'Preserves exports when an override replaces helpers and assigns a public variable' {
+        $override = Join-Path $TestDrive 'override.ps1'
+        @'
+function Get-PPEndpointUrl { param([PPEndpoint]$Endpoint) return 'https://custom.example/' }
+function Get-CachedConfiguration { param([string]$Name) return 'custom configuration' }
+function Get-OverrideOnly { return 'private' }
+$public = @([pscustomobject]@{ BaseName = 'Get-OverrideOnly' })
+'@ | Set-Content -LiteralPath $override
+        $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $override
+        $module = Import-Module -Name $moduleScript -Prefix HookTest -PassThru -Force -ErrorAction Stop
+        try {
+            (& $module { Get-PPEndpointUrl -Endpoint Custom }) | Should -Be 'https://custom.example/'
+            Get-HookTestPPModuleConfiguration -Name 'test' | Should -Be 'custom configuration'
+            $module.ExportedFunctions.Count | Should -Be @(Get-ChildItem -LiteralPath "$testModuleRoot\Public" -Recurse -Filter '*.ps1').Count
+            @($module.ExportedFunctions.Keys | Where-Object { $_ -like '*OverrideOnly*' }).Count | Should -Be 0
+        }
+        finally {
+            Remove-Module $module -Force
+        }
+    }
+
+    It 'Rejects an existing Windows <PathKind> script' -ForEach @(
+        @{ PathKind = 'drive-relative' },
+        @{ PathKind = 'root-relative' }
+    ) -Skip:([System.IO.Path]::DirectorySeparatorChar -ne '\') {
+        $override = Join-Path $testModuleRoot 'relative-override.ps1'
+        "throw 'An ambiguous override path was executed'" | Set-Content -LiteralPath $override
+        $absoluteOverride = (Get-Item -LiteralPath $override).FullName
+        $drive = Split-Path -Path $absoluteOverride -Qualifier
+        Push-Location -LiteralPath $testModuleRoot
+        try {
+            $path = if ($PathKind -eq 'drive-relative') {
+                "$drive$(Split-Path -Path $absoluteOverride -Leaf)"
+            }
+            else {
+                $absoluteOverride.Substring($drive.Length)
+            }
+            Test-Path -LiteralPath $path -PathType Leaf | Should -BeTrue
+            $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $path
+            { Import-Module -Name $moduleScript -Force -ErrorAction Stop } | Should -Throw '*absolute path*'
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    It 'Rejects an invalid configured path: <Path>' -ForEach @(
+        @{ Path = 'relative.ps1' },
+        @{ Path = 'C:\MissingOverride\override.ps1' },
+        @{ Path = 'C:\MissingOverride\override.json' }
+    ) {
+        $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $Path
+        { Import-Module -Name $moduleScript -Force -ErrorAction Stop } | Should -Throw '*absolute path*'
+    }
+
+    It 'Propagates a terminating override failure' {
+        $override = Join-Path $TestDrive 'failing.ps1'
+        "throw 'Override configuration is invalid'" | Set-Content -LiteralPath $override
+        $env:POWERPLATFORM_ENTERPRISE_POLICIES_OVERRIDE = $override
+        { Import-Module -Name $moduleScript -Force -ErrorAction Stop } | Should -Throw '*Override configuration is invalid*'
+    }
+}
+
 Describe 'Script Tests' {
     BeforeAll {
         # List of files that historically do not have a test file. All new scripts shall have test files.
