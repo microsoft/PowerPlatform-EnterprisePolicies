@@ -99,6 +99,13 @@ function Get-AzResource {
     )
 }
 function New-AzResourceGroupDeployment {}
+function Get-AzRoleAssignment {
+    param(
+        [string]$Scope,
+        [string]$ObjectId,
+        [string]$RoleDefinitionName
+    )
+}
 function Get-AzResourceProvider {}
 function Register-AzResourceProvider {}
 function Remove-AzResource {
