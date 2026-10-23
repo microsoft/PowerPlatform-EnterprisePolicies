@@ -67,8 +67,8 @@ function GetAndValidateEnterprisePolicyForKeyVault($enterprisePolicyArmId, $keyV
         return $null
     }
    
-    #check if key vault has vault access policy
-    if ($keyVault.AccessPolicies -ne $null)
+    #check if key vault uses access policy authorization
+    if (-not $keyVault.EnableRbacAuthorization)
     {
         #validate CMK enterprise policy identity has Get, UnwrapKey and WrapKey access permission for key vault
         $accessPolicies = $keyVault.AccessPolicies
