@@ -31,6 +31,8 @@ function Connect-Azure {
             ([PPEndpoint]::china) { "AzureChinaCloud" }
             ([PPEndpoint]::dod) { "AzureUSGovernment" }
             ([PPEndpoint]::usgovhigh) { "AzureUSGovernment" }
+            ([PPEndpoint]::ussec) { "AzureUSSecCloud" }
+            ([PPEndpoint]::usnat) { "AzureUSNatCloud" }
             Default { "AzureCloud" }
         }
     }

@@ -12,6 +12,20 @@ Describe 'AuthenticationOperations Tests' {
             Mock Get-CachedServicePrincipalAuth { return $null }
         }
         Context 'Testing Connect-Azure' {
+            It 'Connects to <EnvironmentName> by environment or endpoint' -TestCases @(
+                @{ EnvironmentName = 'AzureUSSecCloud'; EndpointName = 'ussec' }
+                @{ EnvironmentName = 'AzureUSNatCloud'; EndpointName = 'usnat' }
+            ) {
+                param($EnvironmentName, $EndpointName)
+
+                Mock Get-AzContext { return $null }
+                Mock Connect-AzAccount { throw "Unexpected Azure environment: $Environment" }
+                Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq $EnvironmentName }
+
+                Connect-Azure -AzureEnvironment $EnvironmentName | Should -Be $true
+                Connect-Azure -Endpoint $EndpointName | Should -Be $true
+            }
+
             It 'Connects to Azure with the correct environment' {
                 $endpoint = [PPEndpoint]::usgovhigh
                 Mock Connect-AzAccount { return $true } -ParameterFilter { $Environment -eq "AzureUSGovernment" } -Verifiable

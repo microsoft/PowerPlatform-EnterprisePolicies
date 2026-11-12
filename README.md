@@ -33,6 +33,10 @@ Import-Module .\Microsoft.PowerPlatform.EnterprisePolicies
 
 This will import the module, validate prerequisites and make the commands available for use. If you are missing any prerequisites, the module will inform you and ask for permission to install them.
 
+For `-AzureEnvironment AzureUSSecCloud` or `-AzureEnvironment AzureUSNatCloud`, first register the matching environment name and cloud-specific endpoints using `Add-AzEnvironment`. The separate Power Platform `-Endpoint ussec` and `-Endpoint usnat` values are placeholders only; their API routing and authentication are not implemented.
+
+`Enable-SubnetInjection` and `Enable-Identity` select Azure and Power Platform clouds independently. As with Gov and China, specify both matching `-Endpoint` and `-AzureEnvironment` parameters; selecting an endpoint does not change the Azure environment automatically. This parameter-selection pattern does not enable the unsupported endpoints described above.
+
 ### Forcing re-authentication
 
 By default, the powershell module will attempt to reuse an existing Azure session if one is available. If you want to manually choose which account to use instead of letting the module automatically select one, you can pass the `-ForceAuth` switch to any of the cmdlets:
