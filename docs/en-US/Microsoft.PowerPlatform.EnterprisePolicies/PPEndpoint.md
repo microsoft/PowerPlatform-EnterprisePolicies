@@ -27,8 +27,8 @@ Represents the different PP endpoints that can be used to connect to Power Platf
 | usgovhigh | Azure Government Community Cloud High endpoint. |
 | dod | Azure Department of Defense endpoint. |
 | china | Azure China cloud endpoint. |
-| ussec | Azure USSec cloud endpoint. |
-| usnat | Azure USNat cloud endpoint. |
+| ussec | Air Gapped Cloud endpoint. Requires manual configuration using Set-PPCustomEndpoint. |
+| usnat | Air Gapped Cloud endpoint. Requires manual configuration using Set-PPCustomEndpoint. |
 
 ## EXAMPLES
 
