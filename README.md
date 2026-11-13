@@ -84,7 +84,7 @@ Set-PPCustomEndpoint -Name usnat `
 |-----------|-------|
 | `Authority` | Login base URL without a tenant ID; the module appends the requested tenant ID. |
 | `PPEndpoint` | Power Platform API base URL. |
-| `PPResource` | Power Apps authentication resource URL. |
+| `PPResource` | Power Platform resource URL. |
 | `PPAPI` | Power Platform API base and authentication resource URL. |
 
 All four URLs are required and must be absolute HTTPS URLs without credentials, query strings, or fragments. The cmdlet adds or replaces the complete named entry while preserving other endpoints, and clears cached authorization service clients for the updated endpoint.
