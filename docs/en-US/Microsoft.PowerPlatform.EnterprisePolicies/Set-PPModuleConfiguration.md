@@ -40,6 +40,9 @@ validated, strongly-typed configuration.
 Use the dedicated Set-PPServicePrincipalAuth cmdlet to
 configure service principal authentication.
 
+The reserved 'CustomEndpoints' name can't be set or removed through this cmdlet.
+Use Set-PPCustomEndpoint to configure custom endpoints with validation and authentication cache updates.
+
 Passing $null for the value removes the named configuration entry.
 Use Get-PPModuleConfiguration to read
 stored configuration values back.
