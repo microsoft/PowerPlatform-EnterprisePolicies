@@ -9,19 +9,25 @@ NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HA
 
 <#
 .SYNOPSIS
-Disables customer managed key (CMK) encryption for a Power Platform environment by unlinking it from its enterprise policy.
+Disables customer managed key (CMK) encryption for a Power Platform environment or PlatformAppsData.
 
 .DESCRIPTION
 The Disable-CMK cmdlet unlinks the CMK enterprise policy from a Power Platform environment,
 reverting the environment to Microsoft managed key encryption.
 
-The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
-Use -NoWait to return immediately after the operation is initiated.
+Environment operations are asynchronous. By default, the cmdlet waits for the operation to complete.
+Use -NoWait to return immediately after an environment operation is initiated.
+
+Use -PlatformAppsData instead of -EnvironmentId to unlink the policy through the separate PlatformApps API.
+PlatformAppsData must already be enrolled, and -PolicyArmId must match its currently linked CMK policy.
+This parameter set preserves the legacy scripts' behavior: it defaults to the tip1 endpoint and returns
+after the service accepts the operation, without waiting for completion. Specify -Endpoint explicitly to
+target another endpoint. -NoWait and -TimeoutSeconds apply only to environments.
 
 .OUTPUTS
 System.Boolean
 
-Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated. Returns an error message and returns $false if the environment doesn't have CMK enabled.
+Returns $true when the environment operation completes successfully, or when -NoWait or -PlatformAppsData is specified and the operation is initiated. Throws an error if no CMK policy is linked.
 
 .EXAMPLE
 Disable-CMK -EnvironmentId "00000000-0000-0000-0000-000000000000"
@@ -37,19 +43,31 @@ Disables CMK encryption for an environment in the US Government High cloud.
 Disable-CMK -EnvironmentId "00000000-0000-0000-0000-000000000000" -NoWait
 
 Initiates the unlink operation without waiting for completion.
+
+.EXAMPLE
+Disable-CMK -PlatformAppsData -PolicyArmId "/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy" -Endpoint prod
+
+Initiates CMK unlinking for enrolled PlatformAppsData only if the specified policy is currently linked, without waiting for completion.
 #>
 
 function Disable-CMK {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'Environment')]
     param(
-        [Parameter(Mandatory, HelpMessage="The Power Platform environment ID")]
+        [Parameter(Mandatory, ParameterSetName = 'Environment', HelpMessage="The Power Platform environment ID")]
         [ValidateNotNullOrEmpty()]
         [string]$EnvironmentId,
+
+        [Parameter(Mandatory, ParameterSetName = 'PlatformAppsData', HelpMessage="Unlink the policy from enrolled PlatformAppsData instead of an environment")]
+        [switch]$PlatformAppsData,
+
+        [Parameter(Mandatory, ParameterSetName = 'PlatformAppsData', HelpMessage="The full Azure ARM resource ID of the CMK policy currently linked to PlatformAppsData")]
+        [ValidateAzureResourceId("Microsoft.PowerPlatform/enterprisePolicies")]
+        [string]$PolicyArmId,
 
         [Parameter(Mandatory=$false, HelpMessage="The Entra tenant ID")]
         [string]$TenantId,
 
-        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint. Defaults to prod for environments and tip1 for PlatformAppsData.")]
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use. Defaults to the cloud associated with Endpoint.")]
@@ -58,14 +76,18 @@ function Disable-CMK {
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
         [switch]$ForceAuth,
 
-        [Parameter(Mandatory=$false, HelpMessage="Return immediately without waiting for the operation to complete")]
+        [Parameter(Mandatory=$false, ParameterSetName = 'Environment', HelpMessage="Return immediately without waiting for the operation to complete")]
         [switch]$NoWait,
 
-        [Parameter(Mandatory=$false, HelpMessage="Maximum time in seconds to wait for the operation to complete")]
+        [Parameter(Mandatory=$false, ParameterSetName = 'Environment', HelpMessage="Maximum time in seconds to wait for the operation to complete")]
         [int]$TimeoutSeconds = 600
     )
 
     $ErrorActionPreference = "Stop"
+
+    if ($PSCmdlet.ParameterSetName -eq 'PlatformAppsData' -and -not $PSBoundParameters.ContainsKey('Endpoint')) {
+        $Endpoint = [PPEndpoint]::tip1
+    }
 
     $connectParams = @{
         TenantId = $TenantId
@@ -80,6 +102,10 @@ function Disable-CMK {
 
     if (-not(Connect-Azure @connectParams)) {
         throw "Failed to connect to Azure. Please check your credentials and try again."
+    }
+
+    if ($PSCmdlet.ParameterSetName -eq 'PlatformAppsData') {
+        return Set-PlatformAppsDataCMK -PolicyArmId $PolicyArmId -Operation ([LinkOperation]::unlink) -Endpoint $Endpoint -TenantId $TenantId
     }
 
     # Validate that the environment exists

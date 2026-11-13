@@ -111,10 +111,9 @@ Source/Microsoft.PowerPlatform.EnterprisePolicies/
 
 ### Legacy Scripts (DO NOT follow these patterns)
 Everything under `Source/` outside the module and tests is legacy code being replaced:
-- `Source/Cmk/` - Legacy PlatformAppsData CMK link/unlink scripts, retained until their separate API path is migrated
-- `Source/Common/` - Legacy shared helpers (still used by PlatformAppsData and the remaining top-level setup scripts)
+- `Source/Common/` - Legacy shared helpers (still used by the remaining top-level setup scripts)
 
-CMK policy management and environment linking, subnet injection, and identity have been migrated into the module (under `Public/CMK`, `Public/SubnetInjection`, and `Public/Identity`). Do not reintroduce standalone scripts for these migrated operations.
+CMK (including PlatformAppsData), subnet injection, and identity have been migrated into the module (under `Public/CMK`, `Public/SubnetInjection`, and `Public/Identity`). Do not reintroduce standalone scripts for these migrated operations.
 
 **Do not use these as reference for new code.** Follow patterns in the module only.
 

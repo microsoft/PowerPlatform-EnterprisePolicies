@@ -36,7 +36,7 @@ The Set-CMKEnterprisePolicy cmdlet updates the key vault, key name, and/or key v
 CMK enterprise policy.
 Only the values you provide are changed; any parameter you omit keeps its current value.
 
-The policy's system-assigned managed identity is preserved.
+The policy's system-assigned managed identity and resource tags are preserved.
 At least one of KeyVaultId, KeyName, or KeyVersion
 must be provided.
 

@@ -15,7 +15,7 @@ Updates the key vault configuration of an existing customer managed key (CMK) en
 The Set-CMKEnterprisePolicy cmdlet updates the key vault, key name, and/or key version referenced by an existing
 CMK enterprise policy. Only the values you provide are changed; any parameter you omit keeps its current value.
 
-The policy's system-assigned managed identity is preserved. At least one of KeyVaultId, KeyName, or KeyVersion
+The policy's system-assigned managed identity and resource tags are preserved. At least one of KeyVaultId, KeyName, or KeyVersion
 must be provided.
 
 .OUTPUTS
@@ -117,6 +117,9 @@ function Set-CMKEnterprisePolicy {
     }
 
     $body = New-EnterprisePolicyBody @bodyParams
+    if ($null -ne $policy.Tags) {
+        $body.resources[0]['tags'] = $policy.Tags
+    }
 
     if (-not(Set-EnterprisePolicy -ResourceGroup $resourceGroupName -Body $body)) {
         throw "Failed to update CMK Enterprise Policy."

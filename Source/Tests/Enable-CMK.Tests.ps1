@@ -114,6 +114,50 @@ Describe 'Enable-CMK Tests' {
         }
     }
 
+    Context 'PlatformAppsData' {
+        BeforeAll {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-PlatformAppsDataCMK { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-PPEnvironment { throw "Must not use an environment route" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Wait-EnterprisePolicyOperation { throw "PlatformAppsData must not poll environment operations" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Initiates a link without polling and preserves the legacy default endpoint' {
+            Enable-CMK -PlatformAppsData -PolicyArmId $script:testPolicyArmId | Should -Be $true
+
+            Should -Invoke Connect-Azure -Times 1 -Exactly -ParameterFilter { $Endpoint -eq 'tip1' } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Should -Invoke Set-PlatformAppsDataCMK -Times 1 -Exactly -ParameterFilter {
+                $PolicyArmId -eq $script:testPolicyArmId -and $Operation -eq 'link' -and $Endpoint -eq 'tip1'
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Honors an explicit endpoint, tenant, and forced authentication' {
+            $tenantId = "00000000-0000-0000-0000-000000000004"
+            Enable-CMK -PlatformAppsData -PolicyArmId $script:testPolicyArmId -Endpoint china -TenantId $tenantId -ForceAuth | Should -Be $true
+
+            Should -Invoke Connect-Azure -Times 1 -Exactly -ParameterFilter {
+                $Endpoint -eq 'china' -and $TenantId -eq "00000000-0000-0000-0000-000000000004" -and $Force
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Should -Invoke Set-PlatformAppsDataCMK -Times 1 -Exactly -ParameterFilter {
+                $Endpoint -eq 'china' -and $TenantId -eq "00000000-0000-0000-0000-000000000004"
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Rejects environment-only parameters: <ParameterName>' -TestCases @(
+            @{ ParameterName = 'EnvironmentId' }
+            @{ ParameterName = 'Swap' }
+            @{ ParameterName = 'NoWait' }
+            @{ ParameterName = 'TimeoutSeconds' }
+        ) {
+            param($ParameterName)
+            $parameters = @{ $ParameterName = $true }
+            if ($ParameterName -eq 'EnvironmentId') { $parameters[$ParameterName] = $script:testEnvironmentId }
+            if ($ParameterName -eq 'TimeoutSeconds') { $parameters[$ParameterName] = 60 }
+
+            { Enable-CMK -PlatformAppsData -PolicyArmId $script:testPolicyArmId @parameters } | Should -Throw "*Parameter set cannot be resolved*"
+        }
+    }
+
     Context 'NoWait parameter' {
         BeforeAll {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"

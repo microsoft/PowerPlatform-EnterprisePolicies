@@ -13,16 +13,23 @@ title: Enable-CMK
 
 ## SYNOPSIS
 
-Enables customer managed key (CMK) encryption for a Power Platform environment by linking it to an enterprise policy.
+Enables customer managed key (CMK) encryption for a Power Platform environment or PlatformAppsData.
 
 ## SYNTAX
 
-### __AllParameterSets
+### Environment (Default)
 
 ```
-Enable-CMK [-EnvironmentId] <string> [-PolicyArmId] <string> [[-TenantId] <string>]
- [[-Endpoint] <PPEndpoint>] [[-AzureEnvironment] <AzureEnvironment>] [[-TimeoutSeconds] <int>]
- [-ForceAuth] [-Swap] [-NoWait] [<CommonParameters>]
+Enable-CMK -EnvironmentId <string> -PolicyArmId <string> [-TenantId <string>]
+ [-Endpoint <PPEndpoint>] [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-Swap] [-NoWait]
+ [-TimeoutSeconds <int>] [<CommonParameters>]
+```
+
+### PlatformAppsData
+
+```
+Enable-CMK -PlatformAppsData -PolicyArmId <string> [-TenantId <string>] [-Endpoint <PPEndpoint>]
+ [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -41,9 +48,16 @@ and that the environment meets the CMK prerequisites.
 If the environment already has a different CMK policy linked, use the -Swap switch to replace it.
 Without -Swap, the cmdlet returns an error to prevent accidental policy replacement.
 
-The operation is asynchronous.
+Environment operations are asynchronous.
 By default, the cmdlet waits for the operation to complete.
-Use -NoWait to return immediately after the operation is initiated.
+Use -NoWait to return immediately after an environment operation is initiated.
+
+Use -PlatformAppsData instead of -EnvironmentId to link the policy through the separate PlatformApps API.
+PlatformAppsData must already be enrolled.
+This parameter set preserves the legacy scripts' behavior:
+it defaults to the tip1 endpoint and returns after the service accepts the operation, without waiting for completion.
+Specify -Endpoint explicitly to target another endpoint.
+-Swap, -NoWait, and -TimeoutSeconds apply only to environments.
 
 ## EXAMPLES
 
@@ -71,6 +85,12 @@ Enable-CMK -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/
 
 Initiates the link operation without waiting for completion.
 
+### EXAMPLE 5
+
+Enable-CMK -PlatformAppsData -PolicyArmId "/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy" -Endpoint prod
+
+Initiates CMK linking for enrolled PlatformAppsData at the explicitly selected endpoint, without waiting for completion.
+
 ## PARAMETERS
 
 ### -AzureEnvironment
@@ -84,7 +104,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 4
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -96,7 +116,7 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The Power Platform endpoint to connect to. Defaults to 'prod'.
+The Power Platform endpoint. Defaults to prod for environments and tip1 for PlatformAppsData.
 
 ```yaml
 Type: PPEndpoint
@@ -105,7 +125,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -125,8 +145,8 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 0
+- Name: Environment
+  Position: Named
   IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -167,9 +187,30 @@ DefaultValue: False
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: Environment
   Position: Named
   IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -PlatformAppsData
+
+Link the policy to enrolled PlatformAppsData instead of an environment
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: PlatformAppsData
+  Position: Named
+  IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -189,7 +230,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -209,7 +250,7 @@ DefaultValue: False
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: Environment
   Position: Named
   IsRequired: false
   ValueFromPipeline: false
@@ -231,7 +272,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -251,8 +292,8 @@ DefaultValue: 600
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 5
+- Name: Environment
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -275,7 +316,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.Boolean
 
-Returns $true when the operation completes successfully
+Returns $true when the environment operation completes successfully
 
 {{ Fill in the Description }}
 

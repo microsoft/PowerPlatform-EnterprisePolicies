@@ -86,7 +86,7 @@ The summaries below give a quick overview of each cmdlet. For full parameter lis
 
 ## CMK Users
 
-Customer managed key (CMK) enterprise policies let a Power Platform environment encrypt its data with a key you manage in Azure Key Vault. Policy management and environment linking are now managed through the `Microsoft.PowerPlatform.EnterprisePolicies` module, replacing the corresponding legacy scripts under `Source/Cmk`.
+Customer managed key (CMK) enterprise policies let a Power Platform environment encrypt its data with a key you manage in Azure Key Vault. Policy management, environment linking, and PlatformAppsData linking are now managed through the `Microsoft.PowerPlatform.EnterprisePolicies` module, replacing the legacy scripts under `Source/Cmk`.
 
 The summaries below give a quick overview of each cmdlet. For full parameter lists, examples, and output types, follow the links to the module's generated cmdlet documentation.
 
@@ -104,13 +104,18 @@ Before creating enterprise policies, register the Azure subscription for the Mic
 - **[Enable-CMK](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Enable-CMK.md)** : Links a CMK enterprise policy to a Power Platform environment so its data is encrypted with your key. Use the `-Swap` switch to replace a policy that is already linked to the environment.
 - **[Disable-CMK](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Disable-CMK.md)** : Unlinks the CMK enterprise policy from an environment, reverting it to Microsoft managed key encryption.
 
-#### PlatformAppsData compatibility
+#### Linking policies to PlatformAppsData
 
-PlatformAppsData uses a separate PlatformApps-scoped API, not the environment API used by `Enable-CMK` and `Disable-CMK`. The existing scripts check `platformapps/status` for an `Enrolled` state, then link or unlink an encryption policy through `platformapps/enterprisePolicies/Encryption` (API version `2024-05-01`).
+Use the `-PlatformAppsData` parameter set of `Enable-CMK` and `Disable-CMK` instead of `-EnvironmentId`. These operations use the separate PlatformApps API (version `2024-05-01`) and require PlatformAppsData to already be enrolled.
 
-The standalone [AddCustomerManagedKeyToPlatformAppsData.ps1](./Source/Cmk/AddCustomerManagedKeyToPlatformAppsData.ps1) and [RemoveCustomerManagedKeyFromPlatformAppsData.ps1](./Source/Cmk/RemoveCustomerManagedKeyFromPlatformAppsData.ps1) scripts and their shared helpers are retained unchanged. This migration does not add module replacements for them or change enrollment requirements. These scripts require the legacy dependencies installed by [InstallPowerAppsCmdlets.ps1](./Source/InstallPowerAppsCmdlets.ps1).
+```powershell
+Enable-CMK -PlatformAppsData -PolicyArmId "<policy-ARM-resource-id>" -Endpoint prod
+Disable-CMK -PlatformAppsData -PolicyArmId "<policy-ARM-resource-id>" -Endpoint prod
+```
 
-Both scripts still default to the `tip1` endpoint when `-endpoint` is omitted.
+Unlinking requires `-PolicyArmId` to match the currently linked CMK policy. As with the replaced standalone scripts, PlatformAppsData operations return after the service accepts the request; `$true` confirms initiation, not completion. Environment-only options such as `-Swap`, `-NoWait`, and `-TimeoutSeconds` are not available for PlatformAppsData.
+
+For compatibility, PlatformAppsData still defaults to `tip1` when `-Endpoint` is omitted; environment operations still default to `prod`. Select the intended endpoint explicitly, as in the examples above.
 
 #### Validating the key vault
 

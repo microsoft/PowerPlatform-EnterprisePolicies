@@ -96,6 +96,44 @@ Describe 'Disable-CMK Tests' {
         }
     }
 
+    Context 'PlatformAppsData' {
+        BeforeAll {
+            Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Set-PlatformAppsDataCMK { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Get-PPEnvironment { throw "Must not use an environment route" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Mock Wait-EnterprisePolicyOperation { throw "PlatformAppsData must not poll environment operations" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Initiates an unlink without polling and preserves the legacy default endpoint' {
+            Disable-CMK -PlatformAppsData -PolicyArmId $script:testPolicyArmId | Should -Be $true
+
+            Should -Invoke Connect-Azure -Times 1 -Exactly -ParameterFilter { $Endpoint -eq 'tip1' } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Should -Invoke Set-PlatformAppsDataCMK -Times 1 -Exactly -ParameterFilter {
+                $PolicyArmId -eq $script:testPolicyArmId -and $Operation -eq 'unlink' -and $Endpoint -eq 'tip1'
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Honors an explicit endpoint and tenant' {
+            $tenantId = "00000000-0000-0000-0000-000000000004"
+            Disable-CMK -PlatformAppsData -PolicyArmId $script:testPolicyArmId -Endpoint prod -TenantId $tenantId | Should -Be $true
+
+            Should -Invoke Connect-Azure -Times 1 -Exactly -ParameterFilter {
+                $Endpoint -eq 'prod' -and $TenantId -eq "00000000-0000-0000-0000-000000000004"
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+            Should -Invoke Set-PlatformAppsDataCMK -Times 1 -Exactly -ParameterFilter {
+                $Endpoint -eq 'prod' -and $TenantId -eq "00000000-0000-0000-0000-000000000004"
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Rejects an environment ID with the PlatformAppsData target' {
+            { Disable-CMK -PlatformAppsData -PolicyArmId $script:testPolicyArmId -EnvironmentId $script:testEnvironmentId } | Should -Throw "*Parameter set cannot be resolved*"
+        }
+
+        It 'Rejects environment polling options' {
+            { Disable-CMK -PlatformAppsData -PolicyArmId $script:testPolicyArmId -NoWait } | Should -Throw "*Parameter set cannot be resolved*"
+        }
+    }
+
     Context 'NoWait parameter' {
         BeforeAll {
             Mock Connect-Azure { return $true } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"

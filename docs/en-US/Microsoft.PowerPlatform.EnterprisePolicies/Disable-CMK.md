@@ -13,16 +13,23 @@ title: Disable-CMK
 
 ## SYNOPSIS
 
-Disables customer managed key (CMK) encryption for a Power Platform environment by unlinking it from its enterprise policy.
+Disables customer managed key (CMK) encryption for a Power Platform environment or PlatformAppsData.
 
 ## SYNTAX
 
-### __AllParameterSets
+### Environment (Default)
 
 ```
-Disable-CMK [-EnvironmentId] <string> [[-TenantId] <string>] [[-Endpoint] <PPEndpoint>]
- [[-AzureEnvironment] <AzureEnvironment>] [[-TimeoutSeconds] <int>] [-ForceAuth] [-NoWait]
+Disable-CMK -EnvironmentId <string> [-TenantId <string>] [-Endpoint <PPEndpoint>]
+ [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [-NoWait] [-TimeoutSeconds <int>]
  [<CommonParameters>]
+```
+
+### PlatformAppsData
+
+```
+Disable-CMK -PlatformAppsData -PolicyArmId <string> [-TenantId <string>] [-Endpoint <PPEndpoint>]
+ [-AzureEnvironment <AzureEnvironment>] [-ForceAuth] [<CommonParameters>]
 ```
 
 ## ALIASES
@@ -35,9 +42,17 @@ This cmdlet has the following aliases,
 The Disable-CMK cmdlet unlinks the CMK enterprise policy from a Power Platform environment,
 reverting the environment to Microsoft managed key encryption.
 
-The operation is asynchronous.
+Environment operations are asynchronous.
 By default, the cmdlet waits for the operation to complete.
-Use -NoWait to return immediately after the operation is initiated.
+Use -NoWait to return immediately after an environment operation is initiated.
+
+Use -PlatformAppsData instead of -EnvironmentId to unlink the policy through the separate PlatformApps API.
+PlatformAppsData must already be enrolled, and -PolicyArmId must match its currently linked CMK policy.
+This parameter set preserves the legacy scripts' behavior: it defaults to the tip1 endpoint and returns
+after the service accepts the operation, without waiting for completion.
+Specify -Endpoint explicitly to
+target another endpoint.
+-NoWait and -TimeoutSeconds apply only to environments.
 
 ## EXAMPLES
 
@@ -59,6 +74,12 @@ Disable-CMK -EnvironmentId "00000000-0000-0000-0000-000000000000" -NoWait
 
 Initiates the unlink operation without waiting for completion.
 
+### EXAMPLE 4
+
+Disable-CMK -PlatformAppsData -PolicyArmId "/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy" -Endpoint prod
+
+Initiates CMK unlinking for enrolled PlatformAppsData only if the specified policy is currently linked, without waiting for completion.
+
 ## PARAMETERS
 
 ### -AzureEnvironment
@@ -72,7 +93,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 3
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -84,7 +105,7 @@ HelpMessage: ''
 
 ### -Endpoint
 
-The Power Platform endpoint to connect to. Defaults to 'prod'.
+The Power Platform endpoint. Defaults to prod for environments and tip1 for PlatformAppsData.
 
 ```yaml
 Type: PPEndpoint
@@ -93,7 +114,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 2
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -113,8 +134,8 @@ DefaultValue: ''
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 0
+- Name: Environment
+  Position: Named
   IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -155,9 +176,51 @@ DefaultValue: False
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
+- Name: Environment
   Position: Named
   IsRequired: false
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -PlatformAppsData
+
+Unlink the policy from enrolled PlatformAppsData instead of an environment
+
+```yaml
+Type: System.Management.Automation.SwitchParameter
+DefaultValue: False
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: PlatformAppsData
+  Position: Named
+  IsRequired: true
+  ValueFromPipeline: false
+  ValueFromPipelineByPropertyName: false
+  ValueFromRemainingArguments: false
+DontShow: false
+AcceptedValues: []
+HelpMessage: ''
+```
+
+### -PolicyArmId
+
+The full Azure ARM resource ID of the CMK policy currently linked to PlatformAppsData
+
+```yaml
+Type: System.String
+DefaultValue: ''
+SupportsWildcards: false
+Aliases: []
+ParameterSets:
+- Name: PlatformAppsData
+  Position: Named
+  IsRequired: true
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
   ValueFromRemainingArguments: false
@@ -177,7 +240,7 @@ SupportsWildcards: false
 Aliases: []
 ParameterSets:
 - Name: (All)
-  Position: 1
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -197,8 +260,8 @@ DefaultValue: 600
 SupportsWildcards: false
 Aliases: []
 ParameterSets:
-- Name: (All)
-  Position: 4
+- Name: Environment
+  Position: Named
   IsRequired: false
   ValueFromPipeline: false
   ValueFromPipelineByPropertyName: false
@@ -221,7 +284,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.Boolean
 
-Returns $true when the operation completes successfully
+Returns $true when the environment operation completes successfully
 
 {{ Fill in the Description }}
 

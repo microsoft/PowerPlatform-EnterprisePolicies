@@ -19,6 +19,7 @@ Describe 'Set-CMKEnterprisePolicy Tests' {
             Name = $script:testPolicyName
             Kind = "Encryption"
             Location = "unitedstates"
+            Tags = @{ owner = "platform-team"; costCenter = "1234" }
             Properties = [PSCustomObject]@{
                 encryption = [PSCustomObject]@{
                     keyVault = [PSCustomObject]@{
@@ -68,6 +69,18 @@ Describe 'Set-CMKEnterprisePolicy Tests' {
                 $KeyName -eq "newKey" -and
                 $KeyVersion -eq "newVersion"
             } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        }
+
+        It 'Preserves existing tags in the deployed resource during a key-version update' {
+            Mock Set-EnterprisePolicy {
+                $script:deployedBody = $Body | ConvertTo-Json -Depth 7 | ConvertFrom-Json
+                return $true
+            } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+            Set-CMKEnterprisePolicy -PolicyResourceId $script:testPolicyArmId -KeyVersion "newVersion" | Out-Null
+
+            $script:deployedBody.resources[0].tags.owner | Should -Be "platform-team"
+            $script:deployedBody.resources[0].tags.costCenter | Should -Be "1234"
         }
 
         It 'Should return the updated policy' {
