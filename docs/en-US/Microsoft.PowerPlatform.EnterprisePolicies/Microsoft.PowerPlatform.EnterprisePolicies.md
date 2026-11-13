@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 08/04/2026
+ms.date: 09/10/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -18,6 +18,10 @@ Microsoft PowerPlatform Enterprise policies module
 
 ## Microsoft.PowerPlatform.EnterprisePolicies
 
+### [Disable-CMK](Disable-CMK.md)
+
+Disables customer managed key (CMK) encryption for a Power Platform environment by unlinking it from its enterprise policy.
+
 ### [Disable-Identity](Disable-Identity.md)
 
 Disables identity for a Power Platform environment by unlinking it from its enterprise policy.
@@ -26,6 +30,10 @@ Disables identity for a Power Platform environment by unlinking it from its ente
 
 Disables subnet injection for a Power Platform environment by unlinking it from its enterprise policy.
 
+### [Enable-CMK](Enable-CMK.md)
+
+Enables customer managed key (CMK) encryption for a Power Platform environment by linking it to an enterprise policy.
+
 ### [Enable-Identity](Enable-Identity.md)
 
 Enables identity for a Power Platform environment by linking it to an enterprise policy.
@@ -33,6 +41,10 @@ Enables identity for a Power Platform environment by linking it to an enterprise
 ### [Enable-SubnetInjection](Enable-SubnetInjection.md)
 
 Enables subnet injection for a Power Platform environment by linking it to an enterprise policy.
+
+### [Get-CMKEnterprisePolicy](Get-CMKEnterprisePolicy.md)
+
+Retrieves customer managed key (CMK) enterprise policies for Power Platform.
 
 ### [Get-EnvironmentHistoricalUsage](Get-EnvironmentHistoricalUsage.md)
 
@@ -66,6 +78,10 @@ Retrieves the historical network usage of the subnet backing an enterprise polic
 
 Retrieves subnet injection enterprise policies for Power Platform.
 
+### [New-CMKEnterprisePolicy](New-CMKEnterprisePolicy.md)
+
+Creates a new customer managed key (CMK) enterprise policy for Power Platform.
+
 ### [New-IdentityEnterprisePolicy](New-IdentityEnterprisePolicy.md)
 
 Creates a new identity enterprise policy for Power Platform.
@@ -86,6 +102,10 @@ Creates a new subnet injection enterprise policy for Power Platform.
 
 Creates a new virtual network and subnet with Microsoft.PowerPlatform/enterprisePolicies delegation, or configures an existing VNet/subnet.
 
+### [Remove-CMKEnterprisePolicy](Remove-CMKEnterprisePolicy.md)
+
+Removes a customer managed key (CMK) enterprise policy for Power Platform.
+
 ### [Remove-IdentityEnterprisePolicy](Remove-IdentityEnterprisePolicy.md)
 
 Removes an identity enterprise policy for Power Platform.
@@ -97,6 +117,10 @@ Removes a Power Platform RBAC role assignment.
 ### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
 
 Removes a subnet injection enterprise policy for Power Platform.
+
+### [Set-CMKEnterprisePolicy](Set-CMKEnterprisePolicy.md)
+
+Updates the key vault configuration of an existing customer managed key (CMK) enterprise policy.
 
 ### [Set-PPModuleConfiguration](Set-PPModuleConfiguration.md)
 
@@ -113,6 +137,10 @@ Validates that the account has the correct permissions to run diagnostic command
 ### [Test-AppInsightsConnection](Test-AppInsightsConnection.md)
 
 Tests connectivity to Application Insights by sending a test telemetry event from a specified environment.
+
+### [Test-CMKKeyVault](Test-CMKKeyVault.md)
+
+Validates that an Azure Key Vault is correctly configured for use with a customer managed key (CMK) enterprise policy.
 
 ### [Test-DnsResolution](Test-DnsResolution.md)
 

@@ -1,0 +1,190 @@
+<#
+SAMPLE CODE NOTICE
+
+THIS SAMPLE CODE IS MADE AVAILABLE AS IS. MICROSOFT MAKES NO WARRANTIES, WHETHER EXPRESS OR IMPLIED,
+OF FITNESS FOR A PARTICULAR PURPOSE, OF ACCURACY OR COMPLETENESS OF RESPONSES, OF RESULTS, OR CONDITIONS OF MERCHANTABILITY.
+THE ENTIRE RISK OF THE USE OR THE RESULTS FROM THE USE OF THIS SAMPLE CODE REMAINS WITH THE USER.
+NO TECHNICAL SUPPORT IS PROVIDED. YOU MAY NOT DISTRIBUTE THIS CODE UNLESS YOU HAVE A LICENSE AGREEMENT WITH MICROSOFT THAT ALLOWS YOU TO DO SO.
+#>
+
+<#
+.SYNOPSIS
+Enables customer managed key (CMK) encryption for a Power Platform environment by linking it to an enterprise policy.
+
+.DESCRIPTION
+The Enable-CMK cmdlet links an existing CMK enterprise policy to a Power Platform environment,
+enabling the environment to encrypt its data with the key configured in the policy.
+
+Before running this cmdlet, ensure the enterprise policy's managed identity has been granted access to the key vault
+and that the environment meets the CMK prerequisites.
+
+If the environment already has a different CMK policy linked, use the -Swap switch to replace it.
+Without -Swap, the cmdlet returns an error to prevent accidental policy replacement.
+
+The operation is asynchronous. By default, the cmdlet waits for the operation to complete.
+Use -NoWait to return immediately after the operation is initiated.
+
+.OUTPUTS
+System.Boolean
+
+Returns $true when the operation completes successfully, or when -NoWait is specified and the operation is initiated.
+
+.EXAMPLE
+Enable-CMK -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/myResourceGroup/providers/Microsoft.PowerPlatform/enterprisePolicies/myPolicy"
+
+Enables CMK encryption for the environment by linking it to the specified policy.
+
+.EXAMPLE
+Enable-CMK -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -Endpoint usgovhigh
+
+Enables CMK encryption for an environment in the US Government High cloud.
+
+.EXAMPLE
+Enable-CMK -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/newPolicy" -Swap
+
+Replaces the existing CMK policy with a new one.
+
+.EXAMPLE
+Enable-CMK -EnvironmentId "00000000-0000-0000-0000-000000000000" -PolicyArmId "/subscriptions/.../enterprisePolicies/myPolicy" -NoWait
+
+Initiates the link operation without waiting for completion.
+#>
+
+function Enable-CMK {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory, HelpMessage="The Power Platform environment ID")]
+        [ValidateNotNullOrEmpty()]
+        [string]$EnvironmentId,
+
+        [Parameter(Mandatory, HelpMessage="The full Azure ARM resource ID of the CMK Enterprise Policy")]
+        [ValidateAzureResourceId("Microsoft.PowerPlatform/enterprisePolicies")]
+        [string]$PolicyArmId,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Entra tenant ID")]
+        [string]$TenantId,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Power Platform endpoint to connect to. Defaults to 'prod'.")]
+        [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
+
+        [Parameter(Mandatory=$false, HelpMessage="The Azure environment to use. Defaults to the cloud associated with Endpoint.")]
+        [AzureEnvironment]$AzureEnvironment,
+
+        [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing existing session")]
+        [switch]$ForceAuth,
+
+        [Parameter(Mandatory=$false, HelpMessage="Replace an existing linked policy with the new one")]
+        [switch]$Swap,
+
+        [Parameter(Mandatory=$false, HelpMessage="Return immediately without waiting for the operation to complete")]
+        [switch]$NoWait,
+
+        [Parameter(Mandatory=$false, HelpMessage="Maximum time in seconds to wait for the operation to complete")]
+        [int]$TimeoutSeconds = 600
+    )
+
+    $ErrorActionPreference = "Stop"
+
+    $connectParams = @{
+        TenantId = $TenantId
+        Force = $ForceAuth
+    }
+    if ($PSBoundParameters.ContainsKey('AzureEnvironment')) {
+        $connectParams['AzureEnvironment'] = $AzureEnvironment
+    }
+    else {
+        $connectParams['Endpoint'] = $Endpoint
+    }
+
+    if (-not(Connect-Azure @connectParams)) {
+        throw "Failed to connect to Azure. Please check your credentials and try again."
+    }
+
+    # Validate that the environment exists
+    Write-Verbose "Retrieving environment: $EnvironmentId"
+    $environment = Get-PPEnvironment -EnvironmentId $EnvironmentId -Endpoint $Endpoint -TenantId $TenantId
+
+    if ($null -eq $environment) {
+        throw "Failed to retrieve environment with ID: $EnvironmentId. If the environment exists, ensure you have the necessary permissions to access it and that you are connecting to the correct PP endpoint."
+    }
+
+    Write-Verbose "Environment retrieved successfully"
+
+    # Check if environment already has a linked CMK policy
+    $hasExistingPolicy = $null -ne $environment.properties.enterprisePolicies -and $null -ne $environment.properties.enterprisePolicies.CustomerManagedKeys
+
+    if ($hasExistingPolicy) {
+        $existingPolicyId = $environment.properties.enterprisePolicies.CustomerManagedKeys.id
+        if ($existingPolicyId -ieq $PolicyArmId) {
+            Write-Host "CMK is already enabled with this policy." -ForegroundColor Yellow
+            return $true
+        }
+        # Different policy is linked
+        if (-not $Swap) {
+            throw "Environment already has CMK enabled with a different policy: $existingPolicyId. Use the -Swap parameter to replace it."
+        }
+        Write-Host "Swapping existing policy with the new one..." -ForegroundColor Yellow
+    }
+    elseif ($Swap) {
+        throw "Cannot use -Swap when no CMK policy is currently linked to the environment. Remove the -Swap parameter to enable CMK."
+    }
+
+    # Extract subscription ID from policy ARM ID and set context (format validated by attribute)
+    $null = $PolicyArmId -match "/subscriptions/([^/]+)/"
+    $subscriptionId = $Matches[1]
+    Write-Verbose "Setting subscription context to $subscriptionId"
+    $null = Set-SubscriptionContext -SubscriptionId $subscriptionId
+
+    # Get the enterprise policy and extract SystemId
+    Write-Verbose "Retrieving enterprise policy: $PolicyArmId"
+    $policy = Get-EnterprisePolicy -PolicyArmId $PolicyArmId
+
+    if ($null -eq $policy) {
+        throw "Failed to retrieve enterprise policy with ARM ID: $PolicyArmId. Ensure the policy exists, you have access to it, and its of type 'Encryption'."
+    }
+
+    if ($policy.Kind -ne "Encryption") {
+        throw "The specified policy is not a CMK (Encryption) policy. Policy kind: $($policy.Kind)"
+    }
+
+    $policySystemId = $policy.Properties.systemId
+    if ([string]::IsNullOrWhiteSpace($policySystemId)) {
+        throw "Enterprise policy does not have a systemId. The policy may not be fully provisioned."
+    }
+
+    Write-Verbose "Enterprise policy SystemId: $policySystemId"
+
+    # Link the policy to the environment
+    Write-Verbose "Enabling CMK for environment..."
+    $linkResult = Set-EnvironmentEnterprisePolicy -EnvironmentId $EnvironmentId -PolicyType ([PolicyType]::Encryption) -PolicySystemId $policySystemId -Operation ([LinkOperation]::link) -Endpoint $Endpoint -TenantId $TenantId
+
+    if ($linkResult.StatusCode -ne 202) {
+        $contentString = Get-AsyncResult -Task $linkResult.Content.ReadAsStringAsync()
+        throw "Failed to initiate link operation. Status code: $($linkResult.StatusCode). $contentString"
+    }
+
+    Write-Verbose "Link operation initiated successfully"
+
+    if ($NoWait) {
+        Write-Host "Operation initiated. Use the Power Platform admin center to check the operation status." -ForegroundColor Green
+        return $true
+    }
+
+    # Get operation-location header and poll for completion
+    if (-not $linkResult.Headers.Contains("operation-location")) {
+        throw "Link response did not contain operation-location header"
+    }
+
+    $operationUrl = $linkResult.Headers.GetValues("operation-location") | Select-Object -First 1
+    Write-Verbose "Polling operation: $operationUrl"
+
+    $operationResult = Wait-EnterprisePolicyOperation -OperationUrl $operationUrl -Endpoint $Endpoint -TenantId $TenantId -TimeoutSeconds $TimeoutSeconds
+
+    if ($operationResult -eq "Succeeded") {
+        Write-Host "CMK enabled successfully for environment $EnvironmentId" -ForegroundColor Green
+        return $true
+    }
+
+    Write-Warning "CMK enable operation for environment $EnvironmentId did not complete successfully. Final status: $operationResult"
+    return $false
+}
