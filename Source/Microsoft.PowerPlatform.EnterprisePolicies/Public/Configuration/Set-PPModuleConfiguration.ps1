@@ -35,7 +35,6 @@ Stores the value "SomeValue" under the name "MySetting".
 Set-PPModuleConfiguration -Name "MySetting" -Value $null
 
 Removes the "MySetting" configuration entry.
-
 #>
 function Set-PPModuleConfiguration {
     [CmdletBinding()]

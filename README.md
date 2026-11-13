@@ -83,7 +83,7 @@ Set-PPCustomEndpoint -Name usnat `
 | Parameter | Value |
 |-----------|-------|
 | `Authority` | Login base URL without a tenant ID; the module appends the requested tenant ID. |
-| `PPEndpoint` | BAP API base URL. |
+| `PPEndpoint` | Power Platform API base URL. |
 | `PPResource` | Power Apps authentication resource URL. |
 | `PPAPI` | Power Platform API base and authentication resource URL. |
 

@@ -41,7 +41,7 @@ Name identifies the Power Platform endpoint (ussec or usnat).
 Authority is the login base URL without
 a tenant ID; authorization service authentication appends the requested tenant ID.
 PPEndpoint is the
-BAP endpoint URL, PPResource is the Power Apps authentication resource URL, and PPAPI is the Power
+Power Platform endpoint URL, PPResource is the Power Apps authentication resource URL, and PPAPI is the Power
 Platform API base and authentication resource URL.
 
 Updating an endpoint clears its cached authorization service clients so subsequent authentication
@@ -125,7 +125,7 @@ HelpMessage: ''
 
 ### -PPEndpoint
 
-The HTTPS BAP endpoint URL.
+The HTTPS Power Platform endpoint URL.
 
 ```yaml
 Type: System.String
