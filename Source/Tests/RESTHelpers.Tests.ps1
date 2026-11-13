@@ -29,6 +29,43 @@ Describe 'RESTHelpers Tests' {
             }
         }
     
+        Context 'Custom endpoint URLs' -ForEach @(
+            @{ FunctionName = 'Get-PPEndpointUrl'; PropertyName = 'PPEndpoint'; BaseUrl = 'https://bap.sec.example' }
+            @{ FunctionName = 'Get-PPResourceUrl'; PropertyName = 'PPResource'; BaseUrl = 'https://apps.sec.example' }
+            @{ FunctionName = 'Get-APIResourceUrl'; PropertyName = 'PPAPI'; BaseUrl = 'https://api.sec.example' }
+        ) {
+            It '<FunctionName> reads the named custom URL and ensures a trailing slash' {
+                foreach ($endpointName in @('ussec', 'usnat')) {
+                    foreach ($suffix in @('', '/')) {
+                        $customEndpoint = @{ Name = $endpointName; $PropertyName = "$BaseUrl$suffix" }
+                        Mock Get-CachedConfiguration {
+                            return @(@{ Name = 'other' }, $customEndpoint)
+                        } -ParameterFilter { $Name -eq "CustomEndpoints" }
+
+                        & $FunctionName -Endpoint $endpointName | Should -Be "$BaseUrl/"
+                    }
+                }
+            }
+
+            It '<FunctionName> throws when the named endpoint is missing' {
+                Mock Get-CachedConfiguration {
+                    return @(@{ Name = 'other' })
+                } -ParameterFilter { $Name -eq "CustomEndpoints" }
+
+                { & $FunctionName -Endpoint ([PPEndpoint]::ussec) } |
+                    Should -Throw "*Custom endpoint 'ussec' was not found*"
+            }
+
+            It '<FunctionName> throws when its required URL is missing' {
+                Mock Get-CachedConfiguration {
+                    return @(@{ Name = 'usnat' })
+                } -ParameterFilter { $Name -eq "CustomEndpoints" }
+
+                { & $FunctionName -Endpoint ([PPEndpoint]::usnat) } |
+                    Should -Throw "*must define a $PropertyName*"
+            }
+        }
+
         Context 'Testing Get-EnvironmentRouteHostName' {
             It 'Returns the correct route for TIP1 endpoint' {
                 $result = Get-EnvironmentRouteHostName -EnvironmentId "12345678-1234-1234-1234-123456789012" -Endpoint ([PPEndpoint]::tip1)
@@ -47,6 +84,23 @@ Describe 'RESTHelpers Tests' {
         }
 
         Context 'Validating route IDs' {
+            It 'Uses single-character environment and tenant routes for <EndpointName>' -TestCases @(
+                @{ EndpointName = 'ussec'; BaseHost = 'api.sec.example' }
+                @{ EndpointName = 'usnat'; BaseHost = 'api.nat.example' }
+            ) {
+                param($EndpointName, $BaseHost)
+
+                Mock Get-CachedConfiguration {
+                    return @(@{ Name = $EndpointName; PPAPI = "https://$BaseHost/" })
+                } -ParameterFilter { $Name -eq "CustomEndpoints" }
+                $id = '3496A854-39B3-41BD-A783-1F2479CA3FBD'
+
+                Get-EnvironmentRouteHostName -EnvironmentId $id -Endpoint $EndpointName |
+                    Should -Be "3496A85439B341BDA7831F2479CA3FB.D.environment.$BaseHost"
+                Get-TenantRouteHostName -TenantId $id -Endpoint $EndpointName |
+                    Should -Be "il-3496A85439B341BDA7831F2479CA3FB.D.tenant.$BaseHost"
+            }
+
             It 'Preserves routing across supported endpoints: <EndpointName>' -ForEach @(
                 @{ EndpointName = 'tip1'; BaseHost = 'api.preprod.powerplatform.com'; ShortId = 'D'; RemainingId = '3496A85439B341BDA7831F2479CA3FB' }
                 @{ EndpointName = 'tip2'; BaseHost = 'api.test.powerplatform.com'; ShortId = 'D'; RemainingId = '3496A85439B341BDA7831F2479CA3FB' }

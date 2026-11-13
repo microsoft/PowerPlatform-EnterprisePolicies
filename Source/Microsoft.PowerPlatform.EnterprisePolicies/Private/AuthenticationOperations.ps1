@@ -31,6 +31,8 @@ function Connect-Azure {
             ([PPEndpoint]::china) { "AzureChinaCloud" }
             ([PPEndpoint]::dod) { "AzureUSGovernment" }
             ([PPEndpoint]::usgovhigh) { "AzureUSGovernment" }
+            ([PPEndpoint]::ussec) { "AzureUSSecCloud" }
+            ([PPEndpoint]::usnat) { "AzureUSNatCloud" }
             Default { "AzureCloud" }
         }
     }
@@ -347,6 +349,13 @@ function New-AuthorizationServiceMsalClient {
 
     # Determine the authority based on endpoint
     $authority = switch ($Endpoint) {
+        { $_ -in [PPEndpoint]::ussec, [PPEndpoint]::usnat } {
+            $customEndpoint = Get-CachedEndpoint -EndpointName $Endpoint.ToString()
+            if ([string]::IsNullOrWhiteSpace($customEndpoint.Authority)) {
+                throw "Custom endpoint '$Endpoint' must define an Authority in the CustomEndpoints configuration."
+            }
+            "$($customEndpoint.Authority.TrimEnd('/'))/$TenantId"
+        }
         ([PPEndpoint]::china) { "https://login.chinacloudapi.cn/$TenantId" }
         { $_ -in [PPEndpoint]::dod, [PPEndpoint]::usgovhigh } { "https://login.microsoftonline.us/$TenantId" }
         default { "https://login.microsoftonline.com/$TenantId" }
