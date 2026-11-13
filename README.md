@@ -1,10 +1,10 @@
-﻿# Power Platform Enterprise Policies PowerShell Scripts
+# Power Platform Enterprise Policies PowerShell Scripts
 
 These scripts automate managing (create, update, get, delete) Power Platform Enterprise Policies as Azure resources.</br>
 In addition, we are providing sample scripts on how to associate these policies with Power Platform environments.</br>
 Please note that these scripts are provided under MIT license and its usage is the sole responsibility of the user.
 
-## Subnet Injection and Identity Users
+## Subnet Injection, Identity, and CMK Users
 
 ### Using the Power Platform Enterprise Policies Module
 
@@ -86,54 +86,44 @@ The summaries below give a quick overview of each cmdlet. For full parameter lis
 
 ## CMK Users
 
-### How to run scripts in this repository
+Customer managed key (CMK) enterprise policies let a Power Platform environment encrypt its data with a key you manage in Azure Key Vault. Policy management, environment linking, and PlatformAppsData linking are now managed through the `Microsoft.PowerPlatform.EnterprisePolicies` module, replacing the legacy scripts under `Source/Cmk`.
 
-1. Download the "Source code" `.zip` or `.tar.gz` file from the [Releases page](https://github.com/microsoft/PowerPlatform-EnterprisePolicies/releases).
-2. Extract the files from the `.zip` or `.tar.gz` file.
-3. **(Windows only)** **Unblock the downloaded files** to prevent security warnings that can interrupt script execution and cause parameters to be ignored:</br>
-   These unblocking steps apply only on Windows, where downloaded files may be marked as coming from the internet.</br>
-   **Recommended (Windows Explorer)**: Right-click the downloaded archive file _before_ extracting → Properties → check "Unblock" → Apply. Extracted files will inherit the unblocked state.</br>
-   **Alternative (PowerShell on Windows)**: If you already extracted, run the following in the extracted folder:
-   ```powershell
-   Get-ChildItem -Path . -Recurse -File | Unblock-File
-   ```
-   On macOS and Linux, file unblocking is not required, and you can skip this step.</br>
-4. Open PowerShell and `cd` to the extracted folder. For example: `cd ~/Downloads/PowerPlatform-EnterprisePolicies-0.5.10`.
-5. Install required PowerShell modules by running `.\Source\InstallPowerAppsCmdlets.ps1`.
-6. Run any of the scripts in this repository to manage your Power Platform enterprise policies. See below for more information on each of the scripts.
+The summaries below give a quick overview of each cmdlet. For full parameter lists, examples, and output types, follow the links to the module's generated cmdlet documentation.
 
-### How to run the Azure subscription setup script
+Before creating enterprise policies, register the Azure subscription for the Microsoft.PowerPlatform resource provider (this happens automatically the first time you run a creation cmdlet, or you can run [SetupSubscriptionForPowerPlatform.ps1](./Source/SetupSubscriptionForPowerPlatform.ps1)).
 
-This script registers the Azure subscription for the Microsoft.PowerPlatform resource provider. This will allow you to create and manage enterprise policies in the registered subscription for use with Power Platform.
+#### Managing CMK enterprise policies
 
-Script name: [SetupSubscriptionForPowerPlatform.ps1](./Source/SetupSubscriptionForPowerPlatform.ps1)
+- **[New-CMKEnterprisePolicy](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/New-CMKEnterprisePolicy.md)** : Creates a new CMK enterprise policy as an Azure resource in the specified subscription, resource group, and location, referencing a key vault key. Omit `-KeyVersion` to use the latest enabled key version.
+- **[Get-CMKEnterprisePolicy](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Get-CMKEnterprisePolicy.md)** : Retrieves CMK enterprise policies by ARM resource ID, by environment, by subscription, or by resource group. Replaces the separate legacy scripts that looked up a policy in each of those ways.
+- **[Set-CMKEnterprisePolicy](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Set-CMKEnterprisePolicy.md)** : Updates the key vault, key name, and/or key version referenced by an existing policy. Only the values you provide change; omitted values are left as-is.
+- **[Remove-CMKEnterprisePolicy](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Remove-CMKEnterprisePolicy.md)** : Deletes a CMK enterprise policy. A policy that is still linked to an environment cannot be deleted.
 
-### How to run CMK scripts
+#### Linking policies to environments
 
-The CMK scripts are present in folder [Cmk](./Source/Cmk/) at current location
+- **[Enable-CMK](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Enable-CMK.md)** : Links a CMK enterprise policy to a Power Platform environment so its data is encrypted with your key. Use the `-Swap` switch to replace a policy that is already linked to the environment.
+- **[Disable-CMK](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Disable-CMK.md)** : Unlinks the CMK enterprise policy from an environment, reverting it to Microsoft managed key encryption.
 
-#### Create CMK Enterprise policy
-1. **Create CMK Enterprise Policy** : This script creates a CMK enterprise policy</br>
-Script name : [CreateCMKEnterprisePolicy.ps1](./Source/Cmk/CreateCMKEnterprisePolicy.ps1)</br>
-Input parameters :
-    - subscriptionId : The subscriptionId where CMK enterprise policy needs to be created
-    - resourceGroup : The resource group where CMK enterprise policy needs to be created
-    - enterprisePolicyName : The name of the CMK enterprise policy resource
-    - enterprisePolicyLocation : The Azure geo where CMK enterprise policy needs to be created. Example: unitedstates, europe, australia.</br>
-      To get the complete supported locations for enterprise policy, below command can be used:</br>
-      ((Get-AzResourceProvider -ProviderNamespace Microsoft.PowerPlatform).ResourceTypes | Where-Object ResourceTypeName -eq enterprisePolicies).Locations
-    - keyVaultId : The ARM resource ID of the key vault used for CMK
-    - keyName : The name of the key in the key vault used for CMK
-    - keyVersion: The version of the key in the key vault used for CMK
+#### Linking policies to PlatformAppsData
 
-Sample Input :</br>
-![alt text](./ReadMeImages/CreateCMKEP1.png)</br>
+Use the `-PlatformAppsData` parameter set of `Enable-CMK` and `Disable-CMK` instead of `-EnvironmentId`. These operations use the separate PlatformApps API (version `2024-05-01`) and require PlatformAppsData to already be enrolled.
 
-Sample Output : </br>
-![alt text](./ReadMeImages/CreateCMKEP2.png)</br>
+```powershell
+Enable-CMK -PlatformAppsData -PolicyArmId "<policy-ARM-resource-id>" -Endpoint prod
+Disable-CMK -PlatformAppsData -PolicyArmId "<policy-ARM-resource-id>" -Endpoint prod
+```
+
+Unlinking requires `-PolicyArmId` to match the currently linked CMK policy. As with the replaced standalone scripts, PlatformAppsData operations return after the service accepts the request; `$true` confirms initiation, not completion. Environment-only options such as `-Swap`, `-NoWait`, and `-TimeoutSeconds` are not available for PlatformAppsData.
+
+For compatibility, PlatformAppsData still defaults to `tip1` when `-Endpoint` is omitted; environment operations still default to `prod`. Select the intended endpoint explicitly, as in the examples above.
+
+#### Validating the key vault
+
+- **[Test-CMKKeyVault](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Test-CMKKeyVault.md)** : Validates that a key vault, a CMK enterprise policy, and the encryption key satisfy the CMK prerequisites (soft delete and purge protection enabled, the policy identity has the required key access, and the key exists, is enabled, is activated, and is not expired).
 
 #### Grant enterprise policy permissions to access key vault
-2. **Grant enterprise policy permissions to access key vault** : After creating the enterprise policy, you must grant its managed identity access to the key vault. The enterprise policy's managed identity Object ID can be found in the `CreateCMKEnterprisePolicy.ps1` output under `Identity.PrincipalId`, or via the Azure Portal (navigate to the enterprise policy resource → Identity tab).</br>
+
+After creating the enterprise policy, you must grant its managed identity access to the key vault before linking it to an environment. The enterprise policy's managed identity Object ID can be found in the `New-CMKEnterprisePolicy` output under `Identity.PrincipalId`, or via the Azure Portal (navigate to the enterprise policy resource → Identity tab).
 
 **If your key vault uses Azure role-based access control (recommended)**:</br>
 Assign the **Key Vault Crypto Service Encryption User** role to the enterprise policy's managed identity:
@@ -154,152 +144,18 @@ Set-AzKeyVaultAccessPolicy `
   -PermissionsToKeys Get, WrapKey, UnwrapKey
 ```
 
-> **Note**: RBAC role assignments can take up to 5 minutes to propagate. If you run `ValidateKeyVaultForCMK.ps1` immediately after granting the role, it may report a false failure. Wait a few minutes and retry.</br>
+> **Note**: RBAC role assignments can take up to 5 minutes to propagate. If you run `Test-CMKKeyVault` immediately after granting the role, it may report a false failure. Wait a few minutes and retry.</br>
 
 For more details, see [Grant enterprise policy permissions to access key vault](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-enterprise-policy).</br>
 
-#### Get CMK Enterprise Policy By ResourceId
-2. **Get CMK Enterprise Policy By ResourceId** : The script gets a CMK enterprise policy by ARM resourceId</br>
-Script name : [GetCMKEnterprisePolicyByResourceId.ps1](./Source/Cmk/GetCMKEnterprisePolicyByResourceId.ps1)</br>
-Input parameter :
-    - enterprisePolicyArmId : The ARM resource ID of the CMK Enterprise Policy
+#### Prerequisites for linking an environment
 
-Sample Input :</br>
-![alt text](./ReadMeImages/GetCMKByResourceId1.png)</br>
-
-Sample Output :</br>
-![alt text](./ReadMeImages/GetCMKByResourceId2.png)</br>
-
-#### Get CMK Enterprise Policies in Subscription
-3. **Get CMK Enterprise Policies in Subscription** : The script gets all CMK enterprise policies in an Azure subscription</br>
-Script name : [GetCMKEnterprisePoliciesInSubscription.ps1](./Source/Cmk/GetCMKEnterprisePoliciesInSubscription.ps1)</br>
-Input parameter :
-    - subscriptionId: : The Azure subscription Id
-
-Sample Input :</br>
-![alt text](./ReadMeImages/GetCMKInSub1.png)</br>
-
-Sample Output :</br>
-![alt text](./ReadMeImages/GetCMKInSub2.png)</br>
-
-#### Get CMK Enterprise Policies in Resource Group
-4. **Get CMK Enterprise Policies in Resource Group** : The script gets all CMK enterprise policies in an Azure resource group</br>
-Script name : [GetCMKEnterprisePoliciesInResourceGroup.ps1](./Source/Cmk/GetCMKEnterprisePoliciesInResourceGroup.ps1)</br>
-Input parameters :
-    - subscriptionId : The Azure subscription Id
-    - resourceGroup : The Azure resource group
-
-Sample Input : </br>
-![alt text](./ReadMeImages/GetCMKInResourceGroup1.png)</br>
-
-Sample Output :</br>
-![alt text](./ReadMeImages/GetCMKInResourceGroup2.png)</br>
-
-#### Validate Azure Key Vault
-5. **Validate Azure Key Vault** : This script checks if the Key Vault is setup correctly according to the pre-requisites required by the Power Platform CMK Enterprise Policy. For details please follow the setup instructions at https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-encryption-key-and-grant-access</br>
-	Following major validations are performed:
-    - Soft-delete is enabled for key vault: Please follow the instructions at </br>
-      https://learn.microsoft.com/azure/key-vault/general/soft-delete-change to update the soft delete property.
-    - Purge protection is enabled for key vault: Please follow the istructions at </br>
-	  https://learn.microsoft.com/azure/key-vault/general/key-vault-recovery?tabs=azure-portal to get details about enabling Purge Protection</br>
-	- "Key Vault Crypto Service Encryption User" role assignment is present for the given enterprise policy if key vault permission model is Azure role based access control.</br>
-    - Access policies of GET, UNWRAPKEY, WRAPKEY are added to the key vault for the given enterprise policy if key vault permission model is vault access policy.</br>
-	- Key configured for the given enterprise policy is present, enabled, activated and not expired.</br>
-
-> **Tip**: If validation fails on the key vault access policy checks, follow the [Grant enterprise policy permissions to access key vault](#grant-enterprise-policy-permissions-to-access-key-vault) step above to fix the permissions, then re-run this script.</br>
-	 
-
-Script name : [ValidateKeyVaultForCMK.ps1](./Source/Cmk/ValidateKeyVaultForCMK.ps1)</br>
-Input parameters:
-- subscriptionId : The Azure subscription Id of the Key Vault
-- keyVaultName : The name of the key Vault
-- enterprisePolicyArmId : The CMK enterprise policy ARM Id 
-
-Sample Input : </br>
-![alt text](./ReadMeImages/ValidateKeyVault1.png)</br>
-
-Sample Output :</br>
-![alt text](./ReadMeImages/ValidateKeyVault2.png)</br>
-
-#### Update CMK Enterprise Policy
-6. **Update CMK Enterprise Policy** : This script updates a CMK Enterprise Policy. The updates allowed are for keyVaultId, keyName, keyVersion.</br>
-If you are changing only some of the allowed parameter values, provide “N/A” when prompted for the parameters that you don’t want to change.</br>
- **If the enterprise policy is associated with one or more environments, the update operation will fail, and the script will return an error.**</br>
-Script name : [UpdateCMKEnterprisePolicy.ps1](./Source/Cmk/UpdateCMKEnterprisePolicy.ps1)</br>
-Input parameters :
-    - subscriptionId : The Azure subscription Id of the CMK Enterprise Policy
-    - resourceGroup : The Azure resource group of the CMK Enterprise Policy
-    - enterprisePolicyName : The name of the CMK enterprise policy that needs to be updated
-    - keyVaultId : The ARM resource ID of the key vault if it needs to be updated. Provide "N/A" if update is not required for key vault Id
-    - keyName: The name of the key if it needs to be updated. Provide "N/A" if update is not required for name of the key
-    - keyVersion: The version of the key if it needs to be updated. Provide "N/A" if update is not required for version of the key
-
-Sample Input : </br>
-![alt text](./ReadMeImages/UpdateCMKEP1.png)</br>
-
-Sample Output :</br>
-![alt text](./ReadMeImages/UpdateCMKEP2.png)</br>
-
-#### Delete CMK Enterprise Policy
-7. **Delete CMK Enterprise Policy** : This script deletes the CMK Enterprise Policy for a given policy Id. </br>
-**If the CMK enterprise policy is associated with one or more environments, the delete operation will fail, and the script will return an error.**</br>
-Script name : [RemoveCMKEnterprisePolicy.ps1](./Source/Cmk/RemoveCMKEnterprisePolicy.ps1)</br>
-Input parameter :
-    - policyArmId : The ARM ID of the CMK enterprise policy to be deleted
-
-Sample Input : </br>
-![alt text](./ReadMeImages/RemoveCMKEP1.png)</br>
-
-Sample Output :</br>
-![alt text](./ReadMeImages/RemoveCMKEP2.png)</br>
-
-#### Set CMK for an environment
-8. **Set CMK for an environment** : This script applies a CMK enterprise policy to a given Power Platform environment.</br>
-The script adds the environment to the enterprise policy and optionally polls for the operation outcome.</br>
-Script name : [AddCustomerManagedKeyToEnvironment.ps1](./Source/Cmk/AddCustomerManagedKeyToEnvironment.ps1)</br>
-Input parameters :
-    - environmentId : The Power Platform environment ID
-    - policyArmId : The ARM ID of the CMK Enterprise Policy
-
-> **Prerequisites for Power Platform Admin Center users**:</br>
-> Before adding an environment to a CMK enterprise policy via the Power Platform Admin Center:</br>
+> Before linking an environment to a CMK enterprise policy (including via the Power Platform Admin Center):</br>
 > 1. The environment must be enabled as a [Managed Environment](https://learn.microsoft.com/power-platform/admin/managed-environment-enable).</br>
 > 2. The Power Platform / Dynamics 365 admin must have the **Reader** role on the enterprise policy Azure resource:</br>
 >    `New-AzRoleAssignment -ObjectId <PP-admin-object-id> -RoleDefinitionName Reader -Scope <EP-ARM-resource-id>`</br>
 >    To find the admin's Object ID: Azure Portal → Microsoft Entra ID → Users → select user → copy Object ID.</br>
 > See [Microsoft Learn: CMK prerequisites](https://learn.microsoft.com/power-platform/admin/customer-managed-key#create-encryption-key-and-grant-access) for details.
-
-Sample Input :</br>
-![alt text](./ReadMeImages/AddCMKToEnv1.png)</br>
-
-Sample Output :</br>
-![alt text](./ReadMeImages/AddCMKToEnv2.png)</br>
-
-#### Get CMK for an environment
-9. **Get CMK for an environment** : This script returns the CMK enterprise policy if applied to a given Power Platform environment.</br>
-Script name : [GetCMKEnterprisePolicyForEnvironment.ps1](./Source/Cmk/GetCMKEnterprisePolicyForEnvironment.ps1)</br>
-Input parameter :
-    - environmentId : The Power Platform environment ID
-
-Sample Input :</br>
-![alt text](./ReadMeImages/GetCMKForEnv1.png)</br>
-
-Sample Output :</br>
-![alt text](./ReadMeImages/GetCMKForEnv2.png)</br>
-
-#### Remove CMK from an environment
-10. **Remove CMK from an environment** : The script removes the CMK enterprise policy from an environment, </br>
-which results on data to be encrypted with a Microsoft managed encryption key.</br>
-Script name : [RemoveCustomerManagedKeyFromEnvironment.ps1](./Source/Cmk/RemoveCustomerManagedKeyFromEnvironment.ps1)</br>
-Input parameters :
-    - environmentId : The Power Platform environment ID
-    - policyArmId: The ARM ID of the CMK Enterprise Policy
-
-Sample Input :</br>
-![alt text](./ReadMeImages/RemoveCMKFromEnv1.png)</br>
-
-Sample Output :</br>
-![alt text](./ReadMeImages/RemoveCMKFromEnv2.png)</br>
 
 ## Development
 

@@ -115,6 +115,21 @@ function Remove-AzResource {
     )
 }
 
+# Az.KeyVault cmdlets
+function Get-AzKeyVault {
+    param(
+        [string]$VaultName,
+        [string]$ResourceGroupName
+    )
+}
+function Get-AzKeyVaultKey {
+    param(
+        [string]$VaultName,
+        [string]$Name,
+        [string]$Version
+    )
+}
+
 # Az.Network cmdlets
 function Get-AzVirtualNetwork {}
 function New-AzVirtualNetwork {}
