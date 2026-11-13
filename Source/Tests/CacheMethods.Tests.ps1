@@ -520,6 +520,41 @@ Describe 'CacheMethods Tests' {
             }
         }
 
+        Context 'Get-CachedEndpoint' {
+            BeforeEach {
+                Initialize-Cache
+            }
+
+            It 'Finds a named endpoint in persisted custom configuration' {
+                $endpoints = @(
+                    @{ Name = "ussec"; Authority = "https://login.sec.example"; PPEndpoint = "https://bap.sec.example"; PPResource = "https://apps.sec.example"; PPAPI = "https://api.sec.example" }
+                    @{ Name = "usnat"; Authority = "https://login.nat.example"; PPEndpoint = "https://bap.nat.example"; PPResource = "https://apps.nat.example"; PPAPI = "https://api.nat.example" }
+                )
+                Set-CachedConfiguration -Name "CustomEndpoints" -Value $endpoints
+                Initialize-Cache
+
+                $endpoint = Get-CachedEndpoint -EndpointName "usnat"
+
+                $endpoint.Name | Should -Be "usnat"
+                $endpoint.Authority | Should -Be "https://login.nat.example"
+                $endpoint.PPEndpoint | Should -Be "https://bap.nat.example"
+                $endpoint.PPResource | Should -Be "https://apps.nat.example"
+                $endpoint.PPAPI | Should -Be "https://api.nat.example"
+            }
+
+            It 'Throws when the named endpoint is not configured' {
+                Set-CachedConfiguration -Name "CustomEndpoints" -Value @(
+                    @{ Name = "ussec"; Authority = "https://login.sec.example" }
+                )
+
+                { Get-CachedEndpoint -EndpointName "usnat" } | Should -Throw "*Custom endpoint 'usnat' was not found*"
+            }
+
+            It 'Throws when CustomEndpoints is not configured' {
+                { Get-CachedEndpoint -EndpointName "ussec" } | Should -Throw "*Custom endpoint 'ussec' was not found*"
+            }
+        }
+
         Context 'Get-CachedConfiguration and Set-CachedConfiguration' {
             BeforeEach {
                 Initialize-Cache

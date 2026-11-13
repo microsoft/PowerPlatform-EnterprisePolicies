@@ -35,6 +35,16 @@ Stores the value "SomeValue" under the name "MySetting".
 Set-PPModuleConfiguration -Name "MySetting" -Value $null
 
 Removes the "MySetting" configuration entry.
+
+.EXAMPLE
+Set-PPCustomEndpoint -Name ussec -Authority "https://login.sec.example" -PPEndpoint "https://bap.sec.example" -PPResource "https://apps.sec.example" -PPAPI "https://api.sec.example"
+
+Stores custom endpoint settings. Replace the example URLs with the cloud's actual URLs.
+Name identifies the endpoint (ussec or usnat). Authority is the login base URL without a tenant ID;
+authorization service authentication appends the requested tenant ID. PPEndpoint, PPResource, and PPAPI
+provide the BAP endpoint, Power Apps resource, and Power Platform API URLs respectively.
+Resource and endpoint URLs are returned with a trailing slash.
+This configuration does not replace the Azure environment registration required by Add-AzEnvironment.
 #>
 function Set-PPModuleConfiguration {
     [CmdletBinding()]

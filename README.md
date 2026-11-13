@@ -33,9 +33,19 @@ Import-Module .\Microsoft.PowerPlatform.EnterprisePolicies
 
 This will import the module, validate prerequisites and make the commands available for use. If you are missing any prerequisites, the module will inform you and ask for permission to install them.
 
-For `-AzureEnvironment AzureUSSecCloud` or `-AzureEnvironment AzureUSNatCloud`, first register the matching environment name and cloud-specific endpoints using `Add-AzEnvironment`. The separate Power Platform `-Endpoint ussec` and `-Endpoint usnat` values are placeholders only; their API routing and authentication are not implemented.
+For `-AzureEnvironment AzureUSSecCloud` or `-AzureEnvironment AzureUSNatCloud`, first register the matching environment name and cloud-specific endpoints using `Add-AzEnvironment`. Configure the separate Power Platform `-Endpoint ussec` or `-Endpoint usnat` URLs using [Set-PPCustomEndpoint](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Set-PPCustomEndpoint.md):
 
-`Enable-SubnetInjection` and `Enable-Identity` select Azure and Power Platform clouds independently. As with Gov and China, specify both matching `-Endpoint` and `-AzureEnvironment` parameters; selecting an endpoint does not change the Azure environment automatically. This parameter-selection pattern does not enable the unsupported endpoints described above.
+```powershell
+Set-PPCustomEndpoint -Name ussec `
+    -Authority "https://login.sec.example" `
+    -PPEndpoint "https://bap.sec.example" `
+    -PPResource "https://apps.sec.example" `
+    -PPAPI "https://api.sec.example"
+```
+
+Replace the example URLs with the cloud's actual URLs. `Authority` is the login base URL without a tenant ID. The cmdlet adds or replaces the complete named entry while preserving other endpoints. Settings persist across sessions; read them with `Get-PPModuleConfiguration -Name CustomEndpoints`.
+
+`Enable-SubnetInjection` and `Enable-Identity` select Azure and Power Platform clouds independently. As with Gov and China, specify both matching `-Endpoint` and `-AzureEnvironment` parameters; selecting an endpoint does not change the Azure environment automatically.
 
 ### Forcing re-authentication
 
