@@ -25,7 +25,7 @@ parameters:
   default: '*.nupkg'
 
 steps:
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@6
     displayName: '📝 CodeSigning: Strong Name'
     enabled: ${{ parameters.enable_strongname_codesigning }}
     inputs:
@@ -59,7 +59,7 @@ steps:
         ]
       VerboseLogin: true
 
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@6
     displayName: '📝 CodeSigning: Authenticode (inline)'
     inputs:
       ConnectedServiceName: 'DVEsrpConnectionPME'
@@ -112,7 +112,7 @@ steps:
           }
         ]
 
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@6
     displayName: '📝 CodeSigning: Authenticode (inline) 3rd Party/OSS'
     enabled: ${{ parameters.enable_oss_codesigning }}
     inputs:
@@ -170,7 +170,7 @@ steps:
           }
         ] 
 
-  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@5
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@6
     displayName: '📝 CodeSigning: Nuget Package'
     enabled: ${{ parameters.enable_nuget_signing }}
     inputs:
