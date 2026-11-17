@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 08/04/2026
+ms.date: 11/12/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -56,7 +56,7 @@ Reads configuration values stored in the module's local cache.
 
 ### [Get-PPRBACRoleAssignment](Get-PPRBACRoleAssignment.md)
 
-Gets Power Platform RBAC role assignments at a specified scope.
+Gets Power Platform role-based access control (RBAC) role assignments at a specified scope.
 
 ### [Get-SubnetHistoricalUsage](Get-SubnetHistoricalUsage.md)
 
@@ -72,11 +72,11 @@ Creates a new identity enterprise policy for Power Platform.
 
 ### [New-PPAuthorizationApplication](New-PPAuthorizationApplication.md)
 
-Creates or updates an Azure AD application registration and service principal for Power Platform Authorization.
+Creates or updates an Microsoft Entra ID application registration and service principal for Power Platform authorization.
 
 ### [New-PPRBACRoleAssignment](New-PPRBACRoleAssignment.md)
 
-Creates a Power Platform RBAC role assignment.
+Creates a Power Platform role-based access control (RBAC) role assignment.
 
 ### [New-SubnetInjectionEnterprisePolicy](New-SubnetInjectionEnterprisePolicy.md)
 
@@ -92,11 +92,15 @@ Removes an identity enterprise policy for Power Platform.
 
 ### [Remove-PPRBACRoleAssignment](Remove-PPRBACRoleAssignment.md)
 
-Removes a Power Platform RBAC role assignment.
+Removes a Power Platform role-based access control (RBAC) role assignment.
 
 ### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
 
 Removes a subnet injection enterprise policy for Power Platform.
+
+### [Set-PPCustomEndpoint](Set-PPCustomEndpoint.md)
+
+Configures the Power Platform URLs for an air-gapped cloud.
 
 ### [Set-PPModuleConfiguration](Set-PPModuleConfiguration.md)
 
@@ -124,11 +128,11 @@ Tests the connectivity to a given service in the specified environment.
 
 ### [Test-PPAuthorizationApplication](Test-PPAuthorizationApplication.md)
 
-Tests that an Azure AD application is correctly configured for Power Platform Authorization.
+Tests that a Microsoft Entra ID application is correctly configured for Power Platform authorization.
 
 ### [Test-PPRBACDiagnosticPermission](Test-PPRBACDiagnosticPermission.md)
 
-Tests Power Platform RBAC diagnostic permissions for a principal on an environment.
+Tests Power Platform role-based access control (RBAC) diagnostic permissions for a principal on an environment.
 
 ### [Test-TLSHandshake](Test-TLSHandshake.md)
 

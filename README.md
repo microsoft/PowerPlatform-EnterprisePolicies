@@ -33,6 +33,70 @@ Import-Module .\Microsoft.PowerPlatform.EnterprisePolicies
 
 This will import the module, validate prerequisites and make the commands available for use. If you are missing any prerequisites, the module will inform you and ask for permission to install them.
 
+### Adding air-gapped cloud endpoints
+
+Air-gapped clouds require separate Azure environment registration and Power Platform endpoint configuration. Obtain the actual URLs for your cloud before starting; the `.example` URLs below are placeholders.
+
+| Power Platform endpoint | Azure environment name |
+|-------------------------|------------------------|
+| `ussec` | `AzureUSSecCloud` |
+| `usnat` | `AzureUSNatCloud` |
+
+#### 1. Register the Azure environment with Add-AzEnvironment
+
+Register the matching Azure environment name and its cloud-specific endpoints using [Add-AzEnvironment](https://learn.microsoft.com/powershell/module/az.accounts/add-azenvironment). For example:
+
+```powershell
+Add-AzEnvironment -Name AzureUSSecCloud `
+    -ActiveDirectoryEndpoint "https://login.sec.example/" `
+    -ResourceManagerEndpoint "https://management.sec.example/" `
+    -ActiveDirectoryServiceEndpointResourceId "https://management.core.sec.example/" `
+    -GraphEndpoint "https://graph.sec.example/"
+```
+
+Replace each placeholder with the value provided for your cloud. `ActiveDirectoryServiceEndpointResourceId` is the Azure management authentication audience, which may differ from the Resource Manager endpoint. Configure any additional service endpoints or DNS suffixes required by your cloud using the corresponding `Add-AzEnvironment` parameters.
+
+For `usnat`, use `-Name AzureUSNatCloud` and that cloud's endpoints and authentication audience.
+
+#### 2. Configure Power Platform URLs with Set-PPCustomEndpoint
+
+Configure the separate Power Platform URLs using [Set-PPCustomEndpoint](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies/Set-PPCustomEndpoint.md). This cmdlet does not register or modify the Azure environment from step 1:
+
+```powershell
+Set-PPCustomEndpoint -Name ussec `
+    -Authority "https://login.sec.example" `
+    -PPEndpoint "https://bap.sec.example" `
+    -PPResource "https://apps.sec.example" `
+    -PPAPI "https://api.sec.example"
+```
+
+To configure `usnat`, use its own cloud-specific URLs:
+
+```powershell
+Set-PPCustomEndpoint -Name usnat `
+    -Authority "https://login.nat.example" `
+    -PPEndpoint "https://bap.nat.example" `
+    -PPResource "https://apps.nat.example" `
+    -PPAPI "https://api.nat.example"
+```
+
+| Parameter | Value |
+|-----------|-------|
+| `Authority` | Login base URL without a tenant ID; the module appends the requested tenant ID. |
+| `PPEndpoint` | Power Platform API base URL. |
+| `PPResource` | Power Platform resource URL. |
+| `PPAPI` | Power Platform API base and authentication resource URL. |
+
+All four URLs are required and must be absolute HTTPS URLs without credentials, query strings, or fragments. The cmdlet adds or replaces the complete named entry while preserving other endpoints, and clears cached authorization service clients for the updated endpoint.
+
+Settings persist across sessions. To inspect the stored entries:
+
+```powershell
+Get-PPModuleConfiguration -Name CustomEndpoints
+```
+
+`Enable-SubnetInjection` and `Enable-Identity` select Azure and Power Platform clouds independently. As with Gov and China, specify both matching `-Endpoint` and `-AzureEnvironment` parameters; selecting an endpoint does not change the Azure environment automatically.
+
 ### Forcing re-authentication
 
 By default, the powershell module will attempt to reuse an existing Azure session if one is available. If you want to manually choose which account to use instead of letting the module automatically select one, you can pass the `-ForceAuth` switch to any of the cmdlets:

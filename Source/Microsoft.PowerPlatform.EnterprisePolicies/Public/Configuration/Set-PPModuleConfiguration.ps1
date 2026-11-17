@@ -20,6 +20,9 @@ The reserved 'ServicePrincipalAuth' name can't be set through this cmdlet becaus
 validated, strongly-typed configuration. Use the dedicated Set-PPServicePrincipalAuth cmdlet to
 configure service principal authentication.
 
+The reserved 'CustomEndpoints' name can't be set or removed through this cmdlet.
+Use Set-PPCustomEndpoint to configure custom endpoints with validation and authentication cache updates.
+
 Passing $null for the value removes the named configuration entry. Use Get-PPModuleConfiguration to read
 stored configuration values back.
 
@@ -52,6 +55,10 @@ function Set-PPModuleConfiguration {
 
     if ($Name -eq "ServicePrincipalAuth") {
         throw "The '$Name' configuration cannot be set with Set-PPModuleConfiguration. Use the dedicated Set-PPServicePrincipalAuth cmdlet to configure service principal authentication."
+    }
+
+    if ($Name -eq "CustomEndpoints") {
+        throw "The '$Name' configuration cannot be set with Set-PPModuleConfiguration. Use the dedicated Set-PPCustomEndpoint cmdlet to configure custom endpoints."
     }
 
     Set-CachedConfiguration -Name $Name -Value $Value

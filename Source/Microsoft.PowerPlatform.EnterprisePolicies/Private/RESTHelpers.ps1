@@ -231,6 +231,13 @@ function Get-PPEndpointUrl {
     )
 
     switch ($Endpoint) {
+        { $_ -in [PPEndpoint]::ussec, [PPEndpoint]::usnat } {
+            $customEndpoint = Get-CachedEndpoint -EndpointName $Endpoint.ToString()
+            if ([string]::IsNullOrWhiteSpace($customEndpoint.PPEndpoint)) {
+                throw "Custom endpoint '$Endpoint' must define a PPEndpoint in the CustomEndpoints configuration."
+            }
+            return "$($customEndpoint.PPEndpoint.TrimEnd('/'))/"
+        }
         ([PPEndpoint]::tip1) { return "https://tip1.api.bap.microsoft.com/" }
         ([PPEndpoint]::tip2) { return "https://tip2.api.bap.microsoft.com/" }
         ([PPEndpoint]::prod) { return "https://api.bap.microsoft.com/" }
@@ -248,6 +255,13 @@ function Get-PPResourceUrl {
     )
 
     switch ($Endpoint) {
+        { $_ -in [PPEndpoint]::ussec, [PPEndpoint]::usnat } {
+            $customEndpoint = Get-CachedEndpoint -EndpointName $Endpoint.ToString()
+            if ([string]::IsNullOrWhiteSpace($customEndpoint.PPResource)) {
+                throw "Custom endpoint '$Endpoint' must define a PPResource in the CustomEndpoints configuration."
+            }
+            return "$($customEndpoint.PPResource.TrimEnd('/'))/"
+        }
         ([PPEndpoint]::tip1) { return "https://service.powerapps.com/" }
         ([PPEndpoint]::tip2) { return "https://service.powerapps.com/" }
         ([PPEndpoint]::prod) { return "https://service.powerapps.com/" }
@@ -266,6 +280,13 @@ function Get-APIResourceUrl {
     )
 
     switch ($Endpoint) {
+        { $_ -in [PPEndpoint]::ussec, [PPEndpoint]::usnat } {
+            $customEndpoint = Get-CachedEndpoint -EndpointName $Endpoint.ToString()
+            if ([string]::IsNullOrWhiteSpace($customEndpoint.PPAPI)) {
+                throw "Custom endpoint '$Endpoint' must define a PPAPI in the CustomEndpoints configuration."
+            }
+            return "$($customEndpoint.PPAPI.TrimEnd('/'))/"
+        }
         ([PPEndpoint]::tip1) { return "https://api.preprod.powerplatform.com/" }
         ([PPEndpoint]::tip2) { return "https://api.test.powerplatform.com/" }
         ([PPEndpoint]::prod) { return "https://api.powerplatform.com/" }
@@ -537,6 +558,8 @@ function ConvertTo-Hashtable($obj) {
          [PPEndpoint]::tip1,
          [PPEndpoint]::tip2,
          [PPEndpoint]::usgovhigh,
-         [PPEndpoint]::dod
+         [PPEndpoint]::dod,
+         [PPEndpoint]::ussec,
+         [PPEndpoint]::usnat
      )
  }
