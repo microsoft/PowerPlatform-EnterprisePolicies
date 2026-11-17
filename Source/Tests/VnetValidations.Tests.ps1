@@ -47,7 +47,7 @@ Describe 'VnetValidations Tests' {
             }
 
             It 'Returns false for regions not requiring paired VNets' {
-                $result = Test-PowerPlatformRegionRequiresPair -PowerPlatformRegion "brazil"
+                $result = Test-PowerPlatformRegionRequiresPair -PowerPlatformRegion "singapore"
                 $result | Should -Be $false
             }
 
