@@ -347,6 +347,44 @@ Describe 'AuthenticationOperations Tests' {
                 $script:capturedAuthority | Should -Be "https://login.chinacloudapi.cn/my-tenant"
             }
 
+            It 'Uses cached authority for <EndpointName>' -TestCases @(
+                @{ EndpointName = 'ussec'; Authority = 'https://login.sec.example' }
+                @{ EndpointName = 'usnat'; Authority = 'https://login.nat.example/' }
+            ) {
+                param($EndpointName, $Authority)
+
+                Mock Get-CachedConfiguration {
+                    return @([PSCustomObject]@{ Name = $EndpointName; Authority = $Authority })
+                } -ParameterFilter { $Name -eq "CustomEndpoints" }
+                $builderWithCapture = [PSCustomObject]@{}
+                $builderWithCapture | Add-Member -MemberType ScriptMethod -Name 'WithAuthority' -Value {
+                    param($auth)
+                    $script:capturedAuthority = $auth
+                    return $script:mockBuilder
+                }
+                Mock Get-PublicClientApplicationBuilder { return $builderWithCapture }
+
+                New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "my-tenant" -Endpoint $EndpointName
+
+                $script:capturedAuthority | Should -Be "$($Authority.TrimEnd('/'))/my-tenant"
+            }
+
+            It 'Throws rather than using public authority when a custom endpoint is missing' {
+                Mock Get-CachedConfiguration { return $null } -ParameterFilter { $Name -eq "CustomEndpoints" }
+
+                { New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "my-tenant" -Endpoint ([PPEndpoint]::ussec) } |
+                    Should -Throw "*Custom endpoint 'ussec' was not found*"
+            }
+
+            It 'Throws when the custom endpoint has no authority' {
+                Mock Get-CachedConfiguration {
+                    return @([PSCustomObject]@{ Name = "usnat" })
+                } -ParameterFilter { $Name -eq "CustomEndpoints" }
+
+                { New-AuthorizationServiceMsalClient -ClientId "test-client-id" -TenantId "my-tenant" -Endpoint ([PPEndpoint]::usnat) } |
+                    Should -Throw "*must define an Authority*"
+            }
+
             It 'Skips connection if already connected and Force not specified' {
                 Mock Get-PublicClientApplicationBuilder { return $script:mockBuilder }
 

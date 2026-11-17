@@ -193,6 +193,25 @@ function Get-CachedConfiguration{
     return $property.Value
 }
 
+function Get-CachedEndpoint{
+    param(
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
+        [string]$EndpointName
+    )
+
+    $ErrorActionPreference = "Stop"
+
+    $endpoints = Get-CachedConfiguration -Name "CustomEndpoints"
+    foreach($endpoint in $endpoints){
+        if($endpoint.Name -eq $EndpointName){
+            return $endpoint
+        }
+    }
+
+    throw "Custom endpoint '$EndpointName' was not found in the CustomEndpoints configuration. Configure it using Set-PPCustomEndpoint."
+}
+
 function Set-CachedConfiguration{
     param(
         [Parameter(Mandatory)]

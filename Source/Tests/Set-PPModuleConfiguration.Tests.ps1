@@ -17,6 +17,18 @@ Describe 'Set-PPModuleConfiguration Tests' {
         Should -Invoke Set-CachedConfiguration -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
+    It 'Blocks <Name> with value <Value> and points to the dedicated cmdlet' -TestCases @(
+        @{ Name = "CustomEndpoints"; Value = @(@{ Name = "ussec" }) }
+        @{ Name = "customendpoints"; Value = $null }
+    ) {
+        param($Name, $Value)
+
+        { Set-PPModuleConfiguration -Name $Name -Value $Value } |
+            Should -Throw "*Set-PPCustomEndpoint*"
+
+        Should -Invoke Set-CachedConfiguration -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+    }
+
     It 'Stores a generic named value' {
         Set-PPModuleConfiguration -Name "MySetting" -Value "SomeValue"
 

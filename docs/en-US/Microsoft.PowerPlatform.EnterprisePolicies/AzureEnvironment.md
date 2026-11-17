@@ -25,6 +25,8 @@ Represents the different Azure environments that can be used to connect to Azure
 | AzureUSGovernment | Azure Government cloud environment (includes GCC High and DoD). |
 | EastUs2Euap | Azure Early Update Access Program (EUAP) environment in East US 2 region. Microsoft internal use only. |
 | CentralUSEuap | Azure Early Update Access Program (EUAP) environment in Central US region. Microsoft internal use only. |
+| AzureUSSecCloud | Air Gapped Cloud. Requires manual configuration using Add-AzEnvironment. |
+| AzureUSNatCloud | Air Gapped Cloud. Requires manual configuration using Add-AzEnvironment. |
 
 ## EXAMPLES
 
