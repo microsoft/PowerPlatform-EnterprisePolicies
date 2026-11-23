@@ -5,7 +5,7 @@ HelpInfoUri:
 Locale: en-US
 Module Guid: fce8ece4-09c1-4455-9253-c68b6c2ea4d6
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 11/12/2026
+ms.date: 11/23/2026
 PlatyPS schema version: 2024-05-01
 title: Microsoft.PowerPlatform.EnterprisePolicies Module
 ---
@@ -97,6 +97,10 @@ Removes a Power Platform role-based access control (RBAC) role assignment.
 ### [Remove-SubnetInjectionEnterprisePolicy](Remove-SubnetInjectionEnterprisePolicy.md)
 
 Removes a subnet injection enterprise policy for Power Platform.
+
+### [Reset-EnvironmentDelegation](Reset-EnvironmentDelegation.md)
+
+Requests a delegation reset for a Power Platform environment.
 
 ### [Set-PPCustomEndpoint](Set-PPCustomEndpoint.md)
 
