@@ -98,7 +98,7 @@ Removes a Power Platform role-based access control (RBAC) role assignment.
 
 Removes a subnet injection enterprise policy for Power Platform.
 
-### [Reset-EnvironmentDelegation](Reset-EnvironmentDelegation.md)
+### [Reset-NetworkDelegation](Reset-NetworkDelegation.md)
 
 Requests a delegation reset for a Power Platform environment.
 

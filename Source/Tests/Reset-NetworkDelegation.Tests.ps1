@@ -5,7 +5,7 @@ BeforeDiscovery {
     . $PSScriptRoot\Shared.ps1
 }
 
-Describe 'Reset-EnvironmentDelegation Tests' {
+Describe 'Reset-NetworkDelegation Tests' {
     BeforeAll {
         $script:environmentId = "3496a854-39b3-41bd-a783-1f2479ca3fbd"
         $script:tenantId = "12345678-1234-1234-1234-123456789012"
@@ -17,10 +17,11 @@ Describe 'Reset-EnvironmentDelegation Tests' {
         Mock Get-EnvironmentRegionFromCache { return "eastus" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Get-PPAPIAccessToken { return $script:secureString } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Mock Send-Request {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Mock Write-Host {} -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
     It 'Returns true after sending a bodyless reset POST with the supplied region' {
-        $result = Reset-EnvironmentDelegation -EnvironmentId $script:environmentId -Region "westus"
+        $result = Reset-NetworkDelegation -EnvironmentId $script:environmentId -Region "westus" -Force
 
         $result | Should -BeTrue
         Should -Invoke Get-EnvironmentRegionFromCache -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
@@ -33,7 +34,7 @@ Describe 'Reset-EnvironmentDelegation Tests' {
     }
 
     It 'Uses the resolved environment region when region is omitted' {
-        $result = Reset-EnvironmentDelegation -EnvironmentId $script:environmentId -Endpoint usgovhigh -TenantId $script:tenantId
+        $result = Reset-NetworkDelegation -EnvironmentId $script:environmentId -Endpoint usgovhigh -TenantId $script:tenantId -Force
 
         $result | Should -BeTrue
         Should -Invoke Get-EnvironmentRegionFromCache -Times 1 -Exactly -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter {
@@ -44,32 +45,46 @@ Describe 'Reset-EnvironmentDelegation Tests' {
         }
     }
 
-    It 'Does not authenticate or send a request with WhatIf when region is omitted' {
-        Reset-EnvironmentDelegation -EnvironmentId $script:environmentId -WhatIf
+    It 'Does not authenticate or send a request with WhatIf and Force=<Force>' -ForEach @(
+        @{ Force = $false }
+        @{ Force = $true }
+    ) {
+        Reset-NetworkDelegation -EnvironmentId $script:environmentId -WhatIf -Force:$Force
 
         Should -Invoke Connect-Azure -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Should -Invoke Get-EnvironmentRegionFromCache -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
         Should -Invoke Send-Request -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+        Should -Invoke Write-Host -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+    }
+
+    It 'Shows the wait notice before sending the reset' {
+        Mock Send-Request {
+            Should -Invoke Write-Host -Times 1 -Exactly -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter {
+                $Object -like "*Calling*reset API*up to 100 seconds*"
+            }
+        } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
+
+        Reset-NetworkDelegation -EnvironmentId $script:environmentId -Region "westus" -Force | Should -BeTrue
     }
 
     It 'Does not send the reset when region lookup fails' {
         Mock Get-EnvironmentRegionFromCache { throw "Region lookup failed" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-        { Reset-EnvironmentDelegation -EnvironmentId $script:environmentId } | Should -Throw "*Region lookup failed*"
+        { Reset-NetworkDelegation -EnvironmentId $script:environmentId -Force } | Should -Throw "*Region lookup failed*"
         Should -Invoke Send-Request -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
     It 'Does not send the reset when region lookup returns no region' {
         Mock Get-EnvironmentRegionFromCache { return "" } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-        { Reset-EnvironmentDelegation -EnvironmentId $script:environmentId } | Should -Throw "*Failed to resolve the environment region*"
+        { Reset-NetworkDelegation -EnvironmentId $script:environmentId -Force } | Should -Throw "*Failed to resolve the environment region*"
         Should -Invoke Send-Request -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
     It 'Stops without sending a request when authentication fails' {
         Mock Connect-Azure { return $false } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-        { Reset-EnvironmentDelegation -EnvironmentId $script:environmentId -Region "westus" } | Should -Throw "*Failed to connect to Azure*"
+        { Reset-NetworkDelegation -EnvironmentId $script:environmentId -Region "westus" -Force } | Should -Throw "*Failed to connect to Azure*"
         Should -Invoke Send-Request -Times 0 -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 
@@ -79,7 +94,7 @@ Describe 'Reset-EnvironmentDelegation Tests' {
     ) {
         Mock Send-Request { throw $Message } -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
 
-        { Reset-EnvironmentDelegation -EnvironmentId $script:environmentId -Region "westus" } | Should -Throw -ExpectedMessage $Message
+        { Reset-NetworkDelegation -EnvironmentId $script:environmentId -Region "westus" -Force } | Should -Throw -ExpectedMessage $Message
         Should -Invoke Send-Request -Times 1 -Exactly -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies"
     }
 }

@@ -13,8 +13,9 @@ Requests a delegation reset for a Power Platform environment.
 
 .DESCRIPTION
 Requests a delegation reset for the specified Power Platform environment.
-Use this after DNS changes to pick up the updated settings without unlinking the enterprise policy.
-Some downtime may occur while the reset processes the linked subnets in the virtual network.
+This allows changes such as updated DNS settings to take effect without unlinking the enterprise policy.
+The operation may take up to 100 seconds and causes minor downtime for environments sharing the same virtual network.
+You are prompted to confirm before the reset begins; use -Force to skip this prompt.
 
 .OUTPUTS
 System.Boolean
@@ -22,22 +23,27 @@ System.Boolean
 Returns $true when the reset completes successfully.
 
 .EXAMPLE
-Reset-EnvironmentDelegation -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
+Reset-NetworkDelegation -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "westus"
 
 Requests a delegation reset for the specified environment in westus.
 
 .EXAMPLE
-Reset-EnvironmentDelegation -EnvironmentId "00000000-0000-0000-0000-000000000000"
+Reset-NetworkDelegation -EnvironmentId "00000000-0000-0000-0000-000000000000"
 
 Requests a delegation reset using the environment's automatically resolved region.
 
 .EXAMPLE
-Reset-EnvironmentDelegation -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "usgovvirginia" -Endpoint usgovhigh -WhatIf
+Reset-NetworkDelegation -EnvironmentId "00000000-0000-0000-0000-000000000000" -Region "usgovvirginia" -Endpoint usgovhigh -WhatIf
 
 Previews a delegation reset for an environment in the US Government High cloud without sending the request.
+
+.EXAMPLE
+Reset-NetworkDelegation -EnvironmentId "00000000-0000-0000-0000-000000000000" -Force
+
+Resets network delegation without prompting for confirmation.
 #>
-function Reset-EnvironmentDelegation {
-    [CmdletBinding(SupportsShouldProcess)]
+function Reset-NetworkDelegation {
+    [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
     param(
         [Parameter(Mandatory, HelpMessage="The Power Platform environment ID.")]
         [ValidateNotNullOrEmpty()]
@@ -55,17 +61,24 @@ function Reset-EnvironmentDelegation {
         [PPEndpoint]$Endpoint = [PPEndpoint]::Prod,
 
         [Parameter(Mandatory=$false, HelpMessage="Force re-authentication instead of reusing an existing session.")]
-        [switch]$ForceAuth
+        [switch]$ForceAuth,
+
+        [Parameter(Mandatory=$false, HelpMessage="Reset network delegation without prompting for confirmation.")]
+        [switch]$Force
     )
 
     $ErrorActionPreference = "Stop"
+
+    if ($Force) {
+        $ConfirmPreference = 'None'
+    }
 
     $target = $EnvironmentId
     if ($Region) {
         $target = "$EnvironmentId (region: $Region)"
     }
 
-    if (-not $PSCmdlet.ShouldProcess($target, "Reset environment delegation")) {
+    if (-not $PSCmdlet.ShouldProcess($target, "Reset network delegation. Reset will incur a minor downtime on the environments linked to the same vnet.")) {
         return
     }
 
@@ -80,8 +93,10 @@ function Reset-EnvironmentDelegation {
         }
         $Region = $resolvedRegion
     }
+
     $query = "region=$([System.Uri]::EscapeDataString($Region))"
     $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path "/plex/resetDelegation" -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Post) -Endpoint $Endpoint
+    Write-Host "Calling the network delegation reset API for environment '$EnvironmentId'. This may take up to 100 seconds to return."
     $null = Send-Request -Request $request
     return $true
 }
