@@ -131,10 +131,6 @@ Get-EnvironmentUsage -EnvironmentId "your-environment-id"
 
 For a full list of available functions and their usage, you can refer to the help documentation by checking out the [EnterprisePolicies Docs](./docs/en-US/Microsoft.PowerPlatform.EnterprisePolicies) folder.
 
-### Resetting network delegation
-
-Use `Reset-NetworkDelegation -EnvironmentId "your-environment-id"` to pick up DNS changes without unlinking the enterprise policy. The command prompts for confirmation because the reset incurs minor downtime for environments sharing the VNet. Add `-Force` to skip the prompt, or use `-WhatIf` to preview without making changes. The API call may take up to 100 seconds to return.
-
 ### Identity Users
 
 Identity enterprise policies let a Power Platform environment use a managed identity for scenarios such as customer managed key encryption. They are now managed through the `Microsoft.PowerPlatform.EnterprisePolicies` module, which replaces the legacy scripts that previously lived under `Source/Identity`.

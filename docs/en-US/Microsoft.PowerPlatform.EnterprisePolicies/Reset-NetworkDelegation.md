@@ -4,7 +4,7 @@ external help file: Microsoft.PowerPlatform.EnterprisePolicies-Help.xml
 HelpUri: ''
 Locale: en-US
 Module Name: Microsoft.PowerPlatform.EnterprisePolicies
-ms.date: 11/23/2026
+ms.date: 11/25/2026
 PlatyPS schema version: 2024-05-01
 title: Reset-NetworkDelegation
 ---
@@ -13,7 +13,7 @@ title: Reset-NetworkDelegation
 
 ## SYNOPSIS
 
-Requests a delegation resets the network associated with a Power Platform environment.
+Requests a delegation reset for a Power Platform environment.
 
 ## SYNTAX
 
