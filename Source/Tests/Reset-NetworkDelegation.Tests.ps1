@@ -28,7 +28,7 @@ Describe 'Reset-NetworkDelegation Tests' {
         Should -Invoke Send-Request -Times 1 -Exactly -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter {
             $Request.Method -eq [System.Net.Http.HttpMethod]::Post -and
             $Request.RequestUri.AbsolutePath -eq "/plex/resetDelegation" -and
-            $Request.RequestUri.Query -eq "?region=westus" -and
+            $Request.RequestUri.Query -eq "?api-version=2026-02-01&region=westus" -and
             $null -eq $Request.Content
         }
     }
@@ -41,7 +41,7 @@ Describe 'Reset-NetworkDelegation Tests' {
             $EnvironmentId -eq $script:environmentId -and $Endpoint -eq [PPEndpoint]::usgovhigh -and $TenantId -eq $script:tenantId
         }
         Should -Invoke Send-Request -Times 1 -Exactly -ModuleName "Microsoft.PowerPlatform.EnterprisePolicies" -ParameterFilter {
-            $Request.RequestUri.Query -eq "?region=eastus"
+            $Request.RequestUri.Query -eq "?api-version=2026-02-01&region=eastus"
         }
     }
 

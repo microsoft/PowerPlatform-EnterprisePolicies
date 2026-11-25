@@ -94,7 +94,7 @@ function Reset-NetworkDelegation {
         $Region = $resolvedRegion
     }
 
-    $query = "region=$([System.Uri]::EscapeDataString($Region))"
+    $query = "api-version=2026-02-01&region=$([System.Uri]::EscapeDataString($Region))"
     $request = New-EnvironmentRouteRequest -EnvironmentId $EnvironmentId -Path "/plex/resetDelegation" -Query $query -AccessToken (Get-PPAPIAccessToken -Endpoint $Endpoint -TenantId $TenantId) -HttpMethod ([System.Net.Http.HttpMethod]::Post) -Endpoint $Endpoint
     Write-Host "Calling the network delegation reset API for environment '$EnvironmentId'. This may take up to 100 seconds to return."
     $null = Send-Request -Request $request
